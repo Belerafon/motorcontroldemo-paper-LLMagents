@@ -1,6 +1,6 @@
 //Файл: cood.c
 //Профиль: D:\info\Кафедра\Разработка процессора\Продвижение по договору 2016\Репозиторий\motorcontroldemo\cood.xml
-//Дата созданиЯ: 02.05.2017 15:38:26
+//Дата созданиЯ: 02.05.2017 15:51:27
 //Пользователь: default
 #include "DSP.h"
 #include "main.h"
@@ -13,7 +13,7 @@ Uint16 const co2_numOfInd = 125;
 //Номер перечеслениЯ длЯ групп
 Uint16 const co2_groupEnum = 15;
 //Хэш-сумма:
-Uint32 const co2_odHash[4] = {0x760211E8, 0xDBC1D28B, 0xDFE03DFD, 0x842D8E52};
+Uint32 const co2_odHash[4] = {0xEC5AD07A, 0x97670301, 0x7C2EDEB7, 0x791FDE9A};
 //Таблица с адресами переменных 
 
 long const CO2_OD_TBL3[] = { (long)(&co2_vars.co_deviceType), //[1000h.00h], Название=Тип устройства, ТекстПУ=Device Type, EngText=Device Type, группа=CAN
@@ -3515,7 +3515,7 @@ Uint16 const CO2_OD_TBL2[] = {
 0,
 0,
 
-25693, 498, 616,
+32205, 498, 616,
 0,
 0,
 0,
@@ -3531,7 +3531,7 @@ Uint16 const CO2_OD_TBL2[] = {
 0,
 0,
 
-25693, 499, 618,
+32205, 499, 618,
 0,
 0,
 0,

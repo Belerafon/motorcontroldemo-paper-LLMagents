@@ -4387,7 +4387,7 @@
 			<description description=""/>
 		</obj_5174h.01h>
 		<obj_5174h.02h DataType="Viewable" name="DebugL1" addr="Debug1" group="29" groupName="Для отладки" fullgroup="29" callback="">
-			<format Type="IQ" Size="32" Signed="true" QValue="16" ScaleNum="15"/>
+			<format Type="StandartNum" Size="32" Signed="true"/>
 			<text text="DebugL1" textID="498"/>
 			<defaults default="0" min="" max=""/>
 			<description description=""/>
@@ -4399,7 +4399,7 @@
 			<description description=""/>
 		</obj_5174h.03h>
 		<obj_5174h.04h DataType="Viewable" name="DebugL2" addr="Debug2" group="29" groupName="Для отладки" fullgroup="29" callback="">
-			<format Type="IQ" Size="32" Signed="true" QValue="16" ScaleNum="15"/>
+			<format Type="StandartNum" Size="32" Signed="true"/>
 			<text text="DebugL2" textID="499"/>
 			<defaults default="0" min="" max=""/>
 			<description description=""/>
