@@ -30,16 +30,34 @@
 //! \memberof TCANtoRS
 void CANtoRS_init(TCANtoRS *p) {
 
-	// Выбрать и разрешить периферийную функцию
-	NT_COMMON_REG->GPIOPCTLD_bit.PIN1 = 1;	 //UART_TxD[3]
-	NT_COMMON_REG->GPIOPCTLD_bit.PIN2 = 1;	//UART_RxD[3]
-	NT_GPIOD->ALTFUNCSET = (1 << 1) + (1 << 2);
+#ifdef  HW_NIIET_BOARD_SIMULATOR
+//UART TX - плата микроконтроллера разъем XP6 пин 57 (соответствует обозначению UART_TXD1 в шелкографии на основной плате)
+//UART RX - плата микроконтроллера разъем XP6 пин 59 (соответствует обозначению UART_RXD1 в шелкографии на основной плате)
+        NT_COMMON_REG->GPIOPCTLA_bit.PIN3 = 1;   //UART_TxD1]
+        NT_COMMON_REG->GPIOPCTLA_bit.PIN4 = 1;  //UART_RxD[1]
+        NT_GPIOA->ALTFUNCSET = (1 << 3);
+        NT_GPIOA->ALTFUNCSET = (1 << 4);
 
-	// Изменить периферийную функцию F12 и F13, чтобы они не заблокировали UART3
-	NT_COMMON_REG->GPIOPCTLF_bit.PIN12 = 1;
-	NT_COMMON_REG->GPIOPCTLF_bit.PIN13 = 1;
+        NT_COMMON_REG->GPIOPCTLA_bit.PIN3 = 0;
+        NT_COMMON_REG->GPIOPCTLA_bit.PIN4 = 0;
 
-	p->NT_UART=NT_UART3;//Используемый в драйвере номер UART (1,2,3)
+        p->NT_UART=NT_UART1;//Используемый в драйвере номер UART (1,2,3)
+#else
+
+        // Выбрать и разрешить периферийную функцию
+        NT_COMMON_REG->GPIOPCTLD_bit.PIN1 = 1;   //UART_TxD[3]
+        NT_COMMON_REG->GPIOPCTLD_bit.PIN2 = 1;  //UART_RxD[3]
+        NT_GPIOD->ALTFUNCSET = (1 << 1) + (1 << 2);
+
+        // Изменить периферийную функцию F12 и F13, чтобы они не заблокировали UART3
+        NT_COMMON_REG->GPIOPCTLF_bit.PIN12 = 1;
+        NT_COMMON_REG->GPIOPCTLF_bit.PIN13 = 1;
+
+        p->NT_UART=NT_UART3;//Используемый в драйвере номер UART (1,2,3)
+
+        p->NT_UART->CR_bit.UARTEN = 1; // Разрешить работу UART
+#endif
+
 
 	p->NT_UART->CR_bit.UARTEN = 1; // Разрешить работу UART
 
