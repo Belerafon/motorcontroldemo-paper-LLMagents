@@ -226,7 +226,7 @@ void SM_Sys_ms_Calc(TSM_Sys* p) {
 	//блочная передача драйвера CANopen. Через неё, в частности, грузятся осциллограммы dlog
 	Can2BTInterface.calc(&Can2BTInterface, NT_TIMER2->VALUE, &co2_vars);
 	leds.msCalc(&leds);//светодиоды
-	spiclock.msCalc(&spiclock);//часы
+	RTCclock.msCalc(&RTCclock);//часы
 	if ((drv_params.sens_type == 2) || (drv_params.sens_type == 3)){ //В типе датчика выбран ДПР Холла
 		DPReCAP.ms_calc(&DPReCAP);
 	}
@@ -238,7 +238,7 @@ void SM_Sys_ms_Calc(TSM_Sys* p) {
 //! \memberof TSM_Sys
 void SM_Sys_Slow_Calc(TSM_Sys *p) {
 	UserMem.slow_calc(&UserMem);//пользовательская память в МК
-	spiclock.slowCalc(&spiclock);//часы реального времени
+	RTCclock.slowCalc(&RTCclock);//часы реального времени
 	sm_prot.slow_calc(&sm_prot);//модуль защит
 	sm_net.slow_calc(&sm_net); //обертка для вызова коммуникационных драйверов
 	dlog.background_analizer(&dlog); //фоновый обработчик модуля осциллографирования

@@ -105,7 +105,7 @@ extern TCurPar cur_par;
 extern TVhzProf vhz;
 extern TDPReCAP	DPReCAP;
 extern TposspeedEqep   posspeedEqep;
-extern TRTCClock	spiclock;
+extern TRTCClock	RTCclock;
 extern TAutoOffset AutoOffset;
 extern TSSI_Encoder SSI_Encoder;
 extern TMotorModel model;

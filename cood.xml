@@ -2831,7 +2831,7 @@
 			<defaults default="0" min="0" max="1"/>
 			<description description="Сбросить состояние Аварии"/>
 		</obj_2502h.04h>
-		<obj_250Fh.00h DataType="Editable" name="Часы реального времени" addr="spiclock.packed_time" group="1" groupName="Наблюдаемые" fullgroup="" callback="callback_RTC">
+		<obj_250Fh.00h DataType="Editable" name="Часы реального времени" addr="RTCclock.packed_time" group="1" groupName="Наблюдаемые" fullgroup="" callback="callback_RTC">
 			<format Type="StandartNum" Size="32" Signed="false"/>
 			<text text="RTC" textID="311"/>
 			<defaults default="438392299" min="" max=""/>

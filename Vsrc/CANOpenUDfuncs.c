@@ -226,7 +226,7 @@ void co_RPDO8_Callback(Uint16 nodeID, Uint16 tag_CANnum)
 
 void callback_RTC(Uint16 par, Uint16 tag_CANnum) {
 	if (par == 1) {
-		spiclock.setTimeFlag = 1; //произошла запись в часы
+		RTCclock.setTimeFlag = 1; //произошла запись в часы
 
 	}
 }
