@@ -399,6 +399,8 @@ void PWM_Module_No_SV_Update(TPWM_Module *p) {
 
     PWM_Module_NormInput(p);
 
+    //Расчет скважностей по методу Изосимова.
+    //Подробнее см. диссертацию Чуева П.В. http://motorcontrol.ru/wp-content/uploads/2015/11/Chuev_vector_control.pdf
     tmp_pwm = _IQmpy(_1_SQRT3,p->UbetaNorm);  /*делим на корень из 3*/
     lambda1 = _IQmpy(p->k_pwm,(p->UalphaNorm - tmp_pwm));
     lambda2 = _IQmpy(p->k_pwm,2*tmp_pwm);
@@ -513,6 +515,10 @@ void PWM_Module_Sin_Update(TPWM_Module *p) {
 	} else
 		p->ULimitation = 0;
 
+	//Нормирование входного напряжения. Так как синусоидальная ШИМ формирует на 0.866 меньшее напряжение,
+	//чем векторная ШИМ (270В амплитудного фазного напряжения вместо 311В), то для того, чтобы при том же задании в переменных
+	//p->UalphaNorm, p->UbetaNorm получилось то же самое напряжение на выходе, что и в векторной ШИМ, нужно задания увеличить в 1/0.866 раз.
+	//Деление на два нужно для последующих формул, чтобы переменые менялись в половинном от максимального диапазоне.
 	p->UalphaNorm = _IQmpy(p->UalphaNorm, _IQ(1/0.866/2));
 	p->UbetaNorm = _IQmpy(p->UbetaNorm, _IQ(1/0.866/2));
 
