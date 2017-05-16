@@ -389,6 +389,8 @@ void PWM_Module_No_SV_Update(TPWM_Module *p) {
     int16 gamma1;
     long tmp_pwm;
 
+    //Присвоение трех уставок сравнения только если счетчик таймера далек от нуля, чтобы
+    //предотвратить частичное применение скважностей, что в векторной ШИМ может быть критично и испортить период ШИМ.
     DINT;
     if (NT_PWM0->TBCTR>30) {
         NT_PWM0->CMPA_bit.CMPA=(Uint16)p->GammaA;
@@ -405,7 +407,6 @@ void PWM_Module_No_SV_Update(TPWM_Module *p) {
     lambda1 = _IQmpy(p->k_pwm,(p->UalphaNorm - tmp_pwm));
     lambda2 = _IQmpy(p->k_pwm,2*tmp_pwm);
     lambda3 = _IQmpy(p->k_pwm,p->UalphaNorm + tmp_pwm);
-
 
 
     if (lambda1<=0)
@@ -480,6 +481,9 @@ void PWM_Module_No_SV_Update(TPWM_Module *p) {
     if (p->GammaB>p->k_pwm) p->GammaB=p->k_pwm+1;
     if (p->GammaC>p->k_pwm) p->GammaC=p->k_pwm+1;
 
+    //Присвоение трех уставок сравнения только если счетчик таймера далек от нуля, чтобы
+    //предотвратить частичное применение скважностей, что в векторной ШИМ может быть критично и испортить период ШИМ.
+    //Второй раз - чтобы предотвратить ситуацию с постоянной "незагрузкой" при равенстве частот расчета и ШИМ
     DINT;
     if (NT_PWM0->TBCTR>30) {
         NT_PWM0->CMPA_bit.CMPA=(Uint16)p->GammaA;
