@@ -36,7 +36,7 @@ void SM_CmdLogicInit(TSM_CmdLogic *p) {
 
 	/* Разрешить ногам работать на вход, это кнопки старт и стоп */
 	NT_GPIOA->ALTFUNCCLR = (1 << 13) | (1 << 14);//выключить альт. функцию
-	NT_GPIOA->OUTENCLR |= (1 << 14) | (1 << 14);//на вход
+	NT_GPIOA->OUTENCLR = (1 << 13) | (1 << 14);//на вход
 
 	p->StartButton=((NT_GPIOA->DATA & (1 << 14))==0);//обработка ножки старта
 	p->StopButton=((NT_GPIOA->DATA & (1 << 13))==0);//обработка ножки стопа
