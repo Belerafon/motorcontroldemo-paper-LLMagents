@@ -1,15 +1,28 @@
-/* ==================================================================================
-//File name:       X_CANFlashProgStarter.c
-//
-//Originator:	Aliamkin Dmitriy I
-//
-//Description:   инициализирует процесс прожига по CANу
-//ПРИМЕЧАНИЕ:    
-//=====================================================================================
-//-------------------------------------------------------------------------------------
-//  01.11.2012	Release	Rev 1.4 Исправлена ошибка в функции StartFlashProgrammer
-	26.04.2011	Release	Rev 1.3
-//----------------------------------------------------------------------------------*/
+/*!
+    Copyright 2017 	АО "НИИЭТ" и ООО "НПФ ВЕКТОР"
+
+   Licensed under the Apache License, Version 2.0 (the "License");
+   you may not use this file except in compliance with the License.
+   You may obtain a copy of the License at
+
+       http://www.apache.org/licenses/LICENSE-2.0
+
+   Unless required by applicable law or agreed to in writing, software
+   distributed under the License is distributed on an "AS IS" BASIS,
+   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+   See the License for the specific language governing permissions and
+   limitations under the License.
+
+ \file      X_CANFlashProgStarter.c
+ \brief     Инициализирует процесс прожига по CANу
+ \author	Алямкин Д.
+ \version   v 1.0 30/05/2017
+*/
+
+/** \addtogroup TCANFlashProgStarter */
+/*@{*/
+
+
 #include "DSP.h"
 #include "main.h"
 #include "X_CANFlashProgData.h"
@@ -94,9 +107,6 @@ void StartFlashProgrammer()
 		*destPtr16++ = *sourcePtr16++;
 	}
  
-//	NT_TIMER1->INT.INTCLEAR = 1;
-	NT_TIMER1->INTSTATUS_INTCLEAR_bit.INT = 1; //TODO: Убедиться в правильности этого
-
 	//идем в прошивальщик
 	((void (*)(void))(0x20000001))();
 }
@@ -104,6 +114,13 @@ void StartFlashProgrammer()
 void GPIO_reset()
 {
 	K1921VK01T_GPIO_SafeInit();
+	//здесь нужно проинициализировать ножки МК в нужное состояние
+	//перед прошивкой, если того требует железо.
 }
 
 long swu_vars = 0;
+
+
+
+/*@}*/
+
