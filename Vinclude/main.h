@@ -43,7 +43,6 @@ extern "C" {
 #include "SM_Net.h"
 #include "co_ODvars.h"
 #include "CANOpen_drv.h"
-#include "CANBlockTransferInterface.h"
 #include "V_data_log.h"
 #include "SM_Protect.h"
 #include "V_bits_to_enum_numbers.h"
@@ -74,6 +73,9 @@ extern "C" {
 #include "V_ModBus.h"
 #include "V_MBVarsConv.h"
 #include "V_excitation.h"
+#include "X_CANFlashProgData.h"
+#include "X_CANFlashProgStarter.h"
+#include "CANBlockTransferInterface.h"
 
 extern TClarke 		clarke;
 extern TPark 		park;
@@ -115,6 +117,7 @@ extern TCANtoRS CANtoRS;
 extern TModBus ModBus;
 extern TMBVarsConv MBVarsConv;
 extern Texcitation pwm_ex;
+extern TCanBTInterface 	Can2BTInterface;
 
 extern Uint16 msCounter;
 extern Uint16 FastCounter;

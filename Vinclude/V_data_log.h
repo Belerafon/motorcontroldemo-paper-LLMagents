@@ -1,25 +1,29 @@
 /*!
-    Copyright 2017 	АО "НИИЭТ" и ООО "НПФ ВЕКТОР"
-
-   Licensed under the Apache License, Version 2.0 (the "License");
-   you may not use this file except in compliance with the License.
-   You may obtain a copy of the License at
-
-       http://www.apache.org/licenses/LICENSE-2.0
-
-   Unless required by applicable law or agreed to in writing, software
-   distributed under the License is distributed on an "AS IS" BASIS,
-   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-   See the License for the specific language governing permissions and
-   limitations under the License.
-
  \file      v_data_log.h
- \brief     4-х канальный логгер для осциллографирования в реальном времени (см. TDataLog)
- \author    ООО "НПФ Вектор". http://motorcontrol.ru
- \version   v 2.0 25/03/2016
+ \brief     4-х канальный логгер длЯ осциллографированиЯ в реальном времени (см. TDataLog)
+В версии 2.0 реализован 32-битный режим работы. Основные положения:
+Тип данных даталоггера определяется символьной константой в заголовочном файле 'V_data_log.h'
+(один из вариантов нужно раскомментировать):
+//#define DLOG_DATA_SIZE 16
+#define DLOG_DATA_SIZE 32
+Для 16-битного режима даталоггер работает "классическим" методом. Старый Юникон работает как было.
+Новый Юникон при этом не получает флаг 32-битного режима (см. ниже) и работает по "классическому" алгоритму
+(правда, буфер принимаемых данных у него теперь 32-битный, но это тонкости). При буферной передаче каждый
+канал передаётся, как и раньше, одним запросом.
+32-битный режим:
+В переменную 'dlog.control' добавлен флаг '32-битные данные', по которому новый Юникон узнаёт тип даталоггера.
+При SDO-чтении осциллограмм данные, как и раньше, выдвигаются через 32-битную переменную 'dlog.next_value_var'
+(там, кроме 16-битного значения, есть всякие поля). В неё добавлены два флага:
+- флаг, что в поле "значение" - старшие 16 бит точки
+- флаг, что переменная 16-разрядная
+Юникон сначала запрашивает младшую часть значения, потом - старшую и т.д. по всем точкам.
+Если переменная 16-разрядная, то старшая часть не запрашивается. При буферной передаче:
+Т.к. один буферный запрос ограничен у нас 256-тью 16-битными словами, то Юникон сначала запрашивает
+первые 256 слов (128 32-битных точек), затем - остальные 256 слов. Т.е. используется два буферных запроса.
 
+ \author	Коллектив ООО НПФ Вектор
+ \version   v 2.0 10/04/2017
  \defgroup  v_data_log Цифровой осциллограф (см. TDataLog)
-
  @{
 */
 
@@ -27,40 +31,53 @@
 #ifndef V_DATA_LOG_H
 #define V_DATA_LOG_H
 
+#include "CANOpen_drv.h"
+
 #ifdef __cplusplus
 extern "C"
 {
 #endif
 
-//! change "int" to "long" or "float" according to variable type
-  typedef int16 type_data;
+// Размер значений, передаваемых через логгер (бит)
+//#define DLOG_DATA_SIZE 16
+#define DLOG_DATA_SIZE 32
 
-//! Размер массивов для осциллографирования.
 
-//!Если нужно менять, то это делать надо не только тут - слишком много завязано на это число
-//!Переделать сложно, так как на это число завязка косвенная: например, для ускорения работы
-//!применяются такие конструкции: p->Wcounter&=0xFF; Где FF - маска (символизирует 256 точек)
+#if DLOG_DATA_SIZE == 16
+typedef int16 type_data;
+#elif DLOG_DATA_SIZE == 32
+typedef int32 type_data;
+#endif
+
+
+//! Размер массивов длЯ осциллографированиЯ.
+
+//!Если нужно менЯть, то это делать надо не только тут - слишком много завЯзано на это число
+//!Переделать сложно, так как на это число завЯзка косвеннаЯ: например, длЯ ускорениЯ работы
+//!применЯютсЯ такие конструкции: p->Wcounter&=0xFF; Где FF - маска (символизирует 256 точек)
 #define NUMBER_SAMPLES  256
 
   /*! \class TDataLog
-    \brief 4-х канальный логгер для осциллографирования в реальном времени
+    \brief 4-х канальный логгер длЯ осциллографированиЯ в реальном времени
 
-    Класс \a TDataLog, основанный на структуре SDataLog, позволяет записывать выбранные 4 переменных в массивы
+    Класс \a TDataLog, основанный на структуре SDataLog, позволЯет записывать выбранные 4 переменных в массивы
     из 255 точек с заданной дискретизацией по времени. Кроме того, имеет
-    связь с драйвером CANOpen для автоматизации указания этих переменных: можно
-    "зарядить" в даталоггер любой существующий элемент словаря.*/
+    свЯзь с драйвером CANOpen длЯ автоматизации указаниЯ этих переменных: можно
+    "зарЯдить" в даталоггер любой существующий элемент словарЯ.*/
 
 //! см. TDataLog
   struct SDataLog
   {
-	type_data buff[(NUMBER_SAMPLES*4)];	//4 массива для отснятых осциллограмм, слепленные в один большой
-	type_data  *dlog_iptr1; 	//!< указатели на переменные для записи (например. ток фазы A, скорость и т.д.)
-	type_data  *dlog_iptr2;		//!< Input: Second input pointer (Q15)
+    type_data buff[(NUMBER_SAMPLES*4)];	//4 массива для отснятых осциллограмм, слепленные в один большой
+#if DLOG_DATA_SIZE == 16
+    type_data  *dlog_iptr1; 	//!< указатели на переменные для записи (например. ток фазы A, скорость и т.д.)
+    type_data  *dlog_iptr2;		//!< Input: Second input pointer (Q15)
     type_data  *dlog_iptr3;
     type_data  *dlog_iptr4;
-    int16  dlog_cntr_max;  		//!< Parameter: Maximum number of samples
-    Uint16 Wcounter;            //!< Счетчик по массиву для записи
-    Uint16 Rcounter;            //!< Счетчик по массиву для чтения
+#endif
+    int  dlog_cntr_max;  		//!< Parameter: Maximum number of samples
+    Uint16 Wcounter;            //!< Счетчик по массиву длЯ записи
+    Uint16 Rcounter;            //!< Счетчик по массиву длЯ чтениЯ
     type_data*  dl_buffer1_adr;  	//!< Указатели на массивы, где лежат отснятые осциллограммы
     type_data*  dl_buffer2_adr;  	//!< Parameter: Buffer starting address 2
     type_data*  dl_buffer3_adr;
@@ -76,53 +93,73 @@ extern "C"
 
     /*!  Режимов работы четыре:\n
     0 - стоп\n
-    1 - однократная запись\n
+    1 - однократнаЯ запись\n
     2 - запись по кругу без остановки\n
-    3 - однократная запись одной переменной во все 4 массива последовательно, для получения длинной осциллограммы.\n
+    3 - однократнаЯ запись одной переменной во все 4 массива последовательно, длЯ получениЯ длинной осциллограммы.\n
     Устанавливать переменную надо только вызовом функции set_mode! */
-    Uint16 mode_reset;             //!< задается режим работы
+    Uint16 mode_reset;             //!< задаетсЯ режим работы
     Uint16 mode_reset_prev;        //!< предыдущий режим работы
-	int E;							// флаг энтри
+    int E;							// флаг энтри
 
-    /*! "control" имеет 32 разряда. Первые 8 бит первого слова отведем под флаги, второе слово под установку разреживания.\n
-         7   6   5   4   3   2   1   0\n
-       | x | x | x | x | x | x | x | x |\n
-         |   |   |   |   первые 4 бита - какие из 4х переменых интересуют (какие сдреса обновлять, какие данные записывать)\n
-         |   |   2 бита - желаемый режим даталоггера. Ноль, один, два.\n
-         |   бит "данные готовы" - устанавливается контроллером\n
-         резерв */
+    /*! "control" имеет 32 разрЯда. Первые 16 бит - флаги, последние 16 бит - установка разреживания.\n
+      9   8   7   6   5   4   3   2   1   0\n
+    | x | x | x | x | x | x | x | x | x | x |\n
+      |   |   |   |   |   |   первые 4 бита - какие из 4х переменых интересуют (какие адреса обновлЯть, какие данные записывать)\n
+      |   |   |   |   2 бита - желаемый режим даталоггера: 0, 1, 2\n
+      |   |   |   бит "данные готовы" - устанавливаетсЯ контроллером\n
+      |   |   бит "поддерживается блочная передача"\n
+      |   бит "32-битные данные"\n
+      резерв */
     long control;                  //!< управление даталоггером через внешние программы
 
-    Uint16 WriteDelimiter;        //!<делитель данных при записи
-    Uint16 WriteDelimiterCounter; //!<Счетчик для делителя
-    long ind_subind1;              //!<записывается индекс и подындекс для словаря
+    unsigned int WriteDelimiter;        //!<делитель данных при записи
+    unsigned int WriteDelimiterCounter; //!<Счетчик длЯ делителЯ
+    long ind_subind1;              //!<записываетсЯ индекс и подындекс длЯ словарЯ
     long ind_subind2;
     long ind_subind3;
     long ind_subind4;
-    unsigned long next_value_var;       //!<через эту переменную выдвигаются записанные значения при считывании
-    Uint16 StartBits;	//!< По каким событиям запускать осциллограф. Один выставленный бит - одно событие
-    int16 buff_num;              //!<номер массива, из которого идет выдвижение значений в next_value_var
+    unsigned long next_value_var;	//!<через эту переменную выдвигаютсЯ записанные значениЯ при считывании:
+    								//!<биты 0-15: значение точки
+    								//!<биты 16-23: Rcounter (отдаваемая точка)
+    								//!<биты 24-25: buff_num
+    								//!<бит 26: флаг, что в поле "значение" - старшие 16 бит точки (используется при DLOG_DATA_SIZE = 32)
+    								//!<бит 27: флаг, что переменная 16-разрядная (используется при DLOG_DATA_SIZE = 32)
+    Uint16 StartBits;
+    int buff_num;              	//!<номер массива, из которого идет выдвижение значений в next_value_var
+    int ResetAfterStart; 		//!<флаг обнулениЯ счетчика записи при запуске
     Uint16 OneShotOperation;	//!<флаг синхронизации осциллографа только по первому событию (переход в 1 возможен только из 2)
-    Uint16 BlockTransferSupportFlag;
+    TCo_OdVars *pco_vars;       //!<адрес структуры драйвера CANopen
+#if DLOG_DATA_SIZE == 32
+    int highPartOfValue;		//!<флаг выдачи старшей части
+    TObjectInfo object1Info;	//!<информация о записываемом объекте №1
+    TObjectInfo object2Info;	//!<информация о записываемом объекте №2
+    TObjectInfo object3Info;	//!<информация о записываемом объекте №3
+    TObjectInfo object4Info;	//!<информация о записываемом объекте №4
+#endif
     void (*update)(volatile struct SDataLog *);			//!<Pointer to update function
     void (*set_mode)(Uint16 mode_reset,volatile struct SDataLog *);	//!<Pointer to set_mode function
     void (*background_analizer)(volatile struct SDataLog *);	//!<Pointer to background_analizer function
   } ;
 
-  typedef volatile struct SDataLog TDataLog;
+typedef volatile struct SDataLog TDataLog;
 
 
 
+#if defined(CAN_1_ENABLE)
+#define COX_VARS co1_vars
+#elif defined(CAN_2_ENABLE)
+#define COX_VARS co2_vars
+#endif
 
-
-//! Инициализатор по-умолчанию для данного класса
+//! Инициализатор по-умолчанию длЯ данного класса
+#if DLOG_DATA_SIZE == 16
 #define DATALOG_DEFAULTS {  {0},\
     (type_data *)0x00000300, \
     (type_data *)0x00000300, \
     (type_data *)0x00000300, \
     (type_data *)0x00000300, \
     NUMBER_SAMPLES, \
-    0,0, \
+    0,0,\
     ((type_data *)&dlog.buff), \
     ((type_data *)&dlog.buff+NUMBER_SAMPLES), \
     ((type_data *)&dlog.buff+NUMBER_SAMPLES*2), \
@@ -134,11 +171,39 @@ extern "C"
     0,0,0,0,\
     0,0,\
     0,\
+	1,\
     0,\
-	0,\
+	&COX_VARS,\
     data_log_update,\
     dlog_set_mode,\
     dlog_background_analizer }
+#endif
+
+#if DLOG_DATA_SIZE == 32
+#define DATALOG_DEFAULTS {  {0},\
+    NUMBER_SAMPLES, \
+    0,0,\
+    ((type_data *)&dlog.buff), \
+    ((type_data *)&dlog.buff+NUMBER_SAMPLES), \
+    ((type_data *)&dlog.buff+NUMBER_SAMPLES*2), \
+    ((type_data *)&dlog.buff+NUMBER_SAMPLES*3), \
+    {0}, ((type_data *)&dlog.upload_buff), 0, 0, 0, 0, 0,\
+    2, 2, 0,\
+    0,\
+    0,0,\
+    0,0,0,0,\
+    0,0,\
+    0,\
+	1,\
+    0,\
+	&COX_VARS,\
+	0,\
+	{ 0 }, { 0 }, { 0 }, { 0 },\
+    data_log_update,\
+    dlog_set_mode,\
+    dlog_background_analizer }
+#endif
+
 
 
 //! \memberof TDataLog

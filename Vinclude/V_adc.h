@@ -123,7 +123,7 @@ extern "C"
     800,0,0,0,0, \
 	4,0,{0}, \
     AdcDrv_init,\
-    AdcDrv_PWM_calc,\
+    AdcDrv_fast_calc,\
     AdcDrv_ms_calc,\
     AdcDrv_slow_calc,\
   }
@@ -134,7 +134,7 @@ extern "C"
 //! \memberof TAdcDrv
   void AdcDrv_slow_calc(TAdcDrv*);
 //! \memberof TAdcDrv
-  void AdcDrv_PWM_calc(TAdcDrv*);
+  void AdcDrv_fast_calc(TAdcDrv*);
 //! \memberof TAdcDrv
   void AdcDrv_ms_calc(TAdcDrv*);
   

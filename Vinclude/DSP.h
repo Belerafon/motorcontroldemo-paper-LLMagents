@@ -67,6 +67,12 @@ extern int __isr_vector_ram_end;
 //! Разрешение прерываний
 #define EINT __enable_irq()
 
+//! Процедура безопасного ресета проца, не вызывающего зависаний
+void propReset(void);
+
+//! Процедура безопасной инициализации альтернативных функций дискретных ножек
+void K1921VK01T_GPIO_SafeInit();
+
 
 //приоритеты прерываний
 #define IRQ_PRIORITY_TZ 1

@@ -24,6 +24,9 @@
 #include "DSP.h"
 #include "main.h"
 
+//Для  VectorCARD
+#if defined (HW_VECTORCARD_DRV8301_EVM) || defined (HW_VECTORCARD_DRV8312_EVM) || defined (HW_VECTORCARD_SIMULATOR)
+
 #define VD1_ON NT_GPIOC->MASKLOWBYTE_bit[4].MASKLB = 0			//NT_GPIOC->DATA &= ~(1 << 2)
 #define VD1_OFF NT_GPIOC->MASKLOWBYTE_bit[4].MASKLB = 4			//NT_GPIOC->DATA |= (1 << 2)
 
@@ -51,8 +54,12 @@
 
 #define VDLED11_ON NT_GPIOE->MASKHIGHBYTE_bit[32].MASKHB = 32				//NT_GPIOE->DATA.bit.GPIO13 = 1
 #define VDLED11_OFF NT_GPIOE->MASKHIGHBYTE_bit[32].MASKHB = 0				//NT_GPIOE->DATA.bit.GPIO13 = 0
+#endif
+
 
 void LED_init(Tled *p) {
+//Для  VectorCARD
+#if defined (HW_VECTORCARD_DRV8301_EVM) || defined (HW_VECTORCARD_DRV8312_EVM) || defined (HW_VECTORCARD_SIMULATOR)
 	/* Разрешить ногам работать на выход */
 	NT_GPIOA->ALTFUNCCLR = (1 << 9);
 	NT_GPIOB->ALTFUNCCLR = (1 << 5) | (1 << 6) | (1 << 7) | (1 << 8);
@@ -71,9 +78,24 @@ void LED_init(Tled *p) {
 	NT_GPIOD->OUTENCLR = (1 << 3) | (1 << 4) | (1 << 5) | (1 << 6);
 
 	leds.mode = 2;//наиболее красивый тип мигания
+#endif
+
+#if defined (HW_VECTOR_MK_40_4)
+	/*конфигурируем светодиоды на плате*/
+	NT_GPIOA->ALTFUNCCLR_bit.ALTFUNCCLR = 1 << 11;	// GPIO
+	NT_COMMON_REG->GPIOPCTLA_bit.PIN11 = 0;			// VD1 желтый
+	NT_GPIOA->OUTENSET_bit.OUTENSET |= 1 << 11;		// VD1 желтый
+
+	NT_GPIOA->ALTFUNCCLR_bit.ALTFUNCCLR = 1 << 12;	// GPIO
+	NT_COMMON_REG->GPIOPCTLA_bit.PIN12 = 0; 		// VD2 Красный
+	NT_GPIOA->OUTENSET_bit.OUTENSET |= 1 << 12;		// VD2
+#endif
 }
 
 void LED_toggle(Tled *p, Uint16 led) {
+//Для  VectorCARD
+#if defined (HW_VECTORCARD_DRV8301_EVM) || defined (HW_VECTORCARD_DRV8312_EVM) || defined (HW_VECTORCARD_SIMULATOR)
+
 	switch (led) {
 	case LED1:
 		//NT_GPIOA->DATA.bit.GPIO11 = NT_GPIOA->DATA.bit.GPIO11 ^ 1;
@@ -91,9 +113,13 @@ void LED_toggle(Tled *p, Uint16 led) {
 		NT_GPIOA->MASKHIGHBYTE_bit[24].MASKHB ^= 24;
 		break;
 	}
+#endif
 }
 
 void LED_on(Tled *p, Uint16 led) {
+//Для  VectorCARD
+#if defined (HW_VECTORCARD_DRV8301_EVM) || defined (HW_VECTORCARD_DRV8312_EVM) || defined (HW_VECTORCARD_SIMULATOR)
+
 	switch (led) {
 	case LED1:
 		VD1_ON;
@@ -128,9 +154,13 @@ void LED_on(Tled *p, Uint16 led) {
 		VD6_ON;
 		break;
 	}
+#endif
 }
 
 void LED_off(Tled *p, Uint16 led) {
+//Для  VectorCARD
+#if defined (HW_VECTORCARD_DRV8301_EVM) || defined (HW_VECTORCARD_DRV8312_EVM) || defined (HW_VECTORCARD_SIMULATOR)
+
 	switch (led) {
 	case LED1:
 		VD1_OFF;
@@ -165,9 +195,12 @@ void LED_off(Tled *p, Uint16 led) {
 		VD6_OFF;
 		break;
 	}
+#endif
 }
 
 void LED_clearAll(Tled *p) {
+//Для  VectorCARD
+#if defined (HW_VECTORCARD_DRV8301_EVM) || defined (HW_VECTORCARD_DRV8312_EVM) || defined (HW_VECTORCARD_SIMULATOR)
 	p->timer1 = p->timer2 = p->timer3 = p->timer4 = p->timer5 = p->timer6 = 0;
 	p->mode3counter = 0;
 	VD1_OFF;
@@ -176,9 +209,13 @@ void LED_clearAll(Tled *p) {
 	VD4_OFF;
 	VD5_OFF;
 	VD6_OFF;
+#endif
 }
 
 void LED_mode0(Tled *p) {
+//Для  VectorCARD
+#if defined (HW_VECTORCARD_DRV8301_EVM) || defined (HW_VECTORCARD_DRV8312_EVM) || defined (HW_VECTORCARD_SIMULATOR)
+
 	if (p->timer1 >= 300) {
 		p->timer1 = p->timer2 = p->timer3 = p->timer4 = p->timer5 = p->timer6 =
 				0;
@@ -213,10 +250,14 @@ void LED_mode0(Tled *p) {
 		VD6_ON;
 	else
 		VD6_OFF;
+#endif
 
 }
 
 void LED_mode1(Tled *p) {
+//Для  VectorCARD
+#if defined (HW_VECTORCARD_DRV8301_EVM) || defined (HW_VECTORCARD_DRV8312_EVM) || defined (HW_VECTORCARD_SIMULATOR)
+
 	if (p->timer1 >= 400) {
 		p->timer1 = p->timer2 = p->timer3 = p->timer4 = p->timer5 = p->timer6 =
 				0;
@@ -241,9 +282,13 @@ void LED_mode1(Tled *p) {
 		VD4_OFF;
 		VD6_OFF;
 	}
+#endif
 }
 
 void LED_mode2(Tled *p) {
+//Для  VectorCARD
+#if defined (HW_VECTORCARD_DRV8301_EVM) || defined (HW_VECTORCARD_DRV8312_EVM) || defined (HW_VECTORCARD_SIMULATOR)
+
 	if (p->timer1 >= 720) {
 		p->timer1 = p->timer2 = p->timer3 = p->timer4 = p->timer5 = p->timer6 =
 				0;
@@ -278,9 +323,13 @@ void LED_mode2(Tled *p) {
 		VD6_ON;
 	else
 		VD6_OFF;
+#endif
 }
 
 void LED_mode3(Tled *p) {
+//Для  VectorCARD
+#if defined (HW_VECTORCARD_DRV8301_EVM) || defined (HW_VECTORCARD_DRV8312_EVM) || defined (HW_VECTORCARD_SIMULATOR)
+
 	if (p->timer1 >= (300 - p->mode3counter * 50)) {
 		p->timer1 = p->timer2 = p->timer3 = p->timer4 = p->timer5 = p->timer6 =
 				0;
@@ -427,9 +476,13 @@ void LED_mode3(Tled *p) {
 		VD6_ON;
 		break;
 	}
+#endif
 }
 
 void LED_msCalc(Tled *p) {
+//Для  VectorCARD
+#if defined (HW_VECTORCARD_DRV8301_EVM) || defined (HW_VECTORCARD_DRV8312_EVM) || defined (HW_VECTORCARD_SIMULATOR)
+
 	// В зависимости от нажатой кнопки переключаем способ светодиоденья
 	if ((NT_GPIOD->DATA_bit.DATA & (1 << 3)) == 0)
 		p->mode = 0;
@@ -487,4 +540,47 @@ void LED_msCalc(Tled *p) {
 		VDLED11_ON;
 	else
 		VDLED11_OFF;
+#endif
+
+
+
+#if defined (HW_VECTOR_MK_40_4)
+	//светодиоднаЯ интикациЯ на плате контроллера
+	if (sm_prot.state == PROT_ON_OK)   //если нет аварии
+	{
+		p->timer1++;
+		if (p->timer1 > 500) {
+			NT_GPIOA->MASKHIGHBYTE_bit[1 << (11 - 8)].MASKHB ^= 0xFF;
+			p->timer1 = 0;
+		}
+		if (sm_ctrl.state == CTRL_STOP)
+			NT_GPIOA->MASKHIGHBYTE_bit[1 << (12 - 8)].MASKHB = 0xFF;
+		else
+			NT_GPIOA->MASKHIGHBYTE_bit[1 << (12 - 8)].MASKHB = 0;
+	} else  	//если есть авариЯ
+	{
+		p->timer1++;
+		if (p->timer1 > 200) {
+			NT_GPIOA->MASKHIGHBYTE_bit[1 << (11 - 8)].MASKHB ^= 0xFF;
+			p->timer1 = 0;
+		}
+
+		if (sm_ctrl.state == CTRL_STOP)
+			NT_GPIOA->MASKHIGHBYTE_bit[1 << (12 - 8)].MASKHB = 0xFF;
+		else
+			NT_GPIOA->MASKHIGHBYTE_bit[1 << (12 - 8)].MASKHB = 0;
+	}
+#endif
 }
+
+
+
+
+
+
+
+
+
+
+
+

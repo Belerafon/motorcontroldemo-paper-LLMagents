@@ -224,7 +224,7 @@ void SM_Sys_ms_Calc(TSM_Sys* p) {
 	adc.ms_calc(&adc); //АЦП
 	AutoOffset.ms_calc(&AutoOffset); //авто смещение некоторых каналов АЦП
 	//блочная передача драйвера CANopen. Через неё, в частности, грузятся осциллограммы dlog
-	Can2BTInterface.calc(&Can2BTInterface, NT_TIMER2->VALUE, &co2_vars);
+	Can2BTInterface.ms_calc(&Can2BTInterface, NT_TIMER2->VALUE, &co2_vars);
 	leds.msCalc(&leds);//светодиоды
 	RTCclock.msCalc(&RTCclock);//часы
 	if ((drv_params.sens_type == 2) || (drv_params.sens_type == 3)){ //В типе датчика выбран ДПР Холла
@@ -237,6 +237,7 @@ void SM_Sys_ms_Calc(TSM_Sys* p) {
 //!Вызов медленных расчетов остальных модулей
 //! \memberof TSM_Sys
 void SM_Sys_Slow_Calc(TSM_Sys *p) {
+	Can2BTInterface.slow_calc(&Can2BTInterface);//интерфейс блочной передачи CANopen, медленный расчет
 	UserMem.slow_calc(&UserMem);//пользовательская память в МК
 	RTCclock.slowCalc(&RTCclock);//часы реального времени
 	sm_prot.slow_calc(&sm_prot);//модуль защит

@@ -82,7 +82,7 @@ void TposspeedEqep_init(TposspeedEqep *p) {
 	//Вкл. сторожевого таймера
 	NT_QEP1->QEPCTL_bit.WDE = 1;
 	/*Расчёт вспомогательного коэффициента для расчёта скорости,
-	 где 15=60/4, 60 - для перевода в об/мин; 4 - для получения интерполяции разрешения датчика;
+	 где 15=60/4, 60 - для перевода в об/мин; 4 - для получения интерполяции разрешения датчика (1 период дает 4 фронта);
 	 CORE_CLK - частота процессора*/
 	p->k_low = CORE_CLK / ((float) p->resol * p->speed_nom) * 15.0;
 	//В iq формате уменьшаем число в 1<<(24-SCALE_IQ_K),  где 24 - дробная часть iq, а SCALE_IQ_K - то, насколько сдвигается величина
@@ -179,6 +179,7 @@ void TposspeedEqep_Calc(TposspeedEqep *p) {
 	p->theta_el_tmp = p->theta_mech*p->pole_pairs + p->AngleOffset;
 	p->theta_elec = p->theta_el_tmp & 0x00FFFFFF;
 
+	//рассчитывать скорость аппаратно, засекая время между метками средствами QEP
 	if (p->SpeedCalcType==SPEED_CALC_TYPE_BY_QEP){
 
 		/*Проверка на срабатывание сторожевого таймера - не пришло не единого импульса*/
@@ -301,10 +302,12 @@ void TposspeedEqep_Calc(TposspeedEqep *p) {
 
 	}
 
-
+	//рассчитывать скорость программно через производную угла
 	if (p->SpeedCalcType==SPEED_CALC_TYPE_BY_SOFT){
-		//оценка скорости из производной угла
 		//Сначала легкий фильтр на сам угол
+		//0.5 и маски - это магия нечувствительности фильтра к разнице углов больше 360
+		//Чтобы при обнулении угла при переходе через 360 градусов при
+		//вычитании из 5 градусов 355 получилось 10 (в IQ формате)
 		p->theta_finish=p->theta_finish+_IQmpy(_IQ(0.5),((p->theta_elec-p->theta_finish+_IQ(0.5))&0x00FFFFFF)-_IQ(0.5));
 		p->theta_finish&=0x00FFFFFF;
 		//расчитываем приращение угла
@@ -316,7 +319,7 @@ void TposspeedEqep_Calc(TposspeedEqep *p) {
 		p->speed_elec_temp=_IQmpy(p->d_fi,p->KThetaToSpeed)<<3;
 
 		//инерционный фильтр для скорости
-		p->speed_filter.input = p->speed_elec_temp; //p->speed_elec;
+		p->speed_filter.input = p->speed_elec_temp;
 		p->speed_filter.calc(&p->speed_filter);
 		p->speed_elec=p->speed_filter.output;
 	}
@@ -339,6 +342,8 @@ void TposspeedEqep_IndexEvent(TposspeedEqep *p) {
 //! \memberof TposspeedEqep
 void TposspeedEqep_SlowCalc(TposspeedEqep *p) {
 	//коэффициент перевода производной от угла (вычисляемую неизвестно в чем) в скорость
+	//сдвиг на 3 чтобы результат деления не переполнил 127, потом при использовании коэфа
+	//сдвинется назад на 3
 	p->KThetaToSpeed=_IQdiv(_IQ(1.0),_IQmpyI32(drv_params.freq_nom,FAST_CALC_TS)<<3);
 }
 /*@}*/

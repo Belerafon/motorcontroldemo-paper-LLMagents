@@ -29,6 +29,8 @@ extern "C"
 {
 #endif
 
+#include "build.h"
+
 //! Модуль ащит выключен
 #define PROT_OFF 			0
 //! Модуль защит включен
@@ -37,7 +39,11 @@ extern "C"
 #define PROT_FAIL 			2
 
 //Макрос приема аппаратной аварии инвертора: если ноль, то авария
+#if defined HW_VECTOR_MK_40_4
+#define DRV_FAULT	(NT_GPIOC->DATA & (1 << 8))
+#else
 #define DRV_FAULT	(NT_GPIOC->DATA & (1 << 4))
+#endif
 
 /*! \class TSM_Protect
       \brief Модуль защит.

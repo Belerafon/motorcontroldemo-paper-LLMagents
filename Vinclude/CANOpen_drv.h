@@ -128,7 +128,19 @@ extern void co_SDOrequestWrite(TCo_OdVars*);
 extern void Z_co_receiveSDOrequest(TCo_OdVars*, TZCanMsg*);
 extern void co_CANToExtInterface_Send(TZCanMsg* MSG, Uint16 tag_CANnum);
 
+/*!‘ункция возвращает адрес переменной по переданным индексу
+ и подындексу. ≈сли "связанная" переменная 32-х разрядная, то
+ возвращается указатель на старшую часть.
+ ¬Ќ»ћјЌ»≈!!!≈сли запрошенного индекса и подиндекса не существует, то
+ функция возвращает 0 (это нужно обязательно отслеживать). */
 extern Uint16 * co_getAddr(TCo_OdVars* ppc, Uint32 ind_subind);
+// ‘ункци€ получени€ информации об объекте с заданным адресом.
+// ¬озвращает 0, если объект не найден.
+extern Uint16 co_getObjectInfo(
+ TCo_OdVars* ppc,   		// указатель на структуру используемого модул€ CANopen
+ Uint32 ind_subind,   		// биты 16-31 - индекс, биты 0-7 - подындекс объекта
+ TObjectInfo* pObjectInfo 	// указатель на структуру, куда будет помещена информаци€ об объекте
+ );
 
 extern void co_RPDO1_Callback(Uint16 nodeID, Uint16 tag_CANnum);
 extern void co_RPDO2_Callback(Uint16 nodeID, Uint16 tag_CANnum);

@@ -2886,6 +2886,108 @@
 			<defaults default="0x11111111" min="" max=""/>
 			<description description="Ключ производителя - берётся из настроек &apos;COODedit&apos;"/>
 		</obj_2600h.01h>
+		<obj_2700h.00h DataType="Editable" name="Block Transfer Interpreter" addr="co_blockTransferCommand" group="7" groupName="Слово управления" fullgroup="7" callback="callback_BTcmd">
+			<format Type="StandartNum" Size="16" Signed="false"/>
+			<text text="BT Interpreter" textID="596"/>
+			<defaults default="0" min="" max=""/>
+			<description description="Интерфейс блочной передачи"/>
+		</obj_2700h.00h>
+		<obj_2701h.00h DataType="Viewable" name="CAN programming" addr="" group="7" groupName="Слово управления" fullgroup="7" callback="">
+			<format Type="Root"/>
+			<text text="CAN programming" textID="597"/>
+			<defaults default="0" min="" max=""/>
+			<description description=""/>
+		</obj_2701h.00h>
+		<obj_2701h.01h DataType="Editable" name="cmd" addr="swu_vars" group="7" groupName="Слово управления" fullgroup="7" callback="">
+			<format Type="StandartNum" Size="32" Signed="false"/>
+			<text text="cmd" textID="598"/>
+			<defaults default="0" min="0" max="0"/>
+			<description description=""/>
+		</obj_2701h.01h>
+		<obj_2701h.02h DataType="Editable" name="status" addr="swu_vars" group="7" groupName="Слово управления" fullgroup="7" callback="">
+			<format Type="StandartNum" Size="32" Signed="false"/>
+			<text text="status" textID="599"/>
+			<defaults default="0" min="0" max="0"/>
+			<description description=""/>
+		</obj_2701h.02h>
+		<obj_2701h.03h DataType="Editable" name="quest1" addr="swu_vars" group="7" groupName="Слово управления" fullgroup="7" callback="">
+			<format Type="StandartNum" Size="32" Signed="false"/>
+			<text text="quest1" textID="600"/>
+			<defaults default="0" min="0" max="0"/>
+			<description description=""/>
+		</obj_2701h.03h>
+		<obj_2701h.04h DataType="Editable" name="quest2" addr="swu_vars" group="7" groupName="Слово управления" fullgroup="7" callback="">
+			<format Type="StandartNum" Size="32" Signed="false"/>
+			<text text="quest2" textID="601"/>
+			<defaults default="0" min="0" max="0"/>
+			<description description=""/>
+		</obj_2701h.04h>
+		<obj_2701h.05h DataType="Editable" name="quest3" addr="swu_vars" group="7" groupName="Слово управления" fullgroup="7" callback="">
+			<format Type="StandartNum" Size="32" Signed="false"/>
+			<text text="quest3" textID="602"/>
+			<defaults default="0" min="0" max="0"/>
+			<description description=""/>
+		</obj_2701h.05h>
+		<obj_2701h.06h DataType="Editable" name="quest4" addr="swu_vars" group="7" groupName="Слово управления" fullgroup="7" callback="">
+			<format Type="StandartNum" Size="32" Signed="false"/>
+			<text text="quest4" textID="603"/>
+			<defaults default="0" min="0" max="0"/>
+			<description description=""/>
+		</obj_2701h.06h>
+		<obj_2701h.07h DataType="Editable" name="ans1" addr="swu_vars" group="7" groupName="Слово управления" fullgroup="7" callback="">
+			<format Type="StandartNum" Size="32" Signed="false"/>
+			<text text="ans1" textID="604"/>
+			<defaults default="0" min="0" max="0"/>
+			<description description=""/>
+		</obj_2701h.07h>
+		<obj_2701h.08h DataType="Editable" name="ans2" addr="swu_vars" group="7" groupName="Слово управления" fullgroup="7" callback="">
+			<format Type="StandartNum" Size="32" Signed="false"/>
+			<text text="ans2" textID="605"/>
+			<defaults default="0" min="0" max="0"/>
+			<description description=""/>
+		</obj_2701h.08h>
+		<obj_2701h.09h DataType="Editable" name="ans3" addr="swu_vars" group="7" groupName="Слово управления" fullgroup="7" callback="">
+			<format Type="StandartNum" Size="32" Signed="false"/>
+			<text text="ans3" textID="606"/>
+			<defaults default="0" min="0" max="0"/>
+			<description description=""/>
+		</obj_2701h.09h>
+		<obj_2701h.0Ah DataType="Editable" name="ans4" addr="swu_vars" group="7" groupName="Слово управления" fullgroup="7" callback="">
+			<format Type="StandartNum" Size="32" Signed="false"/>
+			<text text="ans4" textID="607"/>
+			<defaults default="0" min="0" max="0"/>
+			<description description=""/>
+		</obj_2701h.0Ah>
+		<obj_2701h.0Bh DataType="Editable" name="addr" addr="swu_vars" group="7" groupName="Слово управления" fullgroup="7" callback="">
+			<format Type="StandartNum" Size="32" Signed="false"/>
+			<text text="addr" textID="3446"/>
+			<defaults default="0" min="0" max="0"/>
+			<description description=""/>
+		</obj_2701h.0Bh>
+		<obj_2701h.0Ch DataType="Editable" name="CPU_ID" addr="swu_vars" group="7" groupName="Слово управления" fullgroup="7" callback="">
+			<format Type="StandartNum" Size="32" Signed="false"/>
+			<text text="CPU_ID" textID="609"/>
+			<defaults default="0" min="0" max="0"/>
+			<description description=""/>
+		</obj_2701h.0Ch>
+		<obj_2701h.0Dh DataType="Editable" name="sector_mask" addr="swu_vars" group="7" groupName="Слово управления" fullgroup="7" callback="">
+			<format Type="StandartNum" Size="32" Signed="false"/>
+			<text text="sector_mask" textID="610"/>
+			<defaults default="0" min="0" max="0"/>
+			<description description=""/>
+		</obj_2701h.0Dh>
+		<obj_2701h.0Eh DataType="Editable" name="version" addr="swu_vars" group="7" groupName="Слово управления" fullgroup="7" callback="">
+			<format Type="StandartNum" Size="32" Signed="false"/>
+			<text text="version" textID="611"/>
+			<defaults default="0" min="0" max="0"/>
+			<description description=""/>
+		</obj_2701h.0Eh>
+		<obj_2701h.0Fh DataType="Editable" name="CRC" addr="swu_vars" group="7" groupName="Слово управления" fullgroup="7" callback="">
+			<format Type="StandartNum" Size="32" Signed="false"/>
+			<text text="CRC" textID="612"/>
+			<defaults default="0" min="" max=""/>
+			<description description="swu_vars"/>
+		</obj_2701h.0Fh>
 		<obj_3000h.00h DataType="Viewable" name="Статус преобразователя" addr="drv_status.all" group="2" groupName="ВНЕ ГРУПП" fullgroup="2" callback="">
 			<format Type="Bit" Visualization="Text" Length="6" StartBit="0"/>
 			<text text="Статус" textID="317"/>

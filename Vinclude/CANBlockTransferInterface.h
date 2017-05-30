@@ -33,7 +33,8 @@ extern "C"
 #define CANBT_INTERFACE_FREE 0
 #define CANBT_INTERFACE_BUSY 0x8000
 #define CANBT_INTERFACE_FLASH_PROG  1
-#define CANBT_INTERFACE_DATALOG  2
+#define CANBT_INTERFACE_DATALOG1  	2
+#define CANBT_INTERFACE_DATALOG2  	3	// используетс€ дл€ 32-битного даталоггера
 
 struct SCanBTInterface{
 		Uint16 alreadyInit;	//признак первого вызова дискетного автомата.
@@ -43,20 +44,23 @@ struct SCanBTInterface{
 	    Uint32 time_prev;
 	    Uint64 state_time;	//врем€ нахождени€ в текущем состо€нии, в тиках проца. ƒл€ 150ћгц максимальное врем€ около 4тыс. лет :)
 		Uint16 BlockTransferCommand;
-		void (*calc)(volatile struct SCanBTInterface* p, Uint32 time, TCo_OdVars* co_ptr);
+		void (*ms_calc)(volatile struct SCanBTInterface* p, Uint32 time, TCo_OdVars* co_ptr);
+		void (*slow_calc)(volatile struct SCanBTInterface* p);
 		};
 
 typedef volatile struct SCanBTInterface TCanBTInterface;
 
 #define T_CANBT_INTERFACE_DEFAULTS {0,CANBT_INTERFACE_FREE,0xFF,1,\
 									 0,0,0,\
-							   		 SMCanBTInterface}
+									 SMCanBTInterface_ms,\
+									SMCanBTInterface_slow}
 
-void SMCanBTInterface(volatile struct SCanBTInterface* p, Uint32 time, TCo_OdVars* co_ptr);
+void SMCanBTInterface_ms(volatile struct SCanBTInterface* p, Uint32 time, TCo_OdVars* co_ptr);
+void SMCanBTInterface_slow(volatile struct SCanBTInterface* p);
 
-//колбэки дл€ 2700.00 
-void co1_callback_BTcmd(Uint16 par);
-void co2_callback_BTcmd(Uint16 par);
+//колбэки для 2700.00
+void callback_BTcmd(Uint16 par, Uint16 tag_CANnum);
+
 #ifdef __cplusplus
 }
 #endif

@@ -40,7 +40,6 @@
 
 //! \memberof TAdcDrv
 void AdcDrv_init(TAdcDrv *p) {
-
 	// Запрет всех секвенсоров
 	NT_ADC->ACTSS = 0;
 
@@ -147,7 +146,22 @@ void AdcDrv_init(TAdcDrv *p) {
 	NT_ADC->SEQ[4].MUX_bit.CH9 = 1;	//Ток фазы A
 #endif
 
+//для Контроллера МК40.4
+#ifdef HW_VECTOR_MK_40_4
+	NT_ADC->DCCTL_bit[11].CHNL = 11;	//Udc
+	NT_ADC->DCCTL_bit[17].CHNL = 17;	//Ток фазы B
+	NT_ADC->DCCTL_bit[16].CHNL = 16;	//Ток фазы A
 
+	//разрешение работы компараторов
+	NT_ADC->SEQ[2].DCP_bit.CMP11 = 1;	//Udc
+	NT_ADC->SEQ[3].DCP_bit.CMP17 = 1;	//Ток фазы B
+	NT_ADC->SEQ[4].DCP_bit.CMP16 = 1;	//Ток фазы A
+
+	//выбор каналов для измерений
+	NT_ADC->SEQ[2].MUX_bit.CH11 = 1;	//Udc
+	NT_ADC->SEQ[3].MUX_bit.CH17 = 1;	//Ток фазы B
+	NT_ADC->SEQ[4].MUX_bit.CH16 = 1;	//Ток фазы A
+#endif
 }
 
 
@@ -157,7 +171,7 @@ void AdcDrv_init(TAdcDrv *p) {
 //! Токи фаз для повышения точности усредняются за несколько измерений
 
 //! \memberof TAdcDrv
-void AdcDrv_PWM_calc(TAdcDrv *p) {
+void AdcDrv_fast_calc(TAdcDrv *p) {
 
 #if (!defined(HW_VECTORCARD_SIMULATOR)) && (!defined(HW_NIIET_BOARD_SIMULATOR))
 	while (NT_ADC->SEQ[2].FSTAT_bit.FLOAD > 0)	//пока фифо не опустеет
@@ -219,7 +233,7 @@ void AdcDrv_PWM_calc(TAdcDrv *p) {
 	p->Udc_meas = p->UdcGainNom * (p->Udc_temp + p->Udc_meas_offset);
 	p->Imeas_c = -p->Imeas_a - p->Imeas_b;
 #endif
-#ifdef HW_VECTORCARD_DRV8301_EVM
+#if defined(HW_VECTORCARD_DRV8301_EVM) || defined(HW_VECTOR_MK_40_4)
 	p->Imeas_a = p->IaGainNom * ((p->IA_temp + p->Imeas_a_offset));
 	p->Imeas_b = p->IbGainNom * ((p->IB_temp + p->Imeas_b_offset));
 	p->Udc_meas = p->UdcGainNom * (p->Udc_temp + p->Udc_meas_offset);

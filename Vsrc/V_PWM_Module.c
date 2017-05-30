@@ -47,6 +47,13 @@ extern TAdcDrv adc;
 #define GPIO_INV_OFF
 #endif
 
+#if defined(HW_VECTOR_MK_40_4)
+#define GPIO_INV_ON
+#define GPIO_INV_OFF
+#endif
+
+
+
 //! Инициализация
 
 //! \memberof TPWM_Module
@@ -285,42 +292,61 @@ void PWM_Module_Init(TPWM_Module *p) {
 	NT_PWM1->TZCLR = 0x7;
 	NT_PWM2->TZCLR = 0x7;
 
-
-#if (!defined(HW_VECTORCARD_SIMULATOR)) && (!defined(HW_NIIET_BOARD_SIMULATOR))
 	//настройка ножек
-	NT_GPIOG->ALTFUNCSET = (1 << 2) + (1 << 3) + (1 << 4);		//A[0],A[1],A[2]
-
-
 #ifdef HW_VECTORCARD_DRV8301_EVM
-	NT_GPIOA->ALTFUNCSET = (1 << 10);		//B[0]
-	NT_GPIOF->ALTFUNCSET = (1 << 2) + (1 << 4);		//B[1],B[2]
-#endif
+	//ШИМ 6 выводов
+	NT_GPIOG->ALTFUNCSET = (1 << 2) + (1 << 3) + (1 << 4);		//ePWMxA(0), (1), (2)
+	NT_GPIOA->ALTFUNCSET = (1 << 10);		//ePWMxB(0)
+	NT_GPIOF->ALTFUNCSET = (1 << 2) + (1 << 4);		//ePWMxB(1), (2)
 
 	// Периферийная функция - PWM
-	NT_COMMON_REG->GPIOPCTLA_bit.PIN10 = 2;
+	NT_COMMON_REG->GPIOPCTLA_bit.PIN10 = 2;//ePWMxB(0)
+	NT_COMMON_REG->GPIOPCTLF_bit.PIN2 = 0;//ePWMxB(1)
+	NT_COMMON_REG->GPIOPCTLF_bit.PIN4 = 0;//ePWMxB(2)
 
-	NT_COMMON_REG->GPIOPCTLF_bit.PIN2 = 0;
-	NT_COMMON_REG->GPIOPCTLF_bit.PIN4 = 0;
-	NT_COMMON_REG->GPIOPCTLG_bit.PIN2 = 0;
-	NT_COMMON_REG->GPIOPCTLG_bit.PIN3 = 0;
-	NT_COMMON_REG->GPIOPCTLG_bit.PIN4 = 0;
+	NT_COMMON_REG->GPIOPCTLG_bit.PIN2 = 0;//ePWMxA(0)
+	NT_COMMON_REG->GPIOPCTLG_bit.PIN3 = 0;//ePWMxA(1)
+	NT_COMMON_REG->GPIOPCTLG_bit.PIN4 = 0;//ePWMxA(2)
 
-
-#ifdef HW_VECTORCARD_DRV8301_EVM
-//NT_GPIOG->DATAOUT |= (1 << 6);
+	//NT_GPIOG->DATAOUT |= (1 << 6);
 	NT_GPIOG->OUTENSET = (1 << 6); //InvEnable
 #endif
 
-#ifdef HW_VECTORCARD_DRV8312_EVM
-//A[10], F[2], F[4]  ножки резета
-	NT_GPIOA->ALTFUNCCLR = (1 << 10);		//B[0]
+#if defined(HW_VECTORCARD_DRV8312_EVM)
+	//ШИМ 3 вывода (нижние ключи ШИМят сами драйвером)
+	NT_GPIOG->ALTFUNCSET = (1 << 2) + (1 << 3) + (1 << 4);	 //ePWMxA(0), (1), (2)
 
+	// Периферийная функция - PWM
+	NT_COMMON_REG->GPIOPCTLG_bit.PIN2 = 0;//ePWMxA(0)
+	NT_COMMON_REG->GPIOPCTLG_bit.PIN3 = 0;//ePWMxA(1)
+	NT_COMMON_REG->GPIOPCTLG_bit.PIN4 = 0;//ePWMxA(2)
+
+	//выключаем альтернативные функции (на всякий)
+	NT_GPIOA->ALTFUNCCLR = (1 << 10);		//A[10]
+	NT_GPIOF->ALTFUNCCLR = (1 << 2) + (1 << 4);		//F[2], F[4]
+
+	//A[10], F[2], F[4]  ножки резета
 	NT_GPIOA->OUTENSET = (1 << 10);
 	NT_GPIOF->OUTENSET = (1 << 2);
 	NT_GPIOF->OUTENSET = (1 << 4);
 #endif
+
+
+#ifdef HW_VECTOR_MK_40_4
+	NT_GPIOG->ALTFUNCSET_bit.ALTFUNCSET = (1 << 2) + (1 << 3) + (1 << 4); //ePWMxA(0), (1), (2)
+	NT_GPIOF->ALTFUNCSET_bit.ALTFUNCSET = (1 << 0) + (1 << 2) + (1 << 4); //ePWMxB(0), (1), (2)
+
+	// Периферийная функция - PWM
+	NT_COMMON_REG->GPIOPCTLF_bit.PIN0 = 2;//ePWMxB(0)
+	NT_COMMON_REG->GPIOPCTLF_bit.PIN2 = 0;//ePWMxB(1)
+	NT_COMMON_REG->GPIOPCTLF_bit.PIN4 = 0;//ePWMxB(2)
+
+	NT_COMMON_REG->GPIOPCTLG_bit.PIN2 = 0;//ePWMxA(0)
+	NT_COMMON_REG->GPIOPCTLG_bit.PIN3 = 0;//ePWMxA(1)
+	NT_COMMON_REG->GPIOPCTLG_bit.PIN4 = 0;//ePWMxA(2)
 #endif
-	//A[10], F[2], F[4]
+
+
 	//Синхронный запуск ШИМ
 	NT_COMMON_REG->PWM_SYNC_bit.TBCLKSYNC = 0x1FF;
 

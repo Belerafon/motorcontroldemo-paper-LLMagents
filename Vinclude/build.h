@@ -37,6 +37,9 @@
 //Отладочная плата НИИЭТ с имитационными моделями двигателей
 //#define HW_NIIET_BOARD_SIMULATOR
 
+//Контроллер МК40.4 НПФ ВЕКТОР
+//#define HW_VECTOR_MK_40_4
+
 //Для UART, выбирается чем его занять - MODBUS или CANtoRS драйвером
 //#define MODBUS_ENA
 #define CANTORS_ENA
@@ -82,7 +85,7 @@
 #define F_CTRL_HI_UDC       	 	0x2
 #define F_ENCODER_FAULT             0x4
 #define F_MODEL_FAULT 	        	0x8
-//#define F_RESERVED         	    0x10
+#define F_FLASH_PROGRAM         	0x10
 //#define F_RESERVED   		        0x20
 //#define F_RESERVED	       		0x40
 //#define F_RESERVED       		    0x80
@@ -126,7 +129,8 @@
 
 
 
-#if (!defined(HW_VECTORCARD_DRV8301_EVM)) && (!defined(HW_VECTORCARD_DRV8312_EVM)) && (!defined(HW_VECTORCARD_SIMULATOR)) && (!defined(HW_NIIET_BOARD_SIMULATOR))
+#if (!defined(HW_VECTORCARD_DRV8301_EVM)) && (!defined(HW_VECTORCARD_DRV8312_EVM)) && (!defined(HW_VECTORCARD_SIMULATOR))\
+	&& (!defined(HW_NIIET_BOARD_SIMULATOR)) 	&& (!defined(HW_VECTOR_MK_40_4))
 #error необходимо определить хотя бы одну версию аппаратной части
 #endif
 

@@ -74,7 +74,7 @@ CopyDataInit:
   ldr  r3, [r3, r1]
   str  r3, [r0, r1]
   adds  r1, r1, #4
-    
+
 LoopCopyDataInit:
   ldr  r0, =_sdata
   ldr  r3, =_edata
@@ -95,7 +95,6 @@ LoopFillZerobss:
 
 
 /* Включение плавоточки*/
-
   ldr.w R0, =0xE000ED88
   ldr R1, [R0]
   orr R1, R1, #(0xF << 20)

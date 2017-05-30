@@ -91,6 +91,13 @@ struct S_CANOPEN_DRV_SETTINGS
 	Uint16 BlockTransfer_ena;					//разрешение использования в драйвере функций блочной передачи
 };
 
+// Структура, содержащая различную информацию об объекте.
+typedef struct
+{
+	void* varAddr;  // адрес переменной в ОЗУ
+	int varSize;  	// размер переменной в битах (16/32)
+} TObjectInfo;
+
 typedef volatile struct S_CANOPEN_DRV_SETTINGS T_CANOPEN_DRV_SETTINGS;
 
 //!Конфигурирование полей SDO

@@ -45,8 +45,6 @@ void SM_Net_Init(TSM_Net *p) {
 	co2_vars.settings.BlockTransfer_ena = 1;//Разрешить блочную передачу (нужна для осциллографа)
 	co2_Init(&co2_vars); //Инициализация драйвера CANOpen
 
-	//так как в драйвере CANOpen разрешена блочная передача, сообщим это даталоггеру
-	dlog.BlockTransferSupportFlag = 1;
 
 
 #ifdef CANTORS_ENA
@@ -144,6 +142,7 @@ void SM_Net_ms_Calc(TSM_Net *p) {
 #ifdef MODBUS_ENA
 	MBVarsConv.calc(&MBVarsConv);
 #endif
+
 }
 
 void SM_Net_fast_Calc(TSM_Net *p) {
