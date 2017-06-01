@@ -40,7 +40,7 @@ extern "C"
 
 //Макрос приема аппаратной аварии инвертора: если ноль, то авария
 #if defined HW_VECTOR_MK_40_4
-#define DRV_FAULT	(NT_GPIOC->DATA & (1 << 8))
+#define DRV_FAULT	(NT_GPIOA->DATA & (1 << 8))
 #else
 #define DRV_FAULT	(NT_GPIOC->DATA & (1 << 4))
 #endif

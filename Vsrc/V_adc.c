@@ -148,17 +148,17 @@ void AdcDrv_init(TAdcDrv *p) {
 
 //для Контроллера МК40.4
 #ifdef HW_VECTOR_MK_40_4
-	NT_ADC->DCCTL_bit[11].CHNL = 11;	//Udc
+	NT_ADC->DCCTL_bit[1].CHNL = 1;	//Udc
 	NT_ADC->DCCTL_bit[17].CHNL = 17;	//Ток фазы B
 	NT_ADC->DCCTL_bit[16].CHNL = 16;	//Ток фазы A
 
 	//разрешение работы компараторов
-	NT_ADC->SEQ[2].DCP_bit.CMP11 = 1;	//Udc
+	NT_ADC->SEQ[2].DCP_bit.CMP1 = 1;	//Udc
 	NT_ADC->SEQ[3].DCP_bit.CMP17 = 1;	//Ток фазы B
 	NT_ADC->SEQ[4].DCP_bit.CMP16 = 1;	//Ток фазы A
 
 	//выбор каналов для измерений
-	NT_ADC->SEQ[2].MUX_bit.CH11 = 1;	//Udc
+	NT_ADC->SEQ[2].MUX_bit.CH1 = 1;	//Udc
 	NT_ADC->SEQ[3].MUX_bit.CH17 = 1;	//Ток фазы B
 	NT_ADC->SEQ[4].MUX_bit.CH16 = 1;	//Ток фазы A
 #endif

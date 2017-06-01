@@ -341,6 +341,10 @@ void PWM_Module_Init(TPWM_Module *p) {
 	NT_COMMON_REG->GPIOPCTLG_bit.PIN2 = 0;//ePWMxA(0)
 	NT_COMMON_REG->GPIOPCTLG_bit.PIN3 = 0;//ePWMxA(1)
 	NT_COMMON_REG->GPIOPCTLG_bit.PIN4 = 0;//ePWMxA(2)
+
+	//¬ход аппаратной аварии
+	NT_GPIOA->ALTFUNCCLR = (1<<8); //A[8]
+
 #endif
 
 
