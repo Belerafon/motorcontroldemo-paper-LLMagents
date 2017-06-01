@@ -21,13 +21,10 @@
  \addtogroup V_PWM_Module 
  @{*/
 
-//#include "DSP.h"
+
 #include "V_IQmath.h"
 #include "V_PWM_Module.h"
-#include "V_adc.h"
-#include "build.h"
-#include "stdlib.h" //для labs
-extern TAdcDrv adc;
+#include "main.h"
 
 
 #ifdef HW_VECTORCARD_DRV8301_EVM
@@ -337,7 +334,7 @@ void PWM_Module_Init(TPWM_Module *p) {
 	NT_GPIOF->ALTFUNCSET_bit.ALTFUNCSET = (1 << 0) + (1 << 2) + (1 << 4); //ePWMxB(0), (1), (2)
 
 	// Периферийная функция - PWM
-	NT_COMMON_REG->GPIOPCTLF_bit.PIN0 = 2;//ePWMxB(0)
+	NT_COMMON_REG->GPIOPCTLF_bit.PIN0 = 0;//ePWMxB(0)
 	NT_COMMON_REG->GPIOPCTLF_bit.PIN2 = 0;//ePWMxB(1)
 	NT_COMMON_REG->GPIOPCTLF_bit.PIN4 = 0;//ePWMxB(2)
 
@@ -726,11 +723,13 @@ void PWM_Module_Update(TPWM_Module *p) {
 //! \memberof TPWM_Module
 void PWM_Module_SlowCalc(TPWM_Module *p) {
 	Uint16 tmp;
+	//проверка ограничений величины мертвого времени
 	if (p->DeadBand < DEAD_BAND_MIN)
 		p->DeadBand = DEAD_BAND_MIN;
 	if (p->DeadBand > DEAD_BAND_MAX)
 		p->DeadBand = DEAD_BAND_MAX;
-	NT_PWM0->DBRED = _IQ4mpy(_IQ4(150 / 2), p->DeadBand >> 20) >> 4;
+	//пересчет МВ из формата IQ в мкс в такты таймера на 100мГц
+	NT_PWM0->DBRED = _IQ4mpy(_IQ4(100), p->DeadBand >> 20) >> 4;
 	//во все ключи то же самое
 	NT_PWM0->DBFED = NT_PWM0->DBRED;
 
@@ -738,12 +737,13 @@ void PWM_Module_SlowCalc(TPWM_Module *p) {
 	NT_PWM1->DBRED = NT_PWM0->DBRED;
 	NT_PWM2->DBFED = NT_PWM0->DBRED;
 	NT_PWM2->DBRED = NT_PWM0->DBRED;
+	DebugW1=NT_PWM0->DBRED;
 
 	if (p->MinGammaLimit < DEAD_BAND_MIN)
 		p->MinGammaLimit = GAMMA_LIMIT_MIN;
 	if (p->MinGammaLimit > DEAD_BAND_MAX)
 		p->MinGammaLimit = GAMMA_LIMIT_MAX;
-	NT_PWM0->FWDTH = _IQ4mpy(_IQ4(150 / 2), p->MinGammaLimit >> 20) >> 4;
+	NT_PWM0->FWDTH = _IQ4mpy(_IQ4(100), p->MinGammaLimit >> 20) >> 4;
 	NT_PWM1->FWDTH = NT_PWM0->FWDTH;
 	NT_PWM2->FWDTH = NT_PWM0->FWDTH;
 	//частота ШИМ. Смена "на лету".
