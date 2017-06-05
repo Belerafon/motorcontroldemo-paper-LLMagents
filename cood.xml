@@ -2960,7 +2960,7 @@
 		</obj_2701h.0Ah>
 		<obj_2701h.0Bh DataType="Editable" name="addr" addr="swu_vars" group="7" groupName="Слово управления" fullgroup="7" callback="">
 			<format Type="StandartNum" Size="32" Signed="false"/>
-			<text text="addr" textID="3446"/>
+			<text text="addr" textID="608"/>
 			<defaults default="0" min="0" max="0"/>
 			<description description=""/>
 		</obj_2701h.0Bh>

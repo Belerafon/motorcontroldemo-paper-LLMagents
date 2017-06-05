@@ -1,6 +1,6 @@
 //Файл: cood.c
-//Профиль: D:\User\Aliamkin\Projects\VectorCard\motorcontroldemo\cood.xml
-//Дата созданиЯ: 30.05.2017 14:52:26
+//Профиль: D:\Eclipse_GCC_ARM_wks\motorcontroldemo\cood.xml
+//Дата созданиЯ: 01.06.2017 17:29:24
 //Пользователь: default
 #include "DSP.h"
 #include "main.h"
@@ -13,7 +13,7 @@ Uint16 const co2_numOfInd = 127;
 //Номер перечеслениЯ длЯ групп
 Uint16 const co2_groupEnum = 15;
 //Хэш-сумма:
-Uint32 const co2_odHash[4] = {0x153EBE21, 0x5F8C26C7, 0xB38F3D30, 0xC82A12FB};
+Uint32 const co2_odHash[4] = {0x29A0BEF7, 0x7269E89D, 0x90CBA6F4, 0xD6E225FD};
 //Таблица с адресами переменных 
 
 long const CO2_OD_TBL3[] = { (long)(&co2_vars.co_deviceType), //[1000h.00h], Название=Тип устройства, ТекстПУ=Device Type, EngText=Device Type, группа=CAN
@@ -403,22 +403,22 @@ long const CO2_OD_TBL3[] = { (long)(&co2_vars.co_deviceType), //[1000h.00h], Наз
 (long)(&sm_prot.Main_Flags), //[2532h.03h], Название=Системный объект, ТекстПУ=System, EngText=System object, группа=Рег. тока якоря
 (long)(&disp_group_number), //[2534h.01h], Название=Номер груп для пульта управления, ТекстПУ=№ гр ПУ, EngText=, группа=CAN
 (long)(&VendorToken), //[2600h.01h], Название=VendorToken, ТекстПУ=VendorToken, EngText=VendorToken, группа=ВНЕ ГРУПП
-(long)(&co2_vars.co_blockTransferCommand), //[2700h.00h], Название=Block Transfer Interpreter, ТекстПУ=BT Interpreter, EngText=, группа=Слово управления
-(long)(&swu_vars), //[2701h.01h], Название=cmd, ТекстПУ=cmd, EngText=, группа=Слово управления
-(long)(&swu_vars), //[2701h.02h], Название=status, ТекстПУ=status, EngText=, группа=Слово управления
-(long)(&swu_vars), //[2701h.03h], Название=quest1, ТекстПУ=quest1, EngText=, группа=Слово управления
-(long)(&swu_vars), //[2701h.04h], Название=quest2, ТекстПУ=quest2, EngText=, группа=Слово управления
-(long)(&swu_vars), //[2701h.05h], Название=quest3, ТекстПУ=quest3, EngText=, группа=Слово управления
-(long)(&swu_vars), //[2701h.06h], Название=quest4, ТекстПУ=quest4, EngText=, группа=Слово управления
-(long)(&swu_vars), //[2701h.07h], Название=ans1, ТекстПУ=ans1, EngText=, группа=Слово управления
-(long)(&swu_vars), //[2701h.08h], Название=ans2, ТекстПУ=ans2, EngText=, группа=Слово управления
-(long)(&swu_vars), //[2701h.09h], Название=ans3, ТекстПУ=ans3, EngText=, группа=Слово управления
-(long)(&swu_vars), //[2701h.0Ah], Название=ans4, ТекстПУ=ans4, EngText=, группа=Слово управления
-(long)(&swu_vars), //[2701h.0Bh], Название=addr, ТекстПУ=addr, EngText=, группа=Слово управления
-(long)(&swu_vars), //[2701h.0Ch], Название=CPU_ID, ТекстПУ=CPU_ID, EngText=, группа=Слово управления
-(long)(&swu_vars), //[2701h.0Dh], Название=sector_mask, ТекстПУ=sector_mask, EngText=, группа=Слово управления
-(long)(&swu_vars), //[2701h.0Eh], Название=version, ТекстПУ=version, EngText=, группа=Слово управления
-(long)(&swu_vars), //[2701h.0Fh], Название=CRC, ТекстПУ=CRC, EngText=, группа=Слово управления
+(long)(&co2_vars.co_blockTransferCommand), //[2700h.00h], Название=Block Transfer Interpreter, ТекстПУ=BT Interpreter, EngText=BT Interpreter, группа=Слово управления
+(long)(&swu_vars), //[2701h.01h], Название=cmd, ТекстПУ=cmd, EngText=cmd, группа=Слово управления
+(long)(&swu_vars), //[2701h.02h], Название=status, ТекстПУ=status, EngText=status, группа=Слово управления
+(long)(&swu_vars), //[2701h.03h], Название=quest1, ТекстПУ=quest1, EngText=quest1, группа=Слово управления
+(long)(&swu_vars), //[2701h.04h], Название=quest2, ТекстПУ=quest2, EngText=quest2, группа=Слово управления
+(long)(&swu_vars), //[2701h.05h], Название=quest3, ТекстПУ=quest3, EngText=quest3, группа=Слово управления
+(long)(&swu_vars), //[2701h.06h], Название=quest4, ТекстПУ=quest4, EngText=quest4, группа=Слово управления
+(long)(&swu_vars), //[2701h.07h], Название=ans1, ТекстПУ=ans1, EngText=ans1, группа=Слово управления
+(long)(&swu_vars), //[2701h.08h], Название=ans2, ТекстПУ=ans2, EngText=ans2, группа=Слово управления
+(long)(&swu_vars), //[2701h.09h], Название=ans3, ТекстПУ=ans3, EngText=ans3, группа=Слово управления
+(long)(&swu_vars), //[2701h.0Ah], Название=ans4, ТекстПУ=ans4, EngText=ans4, группа=Слово управления
+(long)(&swu_vars), //[2701h.0Bh], Название=addr, ТекстПУ=addr, EngText=addr, группа=Слово управления
+(long)(&swu_vars), //[2701h.0Ch], Название=CPU_ID, ТекстПУ=CPU_ID, EngText=CPU_ID, группа=Слово управления
+(long)(&swu_vars), //[2701h.0Dh], Название=sector_mask, ТекстПУ=sector_mask, EngText=sector_mask, группа=Слово управления
+(long)(&swu_vars), //[2701h.0Eh], Название=version, ТекстПУ=version, EngText=version, группа=Слово управления
+(long)(&swu_vars), //[2701h.0Fh], Название=CRC, ТекстПУ=CRC, EngText=CRC, группа=Слово управления
 (long)(&drv_status.all), //[3000h.00h], Название=Статус преобразователя, ТекстПУ=Статус, EngText=Статус преобразователя, группа=ВНЕ ГРУПП
 (long)(&msCounter), //[3100h.01h], Название=Счётчик прерываний 1 кГц, ТекстПУ=Сч.прерыв.1 кГц, EngText=, группа=Счетчики
 (long)(&FastCounter), //[3100h.02h], Название=Счётчик прерываний 10 кГц, ТекстПУ=Сч.прерыв.10 кГц, EngText=, группа=Счетчики
@@ -2122,7 +2122,7 @@ Uint16 const CO2_OD_TBL2[] = {
 (Uint16)(0), (((Uint32)0)>>16),
 (Uint16)(0), (((Uint32)0)>>16), (Uint16)(0), (((Uint32)0)>>16),
 
-45741, 3446, 398,
+45741, 608, 398,
 (Uint16)(0), (((Uint32)0)>>16),
 (Uint16)(0), (((Uint32)0)>>16), (Uint16)(0), (((Uint32)0)>>16),
 

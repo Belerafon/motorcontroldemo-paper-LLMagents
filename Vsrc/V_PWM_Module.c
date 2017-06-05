@@ -741,7 +741,6 @@ void PWM_Module_SlowCalc(TPWM_Module *p) {
 	NT_PWM1->DBRED = NT_PWM0->DBRED;
 	NT_PWM2->DBFED = NT_PWM0->DBRED;
 	NT_PWM2->DBRED = NT_PWM0->DBRED;
-	DebugW1=NT_PWM0->DBRED;
 
 	if (p->MinGammaLimit < DEAD_BAND_MIN)
 		p->MinGammaLimit = GAMMA_LIMIT_MIN;

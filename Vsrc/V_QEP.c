@@ -93,12 +93,14 @@ void TposspeedEqep_init(TposspeedEqep *p) {
 
     //Инициализация портов ввода вывода
 	NT_GPIOG->ALTFUNCSET = (1 << 10) + (1 << 11) + (1 << 12);
+
+	//фильтры GPIO на пины датчика
 	/*
-	//фильтры GPIO
-	NT_COMMON_REG->GPIOQE3 = (1 << 4) + (1 << 5) + (1 << 6);
-	NT_COMMON_REG->GPIOQM3 = (1 << 4) + (1 << 5) + (1 << 6);
-	NT_COMMON_REG->GPIOQPEH = 0x02020202;
-		*/
+	NT_COMMON_REG->GPIOQE3 = (1 << 10) + (1 << 11) + (1 << 12);//Включение фильтров на пинах
+	NT_COMMON_REG->GPIOQM3 = (1 << 10) + (1 << 11) + (1 << 12);//Фильтр по 6ти отсчетам (1) или по трем (если 0)
+	NT_COMMON_REG->GPIOQPEH_bit.SPRDG = 2; //интервал фильтра в тактах проца
+	*/
+
 	NT_COMMON_REG->GPIOPCTLG_bit.PIN10 = 1;	//QEP1 A
 	NT_COMMON_REG->GPIOPCTLG_bit.PIN11 = 1;	//QEP1 B
 	if (p->Posspeed_CTL.bit.index_en)//если индексная метка есть
