@@ -1,0 +1,15 @@
+-C M4F
+--c++
+-o"D:\Eclipse_GCC_ARM_wks\motorcontroldemo\CodeMaster\Debug\Obj\"
+-l
+--debug
+-E10
+-W50
+-Ohs
+-Q43
+-I"C:\Program Files (x86)\CodeMasterPlusPlus-ARM\1_04_00\CMC-ARM\Inc\"
+-I"D:\Eclipse_GCC_ARM_wks\motorcontroldemo\Vinclude\"
+-I"D:\Eclipse_GCC_ARM_wks\motorcontroldemo\include\"
+-I"C:\Program Files (x86)\CodeMasterPlusPlus-ARM\1_04_00\CMC-ARM\Inc\cpp\"
+..\Vsrc\cood2.c
+..\Vsrc\DRV8301_SPI.c

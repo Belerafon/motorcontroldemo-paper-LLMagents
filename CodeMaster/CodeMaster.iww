@@ -1,0 +1,19 @@
+[Workspace]
+LastVendor=48
+Descr=
+Flags=0
+ActiveProject=MotorControlDemo
+Project_0=.\MotorControlDemo.ipp
+
+[Session]
+DNS_6686=0
+DNS_6980=0
+DNS_14054=0
+GlobalToolbarLayout=1
+UpdateCheckCount=0
+ForceCodeLoad=2
+DNS_14050=0
+DNS_6941=0
+DNS_14051=0
+Debugger=1
+ShellLanguage=Russian|Русский язык

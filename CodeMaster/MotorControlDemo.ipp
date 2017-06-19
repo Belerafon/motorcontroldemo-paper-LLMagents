@@ -4,10 +4,10 @@ mFlags=525376
 expand=0
 idCode=4294967295
 cur_conf=Debug
-iniDir=D:\User\Aliamkin\Projects\VectorCard\VectorCARDServoInverter\MotorControlDemo\CodeMaster
+iniDir=D:\Eclipse_GCC_ARM_wks\motorcontroldemo\Vsrc
 procName=NIIET K1921BK01T
 last_built_chip=NIIET K1921BK01T
-UserName=Aliamkin
+UserName=max
 
 [[sp_node_0]
 mType=2
@@ -95,6 +95,7 @@ EXCEPTIONS=1
 RTTI=1
 STATIC=1
 OPTLEVEL=High by speed
+FLOAT_CONSTS=0
 
 [[[[LocOptions_Release]
 conf_name=Release
@@ -115,6 +116,7 @@ EXCEPTIONS=1
 RTTI=1
 STATIC=1
 OPTLEVEL=High (balanced)
+FLOAT_CONSTS=0
 
 [[[[sp_node_0]
 mType=1
@@ -150,6 +152,7 @@ EXCEPTIONS=1
 RTTI=1
 STATIC=1
 OPTLEVEL=High by speed
+FLOAT_CONSTS=0
 
 [[[[[LocOptions_Release]
 conf_name=Release
@@ -170,6 +173,7 @@ EXCEPTIONS=1
 RTTI=1
 STATIC=1
 OPTLEVEL=High (balanced)
+FLOAT_CONSTS=0
 
 [[[[sp_node_1]
 mType=1
@@ -205,6 +209,7 @@ EXCEPTIONS=1
 RTTI=1
 STATIC=1
 OPTLEVEL=High by speed
+FLOAT_CONSTS=0
 
 [[[[[LocOptions_Release]
 conf_name=Release
@@ -225,6 +230,7 @@ EXCEPTIONS=1
 RTTI=1
 STATIC=1
 OPTLEVEL=High (balanced)
+FLOAT_CONSTS=0
 
 [[[[sp_node_2]
 mType=1
@@ -260,6 +266,7 @@ EXCEPTIONS=1
 RTTI=1
 STATIC=1
 OPTLEVEL=High by speed
+FLOAT_CONSTS=0
 
 [[[[[LocOptions_Release]
 conf_name=Release
@@ -280,6 +287,7 @@ EXCEPTIONS=1
 RTTI=1
 STATIC=1
 OPTLEVEL=High (balanced)
+FLOAT_CONSTS=0
 
 [[[[sp_node_3]
 mType=1
@@ -315,6 +323,7 @@ EXCEPTIONS=1
 RTTI=1
 STATIC=1
 OPTLEVEL=High by speed
+FLOAT_CONSTS=0
 
 [[[[[LocOptions_Release]
 conf_name=Release
@@ -335,6 +344,7 @@ EXCEPTIONS=1
 RTTI=1
 STATIC=1
 OPTLEVEL=High (balanced)
+FLOAT_CONSTS=0
 
 [[[[sp_node_4]
 mType=1
@@ -370,6 +380,7 @@ EXCEPTIONS=1
 RTTI=1
 STATIC=1
 OPTLEVEL=High by speed
+FLOAT_CONSTS=0
 
 [[[[[LocOptions_Release]
 conf_name=Release
@@ -390,6 +401,7 @@ EXCEPTIONS=1
 RTTI=1
 STATIC=1
 OPTLEVEL=High (balanced)
+FLOAT_CONSTS=0
 
 [[[[sp_node_5]
 mType=1
@@ -425,6 +437,7 @@ EXCEPTIONS=1
 RTTI=1
 STATIC=1
 OPTLEVEL=High by speed
+FLOAT_CONSTS=0
 
 [[[[[LocOptions_Release]
 conf_name=Release
@@ -445,6 +458,7 @@ EXCEPTIONS=1
 RTTI=1
 STATIC=1
 OPTLEVEL=High (balanced)
+FLOAT_CONSTS=0
 
 [[[[sp_node_6]
 mType=1
@@ -480,6 +494,7 @@ EXCEPTIONS=1
 RTTI=1
 STATIC=1
 OPTLEVEL=High by speed
+FLOAT_CONSTS=0
 
 [[[[[LocOptions_Release]
 conf_name=Release
@@ -500,6 +515,7 @@ EXCEPTIONS=1
 RTTI=1
 STATIC=1
 OPTLEVEL=High (balanced)
+FLOAT_CONSTS=0
 
 [[[[sp_node_7]
 mType=1
@@ -535,6 +551,7 @@ EXCEPTIONS=1
 RTTI=1
 STATIC=1
 OPTLEVEL=High by speed
+FLOAT_CONSTS=0
 
 [[[[[LocOptions_Release]
 conf_name=Release
@@ -555,6 +572,7 @@ EXCEPTIONS=1
 RTTI=1
 STATIC=1
 OPTLEVEL=High (balanced)
+FLOAT_CONSTS=0
 
 [[[[sp_node_8]
 mType=1
@@ -590,6 +608,7 @@ EXCEPTIONS=1
 RTTI=1
 STATIC=1
 OPTLEVEL=High by speed
+FLOAT_CONSTS=0
 
 [[[[[LocOptions_Release]
 conf_name=Release
@@ -610,6 +629,7 @@ EXCEPTIONS=1
 RTTI=1
 STATIC=1
 OPTLEVEL=High (balanced)
+FLOAT_CONSTS=0
 
 [[[[sp_node_9]
 mType=1
@@ -645,6 +665,7 @@ EXCEPTIONS=1
 RTTI=1
 STATIC=1
 OPTLEVEL=High by speed
+FLOAT_CONSTS=0
 
 [[[[[LocOptions_Release]
 conf_name=Release
@@ -665,6 +686,7 @@ EXCEPTIONS=1
 RTTI=1
 STATIC=1
 OPTLEVEL=High (balanced)
+FLOAT_CONSTS=0
 
 [[[[sp_node_10]
 mType=1
@@ -700,6 +722,7 @@ EXCEPTIONS=1
 RTTI=1
 STATIC=1
 OPTLEVEL=High by speed
+FLOAT_CONSTS=0
 
 [[[[[LocOptions_Release]
 conf_name=Release
@@ -720,6 +743,7 @@ EXCEPTIONS=1
 RTTI=1
 STATIC=1
 OPTLEVEL=High (balanced)
+FLOAT_CONSTS=0
 
 [[[[sp_node_11]
 mType=1
@@ -755,6 +779,7 @@ EXCEPTIONS=1
 RTTI=1
 STATIC=1
 OPTLEVEL=High by speed
+FLOAT_CONSTS=0
 
 [[[[[LocOptions_Release]
 conf_name=Release
@@ -775,6 +800,7 @@ EXCEPTIONS=1
 RTTI=1
 STATIC=1
 OPTLEVEL=High (balanced)
+FLOAT_CONSTS=0
 
 [[[[sp_node_12]
 mType=1
@@ -810,6 +836,7 @@ EXCEPTIONS=1
 RTTI=1
 STATIC=1
 OPTLEVEL=High by speed
+FLOAT_CONSTS=0
 
 [[[[[LocOptions_Release]
 conf_name=Release
@@ -830,6 +857,7 @@ EXCEPTIONS=1
 RTTI=1
 STATIC=1
 OPTLEVEL=High (balanced)
+FLOAT_CONSTS=0
 
 [[[[sp_node_13]
 mType=1
@@ -865,6 +893,7 @@ EXCEPTIONS=1
 RTTI=1
 STATIC=1
 OPTLEVEL=High by speed
+FLOAT_CONSTS=0
 
 [[[[[LocOptions_Release]
 conf_name=Release
@@ -885,6 +914,7 @@ EXCEPTIONS=1
 RTTI=1
 STATIC=1
 OPTLEVEL=High (balanced)
+FLOAT_CONSTS=0
 
 [[[[sp_node_14]
 mType=1
@@ -920,6 +950,7 @@ EXCEPTIONS=1
 RTTI=1
 STATIC=1
 OPTLEVEL=High by speed
+FLOAT_CONSTS=0
 
 [[[[[LocOptions_Release]
 conf_name=Release
@@ -940,6 +971,7 @@ EXCEPTIONS=1
 RTTI=1
 STATIC=1
 OPTLEVEL=High (balanced)
+FLOAT_CONSTS=0
 
 [[[[sp_node_15]
 mType=1
@@ -975,6 +1007,7 @@ EXCEPTIONS=1
 RTTI=1
 STATIC=1
 OPTLEVEL=High by speed
+FLOAT_CONSTS=0
 
 [[[[[LocOptions_Release]
 conf_name=Release
@@ -995,6 +1028,7 @@ EXCEPTIONS=1
 RTTI=1
 STATIC=1
 OPTLEVEL=High (balanced)
+FLOAT_CONSTS=0
 
 [[[[sp_node_16]
 mType=1
@@ -1030,6 +1064,7 @@ EXCEPTIONS=1
 RTTI=1
 STATIC=1
 OPTLEVEL=High by speed
+FLOAT_CONSTS=0
 
 [[[[[LocOptions_Release]
 conf_name=Release
@@ -1050,6 +1085,7 @@ EXCEPTIONS=1
 RTTI=1
 STATIC=1
 OPTLEVEL=High (balanced)
+FLOAT_CONSTS=0
 
 [[[[sp_node_17]
 mType=1
@@ -1085,6 +1121,7 @@ EXCEPTIONS=1
 RTTI=1
 STATIC=1
 OPTLEVEL=High by speed
+FLOAT_CONSTS=0
 
 [[[[[LocOptions_Release]
 conf_name=Release
@@ -1105,6 +1142,7 @@ EXCEPTIONS=1
 RTTI=1
 STATIC=1
 OPTLEVEL=High (balanced)
+FLOAT_CONSTS=0
 
 [[[[sp_node_18]
 mType=1
@@ -1140,6 +1178,7 @@ EXCEPTIONS=1
 RTTI=1
 STATIC=1
 OPTLEVEL=High by speed
+FLOAT_CONSTS=0
 
 [[[[[LocOptions_Release]
 conf_name=Release
@@ -1160,6 +1199,7 @@ EXCEPTIONS=1
 RTTI=1
 STATIC=1
 OPTLEVEL=High (balanced)
+FLOAT_CONSTS=0
 
 [[[[sp_node_19]
 mType=1
@@ -1195,6 +1235,7 @@ EXCEPTIONS=1
 RTTI=1
 STATIC=1
 OPTLEVEL=High by speed
+FLOAT_CONSTS=0
 
 [[[[[LocOptions_Release]
 conf_name=Release
@@ -1215,6 +1256,7 @@ EXCEPTIONS=1
 RTTI=1
 STATIC=1
 OPTLEVEL=High (balanced)
+FLOAT_CONSTS=0
 
 [[[[sp_node_20]
 mType=1
@@ -1250,6 +1292,7 @@ EXCEPTIONS=1
 RTTI=1
 STATIC=1
 OPTLEVEL=High by speed
+FLOAT_CONSTS=0
 
 [[[[[LocOptions_Release]
 conf_name=Release
@@ -1270,6 +1313,7 @@ EXCEPTIONS=1
 RTTI=1
 STATIC=1
 OPTLEVEL=High (balanced)
+FLOAT_CONSTS=0
 
 [[[[sp_node_21]
 mType=1
@@ -1305,6 +1349,7 @@ EXCEPTIONS=1
 RTTI=1
 STATIC=1
 OPTLEVEL=High by speed
+FLOAT_CONSTS=0
 
 [[[[[LocOptions_Release]
 conf_name=Release
@@ -1325,6 +1370,7 @@ EXCEPTIONS=1
 RTTI=1
 STATIC=1
 OPTLEVEL=High (balanced)
+FLOAT_CONSTS=0
 
 [[[[sp_node_22]
 mType=1
@@ -1360,6 +1406,7 @@ EXCEPTIONS=1
 RTTI=1
 STATIC=1
 OPTLEVEL=High by speed
+FLOAT_CONSTS=0
 
 [[[[[LocOptions_Release]
 conf_name=Release
@@ -1380,6 +1427,7 @@ EXCEPTIONS=1
 RTTI=1
 STATIC=1
 OPTLEVEL=High (balanced)
+FLOAT_CONSTS=0
 
 [[[[sp_node_23]
 mType=1
@@ -1415,6 +1463,7 @@ EXCEPTIONS=1
 RTTI=1
 STATIC=1
 OPTLEVEL=High by speed
+FLOAT_CONSTS=0
 
 [[[[[LocOptions_Release]
 conf_name=Release
@@ -1435,6 +1484,7 @@ EXCEPTIONS=1
 RTTI=1
 STATIC=1
 OPTLEVEL=High (balanced)
+FLOAT_CONSTS=0
 
 [[[[sp_node_24]
 mType=1
@@ -1470,6 +1520,7 @@ EXCEPTIONS=1
 RTTI=1
 STATIC=1
 OPTLEVEL=High by speed
+FLOAT_CONSTS=0
 
 [[[[[LocOptions_Release]
 conf_name=Release
@@ -1490,6 +1541,7 @@ EXCEPTIONS=1
 RTTI=1
 STATIC=1
 OPTLEVEL=High (balanced)
+FLOAT_CONSTS=0
 
 [[[[sp_node_25]
 mType=1
@@ -1525,6 +1577,7 @@ EXCEPTIONS=1
 RTTI=1
 STATIC=1
 OPTLEVEL=High by speed
+FLOAT_CONSTS=0
 
 [[[[[LocOptions_Release]
 conf_name=Release
@@ -1545,6 +1598,7 @@ EXCEPTIONS=1
 RTTI=1
 STATIC=1
 OPTLEVEL=High (balanced)
+FLOAT_CONSTS=0
 
 [[[[sp_node_26]
 mType=1
@@ -1580,6 +1634,7 @@ EXCEPTIONS=1
 RTTI=1
 STATIC=1
 OPTLEVEL=High by speed
+FLOAT_CONSTS=0
 
 [[[[[LocOptions_Release]
 conf_name=Release
@@ -1600,6 +1655,7 @@ EXCEPTIONS=1
 RTTI=1
 STATIC=1
 OPTLEVEL=High (balanced)
+FLOAT_CONSTS=0
 
 [[[[sp_node_27]
 mType=1
@@ -1635,6 +1691,7 @@ EXCEPTIONS=1
 RTTI=1
 STATIC=1
 OPTLEVEL=High by speed
+FLOAT_CONSTS=0
 
 [[[[[LocOptions_Release]
 conf_name=Release
@@ -1655,6 +1712,7 @@ EXCEPTIONS=1
 RTTI=1
 STATIC=1
 OPTLEVEL=High (balanced)
+FLOAT_CONSTS=0
 
 [[[[sp_node_28]
 mType=1
@@ -1690,6 +1748,7 @@ EXCEPTIONS=1
 RTTI=1
 STATIC=1
 OPTLEVEL=High by speed
+FLOAT_CONSTS=0
 
 [[[[[LocOptions_Release]
 conf_name=Release
@@ -1710,6 +1769,7 @@ EXCEPTIONS=1
 RTTI=1
 STATIC=1
 OPTLEVEL=High (balanced)
+FLOAT_CONSTS=0
 
 [[[[sp_node_29]
 mType=1
@@ -1745,6 +1805,7 @@ EXCEPTIONS=1
 RTTI=1
 STATIC=1
 OPTLEVEL=High by speed
+FLOAT_CONSTS=0
 
 [[[[[LocOptions_Release]
 conf_name=Release
@@ -1765,6 +1826,7 @@ EXCEPTIONS=1
 RTTI=1
 STATIC=1
 OPTLEVEL=High (balanced)
+FLOAT_CONSTS=0
 
 [[[[sp_node_30]
 mType=1
@@ -1800,6 +1862,7 @@ EXCEPTIONS=1
 RTTI=1
 STATIC=1
 OPTLEVEL=High by speed
+FLOAT_CONSTS=0
 
 [[[[[LocOptions_Release]
 conf_name=Release
@@ -1820,6 +1883,7 @@ EXCEPTIONS=1
 RTTI=1
 STATIC=1
 OPTLEVEL=High (balanced)
+FLOAT_CONSTS=0
 
 [[[[sp_node_31]
 mType=1
@@ -1855,6 +1919,7 @@ EXCEPTIONS=1
 RTTI=1
 STATIC=1
 OPTLEVEL=High by speed
+FLOAT_CONSTS=0
 
 [[[[[LocOptions_Release]
 conf_name=Release
@@ -1875,6 +1940,7 @@ EXCEPTIONS=1
 RTTI=1
 STATIC=1
 OPTLEVEL=High (balanced)
+FLOAT_CONSTS=0
 
 [[[[sp_node_32]
 mType=1
@@ -1910,6 +1976,7 @@ EXCEPTIONS=1
 RTTI=1
 STATIC=1
 OPTLEVEL=High by speed
+FLOAT_CONSTS=0
 
 [[[[[LocOptions_Release]
 conf_name=Release
@@ -1930,6 +1997,7 @@ EXCEPTIONS=1
 RTTI=1
 STATIC=1
 OPTLEVEL=High (balanced)
+FLOAT_CONSTS=0
 
 [[[[sp_node_33]
 mType=1
@@ -1965,6 +2033,7 @@ EXCEPTIONS=1
 RTTI=1
 STATIC=1
 OPTLEVEL=High by speed
+FLOAT_CONSTS=0
 
 [[[[[LocOptions_Release]
 conf_name=Release
@@ -1985,6 +2054,7 @@ EXCEPTIONS=1
 RTTI=1
 STATIC=1
 OPTLEVEL=High (balanced)
+FLOAT_CONSTS=0
 
 [[[[sp_node_34]
 mType=1
@@ -2020,6 +2090,7 @@ EXCEPTIONS=1
 RTTI=1
 STATIC=1
 OPTLEVEL=High by speed
+FLOAT_CONSTS=0
 
 [[[[[LocOptions_Release]
 conf_name=Release
@@ -2040,6 +2111,7 @@ EXCEPTIONS=1
 RTTI=1
 STATIC=1
 OPTLEVEL=High (balanced)
+FLOAT_CONSTS=0
 
 [[[[sp_node_35]
 mType=1
@@ -2075,6 +2147,7 @@ EXCEPTIONS=1
 RTTI=1
 STATIC=1
 OPTLEVEL=High by speed
+FLOAT_CONSTS=0
 
 [[[[[LocOptions_Release]
 conf_name=Release
@@ -2095,6 +2168,7 @@ EXCEPTIONS=1
 RTTI=1
 STATIC=1
 OPTLEVEL=High (balanced)
+FLOAT_CONSTS=0
 
 [[[[sp_node_36]
 mType=1
@@ -2130,6 +2204,7 @@ EXCEPTIONS=1
 RTTI=1
 STATIC=1
 OPTLEVEL=High by speed
+FLOAT_CONSTS=0
 
 [[[[[LocOptions_Release]
 conf_name=Release
@@ -2150,6 +2225,7 @@ EXCEPTIONS=1
 RTTI=1
 STATIC=1
 OPTLEVEL=High (balanced)
+FLOAT_CONSTS=0
 
 [[[[sp_node_37]
 mType=1
@@ -2185,6 +2261,7 @@ EXCEPTIONS=1
 RTTI=1
 STATIC=1
 OPTLEVEL=High by speed
+FLOAT_CONSTS=0
 
 [[[[[LocOptions_Release]
 conf_name=Release
@@ -2205,6 +2282,7 @@ EXCEPTIONS=1
 RTTI=1
 STATIC=1
 OPTLEVEL=High (balanced)
+FLOAT_CONSTS=0
 
 [[[[sp_node_38]
 mType=1
@@ -2240,6 +2318,7 @@ EXCEPTIONS=1
 RTTI=1
 STATIC=1
 OPTLEVEL=High by speed
+FLOAT_CONSTS=0
 
 [[[[[LocOptions_Release]
 conf_name=Release
@@ -2260,6 +2339,121 @@ EXCEPTIONS=1
 RTTI=1
 STATIC=1
 OPTLEVEL=High (balanced)
+FLOAT_CONSTS=0
+
+[[[[sp_node_39]
+mType=1
+mLevel=1
+descr=
+mFlags=1024
+idCode=4294967295
+file_name=X_CANFlashProgDataM4F.c
+mName=..\Vsrc\X_CANFlashProgDataM4F.c
+mFat=0
+mErr=0
+mWrn=0
+mRem=0
+mOther=0
+ExtraOpt=
+
+[[[[[LocOptions_Debug]
+conf_name=Debug
+c_type=1
+OVERPRJ=0
+ANSI=0
+CHAR=0
+ENUM=0
+INLINE=0
+LIST=1
+DEBUG=1
+PREP=0
+ASM=0
+INC=0
+LANGUAGE=C++
+EMBEDED_C=0
+EXCEPTIONS=1
+RTTI=1
+STATIC=1
+OPTLEVEL=High by speed
+FLOAT_CONSTS=0
+
+[[[[[LocOptions_Release]
+conf_name=Release
+c_type=1
+OVERPRJ=0
+ANSI=0
+CHAR=0
+ENUM=0
+INLINE=0
+LIST=1
+DEBUG=0
+PREP=0
+ASM=0
+INC=1
+LANGUAGE=C++
+EMBEDED_C=0
+EXCEPTIONS=1
+RTTI=1
+STATIC=1
+OPTLEVEL=High (balanced)
+FLOAT_CONSTS=0
+
+[[[[sp_node_40]
+mType=1
+mLevel=1
+descr=
+mFlags=1024
+idCode=4294967295
+file_name=X_CANFlashProgStarterM4F.c
+mName=..\Vsrc\X_CANFlashProgStarterM4F.c
+mFat=0
+mErr=0
+mWrn=0
+mRem=0
+mOther=0
+ExtraOpt=
+
+[[[[[LocOptions_Debug]
+conf_name=Debug
+c_type=1
+OVERPRJ=0
+ANSI=0
+CHAR=0
+ENUM=0
+INLINE=0
+LIST=1
+DEBUG=1
+PREP=0
+ASM=0
+INC=0
+LANGUAGE=C++
+EMBEDED_C=0
+EXCEPTIONS=1
+RTTI=1
+STATIC=1
+OPTLEVEL=High by speed
+FLOAT_CONSTS=0
+
+[[[[[LocOptions_Release]
+conf_name=Release
+c_type=1
+OVERPRJ=0
+ANSI=0
+CHAR=0
+ENUM=0
+INLINE=0
+LIST=1
+DEBUG=0
+PREP=0
+ASM=0
+INC=1
+LANGUAGE=C++
+EMBEDED_C=0
+EXCEPTIONS=1
+RTTI=1
+STATIC=1
+OPTLEVEL=High (balanced)
+FLOAT_CONSTS=0
 
 [[[sp_node_1]
 mType=1
@@ -2288,6 +2482,7 @@ EXCEPTIONS=1
 RTTI=1
 STATIC=1
 OPTLEVEL=High by speed
+FLOAT_CONSTS=0
 
 [[[[LocOptions_Release]
 conf_name=Release
@@ -2308,6 +2503,7 @@ EXCEPTIONS=1
 RTTI=1
 STATIC=1
 OPTLEVEL=High (balanced)
+FLOAT_CONSTS=0
 
 [[[[sp_node_0]
 mType=1
@@ -2343,6 +2539,7 @@ EXCEPTIONS=1
 RTTI=1
 STATIC=1
 OPTLEVEL=High by speed
+FLOAT_CONSTS=0
 
 [[[[[LocOptions_Release]
 conf_name=Release
@@ -2363,6 +2560,7 @@ EXCEPTIONS=1
 RTTI=1
 STATIC=1
 OPTLEVEL=High (balanced)
+FLOAT_CONSTS=0
 
 [[sp_node_2]
 mType=5
@@ -2583,10 +2781,10 @@ W=336
 H=141
 
 [[[31552]
-X=706
-Y=383
+X=589
+Y=367
 W=402
-H=291
+H=292
 
 [[[30499]
 X=740
@@ -2890,18 +3088,18 @@ Toolbar=0
 LOGFONT=F5FFFFFF0000000000000000000000009001000000000001000000004D6963726F736F66742053616E73205365726966000000000000000000000000
 LFPointSize=8
 
+[[WinDescr32_34]
+Id=34
+Toolbar=0
+HorizontalGrid=0
+LOGFONT=F3FFFFFF000000000000000000000000000000000000000100000200436F6E736F6C6173000000000000000000000000000000000000000000000000
+LFPointSize=10
+
 [[WinDescr32_12]
 Id=12
 Toolbar=0
 VerticalGrid=1
 HorizontalGrid=1
-LOGFONT=F3FFFFFF000000000000000000000000000000000000000100000200436F6E736F6C6173000000000000000000000000000000000000000000000000
-LFPointSize=10
-
-[[WinDescr32_34]
-Id=34
-Toolbar=0
-HorizontalGrid=0
 LOGFONT=F3FFFFFF000000000000000000000000000000000000000100000200436F6E736F6C6173000000000000000000000000000000000000000000000000
 LFPointSize=10
 
@@ -2943,39 +3141,6 @@ LFPointSize=10
 
 [[Window32_0]
 Base=1
-Id=3
-ActiveSplitter=0
-Style=1443823616
-ExStyle=320
-WINDOWPLACEMENT=2C0000000000000001000000FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF5D01000030000000DD02000047010000
-Title=1
-
-[[Window32_0_Pane_0]
-Id=3
-Splitter=0
-W=368
-H=255
-CaretX=0
-CaretY=0
-Toolbar=5
-StartItem=0
-StartHItem=0
-NumItems=4294967295
-NumHItems=0
-CurItem=0
-LOGFONT=F3FFFFFF000000000000000000000000000000000000000100000200436F6E736F6C6173000000000000000000000000000000000000000000000000
-LFPointSize=10
-VerticalGrid=0
-HorizontalGrid=0
-TabTitle=Дисассемблер
-Symbols=1
-DisplaySourceLines=1
-RightPanePresent=0
-HorizontalScrollBar=0
-StartAddr=0
-
-[[Window32_1]
-Base=1
 Id=21665
 ActiveSplitter=0
 Style=1443823616
@@ -2983,11 +3148,11 @@ ExStyle=320
 WINDOWPLACEMENT=2C0000000000000001000000FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF00000000FAFFFFFF40010000D5020000
 Title=1
 
-[[Window32_1_Pane_0]
+[[Window32_0_Pane_0]
 Id=21665
 Splitter=0
-W=304
-H=661
+W=314
+H=666
 CaretX=4294967295
 CaretY=4294967295
 Toolbar=5
@@ -3013,13 +3178,16 @@ State=96
 [[[[0_1_]
 State=96
 
+[[[[[0_1_0_]
+State=96
+
 [[[[[0_1_1_]
 State=96
 
 [[[[0_2_]
 State=96
 
-[[Window32_1_Pane_1]
+[[Window32_0_Pane_1]
 Id=21665
 Splitter=1
 W=0
@@ -3043,6 +3211,39 @@ TreeHPos=0
 [[[0_]
 State=98
 
+[[Window32_1]
+Base=1
+Id=3
+ActiveSplitter=0
+Style=1443823616
+ExStyle=320
+WINDOWPLACEMENT=2C0000000000000001000000FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF5D01000030000000DD02000047010000
+Title=1
+
+[[Window32_1_Pane_0]
+Id=3
+Splitter=0
+W=378
+H=260
+CaretX=8
+CaretY=12
+Toolbar=5
+StartItem=0
+StartHItem=0
+NumItems=4294967295
+NumHItems=0
+CurItem=0
+LOGFONT=F3FFFFFF000000000000000000000000000000000000000100000200436F6E736F6C6173000000000000000000000000000000000000000000000000
+LFPointSize=10
+VerticalGrid=0
+HorizontalGrid=0
+TabTitle=Дисассемблер
+Symbols=1
+DisplaySourceLines=1
+RightPanePresent=0
+HorizontalScrollBar=0
+StartAddr=0
+
 [[Window32_2]
 Base=1
 Id=21565
@@ -3055,14 +3256,14 @@ Title=1
 [[Window32_2_Pane_0]
 Id=21565
 Splitter=0
-W=1259
-H=391
+W=1269
+H=396
 CaretX=0
 CaretY=0
 Toolbar=5
 StartItem=0
 StartHItem=0
-NumItems=273
+NumItems=128
 NumHItems=512
 CurItem=0
 LOGFONT=F3FFFFFF000000000000000000000000000000000000000100000200436F6E736F6C6173000000000000000000000000000000000000000000000000
@@ -3075,16 +3276,16 @@ NoWarnings=0
 [[Window32_2_Pane_1]
 Id=21565
 Splitter=1
-W=1259
-H=391
+W=1269
+H=396
 CaretX=0
 CaretY=0
 Toolbar=5
-StartItem=609
+StartItem=446
 StartHItem=0
-NumItems=634
+NumItems=471
 NumHItems=512
-CurItem=609
+CurItem=446
 LOGFONT=F3FFFFFF000000000000000000000000000000000000000100000200436F6E736F6C6173000000000000000000000000000000000000000000000000
 LFPointSize=10
 VerticalGrid=0
@@ -3379,19 +3580,25 @@ State=0
 State=0
 
 [[[Info]
-OS=Windows 7 x64 [ver. 6.1.1], build = 7601, SP: 'Service Pack 1']
-Arch=Intel
-NumProcessors=4
-ActiveProcessors=0xF
-Resolution=1814x1058
-Project=CMP-ARM
-ProjectVersion=1.03.00
-Component=CMP-ARM
-ComponentVersion=1.10.50
-ExeDateTime=Apr 29, 2016  17:40:56
 Protection=0
-UserName=Aliamkin
-CommandLine=
+L00=CMP-ARM version:   1.10.56
+L01=CodeMaster++[ARM] version:   1.04.00
+L02=CMP-ARM.exe date:  Jun 15, 2017  17:05:58
+L03=OS:                     Windows 10 x64 [ver. 10.0.0], build = 14393, SP: '']
+L04=Screen:                 1580x1027 (1680x1050), DPI: 96
+L05=System Language Id:     1049
+L06=User Language Id:       1049
+L07=System Default CP:      1251  (ANSI - кириллица)
+L08=RAM Total/Free:         8,094/1,649 MB
+L09=Number of processors:   4
+L10=Battery:                Yes, 100%, AC: On
+L11=User:                   max
+L12=IsUserAnAdmin:          No
+L13=UAC virtualization:     Yes
+L14=Process Id:             1276 = 4FC
+L15=Main thread Id:         16508 = 407C
+L16=Startup dir:            "C:\Program Files (x86)\CodeMasterPlusPlus-ARM\1_04_00"
+L17=Command line:           ""C:\Program Files (x86)\CodeMasterPlusPlus-ARM\1_04_00\CMP-ARM.exe" "
 
 [[Custom_tools_pars]
 
@@ -3444,6 +3651,7 @@ STATIC=1
 INLINE=0
 CHAR=0
 ENUM=0
+FLOAT_CONSTS=0
 INC=0
 LIST=1
 DEBUG=1
@@ -3621,6 +3829,7 @@ STATIC=1
 INLINE=0
 CHAR=0
 ENUM=0
+FLOAT_CONSTS=0
 INC=1
 LIST=1
 DEBUG=0
