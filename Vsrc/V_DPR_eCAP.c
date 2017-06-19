@@ -266,9 +266,6 @@ void DPReCAP_AngleCalc(TDPReCAP* p) {
 	Angle=_IQ(model.hallSensorInterpAdd * (1/(2*MOTOR_MODEL_PI)));//приращение угла дл€ интерпол€тора уже предпосчитано в модели двигател€ с учетом дискретности
 #endif
 
-	if (p->DPReCAP_FLG1.bit.Dir == 1)
-		Angle = _IQ(1.0/6.0) - Angle;
-
 	if (p->DPReCAP_FLG1.bit.Dir) //пользовательска€ инверси€ направлени€
 		Angle = -Angle + _IQ(1.0/6);
 
