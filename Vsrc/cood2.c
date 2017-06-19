@@ -1,6 +1,6 @@
 //Файл: cood.c
 //Профиль: D:\Eclipse_GCC_ARM_wks\motorcontroldemo\cood.xml
-//Дата созданиЯ: 01.06.2017 17:29:24
+//Дата созданиЯ: 19.06.2017 19:09:37
 //Пользователь: default
 #include "DSP.h"
 #include "main.h"
@@ -626,7 +626,7 @@ long const CO2_OD_TBL3[] = { (long)(&co2_vars.co_deviceType), //[1000h.00h], Наз
 (long)(&DPReCAP.CAP_WrongEdgeCnt1), //[5155h.0Ch], Название=Ошибка 1 канала, ТекстПУ=Ошиб_1_к., EngText=, группа=ДПР-Холл
 (long)(&DPReCAP.CAP_WrongEdgeCnt2), //[5155h.0Dh], Название=Ошибка 2 канала, ТекстПУ=Ошиб_2_к., EngText=, группа=ДПР-Холл
 (long)(&DPReCAP.CAP_WrongEdgeCnt3), //[5155h.0Eh], Название=Ошибка 3 канала, ТекстПУ=Ошиб_3_к., EngText=, группа=ДПР-Холл
-(long)(&DPReCAP.DPReCAP_FLG1.all), //[5155h.0Fh], Название=Направление вращения, ТекстПУ=НапрВр, EngText=Направление вращения, группа=ДПР-Холл
+(long)(&DPReCAP.UserDirection), //[5155h.0Fh], Название=Направление вращения, ТекстПУ=НапрВр, EngText=Направление вращения, группа=ДПР-Холл
 (long)(&DPReCAP.WrongCodeCounterLimitPerSec), //[5155h.10h], Название=Макс.число ошибок ДПР, ТекстПУ=Макс.ош.ДПР, EngText=, группа=ДПР-Холл
 (long)(&DPReCAP.WrongCodeCounter), //[5155h.11h], Название=Кол-во ошибок неверной последовательности , ТекстПУ=Ошибки последоват., EngText=, группа=ДПР-Холл
 (long)(&CounterCAP_isr), //[5155h.12h], Название=Счётчик прерываний по приему, ТекстПУ=Счёт.Rx.Int., EngText=, группа=ДПР-Холл

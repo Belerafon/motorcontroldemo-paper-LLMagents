@@ -110,6 +110,7 @@ Uint16 rsvd:
 	int16 ErrorLevelTimeCounterBig;
 	int16 ErrorLevelTimeCounter;
 	int16 SensorFault;
+	Uint16 UserDirection;//пользовательская инверсия направления
 
 	float SimulatorOmega2IQ_factor;
 
@@ -143,7 +144,7 @@ Uint16 rsvd:
 	0,0,0,\
 	0,0,0,0,0,\
     0,0,0,0,\
-	0,0,0,0,0,\
+	0,0,0,0,0,0,\
 	0,0,\
     &DPReCAP_Init, \
     &DPReCAP_AngleCalc, \

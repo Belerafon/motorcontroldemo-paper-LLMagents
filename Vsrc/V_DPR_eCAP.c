@@ -113,7 +113,9 @@ void DPReCAP_Init(TDPReCAP* p) {
 	NT_CAP2->ECEINT_bit.CEVT1 = 1;            	// 2 events = interrupt
 
 	p->TsNom = ((CORE_CLK / (drv_params.speed_nom * drv_params.p)) * 15*2);
-	p->TsNomMilsec = (100000 / (drv_params.speed_nom * drv_params.p));
+	//коэффициент для пересчета времени между метками в мс в скорость в об/мин
+	//60 - об/мин, 1000 мс в секунде, 6 меток на эл. оборот
+	p->TsNomMilsec = (60.0*1000 / (6*drv_params.speed_nom * drv_params.p));
 
 #if (!defined(HW_VECTORCARD_SIMULATOR)) && (!defined(HW_NIIET_BOARD_SIMULATOR))
 	//CAP0, CAP1, CAP2 - E4, E5, E6, соответственно
@@ -153,13 +155,24 @@ void DPReCAP_Angle6Calc(TDPReCAP* p) {
 		p->HallCode = model.hallSensor;
 
 #else
-	if (NT_GPIOE->DATA & (1 << 4))
-		p->HallCode = p->HallCode + 1;
-	if (NT_GPIOE->DATA & (1 << 5))
-		p->HallCode = p->HallCode + 2;
-	if (NT_GPIOE->DATA & (1 << 6))
-		p->HallCode = p->HallCode + 4;
+	if (p->UserDirection == 0) {
+		if (NT_GPIOE->DATA & (1 << 4))
+			p->HallCode = p->HallCode + 1;
+		if (NT_GPIOE->DATA & (1 << 5))
+			p->HallCode = p->HallCode + 2;
+		if (NT_GPIOE->DATA & (1 << 6))
+			p->HallCode = p->HallCode + 4;
+	} else {
+		if (NT_GPIOE->DATA & (1 << 4))
+			p->HallCode = p->HallCode + 4;
+		if (NT_GPIOE->DATA & (1 << 5))
+			p->HallCode = p->HallCode + 2;
+		if (NT_GPIOE->DATA & (1 << 6))
+			p->HallCode = p->HallCode + 1;
+	}
 #endif
+
+
 
 
 	switch (p->HallCode) {
@@ -266,7 +279,10 @@ void DPReCAP_AngleCalc(TDPReCAP* p) {
 	Angle=_IQ(model.hallSensorInterpAdd * (1/(2*MOTOR_MODEL_PI)));//приращение угла для интерполятора уже предпосчитано в модели двигателя с учетом дискретности
 #endif
 
-	if (p->DPReCAP_FLG1.bit.Dir) //пользовательская инверсия направления
+	if (p->DPReCAP_FLG1.bit.Dir == 1)
+		Angle = _IQ(1.0/6.0) - Angle;
+
+	if (p->UserDirection) //пользовательская инверсия направления
 		Angle = -Angle + _IQ(1.0/6);
 
 	p->Angle = Angle6 + Angle + p->AngleOffset;
@@ -294,7 +310,6 @@ void DPReCAP_SpeedCalc(TDPReCAP* p) {
 #if (!defined(HW_VECTORCARD_SIMULATOR)) && (!defined(HW_NIIET_BOARD_SIMULATOR))
 
 	_iq speed;
-	p->milsec++;
 
 	// Считаем скорость в относительных единицах относительно номинальной.
 	if ((p->Tspeed != 0) && (p->DPReCAP_FLG1.bit.ZeroFLG == 0)) {
@@ -304,7 +319,7 @@ void DPReCAP_SpeedCalc(TDPReCAP* p) {
 			speed = _IQdiv(p->TsNom, p->Tspeed);
 		else
 			speed = -_IQdiv(p->TsNom, p->Tspeed);
-		if (p->DPReCAP_FLG1.bit.Dir) { //задается пользователем
+		if (p->UserDirection) { //задается пользователем
 			speed = -speed;
 		}
 	} else {
@@ -313,11 +328,6 @@ void DPReCAP_SpeedCalc(TDPReCAP* p) {
 
 	p->speed = speed;
 
-	if (p->milsecREF != p->milsecPrevREF) {
-		p->milsecFIX = p->milsecREF * 10; //к 10кГц
-		p->speedMinREF = _IQdiv(p->TsNomMilsec, p->milsecFIX);
-		p->milsecPrevREF = p->milsecREF;
-	}
 
 	DINT;//нужно для потокобезопасного обращения к переменной DPReCAP_FLG1 (чтобы не перетереть присваивание в прерывании захвата)
 	// Обнуление скорости, если привысили заданное время между двумя соседними событиями.
@@ -514,7 +524,7 @@ void DPReCAP_CAP3Calc(TDPReCAP* p) {
 }
 
 void DPReCAP_calc_10k(TDPReCAP* p) {
-	p->milsec++;
+
 	DINT;
 	if (p->CAPCalcEna1==0){
 		p->CAPCalcEna1=1;
@@ -557,6 +567,13 @@ void DPReCAP_SlowCalc(TDPReCAP* p) {
 
 
 void DPReCAP_msCalc(TDPReCAP* p) {
+	p->milsec++;//счетчик времени отсутствия меток
+	if (p->milsecREF != p->milsecPrevREF) {
+		p->milsecFIX=p->milsecREF;
+		p->speedMinREF = _IQdiv(p->TsNomMilsec, p->milsecFIX);
+		p->milsecPrevREF = p->milsecREF;
+	}
+
 	p->ErrorLevelTimeCounterBig++;
 	if (p->ErrorLevelTimeCounterBig > 10000) {
 		p->ErrorLevel = p->ErrorLevelCounter;

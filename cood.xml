@@ -4344,7 +4344,7 @@
 			<defaults default="0" min="" max=""/>
 			<description description=""/>
 		</obj_5155h.0Eh>
-		<obj_5155h.0Fh DataType="Editable" name="Направление вращения" addr="DPReCAP.DPReCAP_FLG1.all" group="25" groupName="ДПР-Холл" fullgroup="20" callback="">
+		<obj_5155h.0Fh DataType="Editable" name="Направление вращения" addr="DPReCAP.UserDirection" group="25" groupName="ДПР-Холл" fullgroup="20" callback="">
 			<format Type="Bit" Visualization="Bin" Length="1" StartBit="2"/>
 			<text text="НапрВр" textID="487"/>
 			<defaults default="0" min="" max=""/>

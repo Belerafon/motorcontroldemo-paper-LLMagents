@@ -23,6 +23,9 @@
 
 #ifndef VINCLUDE_DSP_H_
 #define VINCLUDE_DSP_H_
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 // Выбор частоты кварца. Влияет на делители при настройке тактирования
 //#define QUARTZ_10MHZ
@@ -85,5 +88,8 @@ void K1921VK01T_GPIO_SafeInit();
 
 
 
+#ifdef __cplusplus
+}
+#endif
 
 #endif /* VINCLUDE_DSP_H_ */
