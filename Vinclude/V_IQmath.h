@@ -322,6 +322,11 @@ inline int32 _IQabs(int32 x){
 	return x;
 }
 
+#ifdef __CMCPPARM__
+#define fabs(x) fabsf(x)
+#endif /* __CMCPPARM__ */
+
+
 
 #ifdef __cplusplus
 }

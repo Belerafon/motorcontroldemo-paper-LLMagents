@@ -2697,19 +2697,19 @@ W=531
 H=506
 
 [[[30504]
-X=720
+X=550
 Y=308
 W=480
 H=411
 
 [[[24067]
-X=733
+X=563
 Y=452
 W=453
 H=122
 
 [[[24215]
-X=755
+X=585
 Y=386
 W=410
 H=255
@@ -2721,7 +2721,7 @@ W=419
 H=417
 
 [[[32361]
-X=723
+X=553
 Y=254
 W=473
 H=518
@@ -2769,10 +2769,10 @@ W=360
 H=287
 
 [[[22271]
-X=454
-Y=270
+X=337
+Y=254
 W=905
-H=517
+H=518
 
 [[[23142]
 X=792
@@ -2835,10 +2835,10 @@ W=557
 H=462
 
 [[[24104]
-X=778
-Y=376
+X=608
+Y=371
 W=363
-H=280
+H=284
 
 [[[23126]
 X=685
@@ -2941,6 +2941,12 @@ X=744
 Y=429
 W=431
 H=169
+
+[[[23154]
+X=622
+Y=418
+W=335
+H=190
 
 [[Color_54A1512B]
 InvUsed=1
@@ -3145,14 +3151,14 @@ Id=21665
 ActiveSplitter=0
 Style=1443823616
 ExStyle=320
-WINDOWPLACEMENT=2C0000000000000001000000FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF00000000FAFFFFFF40010000D5020000
+WINDOWPLACEMENT=2C0000000000000001000000FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF00000000000000004001000077020000
 Title=1
 
 [[Window32_0_Pane_0]
 Id=21665
 Splitter=0
 W=314
-H=666
+H=566
 CaretX=4294967295
 CaretY=4294967295
 Toolbar=5
@@ -3166,7 +3172,7 @@ LFPointSize=9
 VerticalGrid=0
 HorizontalGrid=0
 TabTitle=Workspace|Проекты
-TreeVPos=0
+TreeVPos=15
 TreeHPos=0
 
 [[[0_]
@@ -3213,20 +3219,178 @@ State=98
 
 [[Window32_1]
 Base=1
+Id=21565
+ActiveSplitter=1
+Style=1443823616
+ExStyle=320
+WINDOWPLACEMENT=2C00000000000000010000000000000000000000F9FFFFFFF9FFFFFF000000007E020000FB040000BD030000
+Title=1
+
+[[Window32_1_Pane_0]
+Id=21565
+Splitter=0
+W=562
+H=124
+CaretX=0
+CaretY=0
+Toolbar=5
+StartItem=0
+StartHItem=0
+NumItems=0
+NumHItems=512
+CurItem=0
+LOGFONT=F3FFFFFF000000000000000000000000000000000000000100000200436F6E736F6C6173000000000000000000000000000000000000000000000000
+LFPointSize=10
+VerticalGrid=0
+HorizontalGrid=0
+TabTitle=Ошибки/Предупреждения
+NoWarnings=0
+
+[[Window32_1_Pane_1]
+Id=21565
+Splitter=1
+W=1269
+H=274
+CaretX=0
+CaretY=0
+Toolbar=5
+StartItem=0
+StartHItem=0
+NumItems=1
+NumHItems=0
+CurItem=0
+LOGFONT=F3FFFFFF000000000000000000000000000000000000000100000200436F6E736F6C6173000000000000000000000000000000000000000000000000
+LFPointSize=10
+VerticalGrid=0
+HorizontalGrid=0
+TabTitle=Журнал компиляции
+NoWarnings=0
+
+[[Window32_2]
+Base=1
+Id=27
+ActiveSplitter=2
+Style=1443823616
+ExStyle=320
+WINDOWPLACEMENT=2C0000000000000001000000FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF8401000083000000EE03000000020000
+Title=1
+
+[[Window32_2_Pane_0]
+Id=27
+Splitter=0
+W=489
+H=319
+CaretX=0
+CaretY=246
+Toolbar=5
+StartItem=245
+StartHItem=0
+NumItems=0
+NumHItems=0
+CurItem=0
+LOGFONT=F3FFFFFF000000000000000000000000000000000000000100000200436F6E736F6C6173000000000000000000000000000000000000000000000000
+LFPointSize=10
+VerticalGrid=0
+HorizontalGrid=0
+TabTitle=SM_Sys.c
+FileName=..\Vsrc\SM_Sys.c
+InsertMode=1
+BlockStat=0
+BlockLine1=2895128576
+BlockLine2=436283397
+BlockCol1=516
+BlockCol2=12544
+LineNumbersOn=0
+
+[[Window32_2_Pane_1]
+Id=527
+Splitter=0
+W=116
+H=319
+CaretX=4294967295
+CaretY=4294967295
+Toolbar=5
+StartItem=0
+StartHItem=0
+NumItems=0
+NumHItems=512
+CurItem=0
+LOGFONT=F3FFFFFF000000000000000000000000000000000000000100000200436F6E736F6C6173000000000000000000000000000000000000000000000000
+LFPointSize=10
+VerticalGrid=0
+HorizontalGrid=0
+TabTitle=SM_Sys.c
+
+[[Window32_2_Pane_2]
+Id=27
+Splitter=1
+W=0
+H=0
+CaretX=0
+CaretY=229
+Toolbar=5
+StartItem=228
+StartHItem=0
+NumItems=0
+NumHItems=0
+CurItem=0
+LOGFONT=F3FFFFFF000000000000000000000000000000000000000100000200436F6E736F6C6173000000000000000000000000000000000000000000000000
+LFPointSize=10
+VerticalGrid=0
+HorizontalGrid=0
+TabTitle=K1921VK01T_init.c
+FileName=..\src\K1921VK01T_init.c
+InsertMode=1
+BlockStat=0
+BlockLine1=2898494464
+BlockLine2=10245
+BlockCol1=262656
+BlockCol2=176384
+LineNumbersOn=0
+
+[[Window32_2_Pane_3]
+Id=27
+Splitter=2
+W=612
+H=319
+CaretX=0
+CaretY=481
+Toolbar=5
+StartItem=480
+StartHItem=0
+NumItems=6687
+NumHItems=32760
+CurItem=0
+LOGFONT=F3FFFFFF000000000000000000000000000000000000000100000200436F6E736F6C6173000000000000000000000000000000000000000000000000
+LFPointSize=10
+VerticalGrid=0
+HorizontalGrid=0
+TabTitle=CANOpen_drv.c
+FileName=D:\CANOpen_and_FlashProgFiles\K1921BK01T\Vsrc\CANOpen_drv.c
+InsertMode=1
+BlockStat=0
+BlockLine1=8192
+BlockLine2=1024
+BlockCol1=38912
+BlockCol2=4294902016
+LineNumbersOn=0
+
+[[Window32_3]
+Base=1
 Id=3
 ActiveSplitter=0
 Style=1443823616
 ExStyle=320
-WINDOWPLACEMENT=2C0000000000000001000000FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF5D01000030000000DD02000047010000
+WINDOWPLACEMENT=2C0000000000000001000000FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF4001000000000000B602000091010000
 Title=1
 
-[[Window32_1_Pane_0]
+[[Window32_3_Pane_0]
 Id=3
 Splitter=0
-W=378
-H=260
+W=368
+H=382
 CaretX=8
-CaretY=12
+CaretY=0
 Toolbar=5
 StartItem=0
 StartHItem=0
@@ -3242,56 +3406,7 @@ Symbols=1
 DisplaySourceLines=1
 RightPanePresent=0
 HorizontalScrollBar=0
-StartAddr=0
-
-[[Window32_2]
-Base=1
-Id=21565
-ActiveSplitter=0
-Style=1443823616
-ExStyle=320
-WINDOWPLACEMENT=2C00000000000000010000000000000000000000F9FFFFFFF9FFFFFF21000000E60100001C0500009F030000
-Title=1
-
-[[Window32_2_Pane_0]
-Id=21565
-Splitter=0
-W=1269
-H=396
-CaretX=0
-CaretY=0
-Toolbar=5
-StartItem=0
-StartHItem=0
-NumItems=128
-NumHItems=512
-CurItem=0
-LOGFONT=F3FFFFFF000000000000000000000000000000000000000100000200436F6E736F6C6173000000000000000000000000000000000000000000000000
-LFPointSize=10
-VerticalGrid=0
-HorizontalGrid=0
-TabTitle=Ошибки/Предупреждения
-NoWarnings=0
-
-[[Window32_2_Pane_1]
-Id=21565
-Splitter=1
-W=1269
-H=396
-CaretX=0
-CaretY=0
-Toolbar=5
-StartItem=446
-StartHItem=0
-NumItems=471
-NumHItems=512
-CurItem=446
-LOGFONT=F3FFFFFF000000000000000000000000000000000000000100000200436F6E736F6C6173000000000000000000000000000000000000000000000000
-LFPointSize=10
-VerticalGrid=0
-HorizontalGrid=0
-TabTitle=Журнал компиляции
-NoWarnings=0
+StartAddr=4676
 
 [Config_Debug]
 ConfName=Debug
@@ -3538,7 +3653,7 @@ NT32M4F1 Remap Pin Number=0
 NT32M4F1 Remap External Mem Function=0
 
 [[[Perf. Analyzer]
-LastProgram=
+LastProgram=D:\Eclipse_GCC_ARM_wks\motorcontroldemo\CodeMaster\Debug\Exe\MotorControlDemo.ELF
 
 [[[ARM Complex Breaks]
 BreakCondition=0
@@ -3589,14 +3704,14 @@ L04=Screen:                 1580x1027 (1680x1050), DPI: 96
 L05=System Language Id:     1049
 L06=User Language Id:       1049
 L07=System Default CP:      1251  (ANSI - кириллица)
-L08=RAM Total/Free:         8,094/1,649 MB
+L08=RAM Total/Free:         8,094/1,473 MB
 L09=Number of processors:   4
-L10=Battery:                Yes, 100%, AC: On
+L10=Battery:                Yes, 98%, AC: On
 L11=User:                   max
 L12=IsUserAnAdmin:          No
 L13=UAC virtualization:     Yes
-L14=Process Id:             1276 = 4FC
-L15=Main thread Id:         16508 = 407C
+L14=Process Id:             4152 = 1038
+L15=Main thread Id:         18372 = 47C4
 L16=Startup dir:            "C:\Program Files (x86)\CodeMasterPlusPlus-ARM\1_04_00"
 L17=Command line:           ""C:\Program Files (x86)\CodeMasterPlusPlus-ARM\1_04_00\CMP-ARM.exe" "
 
@@ -3698,7 +3813,7 @@ USETOOLIW=1
 c_type=4
 MAP=1
 GCHECK=0
-INTEL=0
+INTEL=1
 MCEF=1
 CLIB=1
 NOFLINLIB=0

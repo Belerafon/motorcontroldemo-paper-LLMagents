@@ -25,9 +25,14 @@
 #include "stdlib.h"
 #include "math.h"
 
-#ifdef __GNUC__
+#if defined (__GNUC__) || defined (CMCPPARM)
+#if defined (__GNUC__)
 // Count leading zeros, using processor-specific instruction if available.
 #define clz(x) __builtin_clzl(x)
+#endif
+#if defined (CMCPPARM) //CodeMaster
+#define clz(x) __CLZ(x)
+#endif
 #else
 static uint8_t clz(uint32_t x) {
 	uint8_t result = 0;
@@ -66,11 +71,7 @@ int32 _IQ24div(int32 a, int32 b) {
 //! В CodeMaster нет функции sqrtf, поэтому для него вызывается sqrt. Для GCC вызывать
 //! sqrt нельзя, т.к. тогда он попытается работать с double, а не float.
 int32 _IQ24sqrt(int32 number) {
-#if defined (__GNUC__)
 	return _IQ(sqrtf((float)_IQtoF(number)));
-#elif defined (__CMCPPARM__)
-	return _IQ(sqrt((float)_IQtoF(number)));
-#endif
 }
 
 
