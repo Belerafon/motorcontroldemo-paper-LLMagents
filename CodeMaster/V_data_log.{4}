@@ -1,7 +1,6 @@
 -C M4F
 --c++
 -o"D:\Eclipse_GCC_ARM_wks\motorcontroldemo\CodeMaster\Debug\Obj\"
---fsingle_precision_constant
 -l
 --debug
 -E10

@@ -102,11 +102,6 @@ void dlog_background_analizer(TDataLog *p) {
 //! предполагается для управления логгером из других модулей
 //! проверяет mode_reset на валидность и обнуляет счетчики
 //! \memberof TDataLog
-#ifdef __cplusplus
-#pragma CODE_SECTION("secureRamFuncs")
-#else
-#pragma CODE_SECTION(dlog_set_mode,"secureRamFuncs");
-#endif
 
 void dlog_set_mode(Uint16 mode_reset, TDataLog *p) {
 	if (mode_reset > 3)
@@ -143,11 +138,7 @@ void dlog_set_mode(Uint16 mode_reset, TDataLog *p) {
 //! т.е. непосредственно осциллографированием. ”меет записывать данные
 //! в массивы по-разному в зависимости от выбранного режима работы осциллографа
 //! \memberof TDataLog
-#ifdef __cplusplus
-#pragma CODE_SECTION("secureRamFuncs")
-#else
-#pragma CODE_SECTION(data_log_update,"secureRamFuncs");
-#endif
+
 void data_log_update(TDataLog *p) {
 //везде испоьзуется p-> , а не p* - так быстрее
 

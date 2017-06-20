@@ -362,6 +362,7 @@ void DPReCAP_SpeedCalc(TDPReCAP* p) {
 void DPReCAP_CAP1Calc(TDPReCAP* p) {
 	Uint32 Timer=0;
 	if (p->cnt >= 2) {
+		p->cnt=2;
 		p->HelpCalc(p);
 
 		// В зависимости от номера предудыщего CAP определяем направление вращения.
@@ -417,8 +418,8 @@ void DPReCAP_CAP1Calc(TDPReCAP* p) {
 //! \memberof TDPReCAP
 void DPReCAP_CAP2Calc(TDPReCAP* p) {
 	Uint32 Timer=0;
-
 	if (p->cnt >= 2) {
+		p->cnt=2;
 		p->HelpCalc(p);
 
 		// В зависимости от номера предудыщего CAP определяем направление вращения.
@@ -476,6 +477,7 @@ void DPReCAP_CAP2Calc(TDPReCAP* p) {
 void DPReCAP_CAP3Calc(TDPReCAP* p) {
 	Uint32 Timer;
 	if (p->cnt >= 2) {
+		p->cnt=2;
 		p->HelpCalc(p);
 
 		// В зависимости от номера предудыщего CAP определяем направление вращения.

@@ -1,6 +1,6 @@
 [Project]
 descr=
-mFlags=525376
+mFlags=590912
 expand=0
 idCode=4294967295
 cur_conf=Debug
@@ -95,7 +95,7 @@ EXCEPTIONS=1
 RTTI=1
 STATIC=1
 OPTLEVEL=High by speed
-FLOAT_CONSTS=0
+FLOAT_CONSTS=1
 
 [[[[LocOptions_Release]
 conf_name=Release
@@ -152,7 +152,7 @@ EXCEPTIONS=1
 RTTI=1
 STATIC=1
 OPTLEVEL=High by speed
-FLOAT_CONSTS=0
+FLOAT_CONSTS=1
 
 [[[[[LocOptions_Release]
 conf_name=Release
@@ -209,7 +209,7 @@ EXCEPTIONS=1
 RTTI=1
 STATIC=1
 OPTLEVEL=High by speed
-FLOAT_CONSTS=0
+FLOAT_CONSTS=1
 
 [[[[[LocOptions_Release]
 conf_name=Release
@@ -266,7 +266,7 @@ EXCEPTIONS=1
 RTTI=1
 STATIC=1
 OPTLEVEL=High by speed
-FLOAT_CONSTS=0
+FLOAT_CONSTS=1
 
 [[[[[LocOptions_Release]
 conf_name=Release
@@ -323,7 +323,7 @@ EXCEPTIONS=1
 RTTI=1
 STATIC=1
 OPTLEVEL=High by speed
-FLOAT_CONSTS=0
+FLOAT_CONSTS=1
 
 [[[[[LocOptions_Release]
 conf_name=Release
@@ -380,7 +380,7 @@ EXCEPTIONS=1
 RTTI=1
 STATIC=1
 OPTLEVEL=High by speed
-FLOAT_CONSTS=0
+FLOAT_CONSTS=1
 
 [[[[[LocOptions_Release]
 conf_name=Release
@@ -437,7 +437,7 @@ EXCEPTIONS=1
 RTTI=1
 STATIC=1
 OPTLEVEL=High by speed
-FLOAT_CONSTS=0
+FLOAT_CONSTS=1
 
 [[[[[LocOptions_Release]
 conf_name=Release
@@ -494,7 +494,7 @@ EXCEPTIONS=1
 RTTI=1
 STATIC=1
 OPTLEVEL=High by speed
-FLOAT_CONSTS=0
+FLOAT_CONSTS=1
 
 [[[[[LocOptions_Release]
 conf_name=Release
@@ -551,7 +551,7 @@ EXCEPTIONS=1
 RTTI=1
 STATIC=1
 OPTLEVEL=High by speed
-FLOAT_CONSTS=0
+FLOAT_CONSTS=1
 
 [[[[[LocOptions_Release]
 conf_name=Release
@@ -608,7 +608,7 @@ EXCEPTIONS=1
 RTTI=1
 STATIC=1
 OPTLEVEL=High by speed
-FLOAT_CONSTS=0
+FLOAT_CONSTS=1
 
 [[[[[LocOptions_Release]
 conf_name=Release
@@ -665,7 +665,7 @@ EXCEPTIONS=1
 RTTI=1
 STATIC=1
 OPTLEVEL=High by speed
-FLOAT_CONSTS=0
+FLOAT_CONSTS=1
 
 [[[[[LocOptions_Release]
 conf_name=Release
@@ -722,7 +722,7 @@ EXCEPTIONS=1
 RTTI=1
 STATIC=1
 OPTLEVEL=High by speed
-FLOAT_CONSTS=0
+FLOAT_CONSTS=1
 
 [[[[[LocOptions_Release]
 conf_name=Release
@@ -779,7 +779,7 @@ EXCEPTIONS=1
 RTTI=1
 STATIC=1
 OPTLEVEL=High by speed
-FLOAT_CONSTS=0
+FLOAT_CONSTS=1
 
 [[[[[LocOptions_Release]
 conf_name=Release
@@ -836,7 +836,7 @@ EXCEPTIONS=1
 RTTI=1
 STATIC=1
 OPTLEVEL=High by speed
-FLOAT_CONSTS=0
+FLOAT_CONSTS=1
 
 [[[[[LocOptions_Release]
 conf_name=Release
@@ -893,7 +893,7 @@ EXCEPTIONS=1
 RTTI=1
 STATIC=1
 OPTLEVEL=High by speed
-FLOAT_CONSTS=0
+FLOAT_CONSTS=1
 
 [[[[[LocOptions_Release]
 conf_name=Release
@@ -950,7 +950,7 @@ EXCEPTIONS=1
 RTTI=1
 STATIC=1
 OPTLEVEL=High by speed
-FLOAT_CONSTS=0
+FLOAT_CONSTS=1
 
 [[[[[LocOptions_Release]
 conf_name=Release
@@ -1007,7 +1007,7 @@ EXCEPTIONS=1
 RTTI=1
 STATIC=1
 OPTLEVEL=High by speed
-FLOAT_CONSTS=0
+FLOAT_CONSTS=1
 
 [[[[[LocOptions_Release]
 conf_name=Release
@@ -1064,7 +1064,7 @@ EXCEPTIONS=1
 RTTI=1
 STATIC=1
 OPTLEVEL=High by speed
-FLOAT_CONSTS=0
+FLOAT_CONSTS=1
 
 [[[[[LocOptions_Release]
 conf_name=Release
@@ -1121,7 +1121,7 @@ EXCEPTIONS=1
 RTTI=1
 STATIC=1
 OPTLEVEL=High by speed
-FLOAT_CONSTS=0
+FLOAT_CONSTS=1
 
 [[[[[LocOptions_Release]
 conf_name=Release
@@ -1178,7 +1178,7 @@ EXCEPTIONS=1
 RTTI=1
 STATIC=1
 OPTLEVEL=High by speed
-FLOAT_CONSTS=0
+FLOAT_CONSTS=1
 
 [[[[[LocOptions_Release]
 conf_name=Release
@@ -1235,7 +1235,7 @@ EXCEPTIONS=1
 RTTI=1
 STATIC=1
 OPTLEVEL=High by speed
-FLOAT_CONSTS=0
+FLOAT_CONSTS=1
 
 [[[[[LocOptions_Release]
 conf_name=Release
@@ -1292,7 +1292,7 @@ EXCEPTIONS=1
 RTTI=1
 STATIC=1
 OPTLEVEL=High by speed
-FLOAT_CONSTS=0
+FLOAT_CONSTS=1
 
 [[[[[LocOptions_Release]
 conf_name=Release
@@ -1349,7 +1349,7 @@ EXCEPTIONS=1
 RTTI=1
 STATIC=1
 OPTLEVEL=High by speed
-FLOAT_CONSTS=0
+FLOAT_CONSTS=1
 
 [[[[[LocOptions_Release]
 conf_name=Release
@@ -1406,7 +1406,7 @@ EXCEPTIONS=1
 RTTI=1
 STATIC=1
 OPTLEVEL=High by speed
-FLOAT_CONSTS=0
+FLOAT_CONSTS=1
 
 [[[[[LocOptions_Release]
 conf_name=Release
@@ -1463,7 +1463,7 @@ EXCEPTIONS=1
 RTTI=1
 STATIC=1
 OPTLEVEL=High by speed
-FLOAT_CONSTS=0
+FLOAT_CONSTS=1
 
 [[[[[LocOptions_Release]
 conf_name=Release
@@ -1520,7 +1520,7 @@ EXCEPTIONS=1
 RTTI=1
 STATIC=1
 OPTLEVEL=High by speed
-FLOAT_CONSTS=0
+FLOAT_CONSTS=1
 
 [[[[[LocOptions_Release]
 conf_name=Release
@@ -1577,7 +1577,7 @@ EXCEPTIONS=1
 RTTI=1
 STATIC=1
 OPTLEVEL=High by speed
-FLOAT_CONSTS=0
+FLOAT_CONSTS=1
 
 [[[[[LocOptions_Release]
 conf_name=Release
@@ -1634,7 +1634,7 @@ EXCEPTIONS=1
 RTTI=1
 STATIC=1
 OPTLEVEL=High by speed
-FLOAT_CONSTS=0
+FLOAT_CONSTS=1
 
 [[[[[LocOptions_Release]
 conf_name=Release
@@ -1691,7 +1691,7 @@ EXCEPTIONS=1
 RTTI=1
 STATIC=1
 OPTLEVEL=High by speed
-FLOAT_CONSTS=0
+FLOAT_CONSTS=1
 
 [[[[[LocOptions_Release]
 conf_name=Release
@@ -1748,7 +1748,7 @@ EXCEPTIONS=1
 RTTI=1
 STATIC=1
 OPTLEVEL=High by speed
-FLOAT_CONSTS=0
+FLOAT_CONSTS=1
 
 [[[[[LocOptions_Release]
 conf_name=Release
@@ -1805,7 +1805,7 @@ EXCEPTIONS=1
 RTTI=1
 STATIC=1
 OPTLEVEL=High by speed
-FLOAT_CONSTS=0
+FLOAT_CONSTS=1
 
 [[[[[LocOptions_Release]
 conf_name=Release
@@ -1862,7 +1862,7 @@ EXCEPTIONS=1
 RTTI=1
 STATIC=1
 OPTLEVEL=High by speed
-FLOAT_CONSTS=0
+FLOAT_CONSTS=1
 
 [[[[[LocOptions_Release]
 conf_name=Release
@@ -1919,7 +1919,7 @@ EXCEPTIONS=1
 RTTI=1
 STATIC=1
 OPTLEVEL=High by speed
-FLOAT_CONSTS=0
+FLOAT_CONSTS=1
 
 [[[[[LocOptions_Release]
 conf_name=Release
@@ -1976,7 +1976,7 @@ EXCEPTIONS=1
 RTTI=1
 STATIC=1
 OPTLEVEL=High by speed
-FLOAT_CONSTS=0
+FLOAT_CONSTS=1
 
 [[[[[LocOptions_Release]
 conf_name=Release
@@ -2033,7 +2033,7 @@ EXCEPTIONS=1
 RTTI=1
 STATIC=1
 OPTLEVEL=High by speed
-FLOAT_CONSTS=0
+FLOAT_CONSTS=1
 
 [[[[[LocOptions_Release]
 conf_name=Release
@@ -2090,7 +2090,7 @@ EXCEPTIONS=1
 RTTI=1
 STATIC=1
 OPTLEVEL=High by speed
-FLOAT_CONSTS=0
+FLOAT_CONSTS=1
 
 [[[[[LocOptions_Release]
 conf_name=Release
@@ -2147,7 +2147,7 @@ EXCEPTIONS=1
 RTTI=1
 STATIC=1
 OPTLEVEL=High by speed
-FLOAT_CONSTS=0
+FLOAT_CONSTS=1
 
 [[[[[LocOptions_Release]
 conf_name=Release
@@ -2204,7 +2204,7 @@ EXCEPTIONS=1
 RTTI=1
 STATIC=1
 OPTLEVEL=High by speed
-FLOAT_CONSTS=0
+FLOAT_CONSTS=1
 
 [[[[[LocOptions_Release]
 conf_name=Release
@@ -2261,7 +2261,7 @@ EXCEPTIONS=1
 RTTI=1
 STATIC=1
 OPTLEVEL=High by speed
-FLOAT_CONSTS=0
+FLOAT_CONSTS=1
 
 [[[[[LocOptions_Release]
 conf_name=Release
@@ -2318,7 +2318,7 @@ EXCEPTIONS=1
 RTTI=1
 STATIC=1
 OPTLEVEL=High by speed
-FLOAT_CONSTS=0
+FLOAT_CONSTS=1
 
 [[[[[LocOptions_Release]
 conf_name=Release
@@ -2375,7 +2375,7 @@ EXCEPTIONS=1
 RTTI=1
 STATIC=1
 OPTLEVEL=High by speed
-FLOAT_CONSTS=0
+FLOAT_CONSTS=1
 
 [[[[[LocOptions_Release]
 conf_name=Release
@@ -2432,7 +2432,7 @@ EXCEPTIONS=1
 RTTI=1
 STATIC=1
 OPTLEVEL=High by speed
-FLOAT_CONSTS=0
+FLOAT_CONSTS=1
 
 [[[[[LocOptions_Release]
 conf_name=Release
@@ -2482,7 +2482,7 @@ EXCEPTIONS=1
 RTTI=1
 STATIC=1
 OPTLEVEL=High by speed
-FLOAT_CONSTS=0
+FLOAT_CONSTS=1
 
 [[[[LocOptions_Release]
 conf_name=Release
@@ -2539,7 +2539,7 @@ EXCEPTIONS=1
 RTTI=1
 STATIC=1
 OPTLEVEL=High by speed
-FLOAT_CONSTS=0
+FLOAT_CONSTS=1
 
 [[[[[LocOptions_Release]
 conf_name=Release
@@ -2647,7 +2647,7 @@ Scheme name=Default
 [[Main window32]
 Style=399441920
 ExStyle=262400
-WINDOWPLACEMENT=2C0000000200000003000000FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFA205000081000000910600007F030000
+WINDOWPLACEMENT=2C00000002000000030000009C82FFFF0083FFFFFFFFFFFFFFFFFFFFA205000081000000910600007F030000
 
 [[Desktop options]
 EditToolbar=0
@@ -2769,9 +2769,9 @@ W=360
 H=287
 
 [[[22271]
-X=337
+X=329
 Y=254
-W=905
+W=922
 H=518
 
 [[[23142]
@@ -3147,6 +3147,197 @@ LFPointSize=10
 
 [[Window32_0]
 Base=1
+Id=21565
+ActiveSplitter=1
+Style=1443823616
+ExStyle=320
+WINDOWPLACEMENT=2C00000000000000010000000000000000000000F9FFFFFFF9FFFFFF000000007E020000FB040000BD030000
+Title=1
+
+[[Window32_0_Pane_0]
+Id=21565
+Splitter=0
+W=562
+H=124
+CaretX=0
+CaretY=0
+Toolbar=5
+StartItem=0
+StartHItem=0
+NumItems=0
+NumHItems=512
+CurItem=0
+LOGFONT=F3FFFFFF000000000000000000000000000000000000000100000200436F6E736F6C6173000000000000000000000000000000000000000000000000
+LFPointSize=10
+VerticalGrid=0
+HorizontalGrid=0
+TabTitle=Ошибки/Предупреждения
+NoWarnings=0
+
+[[Window32_0_Pane_1]
+Id=21565
+Splitter=1
+W=1269
+H=274
+CaretX=0
+CaretY=0
+Toolbar=5
+StartItem=0
+StartHItem=0
+NumItems=1
+NumHItems=0
+CurItem=0
+LOGFONT=F3FFFFFF000000000000000000000000000000000000000100000200436F6E736F6C6173000000000000000000000000000000000000000000000000
+LFPointSize=10
+VerticalGrid=0
+HorizontalGrid=0
+TabTitle=Журнал компиляции
+NoWarnings=0
+
+[[Window32_1]
+Base=1
+Id=27
+ActiveSplitter=2
+Style=1443823616
+ExStyle=320
+WINDOWPLACEMENT=2C0000000000000001000000FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF8401000083000000EE03000000020000
+Title=1
+
+[[Window32_1_Pane_0]
+Id=27
+Splitter=0
+W=489
+H=319
+CaretX=0
+CaretY=491
+Toolbar=5
+StartItem=245
+StartHItem=0
+NumItems=0
+NumHItems=0
+CurItem=0
+LOGFONT=F3FFFFFF000000000000000000000000000000000000000100000200436F6E736F6C6173000000000000000000000000000000000000000000000000
+LFPointSize=10
+VerticalGrid=0
+HorizontalGrid=0
+TabTitle=SM_Sys.c
+FileName=..\Vsrc\SM_Sys.c
+InsertMode=1
+BlockStat=0
+BlockLine1=2895128576
+BlockLine2=436283397
+BlockCol1=516
+BlockCol2=12544
+LineNumbersOn=0
+
+[[Window32_1_Pane_1]
+Id=527
+Splitter=0
+W=116
+H=319
+CaretX=4294967295
+CaretY=4294967295
+Toolbar=5
+StartItem=0
+StartHItem=0
+NumItems=0
+NumHItems=512
+CurItem=0
+LOGFONT=F3FFFFFF000000000000000000000000000000000000000100000200436F6E736F6C6173000000000000000000000000000000000000000000000000
+LFPointSize=10
+VerticalGrid=0
+HorizontalGrid=0
+TabTitle=SM_Sys.c
+
+[[Window32_1_Pane_2]
+Id=27
+Splitter=1
+W=0
+H=0
+CaretX=0
+CaretY=457
+Toolbar=5
+StartItem=228
+StartHItem=0
+NumItems=0
+NumHItems=0
+CurItem=0
+LOGFONT=F3FFFFFF000000000000000000000000000000000000000100000200436F6E736F6C6173000000000000000000000000000000000000000000000000
+LFPointSize=10
+VerticalGrid=0
+HorizontalGrid=0
+TabTitle=K1921VK01T_init.c
+FileName=..\src\K1921VK01T_init.c
+InsertMode=1
+BlockStat=0
+BlockLine1=2898494464
+BlockLine2=10245
+BlockCol1=262656
+BlockCol2=176384
+LineNumbersOn=0
+
+[[Window32_1_Pane_3]
+Id=27
+Splitter=2
+W=612
+H=319
+CaretX=0
+CaretY=961
+Toolbar=5
+StartItem=480
+StartHItem=0
+NumItems=6687
+NumHItems=32760
+CurItem=0
+LOGFONT=F3FFFFFF000000000000000000000000000000000000000100000200436F6E736F6C6173000000000000000000000000000000000000000000000000
+LFPointSize=10
+VerticalGrid=0
+HorizontalGrid=0
+TabTitle=CANOpen_drv.c
+FileName=D:\CANOpen_and_FlashProgFiles\K1921BK01T\Vsrc\CANOpen_drv.c
+InsertMode=1
+BlockStat=0
+BlockLine1=8192
+BlockLine2=1024
+BlockCol1=38912
+BlockCol2=4294902016
+LineNumbersOn=0
+
+[[Window32_2]
+Base=1
+Id=3
+ActiveSplitter=0
+Style=1443823616
+ExStyle=320
+WINDOWPLACEMENT=2C0000000000000001000000FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF4001000000000000B602000091010000
+Title=1
+
+[[Window32_2_Pane_0]
+Id=3
+Splitter=0
+W=368
+H=382
+CaretX=0
+CaretY=22
+Toolbar=5
+StartItem=0
+StartHItem=0
+NumItems=4294967295
+NumHItems=0
+CurItem=0
+LOGFONT=F3FFFFFF000000000000000000000000000000000000000100000200436F6E736F6C6173000000000000000000000000000000000000000000000000
+LFPointSize=10
+VerticalGrid=0
+HorizontalGrid=0
+TabTitle=Дисассемблер
+Symbols=1
+DisplaySourceLines=1
+RightPanePresent=0
+HorizontalScrollBar=0
+StartAddr=4676
+
+[[Window32_3]
+Base=1
 Id=21665
 ActiveSplitter=0
 Style=1443823616
@@ -3154,7 +3345,7 @@ ExStyle=320
 WINDOWPLACEMENT=2C0000000000000001000000FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF00000000000000004001000077020000
 Title=1
 
-[[Window32_0_Pane_0]
+[[Window32_3_Pane_0]
 Id=21665
 Splitter=0
 W=314
@@ -3172,7 +3363,7 @@ LFPointSize=9
 VerticalGrid=0
 HorizontalGrid=0
 TabTitle=Workspace|Проекты
-TreeVPos=15
+TreeVPos=0
 TreeHPos=0
 
 [[[0_]
@@ -3193,7 +3384,7 @@ State=96
 [[[[0_2_]
 State=96
 
-[[Window32_0_Pane_1]
+[[Window32_3_Pane_1]
 Id=21665
 Splitter=1
 W=0
@@ -3217,201 +3408,10 @@ TreeHPos=0
 [[[0_]
 State=98
 
-[[Window32_1]
-Base=1
-Id=21565
-ActiveSplitter=1
-Style=1443823616
-ExStyle=320
-WINDOWPLACEMENT=2C00000000000000010000000000000000000000F9FFFFFFF9FFFFFF000000007E020000FB040000BD030000
-Title=1
-
-[[Window32_1_Pane_0]
-Id=21565
-Splitter=0
-W=562
-H=124
-CaretX=0
-CaretY=0
-Toolbar=5
-StartItem=0
-StartHItem=0
-NumItems=0
-NumHItems=512
-CurItem=0
-LOGFONT=F3FFFFFF000000000000000000000000000000000000000100000200436F6E736F6C6173000000000000000000000000000000000000000000000000
-LFPointSize=10
-VerticalGrid=0
-HorizontalGrid=0
-TabTitle=Ошибки/Предупреждения
-NoWarnings=0
-
-[[Window32_1_Pane_1]
-Id=21565
-Splitter=1
-W=1269
-H=274
-CaretX=0
-CaretY=0
-Toolbar=5
-StartItem=0
-StartHItem=0
-NumItems=1
-NumHItems=0
-CurItem=0
-LOGFONT=F3FFFFFF000000000000000000000000000000000000000100000200436F6E736F6C6173000000000000000000000000000000000000000000000000
-LFPointSize=10
-VerticalGrid=0
-HorizontalGrid=0
-TabTitle=Журнал компиляции
-NoWarnings=0
-
-[[Window32_2]
-Base=1
-Id=27
-ActiveSplitter=2
-Style=1443823616
-ExStyle=320
-WINDOWPLACEMENT=2C0000000000000001000000FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF8401000083000000EE03000000020000
-Title=1
-
-[[Window32_2_Pane_0]
-Id=27
-Splitter=0
-W=489
-H=319
-CaretX=0
-CaretY=246
-Toolbar=5
-StartItem=245
-StartHItem=0
-NumItems=0
-NumHItems=0
-CurItem=0
-LOGFONT=F3FFFFFF000000000000000000000000000000000000000100000200436F6E736F6C6173000000000000000000000000000000000000000000000000
-LFPointSize=10
-VerticalGrid=0
-HorizontalGrid=0
-TabTitle=SM_Sys.c
-FileName=..\Vsrc\SM_Sys.c
-InsertMode=1
-BlockStat=0
-BlockLine1=2895128576
-BlockLine2=436283397
-BlockCol1=516
-BlockCol2=12544
-LineNumbersOn=0
-
-[[Window32_2_Pane_1]
-Id=527
-Splitter=0
-W=116
-H=319
-CaretX=4294967295
-CaretY=4294967295
-Toolbar=5
-StartItem=0
-StartHItem=0
-NumItems=0
-NumHItems=512
-CurItem=0
-LOGFONT=F3FFFFFF000000000000000000000000000000000000000100000200436F6E736F6C6173000000000000000000000000000000000000000000000000
-LFPointSize=10
-VerticalGrid=0
-HorizontalGrid=0
-TabTitle=SM_Sys.c
-
-[[Window32_2_Pane_2]
-Id=27
-Splitter=1
-W=0
-H=0
-CaretX=0
-CaretY=229
-Toolbar=5
-StartItem=228
-StartHItem=0
-NumItems=0
-NumHItems=0
-CurItem=0
-LOGFONT=F3FFFFFF000000000000000000000000000000000000000100000200436F6E736F6C6173000000000000000000000000000000000000000000000000
-LFPointSize=10
-VerticalGrid=0
-HorizontalGrid=0
-TabTitle=K1921VK01T_init.c
-FileName=..\src\K1921VK01T_init.c
-InsertMode=1
-BlockStat=0
-BlockLine1=2898494464
-BlockLine2=10245
-BlockCol1=262656
-BlockCol2=176384
-LineNumbersOn=0
-
-[[Window32_2_Pane_3]
-Id=27
-Splitter=2
-W=612
-H=319
-CaretX=0
-CaretY=481
-Toolbar=5
-StartItem=480
-StartHItem=0
-NumItems=6687
-NumHItems=32760
-CurItem=0
-LOGFONT=F3FFFFFF000000000000000000000000000000000000000100000200436F6E736F6C6173000000000000000000000000000000000000000000000000
-LFPointSize=10
-VerticalGrid=0
-HorizontalGrid=0
-TabTitle=CANOpen_drv.c
-FileName=D:\CANOpen_and_FlashProgFiles\K1921BK01T\Vsrc\CANOpen_drv.c
-InsertMode=1
-BlockStat=0
-BlockLine1=8192
-BlockLine2=1024
-BlockCol1=38912
-BlockCol2=4294902016
-LineNumbersOn=0
-
-[[Window32_3]
-Base=1
-Id=3
-ActiveSplitter=0
-Style=1443823616
-ExStyle=320
-WINDOWPLACEMENT=2C0000000000000001000000FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF4001000000000000B602000091010000
-Title=1
-
-[[Window32_3_Pane_0]
-Id=3
-Splitter=0
-W=368
-H=382
-CaretX=8
-CaretY=0
-Toolbar=5
-StartItem=0
-StartHItem=0
-NumItems=4294967295
-NumHItems=0
-CurItem=0
-LOGFONT=F3FFFFFF000000000000000000000000000000000000000100000200436F6E736F6C6173000000000000000000000000000000000000000000000000
-LFPointSize=10
-VerticalGrid=0
-HorizontalGrid=0
-TabTitle=Дисассемблер
-Symbols=1
-DisplaySourceLines=1
-RightPanePresent=0
-HorizontalScrollBar=0
-StartAddr=4676
-
 [Config_Debug]
 ConfName=Debug
 Vendor=48
-Flags=4259840
+Flags=6356992
 DefaultLib=
 Model=0
 WinSize=0
@@ -3704,14 +3704,14 @@ L04=Screen:                 1580x1027 (1680x1050), DPI: 96
 L05=System Language Id:     1049
 L06=User Language Id:       1049
 L07=System Default CP:      1251  (ANSI - кириллица)
-L08=RAM Total/Free:         8,094/1,473 MB
+L08=RAM Total/Free:         8,094/1,500 MB
 L09=Number of processors:   4
 L10=Battery:                Yes, 98%, AC: On
 L11=User:                   max
 L12=IsUserAnAdmin:          No
 L13=UAC virtualization:     Yes
-L14=Process Id:             4152 = 1038
-L15=Main thread Id:         18372 = 47C4
+L14=Process Id:             11924 = 2E94
+L15=Main thread Id:         11632 = 2D70
 L16=Startup dir:            "C:\Program Files (x86)\CodeMasterPlusPlus-ARM\1_04_00"
 L17=Command line:           ""C:\Program Files (x86)\CodeMasterPlusPlus-ARM\1_04_00\CMP-ARM.exe" "
 
@@ -3766,7 +3766,7 @@ STATIC=1
 INLINE=0
 CHAR=0
 ENUM=0
-FLOAT_CONSTS=0
+FLOAT_CONSTS=1
 INC=0
 LIST=1
 DEBUG=1
