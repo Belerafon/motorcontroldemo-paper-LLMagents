@@ -2647,7 +2647,7 @@ Scheme name=Default
 [[Main window32]
 Style=399441920
 ExStyle=262400
-WINDOWPLACEMENT=2C00000002000000030000009C82FFFF0083FFFFFFFFFFFFFFFFFFFFA205000081000000910600007F030000
+WINDOWPLACEMENT=2C00000002000000030000009BFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFA205000081000000910600007F030000
 
 [[Desktop options]
 EditToolbar=0
@@ -2733,7 +2733,7 @@ W=366
 H=272
 
 [[[31678]
-X=710
+X=540
 Y=305
 W=500
 H=416
@@ -2769,9 +2769,9 @@ W=360
 H=287
 
 [[[22271]
-X=329
+X=337
 Y=254
-W=922
+W=905
 H=518
 
 [[[23142]
@@ -2853,10 +2853,10 @@ W=336
 H=174
 
 [[[7225]
-X=647
-Y=332
-W=520
-H=393
+X=517
+Y=314
+W=545
+H=399
 
 [[[31679]
 X=705
@@ -2871,7 +2871,7 @@ W=423
 H=201
 
 [[[32166]
-X=696
+X=526
 Y=327
 W=528
 H=372
@@ -3196,115 +3196,6 @@ NoWarnings=0
 
 [[Window32_1]
 Base=1
-Id=27
-ActiveSplitter=2
-Style=1443823616
-ExStyle=320
-WINDOWPLACEMENT=2C0000000000000001000000FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF8401000083000000EE03000000020000
-Title=1
-
-[[Window32_1_Pane_0]
-Id=27
-Splitter=0
-W=489
-H=319
-CaretX=0
-CaretY=491
-Toolbar=5
-StartItem=245
-StartHItem=0
-NumItems=0
-NumHItems=0
-CurItem=0
-LOGFONT=F3FFFFFF000000000000000000000000000000000000000100000200436F6E736F6C6173000000000000000000000000000000000000000000000000
-LFPointSize=10
-VerticalGrid=0
-HorizontalGrid=0
-TabTitle=SM_Sys.c
-FileName=..\Vsrc\SM_Sys.c
-InsertMode=1
-BlockStat=0
-BlockLine1=2895128576
-BlockLine2=436283397
-BlockCol1=516
-BlockCol2=12544
-LineNumbersOn=0
-
-[[Window32_1_Pane_1]
-Id=527
-Splitter=0
-W=116
-H=319
-CaretX=4294967295
-CaretY=4294967295
-Toolbar=5
-StartItem=0
-StartHItem=0
-NumItems=0
-NumHItems=512
-CurItem=0
-LOGFONT=F3FFFFFF000000000000000000000000000000000000000100000200436F6E736F6C6173000000000000000000000000000000000000000000000000
-LFPointSize=10
-VerticalGrid=0
-HorizontalGrid=0
-TabTitle=SM_Sys.c
-
-[[Window32_1_Pane_2]
-Id=27
-Splitter=1
-W=0
-H=0
-CaretX=0
-CaretY=457
-Toolbar=5
-StartItem=228
-StartHItem=0
-NumItems=0
-NumHItems=0
-CurItem=0
-LOGFONT=F3FFFFFF000000000000000000000000000000000000000100000200436F6E736F6C6173000000000000000000000000000000000000000000000000
-LFPointSize=10
-VerticalGrid=0
-HorizontalGrid=0
-TabTitle=K1921VK01T_init.c
-FileName=..\src\K1921VK01T_init.c
-InsertMode=1
-BlockStat=0
-BlockLine1=2898494464
-BlockLine2=10245
-BlockCol1=262656
-BlockCol2=176384
-LineNumbersOn=0
-
-[[Window32_1_Pane_3]
-Id=27
-Splitter=2
-W=612
-H=319
-CaretX=0
-CaretY=961
-Toolbar=5
-StartItem=480
-StartHItem=0
-NumItems=6687
-NumHItems=32760
-CurItem=0
-LOGFONT=F3FFFFFF000000000000000000000000000000000000000100000200436F6E736F6C6173000000000000000000000000000000000000000000000000
-LFPointSize=10
-VerticalGrid=0
-HorizontalGrid=0
-TabTitle=CANOpen_drv.c
-FileName=D:\CANOpen_and_FlashProgFiles\K1921BK01T\Vsrc\CANOpen_drv.c
-InsertMode=1
-BlockStat=0
-BlockLine1=8192
-BlockLine2=1024
-BlockCol1=38912
-BlockCol2=4294902016
-LineNumbersOn=0
-
-[[Window32_2]
-Base=1
 Id=3
 ActiveSplitter=0
 Style=1443823616
@@ -3312,7 +3203,7 @@ ExStyle=320
 WINDOWPLACEMENT=2C0000000000000001000000FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF4001000000000000B602000091010000
 Title=1
 
-[[Window32_2_Pane_0]
+[[Window32_1_Pane_0]
 Id=3
 Splitter=0
 W=368
@@ -3336,7 +3227,7 @@ RightPanePresent=0
 HorizontalScrollBar=0
 StartAddr=4676
 
-[[Window32_3]
+[[Window32_2]
 Base=1
 Id=21665
 ActiveSplitter=0
@@ -3345,7 +3236,7 @@ ExStyle=320
 WINDOWPLACEMENT=2C0000000000000001000000FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF00000000000000004001000077020000
 Title=1
 
-[[Window32_3_Pane_0]
+[[Window32_2_Pane_0]
 Id=21665
 Splitter=0
 W=314
@@ -3367,7 +3258,7 @@ TreeVPos=0
 TreeHPos=0
 
 [[[0_]
-State=114
+State=112
 
 [[[[0_0_]
 State=96
@@ -3378,13 +3269,16 @@ State=96
 [[[[[0_1_0_]
 State=96
 
+[[[[[[0_1_0_81_]
+State=2
+
 [[[[[0_1_1_]
 State=96
 
 [[[[0_2_]
 State=96
 
-[[Window32_3_Pane_1]
+[[Window32_2_Pane_1]
 Id=21665
 Splitter=1
 W=0
@@ -3407,6 +3301,115 @@ TreeHPos=0
 
 [[[0_]
 State=98
+
+[[Window32_3]
+Base=1
+Id=27
+ActiveSplitter=2
+Style=1443823616
+ExStyle=320
+WINDOWPLACEMENT=2C0000000000000001000000FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF8401000083000000EE03000000020000
+Title=1
+
+[[Window32_3_Pane_0]
+Id=27
+Splitter=0
+W=489
+H=319
+CaretX=24
+CaretY=263
+Toolbar=5
+StartItem=245
+StartHItem=0
+NumItems=0
+NumHItems=0
+CurItem=0
+LOGFONT=F3FFFFFF000000000000000000000000000000000000000100000200436F6E736F6C6173000000000000000000000000000000000000000000000000
+LFPointSize=10
+VerticalGrid=0
+HorizontalGrid=0
+TabTitle=SM_Sys.c
+FileName=..\Vsrc\SM_Sys.c
+InsertMode=1
+BlockStat=0
+BlockLine1=2895128576
+BlockLine2=436283397
+BlockCol1=516
+BlockCol2=12544
+LineNumbersOn=0
+
+[[Window32_3_Pane_1]
+Id=527
+Splitter=0
+W=116
+H=319
+CaretX=4294967295
+CaretY=4294967295
+Toolbar=5
+StartItem=0
+StartHItem=0
+NumItems=0
+NumHItems=512
+CurItem=0
+LOGFONT=F3FFFFFF000000000000000000000000000000000000000100000200436F6E736F6C6173000000000000000000000000000000000000000000000000
+LFPointSize=10
+VerticalGrid=0
+HorizontalGrid=0
+TabTitle=SM_Sys.c
+
+[[Window32_3_Pane_2]
+Id=27
+Splitter=1
+W=0
+H=0
+CaretX=5
+CaretY=38
+Toolbar=5
+StartItem=37
+StartHItem=0
+NumItems=0
+NumHItems=0
+CurItem=0
+LOGFONT=F3FFFFFF000000000000000000000000000000000000000100000200436F6E736F6C6173000000000000000000000000000000000000000000000000
+LFPointSize=10
+VerticalGrid=0
+HorizontalGrid=0
+TabTitle=K1921VK01T_init.c
+FileName=..\src\K1921VK01T_init.c
+InsertMode=1
+BlockStat=0
+BlockLine1=2898494464
+BlockLine2=10245
+BlockCol1=262656
+BlockCol2=176384
+LineNumbersOn=0
+
+[[Window32_3_Pane_3]
+Id=27
+Splitter=2
+W=612
+H=319
+CaretX=50
+CaretY=495
+Toolbar=5
+StartItem=480
+StartHItem=0
+NumItems=6687
+NumHItems=32760
+CurItem=0
+LOGFONT=F3FFFFFF000000000000000000000000000000000000000100000200436F6E736F6C6173000000000000000000000000000000000000000000000000
+LFPointSize=10
+VerticalGrid=0
+HorizontalGrid=0
+TabTitle=CANOpen_drv.c
+FileName=D:\CANOpen_and_FlashProgFiles\K1921BK01T\Vsrc\CANOpen_drv.c
+InsertMode=1
+BlockStat=0
+BlockLine1=8192
+BlockLine2=1024
+BlockCol1=38912
+BlockCol2=4294902016
+LineNumbersOn=0
 
 [Config_Debug]
 ConfName=Debug
@@ -3696,22 +3699,22 @@ State=0
 
 [[[Info]
 Protection=0
-L00=CMP-ARM version:   1.10.56
+L00=CMP-ARM version:   1.10.57
 L01=CodeMaster++[ARM] version:   1.04.00
-L02=CMP-ARM.exe date:  Jun 15, 2017  17:05:58
+L02=CMP-ARM.exe date:  Jun 21, 2017  13:57:04
 L03=OS:                     Windows 10 x64 [ver. 10.0.0], build = 14393, SP: '']
 L04=Screen:                 1580x1027 (1680x1050), DPI: 96
 L05=System Language Id:     1049
 L06=User Language Id:       1049
 L07=System Default CP:      1251  (ANSI - кириллица)
-L08=RAM Total/Free:         8,094/1,500 MB
+L08=RAM Total/Free:         8,094/1,495 MB
 L09=Number of processors:   4
-L10=Battery:                Yes, 98%, AC: On
+L10=Battery:                Yes, 87%, AC: On
 L11=User:                   max
 L12=IsUserAnAdmin:          No
 L13=UAC virtualization:     Yes
-L14=Process Id:             11924 = 2E94
-L15=Main thread Id:         11632 = 2D70
+L14=Process Id:             10532 = 2924
+L15=Main thread Id:         2348 = 92C
 L16=Startup dir:            "C:\Program Files (x86)\CodeMasterPlusPlus-ARM\1_04_00"
 L17=Command line:           ""C:\Program Files (x86)\CodeMasterPlusPlus-ARM\1_04_00\CMP-ARM.exe" "
 
