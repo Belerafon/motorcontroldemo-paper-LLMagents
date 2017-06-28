@@ -104,7 +104,7 @@ void PWM_Module_Init(TPWM_Module *p) {
 	NT_PWM0->AQCTLB_bit.CAU = NT_PWM0->AQCTLA_bit.CAU; //включаем при сравнении и инкрементиовании
 	NT_PWM0->AQCTLB_bit.CAD = NT_PWM0->AQCTLA_bit.CAD; //обнуляем при сравнении и декрементровании
 
-	NT_PWM0->AQSFRC_bit.RLDCSF = 3; //реагировать на софтвенную привязку ног без теневого регистра
+	NT_PWM0->AQSFRC_bit.RLDCSF = 0; //по ТО надо писать 0
 
 	// Setup Deadband
 	// DBRED = DBFED = 150 * Tм_мкс / 4
@@ -117,7 +117,6 @@ void PWM_Module_Init(TPWM_Module *p) {
 	NT_PWM0->ETSEL_bit.INTSEL = ET_DISABLE;        // Disable INT (шимовское)
 	NT_PWM0->ETSEL_bit.INTEN = 0;                  // Disable INT
 
-	NT_PWM0->TBCTL_bit.FREE_SOFT = 0;
 
 	//разрешаем TZ быть источником аппаратной аварии (one-shot)
 	//   NT_PWM0->TZSEL_bit.OSHT1 = TZ_ENABLE;
@@ -171,7 +170,7 @@ void PWM_Module_Init(TPWM_Module *p) {
 	NT_PWM1->AQCTLB_bit.CAU = NT_PWM0->AQCTLA_bit.CAU; //включаем при сравнении и инкрементиовании
 	NT_PWM1->AQCTLB_bit.CAD = NT_PWM0->AQCTLA_bit.CAD; //обнуляем при сравнении и декрементровании
 
-	NT_PWM1->AQSFRC_bit.RLDCSF = 3; //реагировать на софтвенную привязку ног без теневого регистра
+	NT_PWM1->AQSFRC_bit.RLDCSF = 0; //по ТО надо писать 0
 
 	// Active high complementary PWMs - Setup Deadband
 	NT_PWM1->DBRED = NT_PWM0->DBRED;
@@ -183,8 +182,6 @@ void PWM_Module_Init(TPWM_Module *p) {
 	// Interrupt where we will change the Compare Values
 	NT_PWM1->ETSEL_bit.INTSEL = ET_DISABLE;        // Disable INT
 	NT_PWM1->ETSEL_bit.INTEN = 0;                  // Disable INT
-
-	NT_PWM1->TBCTL_bit.FREE_SOFT = 0;
 
 	//разрешаем TZ быть источником аппаратной аварии (one-shot)
 	//   NT_PWM1->TZSEL_bit.OSHT1 = TZ_ENABLE;
@@ -234,7 +231,7 @@ void PWM_Module_Init(TPWM_Module *p) {
 	NT_PWM2->AQCTLB_bit.CAU = NT_PWM0->AQCTLA_bit.CAU; //включаем при сравнении и инкрементиовании
 	NT_PWM2->AQCTLB_bit.CAD = NT_PWM0->AQCTLA_bit.CAD; //обнуляем при сравнении и декрементровании
 
-	NT_PWM2->AQSFRC_bit.RLDCSF = 3; //реагировать на софтвенную привязку ног без теневого регистра
+	NT_PWM2->AQSFRC_bit.RLDCSF = 0; //по ТО надо писать 0
 
 	// Active high complementary PWMs - Setup Deadband
 	NT_PWM2->DBRED = NT_PWM0->DBRED;
@@ -252,7 +249,6 @@ void PWM_Module_Init(TPWM_Module *p) {
 	//  NT_PWM2->TZSEL_bit.OSHT2 = TZ_ENABLE;
 	//  NT_PWM2->TZSEL_bit.OSHT3 = TZ_ENABLE;
 
-	NT_PWM2->TBCTL_bit.FREE_SOFT = 0;
 
 	// Trip-Zone
 	NT_PWM2->TZCTL_bit.TZA = TZ_STATE;   // по событию "One-Shot Trip" переводим
@@ -279,7 +275,6 @@ void PWM_Module_Init(TPWM_Module *p) {
 	NT_PWM3->ETSEL_bit.INTSEL = ET_DISABLE;        // Disable INT
 	NT_PWM3->ETSEL_bit.INTEN = 0;                  // Disable INT
 
-	NT_PWM3->TBCTL_bit.FREE_SOFT = 0;
 
 	NT_PWM3->ETSEL_bit.SOCAEN = 1;		// Разрешить запуск ацп
 	NT_PWM3->ETSEL_bit.SOCASEL = 1;		// Запускать при CTR == 0 (Underflow)
@@ -310,7 +305,7 @@ void PWM_Module_Init(TPWM_Module *p) {
 #endif
 
 #if defined(HW_VECTORCARD_DRV8312_EVM)
-	//ШИМ 3 вывода (нижние ключи ШИМят сами драйвером)
+	//ШИМ 3 вывода управления верхними ключами (нижние ключи ШИМят сами драйвером)
 	NT_GPIOG->ALTFUNCSET = (1 << 2) + (1 << 3) + (1 << 4);	 //ePWMxA(0), (1), (2)
 
 	// Периферийная функция - PWM
@@ -779,7 +774,7 @@ void PWM_Module_SlowCalc(TPWM_Module *p) {
 		EINT;
 	}
 
-	NT_PWM3->TBPHS_bit.TBPHS = 1;//подбор сдвига для запуска АЦП: 1 - ровно на верхушке таймера
+	NT_PWM3->TBPHS_bit.TBPHS = 1;//подбор сдвига для запуска АЦП: 1 - ровно на нуле таймера
 
 }
 
