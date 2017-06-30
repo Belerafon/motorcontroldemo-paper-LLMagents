@@ -28,9 +28,9 @@
 
 
 #ifdef HW_VECTORCARD_DRV8301_EVM
-//NT_GPIOG->DATAOUT |= (1 << 6);
-#define GPIO_INV_ON  NT_GPIOG->MASKLOWBYTE_bit[(1<<6)].MASKLB = (1<<6)
-#define GPIO_INV_OFF NT_GPIOG->MASKLOWBYTE_bit[(1<<6)].MASKLB = 0
+#define GPIO_INV_ON  NT_GPIOG->MASKHIGHBYTE_bit[(1<<(8-8))].MASKHB = (1<<(8-8))
+//Для данной конфигурации выключение инвертора аппаратное не используется, выключение ключей осуществляется выводами упралвения ключами
+#define GPIO_INV_OFF NT_GPIOG->MASKHIGHBYTE_bit[(1<<(8-8))].MASKHB = (1<<(8-8))
 #endif
 
 #ifdef HW_VECTORCARD_DRV8312_EVM
