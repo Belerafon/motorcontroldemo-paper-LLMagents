@@ -327,7 +327,7 @@ void TposspeedEqep_Calc(TposspeedEqep *p) {
 	}
 
 //¬ симул€торе доступен только один способ измерени€ скорости - по углу программно.
-#if (!defined(HW_VECTORCARD_SIMULATOR)) && (!defined(HW_NIIET_BOARD_SIMULATOR))
+#if (defined(HW_VECTORCARD_SIMULATOR)) || (defined(HW_NIIET_BOARD_SIMULATOR))
 	p->SpeedCalcType=SPEED_CALC_TYPE_BY_SOFT;
 #endif
 
