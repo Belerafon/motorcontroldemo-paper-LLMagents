@@ -111,10 +111,11 @@ void MotorModel_Init(TMotorModel *p) {
 			p->motorInternals.RatedPower = IMDATA[p->MotorParametersNum-1].RatedPower; //номинальная мощность (справочная величина, не используется в расчетах)
 			p->motorInternals.RatedSpeed = IMDATA[p->MotorParametersNum-1].RatedSpeed; //номинальная скорость (справочная величина, не используется в расчетах)
 			p->motorInternals.RatedCurrent = IMDATA[p->MotorParametersNum-1].RatedCurrent; //номинальный действующий ток
+			p->motorInternals.MechLoss = p->motorInternals.j * 10; 		//механические потери
 		}
 
 		// Инициализация коэффициентов и расчетных величин, завязанных на параметры двигателя
-		p->motorInternals.MechLoss = p->motorInternals.j * 10; 		//механические потери
+
 		p->motorInternals.speedK = 60/(4*MOTOR_MODEL_PI); //коэффициент датчика скорости
 
 		p->motorInternals.iADCk = p->motorInternals.RatedCurrent*1.414*3; 			// Расчетный коэффициент АЦП равен троекратной амплитуде номинального тока
@@ -144,10 +145,10 @@ void MotorModel_Init(TMotorModel *p) {
 			p->motorInternals.RatedSpeed = SMDATA[p->MotorParametersNum-1].RatedSpeed; //номинальная скорость (справочная величина, не используется в расчетах)
 			p->motorInternals.RatedCurrent = SMDATA[p->MotorParametersNum-1].RatedCurrent; //номинальный действующий ток
 			p->motorInternals.RatedFluxCurrent = SMDATA[p->MotorParametersNum-1].RatedFluxCurrent; //номинальный ток ОВ
-
+			p->motorInternals.MechLoss = p->motorInternals.j * 10; 		//механические потери
 		}
 		// Инициализация коэффициентов и расчетных величин, завязанных на параметры двигателя
-		p->motorInternals.MechLoss = p->motorInternals.j * 10; 		//механические потери
+
 		p->motorInternals.speedK = 60/(4*MOTOR_MODEL_PI); //коэффициент датчика скорости
 
 		p->motorInternals.iADCk = p->motorInternals.RatedCurrent*1.414*3; 			// Расчетный коэффициент АЦП равен троекратной амплитуде номинального тока
@@ -190,10 +191,10 @@ void MotorModel_Init(TMotorModel *p) {
 			p->motorInternals.QEPResolution = DCMDATA[p->MotorParametersNum-1].qep;	//разрешение энкодера
 			p->motorInternals.RatedPower = DCMDATA[p->MotorParametersNum-1].RatedPower; //номинальная мощность (справочная величина, не используется в расчетах)
 			p->motorInternals.RatedSpeed = DCMDATA[p->MotorParametersNum-1].RatedSpeed; //номинальная скорость (справочная величина, не используется в расчетах)
-
+			p->motorInternals.MechLoss = p->motorInternals.j * 10; 					//механические потери
 		}
 		// Инициализация коэффициентов и расчетных величин, завязанных на параметры двигателя
-		p->motorInternals.MechLoss = p->motorInternals.j * 10; 					//механические потери
+
 		p->motorInternals.speedK = 60/(4*MOTOR_MODEL_PI); //коэффициент датчика скорости
 		p->motorInternals.iADCk = (ADC_HALF_VALUE*1.0)/p->motorInternals.iSenseK; // Расчетный коэффициент АЦП тока Оя
 
@@ -233,10 +234,10 @@ void MotorModel_Init(TMotorModel *p) {
 			p->motorInternals.RatedPower = SRMDATA[p->MotorParametersNum-1].RatedPower; //номинальная мощность (справочная величина, не используется в расчетах)
 			p->motorInternals.RatedSpeed = SRMDATA[p->MotorParametersNum-1].RatedSpeed; //номинальная скорость (справочная величина, не используется в расчетах)
 			p->motorInternals.RatedCurrent = SRMDATA[p->MotorParametersNum-1].RatedCurrent; //номинальный действующий ток (справочная величина, не используется в расчетах)
-
+			p->motorInternals.MechLoss = p->motorInternals.j * 10; 				//механические потери
 		}
 		// Инициализация коэффициентов и расчетных величин, завязанных на параметры двигателя
-		p->motorInternals.MechLoss = p->motorInternals.j * 10; 				//механические потери
+
 		p->motorInternals.inv_pp=1.0/p->motorInternals.pp;
 
 		p->motorInternals.iADCk = p->motorInternals.RatedCurrent*1.414*3; 			// Расчетный коэффициент АЦП равен троекратной амплитуде номинального тока
