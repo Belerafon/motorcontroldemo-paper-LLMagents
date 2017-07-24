@@ -45,6 +45,11 @@ void SM_Net_Init(TSM_Net *p) {
 	co2_vars.settings.BlockTransfer_ena = 1;//Разрешить блочную передачу (нужна для осциллографа)
 	co2_Init(&co2_vars); //Инициализация драйвера CANOpen
 
+	//логгер событий:
+	//	размер буфера: 50
+	//	стартовый адрес в SPI: 3000
+	FaultLog.init(&FaultLog, 50, 3000, &RTCclock.packed_time);
+
 
 
 #ifdef CANTORS_ENA
@@ -107,9 +112,16 @@ void SM_Net_Slow_Calc(TSM_Net *p) {
 	drv_params.freq_nom = ((float) drv_params.speed_nom * drv_params.p) / 60 + 0.5; //номин частота
 
 	co_background_calc(&co2_vars); //Расчет драйвера CANOpen фоновый
+	drv_interface.calc(&drv_interface);
+	FaultLog.background_calc(&FaultLog);
 #ifdef MODBUS_ENA
 	MBVarsConv.slow_calc(&MBVarsConv);
 #endif
+
+	if (RTCclock.year != 165)    //часы работают?
+		FaultLog.time_ptr = &RTCclock.packed_time;
+	else
+		FaultLog.time_ptr = (Uint32*) &global_time.PowerOn_time;
 }
 
 //!Быстрый расчет

@@ -25,6 +25,8 @@
 #include "main.h"
 #include "stdlib.h"
 
+int16 WriteCounter = 0;
+
 //!»нициализаци€
 
 //!ѕрисваивание вс€ких переменных
@@ -168,7 +170,35 @@ void SM_Protect_Fast_Calc(TSM_Protect *p) {
 
 //! \memberof TSM_Protect
 void SM_Protect_ms_Calc(TSM_Protect *p) {
-
+	if (WriteCounter <= 15)   //если первое слово
+	{
+		if (((sm_prot.masked_bit_fault1 >> WriteCounter) & 0x1) != 0)  //стоит ii-й флаг аварии
+		{
+			if (((sm_prot.bit_fault_written1 >> WriteCounter) & 0x1) == 0)  //и она не записана
+			{
+				FaultLog.write(&FaultLog, WriteCounter + 1);
+				sm_prot.bit_fault_written1 |= (1 << WriteCounter);
+			}
+		}
+		else
+			sm_prot.bit_fault_written1 &= ~(1 << WriteCounter);
+	}
+	else if (WriteCounter <= 31) //второе слово
+	{
+		if (((sm_prot.masked_bit_fault2 >> (WriteCounter - 16)) & 0x1) != 0)  //стоит ii-й флаг аварии
+		{
+			if (((sm_prot.bit_fault_written2 >> (WriteCounter - 16)) & 0x1) == 0)  //и она только что появилась
+			{
+				FaultLog.write(&FaultLog, WriteCounter + 1);
+				sm_prot.bit_fault_written2 |= (1 << (WriteCounter - 16));
+			}
+		}
+		else
+			sm_prot.bit_fault_written2 &= ~(1 << (WriteCounter - 16));
+	}
+	WriteCounter++;
+	if (WriteCounter >= (33 - 1))
+		WriteCounter = 0;
 }
 
 //! ћедленный расчет.

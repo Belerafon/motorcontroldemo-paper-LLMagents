@@ -66,6 +66,9 @@ TRotorObserver RotorObserver = ROTOR_OBSERVER_DEFAULTS; //!<Датчиковый наблюдате
 TCANtoRS CANtoRS = CAN_TO_RS_DEFAULTS; //!<Модуль для работы с драйвером CANopen через UART (RS). Посылки CAN запаковываются в UART
 TModBus ModBus = MODBUS_DEFAULTS; //!<Драйвер для работы по протоколу MODBUS
 TMBVarsConv MBVarsConv = MBVARSCONV_DEFAULTS;//!< Модуль преобразования данных из формата 16 разрядов Modbus в формат системы управления (IQ 24)
+TDrvInterface drv_interface = DRV_INTERFACE_DEFAULTS;	//!<Интерфейс длЯ работы с банками аварий, событий и т.п.
+TLogger FaultLog = LOGGER_DEFAULTS;			//!<Протоколирование аварий
+TGlobalTime global_time = GLOBAL_TIME_DEFAULTS; //!<Работа с часами
 
 TRefs refs; //!< Структура с заданиями (токи, скорости)
 TCmd cmd = { 0 }; //!< Структура с командами управления

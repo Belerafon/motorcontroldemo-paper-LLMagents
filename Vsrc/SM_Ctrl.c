@@ -93,6 +93,7 @@ void SM_Ctrl_Fast_Calc(TSM_Ctrl *p) {
 			DPReCAP.speed = 0;
 			DPReCAP.Ts = 0;
 			DPReCAP.Tspeed = 0;
+			global_time.WtiteSPI_flag = 1;    //записать времЯ работы
 			//при переходе в стоп и работающем
 			//осциллографе переводим его в режим
 			//однократной записи, чтобы зафиксир. возможную аварию.

@@ -2831,6 +2831,36 @@
 			<defaults default="0" min="0" max="1"/>
 			<description description="Сбросить состояние Аварии"/>
 		</obj_2502h.04h>
+		<obj_2506h.00h DataType="Viewable" name="drv_interface" addr="" group="2" groupName="ВНЕ ГРУПП" fullgroup="2" callback="">
+			<format Type="Root"/>
+			<text text="interf" textID="756"/>
+			<defaults default="0" min="" max=""/>
+			<description description="модуль интерфейса обмена данными"/>
+		</obj_2506h.00h>
+		<obj_2506h.01h DataType="Editable" name="Таймаут потери связи" addr="drv_interface.req_data" group="2" groupName="ВНЕ ГРУПП" fullgroup="2" callback="">
+			<format Type="StandartNum" Size="32" Signed="false"/>
+			<text text="OfflineCounterMax" textID="581"/>
+			<defaults default="0" min="" max=""/>
+			<description description=""/>
+		</obj_2506h.01h>
+		<obj_2506h.02h DataType="Editable" name="Счетчик потери связи" addr="drv_interface.ans_data" group="2" groupName="ВНЕ ГРУПП" fullgroup="2" callback="">
+			<format Type="StandartNum" Size="32" Signed="false"/>
+			<text text="OfflineCounter" textID="582"/>
+			<defaults default="0" min="" max=""/>
+			<description description=""/>
+		</obj_2506h.02h>
+		<obj_2506h.03h DataType="Editable" name="data_Low" addr="drv_interface.data_Low" group="2" groupName="ВНЕ ГРУПП" fullgroup="2" callback="">
+			<format Type="StandartNum" Size="32" Signed="false"/>
+			<text text="data_L" textID="754"/>
+			<defaults default="0" min="" max=""/>
+			<description description=""/>
+		</obj_2506h.03h>
+		<obj_2506h.04h DataType="Editable" name="data_High" addr="drv_interface.data_High" group="2" groupName="ВНЕ ГРУПП" fullgroup="2" callback="">
+			<format Type="StandartNum" Size="32" Signed="false"/>
+			<text text="data_H" textID="753"/>
+			<defaults default="0" min="" max=""/>
+			<description description=""/>
+		</obj_2506h.04h>
 		<obj_250Fh.00h DataType="Editable" name="Часы реального времени" addr="RTCclock.packed_time" group="1" groupName="Наблюдаемые" fullgroup="" callback="callback_RTC">
 			<format Type="StandartNum" Size="32" Signed="false"/>
 			<text text="RTC" textID="311"/>
@@ -4038,6 +4068,18 @@
 			<defaults default="0" min="" max=""/>
 			<description description="Текущий ток статора амплитудный заданный"/>
 		</obj_5138h.06h>
+		<obj_5138h.07h DataType="Viewable" name="Время запитанного сост. ПЧ, м" addr="global_time.PowerOn_time_min" group="1" groupName="Наблюдаемые" fullgroup="19" callback="">
+			<format Type="IQ" Size="32" Signed="false" QValue="0" ScaleNum="11"/>
+			<text text="Твкл, м" textID="1941"/>
+			<defaults default="0" min="" max=""/>
+			<description description=""/>
+		</obj_5138h.07h>
+		<obj_5138h.08h DataType="Viewable" name="Время работы ПЧ, мин" addr="global_time.operational_time_min" group="1" groupName="Наблюдаемые" fullgroup="19" callback="">
+			<format Type="IQ" Size="32" Signed="false" QValue="0" ScaleNum="11"/>
+			<text text="Траб, м" textID="1942"/>
+			<defaults default="0" min="" max=""/>
+			<description description=""/>
+		</obj_5138h.08h>
 		<obj_5150h.00h DataType="Viewable" name="dlog" addr="" group="30" groupName="dlog" fullgroup="30" callback="">
 			<format Type="Root"/>
 			<text text="dlog" textID="443"/>

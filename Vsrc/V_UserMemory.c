@@ -81,7 +81,7 @@ void USERMEMORY_Write(TUserMemory *p)
 		spiaddrTmp++;
 		p->MCUStartAddr8++;
 	}
-	p->MCUStartAddr=(Uint16*)p->MCUStartAddr8;//чтобы адрес на данные поменялся (не знаю, надо это кому или нет)
+	//p->MCUStartAddr=(Uint16*)p->MCUStartAddr8;//чтобы адрес на данные поменялся (не знаю, надо это кому или нет)
 	p->receivedCode = USERMEMORY_OP_OK;
 }
 

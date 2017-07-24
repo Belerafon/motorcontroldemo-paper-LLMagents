@@ -56,6 +56,9 @@ void SM_Sys_Init(TSM_Sys *p) {
 	cur_par.init(&cur_par); //Расчет текущих показателей привода
 	leds.init(&leds);//светодиоды
 
+	//глобальное времЯ (внешние или внутр. часы)
+	global_time.init(&global_time);
+
 	if (drv_params.sens_type == POS_SENSOR_TYPE_HALL){ //В типе датчика выбран ДПР на элементах Холла
 		DPReCAP.Init(&DPReCAP); //ДПР иниц.
 	}
@@ -206,6 +209,8 @@ void SM_Sys_Fast_Calc(TSM_Sys *p) {
 	model.Execute(&model);
 #endif
 
+	global_time.calc(&global_time);
+
 	cur_par.calc(&cur_par); //Расчет текущих показателей привода
 	drv_params.sens_type = drv_params.sens_type & 3; //Отсекаем верхнюю часть переменной, там мусор
 
@@ -222,6 +227,7 @@ void SM_Sys_ms_Calc(TSM_Sys* p) {
 	sm_cmd_logic.ms_calc(&sm_cmd_logic); //Обработка команд управления
 	sm_net.ms_calc(&sm_net); //обертка для вызова коммуникационных драйверов
 	adc.ms_calc(&adc); //АЦП
+	sm_prot.ms_calc(&sm_prot); //Защиты
 	AutoOffset.ms_calc(&AutoOffset); //авто смещение некоторых каналов АЦП
 	//блочная передача драйвера CANopen. Через неё, в частности, грузятся осциллограммы dlog
 	Can2BTInterface.ms_calc(&Can2BTInterface, NT_TIMER2->VALUE, &co2_vars);
@@ -230,6 +236,7 @@ void SM_Sys_ms_Calc(TSM_Sys* p) {
 	if ((drv_params.sens_type == 2) || (drv_params.sens_type == 3)){ //В типе датчика выбран ДПР Холла
 		DPReCAP.ms_calc(&DPReCAP);
 	}
+	global_time.ms_calc(&global_time);
 }
 
 //!Медленный расчет (фоновый).
@@ -243,6 +250,7 @@ void SM_Sys_Slow_Calc(TSM_Sys *p) {
 	sm_prot.slow_calc(&sm_prot);//модуль защит
 	sm_net.slow_calc(&sm_net); //обертка для вызова коммуникационных драйверов
 	dlog.background_analizer(&dlog); //фоновый обработчик модуля осциллографирования
+	global_time.slow_calc(&global_time);
 	rmp.slow_calc(&rmp); //пересчет интенсивности разгона из пользовтельской во внутреннее представление
 	pwm.slow_calc(&pwm); //фоновый обработчик модуля ШИМ (пересчет пользовательских заданий)
 	adc.slow_calc(&adc); //Фоновый обработчик АЦП

@@ -72,6 +72,9 @@ extern "C"
     Uint16 mask_fault1;//!<Маска аварий 1
     Uint16 mask_fault2;//!<Маска аварий 2
     
+    Uint16 bit_fault_written1;
+    Uint16 bit_fault_written2;
+
     long Imax_protect; //!<Уставка максимально-токовой защиты
     long Umax_protect; //!<Уставка защиты max напряжения на ЗПТ
     long Umin_protect;//!<Уставка защиты min напряжения на ЗПТ
@@ -91,6 +94,7 @@ extern "C"
  //!Инициализатор по умолчанию
 #define SM_PROTECT_DEFAULTS {0,0,\
     0,0,\
+	0,0,\
 	0,0,\
     0,0,\
     0,0,\

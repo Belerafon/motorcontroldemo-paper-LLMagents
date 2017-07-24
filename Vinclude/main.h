@@ -76,6 +76,9 @@ extern "C" {
 #include "X_CANFlashProgData.h"
 #include "X_CANFlashProgStarter.h"
 #include "CANBlockTransferInterface.h"
+#include "DRV_INTERFACE.h"
+#include "V_event_log.h"
+#include "Global_time.h"
 
 extern TClarke 		clarke;
 extern TPark 		park;
@@ -118,6 +121,9 @@ extern TModBus ModBus;
 extern TMBVarsConv MBVarsConv;
 extern Texcitation pwm_ex;
 extern TCanBTInterface 	Can2BTInterface;
+extern TDrvInterface drv_interface;
+extern TLogger		FaultLog;
+extern TGlobalTime global_time;
 
 extern Uint16 msCounter;
 extern Uint16 FastCounter;
@@ -178,6 +184,18 @@ void CAP2_IRQHandler(void);
 void QEP1_IRQHandler(void);
 #endif
 
+#if defined(TRUE) && (TRUE != 1)
+#error "TRUE previously defined not equal to 1"
+#endif
+#if defined(FALSE) && (FALSE != 0)
+#error "FALSE previously defined not equal to 0"
+#endif
+#ifndef TRUE
+#define TRUE  (1)
+#endif
+#ifndef FALSE
+#define FALSE (0)
+#endif
 
 #ifdef __cplusplus
 }

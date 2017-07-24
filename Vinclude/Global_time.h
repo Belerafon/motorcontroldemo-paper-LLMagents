@@ -1,0 +1,186 @@
+/*!
+ \file      Global_time.h
+ \brief     ћодуль работы со временем. (см. TGlobalTime)
+
+ \author	Aliamkin Dmitriy I
+ \version   v 1.1 24/02/2010
+ \defgroup  Global_time ћодуль работы со временем. (см. TGlobalTime)
+ @{
+*/
+
+
+
+#ifndef GLOBAL_TIME_H
+#define GLOBAL_TIME_H
+
+#ifdef __cplusplus
+extern "C"
+{
+#endif
+
+#include "DSP.h"
+
+#define GLOBAL_TIME_CALC_FREQ	10	//!<к√ц частота вызова функции calc
+//#define USE_ABSOLUTE_TIME_CLOCK	//раскоментировать если используются часы реального времени
+
+
+
+#define GLOBAL_TIME_SPI_START_ADDR 4500						//!<начальный адрес в SPI
+
+#define GLOBAL_TIME_POWER_ON_TIME_ADDR GLOBAL_TIME_SPI_START_ADDR
+#define GLOBAL_TIME_OPERATIONAL_TIME_ADDR GLOBAL_TIME_SPI_START_ADDR + 4
+
+
+//!јбсолютное время
+  struct SABSOLUTE_TIME
+  {
+    int16 second;
+    int16 minute;
+    int16 hour;
+    int16 day;
+    int16 year;
+  };
+  typedef volatile struct SABSOLUTE_TIME ABSOLUTE_TIME;
+
+//!ќтносительная дата
+  typedef struct
+  {
+    int16 millisecond;
+    int16 second;
+    int16 minute;
+    int32 hour;
+  }RELATIVE_DATE;
+
+
+//!ќтносительное время
+  struct SRELATIVE_TIME
+  {
+    int		ON;
+    Uint32  tic_isr;
+    Uint32  millisecond_counter;
+    Uint32  second_counter;
+    int16 	delta_millisecond;
+    int16 	delta_second;
+    RELATIVE_DATE	relative_date;
+  };
+  typedef volatile struct SRELATIVE_TIME RELATIVE_TIME;
+
+
+
+  /*! \class TGlobalTime
+        \brief ћодуль работы со временем.
+
+         ласс \a TGlobalTime, основанный на структуре SGlobalTime, содержит методы
+        для работы со временем.ќтсчитывает время в:\n
+  				  для отсчета времени работы и т.д.:\n
+  					милисекунды:	0-999\n
+  					секунды:		0-59\n
+  					минуты:			0-59\n
+  					часы:			0-23\n
+  					дни:			0-364\n
+  					года:			0-примерно до 160 лет\n
+  				  для отсчета дельт (приращений времени):\n
+  					милисекунды:	0-0xFFFFFFFF - соответствует примерно 1.5 месяцам\n
+  					секунды:		0-0xFFFFFFFF - соответствует примерно 160 годам\n
+
+      ≈сть специальный способ, позволяющий отсчитывать выдержки времени с точностью
+  до миллисекунд в  перывании Ў»ћ. »спользуется переменная delta_millisecond,
+  которая возводится в единицу каждую миллисекунду и на следующем периоде Ў»ћ
+  сбрасывается. “огда можно в необходимый счетчик добавить counter+=delta_millisecond и
+  получить в counter счетчик миллисекунд. јналогично delta_second.
+
+  ѕ–»ћ≈„јЌ»≈:   1. модуль не требует инициализации
+  				2. автоматически перенастраивается при изменении несущей частоты
+
+  ƒЋя  ќ––≈ “Ќќ… –јЅќ“џ ћќƒ”Ћя ѕќЋ№«ќ¬ј“≈Ћ№ ƒќЋ∆≈Ќ:
+  1. в макросе GLOBAL_TIME_CALC_FREQ правильно указать  несущую частоту вызова функции расчета.
+  —ледует отметить, что значение GLOBAL_TIME_CALC_FREQ целочисленное, поэтому
+  модуль корректно работает только при целых значениях несущей частоты (в к√ц).
+  Ќедостаток связан с конкретной реализацией модуля.
+  */
+
+//! см. TGlobalTime
+  struct SGlobalTime
+  {
+    RELATIVE_TIME relative_time1;//!относительное время 1
+    RELATIVE_TIME relative_time2;//!относительное время 2
+    ABSOLUTE_TIME absolute_time;//!абсолютное время
+    int16 time_type;//!часы реального времени (1 - есть)
+	int32 PowerOn_time;				//!<ќбщее время наработки
+	int32 PowerOn_time_min;				//!<ќбщее время наработки в минутах
+	int32 operational_time;	//!<ќбщее время включенного состояния
+	int32 operational_time_min;				//!<ќбщее время включенного состояния в минутах
+	int16 WtiteSPI_flag;
+	int32 PrevWriteSPIHour;
+    void	(*init)(volatile struct SGlobalTime*);
+    void	(*calc)(volatile struct SGlobalTime*);
+    void	(*ms_calc)(volatile struct SGlobalTime*);
+    void	(*slow_calc)(volatile struct SGlobalTime*);
+	void (*read_PowerOn_time)(volatile struct SGlobalTime*);
+	void (*write_PowerOn_time)(volatile struct SGlobalTime*);
+	void (*read_oper_time) (volatile struct SGlobalTime*);
+	void (*write_oper_time)(volatile struct SGlobalTime*);
+  };
+
+  typedef volatile struct SGlobalTime TGlobalTime;
+
+//!»ницализатор относительной даты.
+#define RELATIVE_DATE_DEFAULTS {0,0,0,0}
+
+//!»нициализатор относительного времени.
+#define RELATIVE_TIME_DEFAULTS {0,\
+    0,0,0,0,0,\
+    RELATIVE_DATE_DEFAULTS,\
+  }
+//!»нициализатор абсолютного времени.
+#define ABSOLUTE_TIME_DEFAULTS {0,0,0,0,0}
+
+//!»нициализатор TGlobalTime.
+#define GLOBAL_TIME_DEFAULTS { RELATIVE_TIME_DEFAULTS,\
+    RELATIVE_TIME_DEFAULTS,\
+    ABSOLUTE_TIME_DEFAULTS,\
+    1,0,0,0,0,0,0,\
+    GlobalTime_init,\
+    GlobalTime_calc,\
+    GlobalTime_ms_calc,\
+    GlobalTime_slow_calc,\
+	GlobalTime_read_PowerOn_time, \
+	GlobalTime_write_PowerOn_time, \
+	GlobalTime_read_oper_time, \
+	GlobalTime_write_oper_time,\
+  }
+
+//! \memberof TGlobalTime
+  void GlobalTime_init(TGlobalTime*);
+//! \memberof TGlobalTime
+  void GlobalTime_calc(TGlobalTime*);
+  //! \memberof TGlobalTime
+  void GlobalTime_ms_calc(TGlobalTime*);
+//! \memberof TGlobalTime
+  void GlobalTime_slow_calc(TGlobalTime*);
+
+//! \memberof TGlobalTime
+  void GlobalTime_REL_TIME_calc(RELATIVE_TIME *p);
+
+//! \memberof TGlobalTime
+void GlobalTime_read_PowerOn_time(TGlobalTime*);
+//! \memberof TGlobalTime
+void GlobalTime_write_PowerOn_time(TGlobalTime*);
+//! \memberof TGlobalTime
+void GlobalTime_read_oper_time(TGlobalTime*);
+//! \memberof TGlobalTime
+void GlobalTime_write_oper_time(TGlobalTime*);
+
+
+
+#ifdef __cplusplus
+}
+#endif
+
+
+#endif
+
+
+
+/*@}*/
+
