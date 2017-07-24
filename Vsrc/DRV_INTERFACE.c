@@ -1,9 +1,20 @@
-/* ==================================================================================
- //File name:       DRV_INTERFACE.c
- //
- //Originator:	Aliamkin Dmitriy I
- //
- //Description:  Через данные модуль обеспечиваетсЯ работа с банком аварий (чтение, очистка).
+/*!
+    Copyright 2017 	АО "НИИЭТ" и ООО "НПФ ВЕКТОР"
+
+   Licensed under the Apache License, Version 2.0 (the "License");
+   you may not use this file except in compliance with the License.
+   You may obtain a copy of the License at
+
+       http://www.apache.org/licenses/LICENSE-2.0
+
+   Unless required by applicable law or agreed to in writing, software
+   distributed under the License is distributed on an "AS IS" BASIS,
+   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+   See the License for the specific language governing permissions and
+   limitations under the License.
+
+ \file      DRV_INTERFACE.c
+ \brief     Через данные модуль обеспечиваетсЯ работа с банком аварий (чтение, очистка).
  //ПредполагаетсЯ, что модуль может расширЯть функциональность (скачивать каие-то другие данные)...
  //ПРИМЕЧАНИЕ для программиста:
   	1.для команд работающих по сети с автоматизированными системами (Юникон,, пульты и т.д.) после выполнения команды поле ans_data должно быть установлено значением запроса:
@@ -12,11 +23,10 @@
   	     p->data_Low
 		  p->data_High
 	2.для внутренних вызовов поле p->ans_data трогать не нужно
- //=====================================================================================
- //-------------------------------------------------------------------------------------
-  	  27.11.2014	Release	Rev 2.0
-  	  02.11.2005	Release	Rev 1.0
- //----------------------------------------------------------------------------------*/
+ \author    ООО "НПФ Вектор". http://motorcontrol.ru
+ \version   v 2.1 2017_07_24
+
+ */
 
 
 #include "main.h"

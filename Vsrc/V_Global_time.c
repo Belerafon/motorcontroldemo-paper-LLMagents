@@ -1,10 +1,24 @@
-/*!
- \file      V_Global_time.c
- \brief     Модуль работы со временем. (см. TGlobalTime)
 
- \author	Aliamkin Dmitriy I
- \version   v 1.1 24/02/2010
- перенесено на M3 и слегка доработано Кульмановым В.И. (16.10.2013) - v. 1.2
+/*!
+     Copyright 2017 	АО "НИИЭТ" и ООО "НПФ ВЕКТОР"
+
+   Licensed under the Apache License, Version 2.0 (the "License");
+   you may not use this file except in compliance with the License.
+   You may obtain a copy of the License at
+
+       http://www.apache.org/licenses/LICENSE-2.0
+
+   Unless required by applicable law or agreed to in writing, software
+   distributed under the License is distributed on an "AS IS" BASIS,
+   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+   See the License for the specific language governing permissions and
+   limitations under the License.
+
+ \file      Global_time.c
+ \brief     Модуль работы со временем
+ \author    ООО "НПФ Вектор". http://motorcontrol.ru
+ \version   v 1.2 2013_10_16
+
 */
 
 /** \addtogroup Global_time */

@@ -1,13 +1,25 @@
 /*!
- \file      W_event_log.c
- \brief     —охранение событий и времени возникновения в Ёнќ«” TEvent (см. TEvent)
+     Copyright 2017 	јќ "Ќ»»Ё“" и ќќќ "Ќѕ‘ ¬≈ “ќ–"
 
- »спользуется драйвер работы с энергонезависимой памятью по I2C
- ѕоэтому вызов init(); должен быть после инициализации I2C
+   Licensed under the Apache License, Version 2.0 (the "License");
+   you may not use this file except in compliance with the License.
+   You may obtain a copy of the License at
 
- \author	Aliamkin Dmitriy I
- \дл€ M3 и I2C адаптировал  ульманов ¬.».: в данный модуль перенесена функци€ проверки выставленных битов аварий и их записи. (17.10.2013)
- \version   v 1.0 20/01/2009
+       http://www.apache.org/licenses/LICENSE-2.0
+
+   Unless required by applicable law or agreed to in writing, software
+   distributed under the License is distributed on an "AS IS" BASIS,
+   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+   See the License for the specific language governing permissions and
+   limitations under the License.
+
+ \file      V_event_log.c
+ \brief     —охранение событий и времени возникновения в Ёнќ«”
+			»спользуется драйвер работы с энергонезависимой памятью
+			ѕоэтому вызов init(); должен быть после инициализации Ёнќ«”
+ \author    ќќќ "Ќѕ‘ ¬ектор". http://motorcontrol.ru
+ \version   v 1.0 2009_01_20
+
 */
 
 /** \addtogroup W_event_log */
