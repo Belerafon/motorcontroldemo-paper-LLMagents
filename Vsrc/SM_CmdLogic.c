@@ -34,6 +34,7 @@ void SM_CmdLogicInit(TSM_CmdLogic *p) {
 	p->state_prev = 0xFF;
 	cmd.all = 0;
 
+#if defined (HW_VECTORCARD_DRV8301_EVM) || defined (HW_VECTORCARD_DRV8312_EVM)
 	/* Разрешить ногам работать на вход, это кнопки старт и стоп */
 	NT_GPIOA->ALTFUNCCLR = (1 << 13) | (1 << 14);//выключить альт. функцию
 	NT_GPIOA->OUTENCLR = (1 << 13) | (1 << 14);//на вход
@@ -42,7 +43,7 @@ void SM_CmdLogicInit(TSM_CmdLogic *p) {
 	p->StopButton=((NT_GPIOA->DATA & (1 << 13))==0);//обработка ножки стопа
 	p->StartButtonPrev=p->StartButton;
 	p->StopButtonPrev=p->StopButton;
-
+#endif
 }
 
 //!Медленный расчет
@@ -66,7 +67,7 @@ void SM_CmdLogicms_Calc(TSM_CmdLogic *p) {
 		p->E = 0;
 	p->state_prev = p->state;
 
-
+#if defined (HW_VECTORCARD_DRV8301_EVM) || defined (HW_VECTORCARD_DRV8312_EVM)
 	p->StartButton=((NT_GPIOA->DATA & (1 << 14))==0);//обработка ножки старта
 	p->StopButton=((NT_GPIOA->DATA & (1 << 13))==0);//обработка ножки стопа
 
@@ -79,7 +80,7 @@ void SM_CmdLogicms_Calc(TSM_CmdLogic *p) {
 
 	p->StartButtonPrev=p->StartButton;
 	p->StopButtonPrev=p->StopButton;
-
+#endif
 	//определяем режим работы
 	switch (p->state) {
 	case CMD_LOGIC_TURNED_OFF: {	//состояние 0- ОТКЛЮЧЕН
