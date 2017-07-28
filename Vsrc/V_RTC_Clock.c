@@ -141,6 +141,27 @@ void RTC_Clock_Ms_Calc(TRTCClock *p) {
 		p->ms = 0;
 		p->readTimeFlag = 1;
 	}
+
+	//проверка работы часов реального времени и установка, в зависимсоти от этого, указателя для банка аварий
+	if (p->secondPrev == p->second)	//секунда не меняется
+		p->stoppedCounter++;				//считаем, как долго
+	else										//сменилась, значит часы работают
+		p->stoppedCounter = 0;
+
+	if (p->stoppedCounter < RTC_SECOND_WAITING_TIMEOUT)		//часы работают
+		p->ClockOk=1;
+
+	else
+	{
+		p->ClockOk=0;
+		p->stoppedCounter = RTC_SECOND_WAITING_TIMEOUT;
+	}
+	p->secondPrev = p->second;
+
+
+
+
+
 #else
 
 	if (p->ms == 1000) {

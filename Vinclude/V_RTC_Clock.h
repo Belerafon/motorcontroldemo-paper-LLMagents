@@ -57,6 +57,7 @@ struct SRTCClock{
 
 	Uint16 secondPrev;
 	Uint16 stoppedCounter;
+	Uint16 ClockOk;
 	void (*init)(volatile struct SRTCClock*);					// Инициализация
 	void (*read)(volatile struct SRTCClock*);					// Прочитать время из часиков
 	void (*set)(volatile struct SRTCClock*);					// Письнуть время в часики
@@ -66,7 +67,7 @@ struct SRTCClock{
 
 typedef volatile struct SRTCClock TRTCClock;
 
-#define RTC_CLOCK_DEFAULTS {0,0,0,0, 0,0,0, 0,0,0,0, 0,0, 0,0, 0,0,\
+#define RTC_CLOCK_DEFAULTS {0,0,0,0, 0,0,0, 0,0,0,0, 0,0, 0,0, 0,0,0,\
 							RTC_Clock_Init,\
 							RTC_Clock_Read_Time,\
 							RTC_Clock_Set_Time,\
