@@ -32,6 +32,7 @@
 #define RTC_TIMEOUT_ERROR	3
 
 #define RTC_TIMEOUT			1000		// Количество ожидания шины
+#define RTC_SECOND_WAITING_TIMEOUT			10000		// Время, в течение которого должна смениться секунда (задается в мс). Если не меняется, значит часы не работают.
 
 struct SRTCClock{
 	Uint16 ms;			// На всякий
@@ -53,6 +54,9 @@ struct SRTCClock{
 
 	Uint16 setTimeFlag;
 	Uint16 readTimeFlag;
+
+	Uint16 secondPrev;
+	Uint16 stoppedCounter;
 	void (*init)(volatile struct SRTCClock*);					// Инициализация
 	void (*read)(volatile struct SRTCClock*);					// Прочитать время из часиков
 	void (*set)(volatile struct SRTCClock*);					// Письнуть время в часики
@@ -62,7 +66,7 @@ struct SRTCClock{
 
 typedef volatile struct SRTCClock TRTCClock;
 
-#define RTC_CLOCK_DEFAULTS {0,0,0,0, 0,0,0, 0,0,0,0, 0,0, 0,0,\
+#define RTC_CLOCK_DEFAULTS {0,0,0,0, 0,0,0, 0,0,0,0, 0,0, 0,0, 0,0,\
 							RTC_Clock_Init,\
 							RTC_Clock_Read_Time,\
 							RTC_Clock_Set_Time,\

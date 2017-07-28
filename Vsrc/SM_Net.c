@@ -118,10 +118,6 @@ void SM_Net_Slow_Calc(TSM_Net *p) {
 	MBVarsConv.slow_calc(&MBVarsConv);
 #endif
 
-	if (RTCclock.year != 165)    //часы работают?
-		FaultLog.time_ptr = &RTCclock.packed_time;
-	else
-		FaultLog.time_ptr = (Uint32*) &global_time.PowerOn_time;
 }
 
 //!Быстрый расчет
@@ -155,6 +151,20 @@ void SM_Net_ms_Calc(TSM_Net *p) {
 	MBVarsConv.calc(&MBVarsConv);
 #endif
 
+	//проверка работы часов реального времени и установка, в зависимсоти от этого, указателя для банка аварий
+	if (RTCclock.secondPrev == RTCclock.second)	//секунда не меняется
+		RTCclock.stoppedCounter++;				//считаем, как долго
+	else										//сменилась, значит часы работают
+		RTCclock.stoppedCounter = 0;
+
+	if (RTCclock.stoppedCounter < RTC_SECOND_WAITING_TIMEOUT)		//часы работают
+		FaultLog.time_ptr = &RTCclock.packed_time;
+	else
+	{
+		FaultLog.time_ptr = (Uint32*) &global_time.PowerOn_time;
+		RTCclock.stoppedCounter = RTC_SECOND_WAITING_TIMEOUT;
+	}
+	RTCclock.secondPrev = RTCclock.second;
 }
 
 void SM_Net_fast_Calc(TSM_Net *p) {
