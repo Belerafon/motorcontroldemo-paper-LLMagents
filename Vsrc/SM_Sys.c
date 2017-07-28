@@ -233,6 +233,7 @@ void SM_Sys_ms_Calc(TSM_Sys* p) {
 	Can2BTInterface.ms_calc(&Can2BTInterface, NT_TIMER2->VALUE, &co2_vars);
 	leds.msCalc(&leds);//светодиоды
 	RTCclock.msCalc(&RTCclock);//часы
+	UserMem.ms_calc(&UserMem);//пользовательская память в МК
 	if ((drv_params.sens_type == 2) || (drv_params.sens_type == 3)){ //В типе датчика выбран ДПР Холла
 		DPReCAP.ms_calc(&DPReCAP);
 	}
