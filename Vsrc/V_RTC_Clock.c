@@ -148,7 +148,7 @@ void RTC_Clock_Ms_Calc(TRTCClock *p) {
 	else										//сменилась, значит часы работают
 		p->stoppedCounter = 0;
 
-	if (p->stoppedCounter < RTC_SECOND_WAITING_TIMEOUT)		//часы работают
+	if ((p->stoppedCounter < RTC_SECOND_WAITING_TIMEOUT) && (p->year<48))		//часы работают - тикают и год не 2048 (как когда нет батарейки)
 		p->ClockOk=1;
 
 	else

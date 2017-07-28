@@ -1,6 +1,6 @@
 //Файл: cood.c
-//Профиль: C:\VectorIDEWorkspace\NIIET_MotorControlDemo\cood.xml
-//Дата созданиЯ: 21.07.2017 14:25:45
+//Профиль: D:\Eclipse_GCC_ARM_wks\motorcontroldemo\cood.xml
+//Дата созданиЯ: 28.07.2017 16:51:59
 //Пользователь: default
 #include "DSP.h"
 #include "main.h"
@@ -13,7 +13,7 @@ Uint16 const co2_numOfInd = 128;
 //Номер перечеслениЯ длЯ групп
 Uint16 const co2_groupEnum = 15;
 //Хэш-сумма:
-Uint32 const co2_odHash[4] = {0x39444BF2, 0xE773FAB7, 0x8B5228C3, 0xA192E344};
+Uint32 const co2_odHash[4] = {0xC5BED56E, 0x1290CE7C, 0x932018C9, 0x5E3FEFD0};
 //Таблица с адресами переменных 
 
 long const CO2_OD_TBL3[] = { (long)(&co2_vars.co_deviceType), //[1000h.00h], Название=Тип устройства, ТекстПУ=Device Type, EngText=Device Type, группа=CAN
@@ -582,8 +582,8 @@ long const CO2_OD_TBL3[] = { (long)(&co2_vars.co_deviceType), //[1000h.00h], Наз
 (long)(&cur_par.ThetaRefCurr), //[5138h.04h], Название=ЭлУголЗад, ТекстПУ=ЭлУголЗад, EngText=ЭлУголЗад, группа=Наблюдаемые
 (long)(&cur_par.ThetaCurr), //[5138h.05h], Название=ЭлУгол, ТекстПУ=ЭлУгол, EngText=ЭлУгол, группа=Наблюдаемые
 (long)(&cur_par.IsRef), //[5138h.06h], Название=Ток статора зад, ТекстПУ=ТокСтЗад, EngText=Ток статора зад, группа=Наблюдаемые
-(long)(&global_time.PowerOn_time_min), //[5138h.07h], Название=Время запитанного сост. ПЧ, м, ТекстПУ=Твкл, м, EngText=, группа=Наблюдаемые
-(long)(&global_time.operational_time_min), //[5138h.08h], Название=Время работы ПЧ, мин, ТекстПУ=Траб, м, EngText=, группа=Наблюдаемые
+(long)(&global_time.PowerOn_time_min), //[5138h.07h], Название=Время запитанного состояния, мин, ТекстПУ=Power On Time, EngText=Power On Time, группа=Наблюдаемые
+(long)(&global_time.operational_time_min), //[5138h.08h], Название=Вреря работы привода, мин, ТекстПУ=Work Time, EngText=Work Time, группа=Наблюдаемые
 (long)(&dlog.mode_reset), //[5150h.01h], Название=dlog.mode_reset, ТекстПУ=mode, EngText=dlog.mode_reset, группа=dlog
 (long)(&dlog.control), //[5150h.02h], Название=dlog.control, ТекстПУ=dlcont, EngText=dlog.control, группа=dlog
 (long)(&dlog.ind_subind1), //[5150h.03h], Название=dlog.ind_subind1, ТекстПУ=dlisi1, EngText=dlog.ind_subind1, группа=dlog
@@ -3092,9 +3092,9 @@ Uint16 const CO2_OD_TBL2[] = {
 
 25909, 442, 565,
 
-28141, 1941, 566,
+28141, 613, 566,
 
-28141, 1942, 567,
+28141, 614, 567,
 
 20023, 443, 7,
 

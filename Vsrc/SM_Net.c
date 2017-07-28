@@ -48,7 +48,7 @@ void SM_Net_Init(TSM_Net *p) {
 	//логгер событий:
 	//	размер буфера: 50
 	//	стартовый адрес в SPI: 3000
-	FaultLog.init(&FaultLog, 50, 3000, &RTCclock.packed_time);
+	FaultLog.init(&FaultLog, 50, 3000, &RTCclock.packed_time);//ниже указатель на время может быть переопределен в зависимости от работы часов
 
 
 

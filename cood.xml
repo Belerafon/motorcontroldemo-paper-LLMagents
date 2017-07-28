@@ -4068,15 +4068,15 @@
 			<defaults default="0" min="" max=""/>
 			<description description="Текущий ток статора амплитудный заданный"/>
 		</obj_5138h.06h>
-		<obj_5138h.07h DataType="Viewable" name="Время запитанного сост. ПЧ, м" addr="global_time.PowerOn_time_min" group="1" groupName="Наблюдаемые" fullgroup="19" callback="">
+		<obj_5138h.07h DataType="Viewable" name="Время запитанного состояния, мин" addr="global_time.PowerOn_time_min" group="1" groupName="Наблюдаемые" fullgroup="19" callback="">
 			<format Type="IQ" Size="32" Signed="false" QValue="0" ScaleNum="11"/>
-			<text text="Твкл, м" textID="1941"/>
+			<text text="Power On Time" textID="613"/>
 			<defaults default="0" min="" max=""/>
 			<description description=""/>
 		</obj_5138h.07h>
-		<obj_5138h.08h DataType="Viewable" name="Время работы ПЧ, мин" addr="global_time.operational_time_min" group="1" groupName="Наблюдаемые" fullgroup="19" callback="">
+		<obj_5138h.08h DataType="Viewable" name="Вреря работы привода, мин" addr="global_time.operational_time_min" group="1" groupName="Наблюдаемые" fullgroup="19" callback="">
 			<format Type="IQ" Size="32" Signed="false" QValue="0" ScaleNum="11"/>
-			<text text="Траб, м" textID="1942"/>
+			<text text="Work Time" textID="614"/>
 			<defaults default="0" min="" max=""/>
 			<description description=""/>
 		</obj_5138h.08h>
