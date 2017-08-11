@@ -52,7 +52,7 @@ void SM_Net_Init(TSM_Net *p) {
 
 
 
-#ifdef CANTORS_ENA
+#if (defined(CANTORS_ENA)) || (defined(CANTOUSB_ENA))
 //Работа с CANopen через UART (параллельно с CAN, нет конфликта)
 	CANtoRS.nodeID = (Uint16*)&co2_vars.co_nodeID; //Номер узла из CANopen
     CANtoRS.callback = Z_co_receiveSDOrequest;//Указатель на функцию обратного вызова из драйвера CANopen по приходу SDO сообщения
@@ -148,7 +148,7 @@ void SM_Net_ms_Calc(TSM_Net *p) {
 	sm_prot.Main_ErrorCode = 0xFF & pult_faults_lister.output;
 
 	co_1ms_calc(&co2_vars);    //Расчет драйвера CANOpen
-#ifdef CANTORS_ENA
+#if (defined(CANTORS_ENA)) || (defined(CANTOUSB_ENA))
 	CANtoRS.calc(&CANtoRS);
 #endif
 #ifdef MODBUS_ENA

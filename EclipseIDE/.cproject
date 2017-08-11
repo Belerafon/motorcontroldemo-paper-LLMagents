@@ -138,6 +138,7 @@
 							<option id="ilg.gnuarmeclipse.managedbuild.cross.option.arm.target.fpu.unit.1709970612.1626686790" name="FPU Type" superClass="ilg.gnuarmeclipse.managedbuild.cross.option.arm.target.fpu.unit.1709970612"/>
 							<option id="ilg.gnuarmeclipse.managedbuild.cross.option.arm.target.fpu.abi.447103466.1557166818" name="Float ABI" superClass="ilg.gnuarmeclipse.managedbuild.cross.option.arm.target.fpu.abi.447103466"/>
 							<option id="ilg.gnuarmeclipse.managedbuild.cross.option.target.other.441844501.261835020" name="Other target flags" superClass="ilg.gnuarmeclipse.managedbuild.cross.option.target.other.441844501"/>
+							<targetPlatform archList="all" binaryParser="org.eclipse.cdt.core.ELF" id="ilg.gnuarmeclipse.managedbuild.cross.targetPlatform" isAbstract="false" osList="all" superClass="ilg.gnuarmeclipse.managedbuild.cross.targetPlatform"/>
 							<tool id="ilg.gnuarmeclipse.managedbuild.cross.tool.assembler.25739545" name="Cross ARM GNU Assembler" superClass="ilg.gnuarmeclipse.managedbuild.cross.tool.assembler.1135800266">
 								<inputType id="ilg.gnuarmeclipse.managedbuild.cross.tool.assembler.input.321302863" superClass="ilg.gnuarmeclipse.managedbuild.cross.tool.assembler.input"/>
 							</tool>
@@ -242,7 +243,7 @@
 						</toolChain>
 					</folderInfo>
 					<sourceEntries>
-						<entry excluding="asm/niiet.S|include/UART_API|include/Peripherals|include/Peripherals/UART_API/PrimeCell_gen_sw|include/Peripherals/eADC/stellaris (do not include)" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name=""/>
+						<entry excluding="include/Peripherals|asm/niiet.S|include/UART_API|include/Peripherals/UART_API/PrimeCell_gen_sw|include/Peripherals/eADC/stellaris (do not include)" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name=""/>
 					</sourceEntries>
 				</configuration>
 			</storageModule>
@@ -267,4 +268,5 @@
 	<storageModule moduleId="cdtBuildSystem" version="4.0.0">
 		<project id="Example_LED_blinking.null.308845348" name="Example_LED_blinking"/>
 	</storageModule>
+	<storageModule moduleId="org.eclipse.cdt.make.core.buildtargets"/>
 </cproject>

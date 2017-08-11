@@ -284,7 +284,8 @@ g_pfnVectors:
  .word     CAN13_IRQHandler           /* INT_129 : CAN13          */
  .word     CAN14_IRQHandler           /* INT_130 : CAN14          */
  .word     CAN15_IRQHandler           /* INT_131 : CAN15          */
-
+ .word     RTC_IRQHandler           /* INT_130 : CAN14          */
+ .word     USBOTG_IRQHandler           /* INT_131 : CAN15          */
 
 /*******************************************************************************
 *
@@ -575,5 +576,8 @@ g_pfnVectors:
 	.thumb_set CAN14_IRQHandler             ,Default_Handler
 	.weak CAN15_IRQHandler
 	.thumb_set CAN15_IRQHandler             ,Default_Handler
-
+	.weak RTC_IRQHandler
+	.thumb_set RTC_IRQHandler             ,Default_Handler
+	.weak USBOTG_IRQHandler
+	.thumb_set USBOTG_IRQHandler             ,Default_Handler
 

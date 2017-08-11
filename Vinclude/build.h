@@ -44,6 +44,9 @@
 //#define MODBUS_ENA
 #define CANTORS_ENA
 
+// Также можно задействовать USB для CANopen
+#define CANTOUSB_ENA
+
 //!Режимы работы (состояния ДА sm_ctrl)
 //! Режим останов
 #define CTRL_STOP 							0

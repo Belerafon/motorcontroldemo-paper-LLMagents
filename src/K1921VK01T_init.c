@@ -210,7 +210,8 @@ void InitCLK(void)
 
 
 	NT_BOOTFLASH->T_ACC = 6;		//Задержка от установки адреса, до считывания данных из флеш-памяти (в транзакциях чтения)
-
+    NT_COMMON_REG->USB_CTRL = 0x00000006; //clk_en, 12MHz, xtal
+    NT_COMMON_REG->PER_RST1 |= (1<<3); //clear reset from usb phy
 	//Настройка частоты тактирования
 	//выходная частота равна FOUT = (FIN * NF) / ( NR * NO), где FIN - частота кварца
 	NT_COMMON_REG->PLL_OD = 2;		//Выходной делитель PLL NO=2

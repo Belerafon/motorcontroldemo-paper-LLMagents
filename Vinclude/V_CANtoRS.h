@@ -14,11 +14,11 @@
    limitations under the License.
 
  \file      v_CANtoRS.h
- \brief     Преобразователь посылок CAN в RS и обратно. Работает
+ \brief     Преобразователь посылок CAN в RS/USB и обратно. Работает
 совместно с драйвером CANOpen
 
  \author    ООО "НПФ Вектор". http://motorcontrol.ru
- \version   v 2.0 25/03/2016
+ \version   v 3.0 08/08/2017
 
 */
 
@@ -35,10 +35,15 @@ extern "C" {
 #define CANTORS_HEART_COUNTER_MAX 1000
 
 
+#define CANTORS_ACTIVE		0x1
+#define CANTOUSB_ACTIVE		0x2
+
 #include "DSP.h"
 #include "CANOpen_drv.h"
 
 struct SCANtoRS {
+				Uint16 lastActiveConnection;	// Определяет, какой интерфейс был активен в последний раз - USB или RS
+				Uint8 tempBuf[13];		// Временный буфер для данных
                 Uint16 test_dbg; //для отладки
                 Uint16 APIpacketMode;
                 int16 HeartBeatGo;//пропустите сердцебиение!
@@ -58,10 +63,10 @@ struct SCANtoRS {
 				Uint16 CounterWrongCRC;
 				Uint16 CounterRes;
 				Uint16 CounterSended;
-				void (*init)(struct SCANtoRS *);     /* Pointer to the init function */
-				void (*calc)(struct SCANtoRS *);     /* Pointer to the calc function */
-                void (*receive)(struct SCANtoRS *);
-                Uint16 (*write)(TZCanMsg* MSG,struct SCANtoRS *);  
+				void (*init)(volatile struct SCANtoRS *);     /* Pointer to the init function */
+				void (*calc)(volatile struct SCANtoRS *);     /* Pointer to the calc function */
+                void (*receive)(volatile struct SCANtoRS *);
+                Uint16 (*write)(TZCanMsg* MSG,volatile struct SCANtoRS *);
                 void (*callback)(TCo_OdVars* ppc, TZCanMsg* p);        
                 unsigned char buf_out[CANTORS_BUFSIZE];
                 Uint16 temp_buf[CANTORS_BUFSIZE];
@@ -74,7 +79,7 @@ struct SCANtoRS {
 				NT_UART_TypeDef *NT_UART;//!Указатель на используемый модуль UART
 				};
 
-typedef  struct SCANtoRS TCANtoRS;
+typedef volatile struct SCANtoRS TCANtoRS;
 
 
 void CANtoRS_init(TCANtoRS*);
@@ -89,12 +94,10 @@ void CANtoRS_Analysis(TCANtoRS*);
 
 
 //если добавляем в струкуру переменные то добавляем значения по умолчанию
-#define CAN_TO_RS_DEFAULTS {0,0,0,0,0,0,0,0,0,0,0,0,\
-						0,0,0,0,0,0,0,\
-						CANtoRS_init,\
-						CANtoRS_calc,\
-						CANtoRS_Receive,\
-						CANtoRS_WriteHelper}
+#define CAN_TO_RS_DEFAULTS { .init = CANtoRS_init,\
+							 .calc = CANtoRS_calc,\
+							 .receive = CANtoRS_Receive,\
+							 .write = CANtoRS_WriteHelper}
 
 #ifdef __cplusplus
 }

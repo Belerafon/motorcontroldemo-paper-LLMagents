@@ -14,10 +14,10 @@
    limitations under the License.
 
  \file      v_CANtoRS.c
- \brief     Преобразователь посылок CAN в RS и обратно. Работает 
+ \brief     Преобразователь посылок CAN в RS/USB и обратно. Работает
 совместно с драйвером CANOpen
  \author    ООО "НПФ Вектор". http://motorcontrol.ru
- \version   v 2.0 25/03/2016
+ \version   v 3.0 08/08/2017
 
  \addtogroup v_CANtoRS
 @{
@@ -26,10 +26,11 @@
 #include "main.h"
 
 
-
+void usb_irq_en(void);
+void usb_irq_dis(void);
 //! \memberof TCANtoRS
 void CANtoRS_init(TCANtoRS *p) {
-
+#ifdef CANTORS_ENA
 #ifdef  HW_NIIET_BOARD_SIMULATOR
 //UART TX - плата микроконтроллера разъем XP6 пин 57 (соответствует обозначению UART_TXD1 в шелкографии на основной плате)
 //UART RX - плата микроконтроллера разъем XP6 пин 59 (соответствует обозначению UART_RXD1 в шелкографии на основной плате)
@@ -80,7 +81,11 @@ void CANtoRS_init(TCANtoRS *p) {
 	p->NT_UART->CR_bit.TXE = 1;			// Разрешить приём
 	p->NT_UART->CR_bit.RXE = 1;			// Разрешить передачу
 	p->NT_UART->LCR_H_bit.STP2 = 0;		// 1 стоп-бит
+#endif
+#ifdef CANTOUSB_ENA
+	USB_init_hardware();
 
+#endif
     p->CounterWrongCRC=0;
     p->CounterRes=0;
     p->CounterSended=0;
@@ -107,12 +112,22 @@ Uint16 CANtoRS_SendP(Uint16* Data, int16 len, TCANtoRS *p) {
     p->all_len=1+len+2;//полная длина=сигнатура+данные + контрольная сумма
 
     i = 0;
+
+#ifdef CANTORS_ENA
     // Если буфер TX не заполнен, то отправляем все байты из буфера
     while ((p->NT_UART->FR_bit.TXFF != 1) && (i < p->all_len)){
     	p->NT_UART->DR = p->buf_out[i];
     	i++;
     }
+#endif
 
+#ifdef CANTOUSB_ENA
+	usb_irq_dis();
+	if (usbTxBuf.busy == 0 && usbTxBuf.availSpace(&usbTxBuf) > p->all_len){
+		usbTxBuf.put(&usbTxBuf, p->all_len, (Uint8*)p->buf_out);
+	}
+	usb_irq_en();
+#endif
 
     return 1;
 }
@@ -163,99 +178,140 @@ void CANtoRS_Analysis(TCANtoRS *p) {
     p->callback_go=1;
 }
 
-
-
-
-
-/*! Побайтовый обработчик приходящих по SCI данных.
-Работает по принципу дискретного автомата и пытается
-найти в посылке API пакет. Сначала ждет заданную сигнатуру,
-потом длину и т.п. В конце проверяет контрольную сумму и
-вызывает дальнейшие обработчики */
+/*! Функция вызывается, когда пришли какие-то данные,
+ * и проверяет, что эти данные корректны и могут быть обработаны
+ * драйвером CANopen. Если это так - данные отправляются на
+ * обработку
+ */
  //! \memberof TCANtoRS
 #if defined (__GNUC__)
 __attribute__((section(".fastcode")))
 #endif
-void CANtoRS_Receive(TCANtoRS *p) {
-    Uint16 MyReadCRC_u16;
-    Uint16 MyCalcCRC;
-    Uint32 temp_byte;
-    Uint16 repeat;
-    for (repeat=0;repeat<7; repeat++) {//обработка не более n байт за один вход в функцию
+void CANtoRS_CheckPacketValid(TCANtoRS *p) {
+	Uint8 i;
+    Uint16 readCRC, calcCRC;	// Расчётная и пришедшая контрольные суммы
 
-        switch (p->APIpacketMode) {
-
-        case 0: { //ожидание сигнатуры
-
-
-            if (p->NT_UART->FR_bit.RXFE)
-            	return;
-            temp_byte = p->NT_UART->DR_bit.DATA;
-            if (temp_byte!=0x7e) {
-                p->MessDrop3++;
-                return;
-            }
-            p->ReadPackDataCounter=0;//счетчик данных
-            p->APIpacketMode=1; //сигрнатура найдена, режим приема данных
-            break;
-        };
-        case 1: { //ожидание данных(полезная нагрузка) пакета
-            //все последующие байты складываем в API буфер
-
-            if (p->NT_UART->FR_bit.RXFE)
-            	return;
-            temp_byte = p->NT_UART->DR_bit.DATA;
-            p->ReadPackData[p->ReadPackDataCounter++]=temp_byte;
-            if (p->ReadPackDataCounter>=CANTORS_READ_DATA_MAX_LEN) {
-                p->ReadPackDataCounter=0;//счетчик данных
-                p->ReadCRCCounter=0;//счетчик контрольной суммы
-                p->APIpacketMode=2;  //данные приняты, режим приема и проверси CRC
-            }
-            break;
-        };
-
-        case 2: { //ожидание  CRC
-            //все последующие байты складываем в CRC буфер
-
-            if (p->NT_UART->FR_bit.RXFE)
-            	return;
-            temp_byte = p->NT_UART->DR_bit.DATA;
-            p->ReadCRC[p->ReadCRCCounter++]=temp_byte;
-            if (p->ReadCRCCounter>=2) {
-                p->ReadCRCCounter=0;//счетчик контрольной суммы
-                MyReadCRC_u16=(p->ReadCRC[0]&0xFF)+((p->ReadCRC[1]<<8)&0xFF00);//запаковываем двухбайтовую CRC в одну переменную
-                MyCalcCRC=CANtoRS_C_CRC(p,p->ReadPackData,CANTORS_READ_DATA_MAX_LEN);
-                if (MyCalcCRC!=MyReadCRC_u16) {
-                    //ошибка!
-                    p->CounterWrongCRC++;
-                    p->APIpacketMode=0;
-                    break;
-                }//контрольная сумма принята и верна
-
-                CANtoRS_Analysis(p);
-                if (p->callback_go) { //если выставлен флаг, вызов callback
-                    p->callback_go=0;
-                    p->APIpacketMode=3;  //обработка callback
-                }
-                else
-                    p->APIpacketMode=0;
-                return;
-            }
-            break;
-        };
-        case 3: { //обработка callback
-            p->CounterRes++;
-            p->callback(&co2_vars, &(p->MSG));
-            p->APIpacketMode=0;
-            break;
-        };
-        default:
-            return;
-        }
+    // Сначала проверим, не хотел ли предыдуищй принятый пакет запустить колбэк
+    // Если хотел - то выполним, а уже при следующем вызове проверим, пришли ли данные, чтобы не сильно загружать процессор
+    if (p->callback_go) {
+    	p->callback_go = 0;
+    	p->CounterRes++;
+    	p->callback(&co2_vars, (TZCanMsg*)&(p->MSG));
+    	return;
     }
+    // Посмотрим, сколько байт начитали в буфер. Если меньше, чем нужно (13) - выходим и ждём следующего раза.
+    // Если насчитали - сбрасываем счётчик принятых байт и идём проверять посылку
+    if (p->ReadPackDataCounter < 13)
+    	return;
+
+    p->ReadPackDataCounter = 0;
+
+    // Сначала проверяем сигнатуру, первый байт посылки (должна быть 0x7E)
+    // Если сигнатура не сошлась - сбрасываем счётчик начитанных байтов, и увеличиваем число потерянных пакетов
+    if (p->tempBuf[0] != 0x7E){
+    	p->MessDrop3++;
+    	return;
+    }
+
+    // Если сигнатура сошлась - следующие 10 байт кладём в DATA
+    for (i = 0; i < CANTORS_READ_DATA_MAX_LEN; i++){
+    	p->ReadPackData[i] = p->tempBuf[i + 1];
+    }
+
+    // Теперь забираем последние два байт посылки - CRC. Сраниваем пришедшую CRC и расчётную.
+    // Если не сошлось - выходим отседова.
+    readCRC = ((Uint16)(p->tempBuf[12]) << 8) | ((Uint16)(p->tempBuf[11]));
+    calcCRC = CANtoRS_C_CRC(p, (Uint16*)p->ReadPackData, CANTORS_READ_DATA_MAX_LEN);
+    if (readCRC != calcCRC) {
+        p->CounterWrongCRC++;
+        return;
+    }
+
+    // Контрольная сумма сошлась - анализируем пакет
+    CANtoRS_Analysis(p);
+
+    // Может получится, что в результате обработки пакета мы увидели необходимость вызвать коллбэк.
+    // В таком случае будет взведён флаг "callback_go". Если это так - мы его обработаем при следующем
+    // вызове функции, чтобы не тратить слишком много времени. А пока выходим.
     return;
+
 }
 
+//! Функция для приёма данных от периферии RS
+//! \memberof TCANtoRS
+#if defined (__GNUC__)
+__attribute__((section(".fastcode")))
+#endif
+void CANtoRS_ReceiveRS(TCANtoRS *p) {
+    // Читаем из фифо данные, пока они там есть, либо пока фифо не опустеет
+    while ((p->NT_UART->FR_bit.RXFE != 1) && (p->ReadPackDataCounter < 13)) {
+    	// Если что-то пришло по RS, а в прошлый раз приходило по USB - надо обнулить ReadDataCounter
+    	if (p->lastActiveConnection == CANTOUSB_ACTIVE)
+    		p->ReadPackDataCounter = 0;
+
+    	p->tempBuf[p->ReadPackDataCounter] = p->NT_UART->DR_bit.DATA;
+    	p->ReadPackDataCounter++;
+
+    	// Указываем, что сейчас активен RS
+    	p->lastActiveConnection = CANTORS_ACTIVE;
+    }
+}
+
+//! Функция для приёма данных от периферии USB
+//! \memberof TCANtoRS
+#if defined (__GNUC__)
+__attribute__((section(".fastcode")))
+#endif
+void CANtoRS_ReceiveUSB(TCANtoRS *p) {
+    Uint16 neededBytes;
+    Uint16 tempLen;
+    // Проверяем, сколько есть данных в буфере.
+    // Если больше, чем нам надо - читаем сколько надо.
+    // Если меньше, чем надо - читаем всё.
+    usb_irq_dis();
+    tempLen = usbRxBuf.filledSpace(&usbRxBuf);
+    if (tempLen > 0){
+    	// Если что-то пришло по USB, а в прошлый раз приходило по RS - надо обнулить ReadDataCounter
+    	if (p->lastActiveConnection == CANTORS_ACTIVE)
+    		p->ReadPackDataCounter = 0;
+
+    	neededBytes = 13 - p->ReadPackDataCounter;
+
+    	if (tempLen >= neededBytes) {
+    		usbRxBuf.get(&usbRxBuf, neededBytes, (Uint8*)(p->tempBuf + p->ReadPackDataCounter));
+    		p->ReadPackDataCounter += neededBytes;
+    	} else {
+    		usbRxBuf.get(&usbRxBuf, tempLen, (Uint8*)(p->tempBuf + p->ReadPackDataCounter));
+    		p->ReadPackDataCounter += tempLen;
+    	}
+
+    	// Указываем, что у нас был активен USB
+    	p->lastActiveConnection = CANTOUSB_ACTIVE;
+    }
+    usb_irq_en();
+}
+
+//! Функция для приёма и обработки данных от периферии/
+//! Работает сразу и с USB, и с RS
+//! \memberof TCANtoRS
+#if defined (__GNUC__)
+__attribute__((section(".fastcode")))
+#endif
+void CANtoRS_Receive(TCANtoRS *p) {
+
+#ifdef CANTORS_ENA
+	// Если RS-модуль задействован - обрабатываем UART
+	CANtoRS_ReceiveRS(p);
+#endif
+
+#ifdef CANTOUSB_ENA
+	// Если USB задействован - обрабатываем USB
+	CANtoRS_ReceiveUSB(p);
+#endif
+
+	// Проверяем пришедшие данные
+	CANtoRS_CheckPacketValid(p);
+}
 
 
 /*! Должна вызываться каждую секунду и отсылает
@@ -264,19 +320,19 @@ CAN пакеты HeartBeat. Если отослать не выходит (передача занята),
 отправить заново */
  //! \memberof TCANtoRS
 void CANtoRS_HeartBeat(TCANtoRS *p) {
-    TZCanMsg MSG;
-    int16 i;
-    MSG.id=0xE<<7;//heartbeat
-    MSG.id|=*p->nodeID;//номер узла
-    MSG.dlc=1;//длина
-    for (i=0;i<8;MSG.data[i++]=0);//очистка
-    MSG.data[0]=5;//данные heartbeat
-    if (!CANtoRS_Write(&MSG,p)) { //если не получилось отправить
-        p->HeartCounter=(CANTORS_HEART_COUNTER_MAX-3); //вскоре пробуем сделать это еще раз
-        p->HeartBeatGo=1;//и если будет событие на отправку SDO, но будет знать, что надо пропустить
-    } else {
-        p->HeartBeatGo=0;
-    }
+	TZCanMsg MSG;
+	int16 i;
+	MSG.id = 0xE << 7;				//heartbeat
+	MSG.id |= *p->nodeID;			//номер узла
+	MSG.dlc = 1;					//длина
+	for (i = 0; i < 8; MSG.data[i++] = 0);					//очистка
+	MSG.data[0] = 5;				//данные heartbeat
+	if (!CANtoRS_Write(&MSG, p)) { 	//если не получилось отправить
+		p->HeartCounter = (CANTORS_HEART_COUNTER_MAX - 3); //вскоре пробуем сделать это еще раз
+		p->HeartBeatGo = 1; 		//и если будет событие на отправку SDO, но будет знать, что надо пропустить
+	} else {
+		p->HeartBeatGo = 0;
+	}
 }
 
 
@@ -321,7 +377,7 @@ Uint16 CANtoRS_Write_Real(TZCanMsg* MSG,TCANtoRS *p) {
     p->TempData[0]|=(MSG->id >> 8) & 7;
     p->TempData[1]=MSG->id & 0xFF;
     for (i=0;i<8;i++) p->TempData[i+2]=MSG->data[i];
-    CANtoRS_SendP(p->TempData,10,p);
+    CANtoRS_SendP((Uint16*)p->TempData,10,p);
     return 1;
 }
 
@@ -338,7 +394,7 @@ void CANtoRS_calc(TCANtoRS *p) {
 
     //если в буфере есть пакет, ожидающий отправки и передатчик свободен и не ждет heartbeat
     if (p->PacketInWait) {
-        if (!CANtoRS_Write_Real(&p->bufMSG,p))//отправить не удалось?
+        if (!CANtoRS_Write_Real((TZCanMsg*)&p->bufMSG, p))//отправить не удалось?
             p->MessDrop2++;
         p->PacketInWait=0;//очищаем буфер
     }

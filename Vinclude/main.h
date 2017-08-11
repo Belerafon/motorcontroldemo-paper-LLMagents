@@ -79,6 +79,8 @@ extern "C" {
 #include "DRV_INTERFACE.h"
 #include "V_event_log.h"
 #include "Global_time.h"
+#include "V_fifo.h"
+#include "V_usblib.h"
 
 extern TClarke 		clarke;
 extern TPark 		park;
