@@ -69,6 +69,8 @@ TMBVarsConv MBVarsConv = MBVARSCONV_DEFAULTS;//!< Модуль преобразования данных и
 TDrvInterface drv_interface = DRV_INTERFACE_DEFAULTS;	//!<Интерфейс длЯ работы с банками аварий, событий и т.п.
 TLogger FaultLog = LOGGER_DEFAULTS;			//!<Протоколирование аварий
 TGlobalTime global_time = GLOBAL_TIME_DEFAULTS; //!<Работа с часами
+TUdControl udControl = UD_CONTROL_DEFAULTS; //!<Плавная зарядка ЗПТ через термисторы
+TFanControl FanControl = FAN_CONTROL_DEFAULTS; //!<Вентилятор
 
 TRefs refs; //!< Структура с заданиями (токи, скорости)
 TCmd cmd = { 0 }; //!< Структура с командами управления

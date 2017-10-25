@@ -38,6 +38,7 @@ extern "C"
 #define DRV_STATUS_STOPPED 0x5
 #define DRV_STATUS_AUTO_SET 0x6
 #define DRV_STATUS_ALARM 0x8
+#define DRV_STATUS_OVERHEAT 0xC
 
 /*! \class TSM_Net
       \brief ћодуль общего назначени€ дл€ работы с сетью.

@@ -119,7 +119,7 @@ void SM_Net_Slow_Calc(TSM_Net *p) {
 #endif
 
 	if (RTCclock.ClockOk)//часы работают?
-		FaultLog.time_ptr = &RTCclock.packed_time;//время для банка аварий из часов
+		FaultLog.time_ptr = &RTCclock.packed_time; //время для банка аварий из часов
 	else
 		FaultLog.time_ptr = (Uint32*) &global_time.PowerOn_time;//если не работают, то из модуля подсчета времени наработки
 }
@@ -143,6 +143,10 @@ void SM_Net_ms_Calc(TSM_Net *p) {
 		drv_status_code |= DRV_STATUS_ALARM;
 	else
 		drv_status_code &= ~DRV_STATUS_ALARM;
+	if (drv_status.bit.overheat == 1)
+		drv_status_code = DRV_STATUS_OVERHEAT;
+	else
+		drv_status_code &= ~DRV_STATUS_OVERHEAT;
 	//функция листания аварий для пульта (UniCON)
 	pult_faults_lister.calc(&pult_faults_lister);
 	sm_prot.Main_ErrorCode = 0xFF & pult_faults_lister.output;

@@ -34,6 +34,13 @@ int16 WriteCounter = 0;
 void SM_Protect_Init(TSM_Protect *p) {
 	p->state_prev = 0xff;
 	p->state = 0x00;
+
+#if defined (HW_MOTORCONTROLBOARD)
+/*
+ * 		Инициализация кнопки СБРОС АВАРИЙ не требуется, так как мы используем для этого дискретный вход
+ */
+#endif
+
 }
 
 //! Быстрый расчет.
@@ -52,6 +59,28 @@ void SM_Protect_Fast_Calc(TSM_Protect *p) {
 		//имеется какая-то аппаратная авария
 		sm_prot.bit_fault1 |= F_PDPINT;
 	}
+
+#if defined (HW_MOTORCONTROLBOARD)
+	if (!DRV_FAULT1) {
+		//имеется какая-то аппаратная авария
+		sm_prot.bit_fault2 |= F_PDP_SWITCH_A0;
+	}
+
+	if (!DRV_FAULT2) {
+		//имеется какая-то аппаратная авария
+		sm_prot.bit_fault2 |= F_PDP_SWITCH_A1;
+	}
+
+	if (!DRV_FAULT3) {
+		//имеется какая-то аппаратная авария
+		sm_prot.bit_fault2 |= F_PDP_SWITCH_A2;
+	}
+
+	if (!DRV_FAULT4) {
+		//имеется какая-то аппаратная авария
+		sm_prot.bit_fault2 |= F_PDP_SWITCH_LOWER;
+	}
+#endif
 
 	/*Защита по максимальному току*/
 	if (adc.Imeas_a > sm_prot.Imax_protect)
@@ -82,6 +111,11 @@ void SM_Protect_Fast_Calc(TSM_Protect *p) {
 		if (sm_ctrl.state != CTRL_STOP) {
 			sm_prot.bit_fault1 |= F_CTRL_LOW_UDC;
 		}
+	}
+
+	//при превышении температуры выше аварийной нормы
+	if (adc.T_meas > sm_prot.T_max) {
+		sm_prot.bit_fault1 |= F_CTRL_HI_TEMP; // максимальная температура
 	}
 
 #if defined(HW_VECTORCARD_SIMULATOR) || defined(HW_NIIET_BOARD_SIMULATOR)
@@ -141,7 +175,7 @@ void SM_Protect_Fast_Calc(TSM_Protect *p) {
 		//Выключение ШИМ. Пока там все остальные дискретные автоматы пробурлятся, чтобы их не ждать
 		pwm.Off(&pwm);
 		//логика сбороса аварии
-		if (cmd.bit.trip_reset == 1) {//команда на сброс аварии
+		if ((cmd.bit.trip_reset == 1) || (RESET_FAULT_BUTTON == 1)) {//команда на сброс аварии
 			p->state = PROT_ON_OK;//идем в "норма"
 			p->clearDrvFault = 1;	//отправить драйверу ключей команду сброса
 			//обнуляем все флаги аварий

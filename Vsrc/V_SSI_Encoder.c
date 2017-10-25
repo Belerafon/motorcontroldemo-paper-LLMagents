@@ -35,6 +35,17 @@ void SSI_Encoder_init(TSSI_Encoder *p) {
 	volatile long delay;
 	volatile Uint32 tempREG;
 
+
+	// Настройка ног SPI
+#ifdef HW_MOTORCONTROLBOARD
+#define SSI_NT_SPI NT_SPI0 //Настройка номера SPI
+	NT_GPIOA->ALTFUNCSET = (1 << 6); //SPI_CLK0
+	NT_GPIOA->ALTFUNCSET = (1 << 7); //SPI_RXD0
+	NT_COMMON_REG->GPIOPCTLA_bit.PIN6 = 0;
+	NT_COMMON_REG->GPIOPCTLA_bit.PIN7 = 0;
+#else
+
+#define SSI_NT_SPI NT_SPI2 //Настройка номера SPI
 	//SPI-SOMI - на VectorCard нога 88, на проце B15, SPI_RXD2
 	//SPI-SIMO - на VectorCard нога 38, на проце C6, SPI_TXD2
 	//SPI-CLK - на VectorCard нога 39, на проце  B14, SPI_CLK2
@@ -42,7 +53,6 @@ void SSI_Encoder_init(TSSI_Encoder *p) {
 	//Плата texas DRV8301-HC-EVM разведена так, что микроконтроллер - это ведомое устройство.
 	//Нужно сделать его мастером. Подробнее читайте комментарий в заголовочном файле.
 
-	// Настройка ног SPI
 	NT_GPIOB->ALTFUNCSET = (1 << 13);//чип-селект
 	NT_GPIOB->ALTFUNCSET = (1 << 14) | (1 << 15);
 	NT_GPIOC->ALTFUNCSET = (1 << 6);//SIMO
@@ -50,7 +60,7 @@ void SSI_Encoder_init(TSSI_Encoder *p) {
 	NT_COMMON_REG->GPIOPCTLB_bit.PIN14 = 2;
 	NT_COMMON_REG->GPIOPCTLB_bit.PIN15 = 2;
 	NT_COMMON_REG->GPIOPCTLC_bit.PIN6 = 2;//SIMO
-
+#endif
 
 	// Настройка тактирования SSP модуля
 	// Всего 4 модуля, на каждый модуль по 8 бит из регистра SSP_CLK_CTRL и по два бита из UART_SSP_CLK_SEL
@@ -66,13 +76,13 @@ void SSI_Encoder_init(TSSI_Encoder *p) {
 	//  X - деление по формуле SSPclk = f_SSP_IN /( 2 * (X +1) )
 	// Из документации на блок SSP - минимальная частота для работы модуля в режимах и мастер и слейв,
 	// f_SSP_IN > 22.12 MHz, поэтому 25 МГц сделаем
-	/* закомменчены, так как тоже самое делается в DRV8301_SPI
+#ifdef HW_MOTORCONTROLBOARD
+	//Для DRV8301_SPI не делаем, т.к. тоже самое делается в нем самом
 	tempREG = NT_COMMON_REG->UART_SPI_CLK_SEL;// Через tempREG, чтобы не задеть другие биты, отвечающие за тактирование UART'a
 	tempREG &= 0xFFFF00FF;
 	NT_COMMON_REG->UART_SPI_CLK_SEL = tempREG;
 	NT_COMMON_REG->SPI_CLK = 0x07070707;// Разрешить тактирование, разрешить деление частоты, делить на 4 - 25 МГц
-	*/
-
+#endif
 
 	// Настройка самого модуля SPI
 	// Продолжение настройки тактирования.
@@ -81,18 +91,18 @@ void SSI_Encoder_init(TSSI_Encoder *p) {
 	// SSPCR0.bit.SCR - второй делитель от 0 до 255.
 	// Битрейт в итоге BitRate = f_SSP_IN / ( SSPCPSR * (SCR + 1) )
 
-	NT_SPI2->SPI_CR1 = 0;// Режим - мастер, LoopBack отключён, сам модуль SSP тоже отключён
-	NT_SPI2->SPI_IMSC = 0x0;		// Запретить все прерывания
-	NT_SPI2->SPI_DMACR = 0;		// Запретить DMA
-	NT_SPI2->SPI_ICR = 0x3;	// Очистка прерываний ("переполнение FIFO приёма" и "необслуженное FIFO приёма")
+	SSI_NT_SPI->SPI_CR1 = 0;// Режим - мастер, LoopBack отключён, сам модуль SSP тоже отключён
+	SSI_NT_SPI->SPI_IMSC = 0x0;		// Запретить все прерывания
+	SSI_NT_SPI->SPI_DMACR = 0;		// Запретить DMA
+	SSI_NT_SPI->SPI_ICR = 0x3;	// Очистка прерываний ("переполнение FIFO приёма" и "необслуженное FIFO приёма")
 
-	NT_SPI2->SPI_CPSR = 4;			// Деление входной частоты на 4 -> 6,25 MHz
-	NT_SPI2->SPI_CR0_bit.DSS = 12;	// Размер данных - 12 бит
-	NT_SPI2->SPI_CR0_bit.SCR = 0x3F;	// Второй делитель
-	NT_SPI2->SPI_CR0_bit.FRF = 0x0;	// Какая-то "фаза" для протокола Motorola SPI
-	NT_SPI2->SPI_CR0_bit.SPH = 0x1;	// Какая-то "полярность" для протокола Motorola SPI
-	NT_SPI2->SPI_CR0_bit.SPO = 0x0;	// Выбор формата кадра Motorola/TI/Microwire. "0" - по протоколу Motorola SPI
-	NT_SPI2->SPI_CR1_bit.SSE = 1;	// Разрешить работу
+	SSI_NT_SPI->SPI_CPSR = 4;			// Деление входной частоты на 4 -> 6,25 MHz
+	SSI_NT_SPI->SPI_CR0_bit.DSS = 12;	// Размер данных - 12 бит
+	SSI_NT_SPI->SPI_CR0_bit.SCR = 0x3F;	// Второй делитель
+	SSI_NT_SPI->SPI_CR0_bit.FRF = 0x0;	// Какая-то "фаза" для протокола Motorola SPI
+	SSI_NT_SPI->SPI_CR0_bit.SPH = 0x1;	// Какая-то "полярность" для протокола Motorola SPI
+	SSI_NT_SPI->SPI_CR0_bit.SPO = 0x0;	// Выбор формата кадра Motorola/TI/Microwire. "0" - по протоколу Motorola SPI
+	SSI_NT_SPI->SPI_CR1_bit.SSE = 1;	// Разрешить работу
 
 	p->resol_inv = 1.0 / ((float) p->resol);
 
@@ -114,9 +124,9 @@ void SSI_Encoder_Read(TSSI_Encoder*p) {
 	Uint16 Data_read=0;
 	_iq theta_mech_temp;
 
-	if (NT_SPI2->SPI_SR_bit.BSY == 0){//SPI свободен
-		Data_read = NT_SPI2->SPI_DR;//код с датчика (число от 0 до resol)
-		NT_SPI2->SPI_DR = 0xff;//отправляем что угодно, главное, чтобы тактирование шло
+	if (SSI_NT_SPI->SPI_SR_bit.BSY == 0){//SPI свободен
+		Data_read = SSI_NT_SPI->SPI_DR;//код с датчика (число от 0 до resol)
+		SSI_NT_SPI->SPI_DR = 0xff;//отправляем что угодно, главное, чтобы тактирование шло
 
 
 		if (p->rotation_dir)//обратное направление вращения

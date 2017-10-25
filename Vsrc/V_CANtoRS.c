@@ -43,8 +43,18 @@ void CANtoRS_init(TCANtoRS *p) {
         NT_COMMON_REG->GPIOPCTLA_bit.PIN4 = 0;
 
         p->NT_UART=NT_UART1;//Используемый в драйвере номер UART (1,2,3)
-#else
 
+#elif defined (HW_MOTORCONTROLBOARD)
+        // Выбрать и разрешить периферийную функцию
+        NT_COMMON_REG->GPIOPCTLC_bit.PIN7 = 1;   //UART_TxD[1]
+        NT_COMMON_REG->GPIOPCTLA_bit.PIN4 = 0;  //UART_RxD[1]
+        NT_GPIOC->ALTFUNCSET = (1 << 7);
+        NT_GPIOA->ALTFUNCSET = (1 << 4);
+
+        p->NT_UART=NT_UART1;//Используемый в драйвере номер UART (1,2,3)
+
+        p->NT_UART->CR_bit.UARTEN = 1; // Разрешить работу UART
+#else
         // Выбрать и разрешить периферийную функцию
         NT_COMMON_REG->GPIOPCTLD_bit.PIN1 = 1;   //UART_TxD[3]
         NT_COMMON_REG->GPIOPCTLD_bit.PIN2 = 1;  //UART_RxD[3]

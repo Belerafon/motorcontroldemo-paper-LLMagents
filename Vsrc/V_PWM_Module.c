@@ -49,6 +49,10 @@
 #define GPIO_INV_OFF
 #endif
 
+#if defined(HW_MOTORCONTROLBOARD)
+#define GPIO_INV_ON
+#define GPIO_INV_OFF
+#endif
 
 
 //! Инициализация
@@ -342,6 +346,22 @@ void PWM_Module_Init(TPWM_Module *p) {
 
 #endif
 
+#ifdef HW_MOTORCONTROLBOARD
+	//ШИМ 6 выводов
+	NT_GPIOG->ALTFUNCSET = (1 << 2) + (1 << 3) + (1 << 4);		//ePWMxA(0), (1), (2)
+	NT_GPIOF->ALTFUNCSET = (1 << 0);							//ePWMxB(0)
+	NT_GPIOA->ALTFUNCSET = (1 << 11) + (1 << 12);				//ePWMxB(1), (2)
+
+	// Периферийная функция - PWM
+	NT_COMMON_REG->GPIOPCTLF_bit.PIN0 = 0;		//ePWMxB(0)
+	NT_COMMON_REG->GPIOPCTLA_bit.PIN11 = 2;		//ePWMxB(1)
+	NT_COMMON_REG->GPIOPCTLA_bit.PIN12 = 2;		//ePWMxB(2)
+
+
+	NT_COMMON_REG->GPIOPCTLG_bit.PIN2 = 0;//ePWMxA(0)
+	NT_COMMON_REG->GPIOPCTLG_bit.PIN3 = 0;//ePWMxA(1)
+	NT_COMMON_REG->GPIOPCTLG_bit.PIN4 = 0;//ePWMxA(2)
+#endif
 
 	//Синхронный запуск ШИМ
 	NT_COMMON_REG->PWM_SYNC_bit.TBCLKSYNC = 0x1FF;

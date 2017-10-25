@@ -30,10 +30,10 @@
 		<scale_24 units="16" prefix="0" scaleQ="0" num_of_float="2" possible_value="1000" name=""/>
 		<scale_25 units="13" prefix="0" scaleQ="0" num_of_float="0" possible_value="1" name=""/>
 		<scale_26 units="14" prefix="0" scaleQ="0" num_of_float="0" possible_value="1" name=""/>
-		<scale_27 units="0" prefix="0" scaleQ="0" num_of_float="0" possible_value="1" name=""/>
-		<scale_28 units="" prefix="" scaleQ="" num_of_float="" possible_value="1" name=""/>
-		<scale_29 units="" prefix="" scaleQ="" num_of_float="" possible_value="1" name=""/>
-		<scale_30 units="" prefix="" scaleQ="" num_of_float="" possible_value="1" name=""/>
+		<scale_27 units="12" prefix="0" scaleQ="0" num_of_float="3" possible_value="1" name=""/>
+		<scale_28 units="0" prefix="0" scaleQ="0" num_of_float="0" possible_value="0" name=""/>
+		<scale_29 units="0" prefix="" scaleQ="0" num_of_float="0" possible_value="" name=""/>
+		<scale_30 units="0" prefix="" scaleQ="0" num_of_float="0" possible_value="" name=""/>
 		<scale_31 units="" prefix="" scaleQ="" num_of_float="" possible_value="1" name=""/>
 	</scale_numbers>
 	<Indexes>
@@ -2690,7 +2690,7 @@
 		<obj_211Bh.02h DataType="Editable" name="Scale Number 1BFormat" addr="co_scaleNum1BFormat" group="6" groupName="CAN" fullgroup="6" callback="">
 			<format Type="StandartNum" Size="16" Signed="false"/>
 			<text text="S1BFmt" textID="300"/>
-			<defaults default="0" min="" max=""/>
+			<defaults default="12384" min="" max=""/>
 			<description description="Scale Number Format - формат масштабирующего коэффициента"/>
 		</obj_211Bh.02h>
 		<obj_211Bh.03h DataType="Editable" name="Scale Number Format Q" addr="co_scaleNum1BFormat" group="6" groupName="CAN" fullgroup="6" callback="">
@@ -2702,7 +2702,7 @@
 		<obj_211Bh.04h DataType="Editable" name="Scale Number Format NumOfFloat" addr="co_scaleNum1BFormat" group="6" groupName="CAN" fullgroup="6" callback="">
 			<format Type="Bit" Visualization="Dec" Length="2" StartBit="5"/>
 			<text text="NFloat" textID="217"/>
-			<defaults default="0" min="" max=""/>
+			<defaults default="3" min="" max=""/>
 			<description description="Scale Number Format NumOfFloat - количество дробных разрядов для отображения результирующего числа"/>
 		</obj_211Bh.04h>
 		<obj_211Bh.05h DataType="Editable" name="Scale Number Format Prefix" addr="co_scaleNum1BFormat" group="6" groupName="CAN" fullgroup="6" callback="">
@@ -2714,7 +2714,7 @@
 		<obj_211Bh.06h DataType="Editable" name="Scale Number Format Units" addr="co_scaleNum1BFormat" group="6" groupName="CAN" fullgroup="6" callback="">
 			<format Type="Bit" Visualization="Text" Length="6" StartBit="10"/>
 			<text text="Units" textID="219"/>
-			<defaults default="0" min="" max=""/>
+			<defaults default="12" min="" max=""/>
 			<description description="Scale Number Format Units - единицы измерения"/>
 		</obj_211Bh.06h>
 		<obj_211Ch.00h DataType="Viewable" name="Scale Number 1C Record" addr="" group="6" groupName="CAN" fullgroup="30" callback="">
@@ -3744,6 +3744,13 @@
 			<defaults default="100663296" min="" max=""/>
 			<description description=""/>
 		</obj_510Eh.0Ah>
+		<obj_510Eh.0Bh DataType="Editable" name="Максимальная температура" addr="sm_prot.T_max" group="18" groupName="Защиты" fullgroup="" callback="">
+			<format Type="IQ" Size="32" Signed="true" QValue="24" ScaleNum="10"/>
+			<text text="t_max" textID="639"/>
+			<defaults default="75497472" min="" max=""/>
+			<description description="Максимальная температура 
+"/>
+		</obj_510Eh.0Bh>
 		<obj_5112h.00h DataType="Viewable" name="Задания" addr="" group="3" groupName="Задания" fullgroup="3" callback="">
 			<format Type="Root"/>
 			<text text="ЗадПар" textID="394"/>
@@ -3978,6 +3985,18 @@
 			<defaults default="0" min="" max=""/>
 			<description description=""/>
 		</obj_5116h.0Fh>
+		<obj_5116h.10h DataType="Editable" name="Коэффициент температуры" addr="adc.T_meas_gain" group="16" groupName="АЦП" fullgroup="" callback="">
+			<format Type="IQ" Size="16" Signed="true" QValue="0" ScaleNum="27"/>
+			<text text="t_gain" textID="633"/>
+			<defaults default="0" min="" max=""/>
+			<description description=""/>
+		</obj_5116h.10h>
+		<obj_5116h.11h DataType="Viewable" name="Температура" addr="adc.T_meas" group="16" groupName="АЦП" fullgroup="" callback="">
+			<format Type="IQ" Size="32" Signed="true" QValue="24" ScaleNum="10"/>
+			<text text="t" textID="634"/>
+			<defaults default="0" min="" max=""/>
+			<description description=""/>
+		</obj_5116h.11h>
 		<obj_511Ah.00h DataType="Viewable" name="Модуль U/F" addr="" group="20" groupName="Кривая U-f" fullgroup="18" callback="">
 			<format Type="Root"/>
 			<text text="Закон U(f) (АД)" textID="428"/>
@@ -5364,5 +5383,79 @@
 			<defaults default="16777216" min="" max=""/>
 			<description description="Индуктивность фазы статора"/>
 		</obj_5B04h.08h>
+		<obj_5B05h.00h DataType="Viewable" name="Плавный заряд ЗПТ" addr="" group="48" groupName="Плавный заряд ЗПТ" fullgroup="" callback="">
+			<format Type="Root"/>
+			<text text="smooth_charge" textID="626"/>
+			<defaults default="0" min="" max=""/>
+			<description description="Плавный заряд через термистор и последующее закорачивание цепи через реле"/>
+		</obj_5B05h.00h>
+		<obj_5B05h.01h DataType="Viewable" name="Текущее состояние реле" addr="udControl.StateOn" group="48" groupName="Плавный заряд ЗПТ" fullgroup="" callback="">
+			<format Type="StandartNum" Size="8" Signed="false"/>
+			<text text="Relay_state" textID="631"/>
+			<defaults default="0" min="" max=""/>
+			<description description=""/>
+		</obj_5B05h.01h>
+		<obj_5B05h.02h DataType="Editable" name="Задежка включения реле, мс" addr="udControl.Timeout_on" group="48" groupName="Плавный заряд ЗПТ" fullgroup="" callback="">
+			<format Type="StandartNum" Size="16" Signed="false"/>
+			<text text="relay on-delay" textID="627"/>
+			<defaults default="2000" min="" max=""/>
+			<description description=""/>
+		</obj_5B05h.02h>
+		<obj_5B05h.03h DataType="Editable" name="Напряжение включения, В" addr="udControl.U_on" group="48" groupName="Плавный заряд ЗПТ" fullgroup="" callback="">
+			<format Type="IQ" Size="32" Signed="false" QValue="24" ScaleNum="7"/>
+			<text text="on-voltage" textID="628"/>
+			<defaults default="15099494" min="" max=""/>
+			<description description=""/>
+		</obj_5B05h.03h>
+		<obj_5B05h.04h DataType="Editable" name="Напряжение выключения, В" addr="udControl.U_off" group="48" groupName="Плавный заряд ЗПТ" fullgroup="" callback="">
+			<format Type="IQ" Size="32" Signed="false" QValue="24" ScaleNum="7"/>
+			<text text="off-voltage" textID="629"/>
+			<defaults default="11744051" min="" max=""/>
+			<description description=""/>
+		</obj_5B05h.04h>
+		<obj_5B05h.05h DataType="Viewable" name="Производная напряжения ЗПТ" addr="udControl.deriv_time_ZPT" group="48" groupName="Плавный заряд ЗПТ" fullgroup="" callback="">
+			<format Type="IQ" Size="32" Signed="true" QValue="24" ScaleNum="15"/>
+			<text text="derivative_voltage" textID="630"/>
+			<defaults default="0" min="" max=""/>
+			<description description=""/>
+		</obj_5B05h.05h>
+		<obj_5B05h.06h DataType="Editable" name="Уставка по производной ЗПТ" addr="udControl.deriv_const" group="48" groupName="Плавный заряд ЗПТ" fullgroup="" callback="">
+			<format Type="IQ" Size="32" Signed="true" QValue="24" ScaleNum="15"/>
+			<text text="derivative_const" textID="632"/>
+			<defaults default="0" min="" max=""/>
+			<description description=""/>
+		</obj_5B05h.06h>
+		<obj_5B06h.00h DataType="Viewable" name="Система охлаждения" addr="" group="47" groupName="Система охлаждения" fullgroup="" callback="">
+			<format Type="Root"/>
+			<text text="cool_syst" textID="635"/>
+			<defaults default="0" min="" max=""/>
+			<description description=""/>
+		</obj_5B06h.00h>
+		<obj_5B06h.01h DataType="Viewable" name="Текущее состояние вентилятора" addr="FanControl.StateOn" group="47" groupName="Система охлаждения" fullgroup="" callback="">
+			<format Type="StandartNum" Size="16" Signed="false"/>
+			<text text="fan_state" textID="636"/>
+			<defaults default="0" min="" max=""/>
+			<description description="Состояние вентилятора (включен/выключен)"/>
+		</obj_5B06h.01h>
+		<obj_5B06h.02h DataType="Editable" name="Температура включения вентилятора" addr="FanControl.T_on" group="47" groupName="Система охлаждения" fullgroup="" callback="">
+			<format Type="IQ" Size="32" Signed="true" QValue="24" ScaleNum="10"/>
+			<text text="t_on" textID="637"/>
+			<defaults default="41943040" min="" max=""/>
+			<description description="Температура включения вентилятора "/>
+		</obj_5B06h.02h>
+		<obj_5B06h.03h DataType="Editable" name="Температура выключения вентилятора" addr="FanControl.T_off" group="47" groupName="Система охлаждения" fullgroup="" callback="">
+			<format Type="IQ" Size="32" Signed="true" QValue="24" ScaleNum="10"/>
+			<text text="t_off" textID="638"/>
+			<defaults default="25165824" min="" max=""/>
+			<description description="Температура выключения вентилятора
+"/>
+		</obj_5B06h.03h>
+		<obj_5B06h.04h DataType="Editable" name="Температура вывода предупреждения о перегреве" addr="FanControl.T_alarm" group="47" groupName="Система охлаждения" fullgroup="" callback="">
+			<format Type="IQ" Size="32" Signed="true" QValue="24" ScaleNum="10"/>
+			<text text="t_alarm" textID="640"/>
+			<defaults default="67108864" min="" max=""/>
+			<description description="Температура выключения вентилятора
+"/>
+		</obj_5B06h.04h>
 	</Indexes>
 </root>

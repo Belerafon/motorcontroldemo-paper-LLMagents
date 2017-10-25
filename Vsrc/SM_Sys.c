@@ -43,6 +43,8 @@ void SM_Sys_Init(TSM_Sys *p) {
 	sw.HardwareType = 1;
 #elif defined (HW_VECTORCARD_SIMULATOR)
 	sw.HardwareType = 2;
+#elif defined (HW_MOTORCONTROLBOARD)
+	sw.HardwareType = 3;
 #endif
 	cmd.all = 0;
 	drv_status.all = 0;
@@ -55,7 +57,9 @@ void SM_Sys_Init(TSM_Sys *p) {
 	pwm.init(&pwm); //Модуль ШИМ
 	cur_par.init(&cur_par); //Расчет текущих показателей привода
 	leds.init(&leds);//светодиоды
-
+	udControl.init(&udControl); //плавная зарядка ЗПТ через термисторы
+	DIO_Init(); //дискретные входы/выходы
+	FanControl.init(&FanControl); //вентилятор
 	//глобальное времЯ (внешние или внутр. часы)
 	global_time.init(&global_time);
 
@@ -200,6 +204,8 @@ void SM_Sys_Fast_Calc(TSM_Sys *p) {
 	dlog.update(&dlog); //Осциллографирование данных
 	sm_prot.fast_calc(&sm_prot); //Защиты
 	sm_ctrl.fast_calc(&sm_ctrl); //Главный дискретный автомат системы управления
+	udControl.calc(&udControl);//Плавная зарядка ЗПТ через термисторы
+
 #if defined(HW_VECTORCARD_SIMULATOR) || defined(HW_NIIET_BOARD_SIMULATOR)
 	//Передача текущих скважностей таймеров ШИМ в модель
 	model.cmpr0=NT_PWM0->CMPA_bit.CMPA;
@@ -212,7 +218,7 @@ void SM_Sys_Fast_Calc(TSM_Sys *p) {
 	global_time.calc(&global_time);
 
 	cur_par.calc(&cur_par); //Расчет текущих показателей привода
-	drv_params.sens_type = drv_params.sens_type & 3; //Отсекаем верхнюю часть переменной, там мусор
+	drv_params.sens_type = drv_params.sens_type & 7; //Отсекаем верхнюю часть переменной, там мусор
 
 #ifdef WATCHDOG_ON
 	WatchDog.calc();//если сторожевой таймер используется, сбрасываем его здесь
@@ -238,6 +244,8 @@ void SM_Sys_ms_Calc(TSM_Sys* p) {
 		DPReCAP.ms_calc(&DPReCAP);
 	}
 	global_time.ms_calc(&global_time);
+
+	DIO_fast_calc(); //дискретные входы/выходы
 }
 
 //!Медленный расчет (фоновый).
@@ -259,6 +267,8 @@ void SM_Sys_Slow_Calc(TSM_Sys *p) {
 	AutoOffset.slow_calc(&AutoOffset);
 	posspeedEqep.slow_calc(&posspeedEqep);//инициализация модуля энкодера
 	RotorObserver.slow_calc(&RotorObserver);//наблюдатель потока ротора АД
+	DIO_slow_calc(); //дискретные входы/выходы
+	FanControl.slow_calc(&FanControl);//вентилятор
 
 	//Пересчет коэффициентов для масштабирования токов и напряжений
 	drv_params._1_Udc_nom = _IQdiv(_IQ16(1), _IQ16(drv_params.Udc_nom));

@@ -79,8 +79,11 @@ extern "C" {
 #include "DRV_INTERFACE.h"
 #include "V_event_log.h"
 #include "Global_time.h"
+#include "V_UdControl.h"
+#include "V_DIO.h"
 #include "V_fifo.h"
 #include "V_usblib.h"
+#include "V_Fan.h"
 
 extern TClarke 		clarke;
 extern TPark 		park;
@@ -126,6 +129,8 @@ extern TCanBTInterface 	Can2BTInterface;
 extern TDrvInterface drv_interface;
 extern TLogger		FaultLog;
 extern TGlobalTime global_time;
+extern TUdControl udControl;
+extern TFanControl FanControl;
 
 extern Uint16 msCounter;
 extern Uint16 FastCounter;

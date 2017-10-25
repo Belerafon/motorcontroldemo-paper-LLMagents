@@ -38,11 +38,19 @@ void SM_CmdLogicInit(TSM_CmdLogic *p) {
 	/* Разрешить ногам работать на вход, это кнопки старт и стоп */
 	NT_GPIOA->ALTFUNCCLR = (1 << 13) | (1 << 14);//выключить альт. функцию
 	NT_GPIOA->OUTENCLR = (1 << 13) | (1 << 14);//на вход
+#endif
 
-	p->StartButton=((NT_GPIOA->DATA & (1 << 14))==0);//обработка ножки старта
-	p->StopButton=((NT_GPIOA->DATA & (1 << 13))==0);//обработка ножки стопа
-	p->StartButtonPrev=p->StartButton;
-	p->StopButtonPrev=p->StopButton;
+#if defined (HW_MOTORCONTROLBOARD)
+	/* Разрешить ногам работать на вход, это кнопки старт и стоп */
+	/* Для включения/выключения данного контроллера использованы внешние дискретные входы */
+
+	/*
+	 *		Здесь описываются (отключается альтернативная функция,
+	 *		разрешается работа на выход) ножки для работы с кнопками
+	 *		на самом контроллере. Но так как для данного контроллера
+	 *		мы используем внешние дискретные входы (см. V_DIO), оставим
+	 *		это место пустым.
+	 */
 #endif
 }
 
@@ -59,6 +67,8 @@ void SM_CmdLogicSlow_Calc(TSM_CmdLogic *p) {
 //!который переключает глобально режимы РАБОТА и ОСТАНОВ.
 //! \memberof TSM_CmdLogic
 void SM_CmdLogicms_Calc(TSM_CmdLogic *p) {
+	p->StartButton = STARTBUTTON;//обработка ножки старта
+	p->StopButton = STOPBUTTON;//обработка ножки стопа
 
 	//Стандартная обработка дискретного автомата
 	if (p->state_prev != p->state)
@@ -67,10 +77,7 @@ void SM_CmdLogicms_Calc(TSM_CmdLogic *p) {
 		p->E = 0;
 	p->state_prev = p->state;
 
-#if defined (HW_VECTORCARD_DRV8301_EVM) || defined (HW_VECTORCARD_DRV8312_EVM)
-	p->StartButton=((NT_GPIOA->DATA & (1 << 14))==0);//обработка ножки старта
-	p->StopButton=((NT_GPIOA->DATA & (1 << 13))==0);//обработка ножки стопа
-
+#if defined (HW_VECTORCARD_DRV8301_EVM) || defined (HW_VECTORCARD_DRV8312_EVM) || defined (HW_MOTORCONTROLBOARD)
 	if ((p->StartButton==1) && (p->StartButtonPrev==0)){
 		cmd.bit.start=1;//команда на запуск. Она же ставится через CAN
 	}
@@ -92,8 +99,14 @@ void SM_CmdLogicms_Calc(TSM_CmdLogic *p) {
 		}
 
 		if (sm_prot.state == PROT_ON_OK) {//если ДА защит включился, обрабатываем команды включения
-			if ((cmd.bit.start == 1) && (sm_sys.state == SYS_READY))//есть битовая команда старта
-				p->state = CMD_LOGIC_TURNED_ON;	//поехали
+			if ((cmd.bit.start == 1) && (sm_sys.state == SYS_READY)) {//есть битовая команда старта
+				if (udControl.Enabled == 0) {	//Если цепь плавного заряда ЗПТ отключена, то переходим к пуску
+					p->state = CMD_LOGIC_TURNED_ON;	//поехали
+				}
+				else if (udControl.StateOn == 1) { //Если цепь плавного заряда ЗПТ включена, ждем срабатывания реле, а потом запускаем
+					p->state = CMD_LOGIC_TURNED_ON;	//поехали
+				}
+			}
 		}
 
 		//дискретный автомат со структурами управления в СТОПе всегда тоже принудительно переводим в стоп

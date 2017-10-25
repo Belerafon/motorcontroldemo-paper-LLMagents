@@ -58,9 +58,14 @@
 #include "V_ModBus.h"
 #include "main.h"
 
+#if defined (HW_MOTORCONTROLBOARD)
 //Макросы для переключения RS485 между приемом и передачей
+#define MODBUS_RX_RS485 NT_GPIOG->MASKHIGHBYTE_bit[1].MASKHB = 0	//G8
+#define MODBUS_TX_RS485 NT_GPIOG->MASKHIGHBYTE_bit[1].MASKHB = 1	//G8
+#else
 #define MODBUS_RX_RS485 //NT_GPIOC->MASKHIGHBYTE_bit[4].MASKHB = 4
 #define MODBUS_TX_RS485 //NT_GPIOC->MASKHIGHBYTE_bit[4].MASKHB = 0
+#endif
 //Макрос для осциллографирования ножек UART (удобно для отладки, когда вообще ничего не работает)
 #define MODBUS_GPIO_VALUE  (NT_GPIOD->DATA>>1) & 3
 //Частота тактирования блока UART (настраивается в инициализации микроконтроллера)
@@ -68,6 +73,25 @@
 
 
 void  ModBus_RS_Init(TModBus *p){
+
+#if defined (HW_MOTORCONTROLBOARD)
+
+	//Разрешить ножке G8 работать на выход
+	NT_GPIOG->OUTENSET = (1 << 8);
+
+
+    // Выбрать и разрешить периферийную функцию
+    NT_COMMON_REG->GPIOPCTLF_bit.PIN10 = 0;   //UART_TxD[2]
+    NT_COMMON_REG->GPIOPCTLF_bit.PIN11 = 0;  //UART_RxD[2]
+    NT_GPIOF->ALTFUNCSET = (1 << 10) + (1 << 11);
+
+    // Изменить периферийную функцию F4, чтобы она не заблокировала UART2
+    NT_COMMON_REG->GPIOPCTLF_bit.PIN4 = 1;
+
+    p->MBInternals.NT_UART=NT_UART2;//Используемый в драйвере номер UART (1,2,3)
+
+	p->MBInternals.NT_UART->CR_bit.UARTEN = 1; 		// Разрешить работу UART
+#else
 	// Выбрать и разрешить периферийную функцию
 	NT_COMMON_REG->GPIOPCTLD_bit.PIN1 = 1;	 //UART_TxD[3]
 	NT_COMMON_REG->GPIOPCTLD_bit.PIN2 = 1;	//UART_RxD[3]
@@ -79,6 +103,7 @@ void  ModBus_RS_Init(TModBus *p){
 	p->MBInternals.NT_UART=NT_UART3;//Используемый в драйвере номер UART (1,2,3)
 
 	p->MBInternals.NT_UART->CR_bit.UARTEN = 1; 		// Разрешить работу UART
+#endif
 
 	//Текущая реализация драйвера не использует FIFO, обрабатывает данные по одному байту
 	//и вызывается в прерывании 10кГц. Поэтому частоты обмена больше 57600 не поддерживаются (будет терять байты)

@@ -39,6 +39,22 @@ extern "C"
 //! Состояние РАБОТА
 #define CMD_LOGIC_TURNED_ON			0x2
 
+#if defined (HW_VECTORCARD_DRV8301_EVM) || defined (HW_VECTORCARD_DRV8312_EVM)
+#define	STARTBUTTON	((NT_GPIOA->DATA & (1 << 14))==0)	//обработка ножки старта
+#define	STOPBUTTON	((NT_GPIOA->DATA & (1 << 13))==0)	//обработка ножки стопа
+#endif
+
+#if defined (HW_MOTORCONTROLBOARD)
+//Для управления контроллером мы используем внешние дискретные входы с использованием фильтрации (см. V_DIO)
+#define	STARTBUTTON (BIT_IS_SET(input_vect, 0) ? 1 : 0)	//Проверка на уставку бита в векторе дискретных входов
+#define	STOPBUTTON 	(BIT_IS_SET(input_vect, 1) ? 1 : 0)	//Проверка на уставку бита в векторе дискретных входов
+#endif
+
+#if !defined (HW_MOTORCONTROLBOARD) && !defined (HW_VECTORCARD_DRV8301_EVM) && !defined (HW_VECTORCARD_DRV8312_EVM)
+#define	STARTBUTTON		0
+#define	STOPBUTTON		0
+#endif
+
 /*! \class TSM_CmdLogic
       \brief Обработка команд и заданий, поступающих из различных источников.
 

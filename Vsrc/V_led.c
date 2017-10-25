@@ -57,6 +57,39 @@
 #endif
 
 
+#if defined (HW_VECTOR_MK_40_4)
+
+#define VD1_ON NT_GPIOA->MASKHIGHBYTE_bit[8].MASKLB = 0				//NT_GPIOA->DATA &= ~(1 << 11)	Желтый светодиод
+#define VD1_OFF NT_GPIOA->MASKHIGHBYTE_bit[8].MASKLB = 8			//NT_GPIOA->DATA |= (1 << 11)
+
+#define VD2_ON NT_GPIOA->MASKHIGHBYTE_bit[16].MASKLB = 0			//NT_GPIOA->DATA &= ~(1 << 12)	Красный светодиод
+#define VD2_OFF NT_GPIOA->MASKHIGHBYTE_bit[16].MASKLB = 16			//NT_GPIOA->DATA |= (1 << 12)
+
+#define VD3_ON
+#define VD3_OFF
+
+#define VD4_ON
+#define VD4_OFF
+
+#endif
+
+
+#if defined (HW_MOTORCONTROLBOARD)
+
+#define VD1_ON NT_GPIOA->MASKLOWBYTE_bit[2].MASKLB = 0			//NT_GPIOA->DATA &= ~(1 << 1)	Красный светодиод	VD18
+#define VD1_OFF NT_GPIOA->MASKLOWBYTE_bit[2].MASKLB = 2			//NT_GPIOA->DATA |= (1 << 1)
+
+#define VD2_ON NT_GPIOA->MASKLOWBYTE_bit[1].MASKLB = 0			//NT_GPIOA->DATA &= ~(1 << 0)	Желтый светодиод	VD19
+#define VD2_OFF NT_GPIOA->MASKLOWBYTE_bit[1].MASKLB = 1			//NT_GPIOA->DATA |= (1 << 0)
+
+#define VD3_ON NT_GPIOH->MASKLOWBYTE_bit[128].MASKLB = 0	 	//NT_GPIOH->DATA &= ~(1 << 7)	Зеленый светодиод	VD1
+#define VD3_OFF NT_GPIOH->MASKLOWBYTE_bit[128].MASKLB = 128		//NT_GPIOH->DATA |= (1 << 7)
+
+#define VD4_ON NT_GPIOH->MASKLOWBYTE_bit[1].MASKLB = 0			//NT_GPIOH->DATA &= ~(1 << 0)	Зеленый светодиод	VD2
+#define VD4_OFF NT_GPIOH->MASKLOWBYTE_bit[1].MASKLB = 1			//NT_GPIOH->DATA |= (1 << 0)
+
+#endif
+
 void LED_init(Tled *p) {
 //Для  VectorCARD
 #if defined (HW_VECTORCARD_DRV8301_EVM) || defined (HW_VECTORCARD_DRV8312_EVM) || defined (HW_VECTORCARD_SIMULATOR)
@@ -81,14 +114,19 @@ void LED_init(Tled *p) {
 #endif
 
 #if defined (HW_VECTOR_MK_40_4)
-	/*конфигурируем светодиоды на плате*/
-	NT_GPIOA->ALTFUNCCLR_bit.ALTFUNCCLR = 1 << 11;	// GPIO
-	NT_COMMON_REG->GPIOPCTLA_bit.PIN11 = 0;			// VD1 желтый
-	NT_GPIOA->OUTENSET_bit.OUTENSET |= 1 << 11;		// VD1 желтый
+	/* Разрешить ногам работать на выход */
+	NT_GPIOA->ALTFUNCCLR = (1 << 11) | (1 << 12);	//Желтый и красный
 
-	NT_GPIOA->ALTFUNCCLR_bit.ALTFUNCCLR = 1 << 12;	// GPIO
-	NT_COMMON_REG->GPIOPCTLA_bit.PIN12 = 0; 		// VD2 Красный
-	NT_GPIOA->OUTENSET_bit.OUTENSET |= 1 << 12;		// VD2
+	NT_GPIOA->OUTENSET |= (1 << 11) | (1 << 12);
+#endif
+
+#if defined (HW_MOTORCONTROLBOARD)
+	/* Разрешить ногам работать на выход */
+	NT_GPIOA->ALTFUNCCLR = (1 << 0) | (1 << 1);	//Желтый и красный
+	NT_GPIOH->ALTFUNCCLR = (1 << 0) | (1 << 7);	//Зеленый и зеленый
+
+	NT_GPIOA->OUTENSET |= (1 << 0) | (1 << 1);	//Желтый и красный
+	NT_GPIOH->OUTENSET |= (1 << 0) | (1 << 7);	//Зеленый и зеленый
 #endif
 }
 
@@ -324,6 +362,7 @@ void LED_mode2(Tled *p) {
 	else
 		VD6_OFF;
 #endif
+
 }
 
 void LED_mode3(Tled *p) {
@@ -571,10 +610,55 @@ void LED_msCalc(Tled *p) {
 			NT_GPIOA->MASKHIGHBYTE_bit[1 << (12 - 8)].MASKHB = 0;
 	}
 #endif
+
+#if defined (HW_MOTORCONTROLBOARD)
+	//светодиоднаЯ интикациЯ на плате контроллера
+	if (sm_prot.state == PROT_ON_OK)   //если нет аварии
+	{
+		p->timer1++;
+		p->timer2++;
+		if (p->timer1 >= 500)
+		{
+			p->timer1 = p->timer2 = 0;
+		}
+
+		VD1_OFF;
+		VD2_ON;
+
+		if (p->timer1 >= 0 && p->timer1 < 250)
+			VD3_ON;
+		else
+			VD3_OFF;
+
+		if (p->timer2 >= 250 && p->timer2 < 500)
+			VD4_ON;
+		else
+			VD4_OFF;
+	} else  	//если есть авария
+	{
+		p->timer1++;
+		p->timer2++;
+		if (p->timer1 >= 1000)
+		{
+			p->timer1 = p->timer2 = 0;
+		}
+
+		VD3_OFF;
+		VD4_OFF;
+
+		if (p->timer1 >= 0 && p->timer1 < 500)
+			VD1_ON;
+		else
+			VD1_OFF;
+
+		if (p->timer2 >= 500 && p->timer2 < 1000)
+			VD2_ON;
+		else
+			VD2_OFF;
+	}
+#endif
+
 }
-
-
-
 
 
 

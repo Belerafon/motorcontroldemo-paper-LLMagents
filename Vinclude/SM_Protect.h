@@ -38,12 +38,28 @@ extern "C"
 //! Модуль защит в состоянии аварии (сработала защита)
 #define PROT_FAIL 			2
 
-//Макрос приема аппаратной аварии инвертора: если ноль, то авария
+//Макрос приема (если ноль, то авария) и сброса (если 1, то сброс) аппаратной аварии
 #if defined HW_VECTOR_MK_40_4
 #define DRV_FAULT	(NT_GPIOA->DATA & (1 << 8))
-#else
-#define DRV_FAULT	(NT_GPIOC->DATA & (1 << 4))
+#define RESET_FAULT_BUTTON	0 //кнопка сброса аварий не предусмотрена
 #endif
+
+#if defined (HW_VECTORCARD_DRV8301_EVM) || defined(HW_VECTORCARD_DRV8312_EVM)
+#define DRV_FAULT	(NT_GPIOC->DATA & (1 << 4))
+#define RESET_FAULT_BUTTON	0 //кнопка сброса аварий не предусмотрена
+#endif
+
+#if defined (HW_MOTORCONTROLBOARD)
+#define DRV_FAULT	(NT_GPIOG->DATA & (1 << 13))	//Прием общей аварии
+#define DRV_FAULT1	(NT_GPIOA->DATA & (1 << 9))		//Авария ключа A0
+#define DRV_FAULT2	(NT_GPIOG->DATA & (1 << 15))	//Авария ключа A1
+#define DRV_FAULT3	(NT_GPIOE->DATA & (1 << 7))		//Авария ключа A2
+#define DRV_FAULT4	(NT_GPIOC->DATA & (1 << 8))		//Авария ключа B0 или B1 или B2
+
+//Для сброса аппаратной аварии в данном контроллере используеется внешний дискретный порт ввода
+#define RESET_FAULT_BUTTON	(BIT_IS_SET(input_vect, 2) ? 1 : 0) //Если установлен 3-й бит в векторе дискретных входов
+#endif
+
 
 /*! \class TSM_Protect
       \brief Модуль защит.
@@ -75,10 +91,11 @@ extern "C"
     Uint16 bit_fault_written1;
     Uint16 bit_fault_written2;
 
-    long Imax_protect; //!<Уставка максимально-токовой защиты
-    long Umax_protect; //!<Уставка защиты max напряжения на ЗПТ
-    long Umin_protect;//!<Уставка защиты min напряжения на ЗПТ
-    long speed_max;//!<Уставка максимальной скорости
+    long Imax_protect;	//!<Уставка максимально-токовой защиты
+    long Umax_protect; 	//!<Уставка защиты max напряжения на ЗПТ
+    long Umin_protect;	//!<Уставка защиты min напряжения на ЗПТ
+    long speed_max;		//!<Уставка максимальной скорости
+    long T_max;			//!<Уставка максимальной температуры
 
     int E;//!<Флаг первого вхождения
     Uint16 Main_ErrorCode;//!< //листающийся код аварии
@@ -98,7 +115,7 @@ extern "C"
 	0,0,\
     0,0,\
     0,0,\
-    0,0,0,0,\
+    0,0,0,0,0,\
     0,0,0,0,\
     SM_Protect_Init,\
     SM_Protect_Slow_Calc,\

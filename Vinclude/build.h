@@ -32,20 +32,23 @@
 //#define HW_VECTORCARD_DRV8312_EVM
 
 //VectorCARD с имитационными моделями двигателей
-#define HW_VECTORCARD_SIMULATOR
+//#define HW_VECTORCARD_SIMULATOR
 
 //Отладочная плата НИИЭТ с имитационными моделями двигателей
-//#define HW_NIIET_BOARD_SIMULATOR
+#define HW_NIIET_BOARD_SIMULATOR
 
 //Контроллер МК40.4 НПФ ВЕКТОР
 //#define HW_VECTOR_MK_40_4
+
+//Контроллер Motor Control Board
+//#define HW_MOTORCONTROLBOARD
 
 //Для UART, выбирается чем его занять - MODBUS или CANtoRS драйвером
 //#define MODBUS_ENA
 #define CANTORS_ENA
 
 // Также можно задействовать USB для CANopen
-#define CANTOUSB_ENA
+//#define CANTOUSB_ENA
 
 //!Режимы работы (состояния ДА sm_ctrl)
 //! Режим останов
@@ -89,7 +92,7 @@
 #define F_ENCODER_FAULT             0x4
 #define F_MODEL_FAULT 	        	0x8
 #define F_FLASH_PROGRAM         	0x10
-//#define F_RESERVED   		        0x20
+#define F_CTRL_HI_TEMP  		    0x20
 //#define F_RESERVED	       		0x40
 //#define F_RESERVED       		    0x80
 #define F_PROGRAM_1K	          	0x100
@@ -114,10 +117,10 @@
 #define F_CTRL_SPEED_MAX			0x200  
 //#define F_RESERVED				0x400
 //#define F_RESERVED				0x800
-//#define F_RESERVED				0x1000
-//#define F_RESERVED				0x2000
-//#define F_RESERVED				0x4000
-//#define F_RESERVED				0x8000
+#define F_PDP_SWITCH_A0				0x1000
+#define F_PDP_SWITCH_A1				0x2000
+#define F_PDP_SWITCH_A2				0x4000
+#define F_PDP_SWITCH_LOWER			0x8000
 
 
 #define POS_SENSOR_TYPE_NO_SENSOR 0
@@ -133,7 +136,7 @@
 
 
 #if (!defined(HW_VECTORCARD_DRV8301_EVM)) && (!defined(HW_VECTORCARD_DRV8312_EVM)) && (!defined(HW_VECTORCARD_SIMULATOR))\
-	&& (!defined(HW_NIIET_BOARD_SIMULATOR)) 	&& (!defined(HW_VECTOR_MK_40_4))
+	&& (!defined(HW_NIIET_BOARD_SIMULATOR)) 	&& (!defined(HW_VECTOR_MK_40_4)) && (!defined(HW_MOTORCONTROLBOARD))
 #error необходимо определить хотя бы одну версию аппаратной части
 #endif
 
