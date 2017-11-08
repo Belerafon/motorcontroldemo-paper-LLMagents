@@ -49,6 +49,11 @@ extern "C"
 #define RESET_FAULT_BUTTON	0 //кнопка сброса аварий не предусмотрена
 #endif
 
+#if defined (HW_NIIET_BOARD_SIMULATOR) || defined(HW_NIIET_BOARD_SIMULATOR)
+#define DRV_FAULT	0 //аварий ключа в симуляторе не предусмотрено
+#define RESET_FAULT_BUTTON	0 //кнопка сброса аварий не предусмотрена
+#endif
+
 #if defined (HW_MOTORCONTROLBOARD)
 #define DRV_FAULT	(NT_GPIOG->DATA & (1 << 13))	//Прием общей аварии
 #define DRV_FAULT1	(NT_GPIOA->DATA & (1 << 9))		//Авария ключа A0
