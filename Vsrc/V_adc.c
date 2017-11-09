@@ -59,6 +59,7 @@ void AdcDrv_init(TAdcDrv *p) {
 	NT_ADC->ACTSS_bit.ASEN3 = 1;
 	NT_ADC->ACTSS_bit.ASEN4 = 1;
 	NT_ADC->ACTSS_bit.ASEN5 = 1;
+	NT_ADC->ACTSS_bit.ASEN6 = 1;
 	//Ставим маску прерывания (для 4 секвенсора, нам не надо 4 прерывания, достаточно одного)
 	NT_ADC->IM_bit.MASK4 = 1;
 	//Настраиваем источник запуска
@@ -66,21 +67,25 @@ void AdcDrv_init(TAdcDrv *p) {
 	NT_ADC->EMUX_bit.EM3 = 8; //запуск производится по команде SocA  Блока ШИМ 3 для vector card
 	NT_ADC->EMUX_bit.EM4 = 8; //запуск производится по команде SocA  Блока ШИМ 3 для vector card
 	NT_ADC->EMUX_bit.EM5 = 8; //запуск производится по команде SocA  Блока ШИМ 3 для vector card
+	NT_ADC->EMUX_bit.EM6 = 8; //запуск производится по команде SocA  Блока ШИМ 3 для vector card
 	NT_ADC->PSSI_bit.SS2 = 1; //разрешить программный запуск секвенсора
 	NT_ADC->PSSI_bit.SS3 = 1; //разрешить программный запуск секвенсора
 	NT_ADC->PSSI_bit.SS4 = 1; //разрешить программный запуск секвенсора
 	NT_ADC->PSSI_bit.SS5 = 1; //разрешить программный запуск секвенсора
+	NT_ADC->PSSI_bit.SS6 = 1; //разрешить программный запуск секвенсора
 
 	//Настраиваем количество перезапусков секвенсора
 	NT_ADC->SEQ[2].CTL_bit.RCNT = 0; //Перезапуск не требуется
 	NT_ADC->SEQ[3].CTL_bit.RCNT = 0; //Перезапуск не требуется
 	NT_ADC->SEQ[4].CTL_bit.RCNT = 0; //Перезапуск не требуется
 	NT_ADC->SEQ[5].CTL_bit.RCNT = 0; //Перезапуск не требуется
+	NT_ADC->SEQ[6].CTL_bit.RCNT = 0; //Перезапуск не требуется
 	//Настраиваем частоту прерываний
 	NT_ADC->SEQ[2].CTL_bit.ICNT = 0; //Прерывания после каждого запуска
 	NT_ADC->SEQ[3].CTL_bit.ICNT = 0; //Прерывания после каждого запуска
 	NT_ADC->SEQ[4].CTL_bit.ICNT = 0; //Прерывания после каждого запуска
 	NT_ADC->SEQ[5].CTL_bit.ICNT = 0; //Прерывания после каждого запуска
+	NT_ADC->SEQ[6].CTL_bit.ICNT = 0; //Прерывания после каждого запуска
 	//NT_ADC->SEQUENCER.SEQ0.ADCSSTMR.bit.TMR
 
 	NT_ADC->PP_bit[0].OM = 0x3; //OM2-OM0 = ’011’ All blocks active (ADC plus internal buffers plus internal bandgap).
@@ -175,18 +180,21 @@ void AdcDrv_init(TAdcDrv *p) {
 	NT_ADC->DCCTL_bit[0].CHNL = 0;		//Ток фазы B
 	NT_ADC->DCCTL_bit[2].CHNL = 2;		//Ток фазы A
 	NT_ADC->DCCTL_bit[16].CHNL = 16;	//Температура
+	NT_ADC->DCCTL_bit[10].CHNL = 10;	//Задание
 
 	//разрешение работы компараторов
 	NT_ADC->SEQ[2].DCP_bit.CMP4 = 1;	//Udc
 	NT_ADC->SEQ[3].DCP_bit.CMP0 = 1;	//Ток фазы B
 	NT_ADC->SEQ[4].DCP_bit.CMP2 = 1;	//Ток фазы A
 	NT_ADC->SEQ[5].DCP_bit.CMP16 = 1;	//Температура
+	NT_ADC->SEQ[6].DCP_bit.CMP10 = 1;   //Задание
 
 	//выбор каналов для измерений
 	NT_ADC->SEQ[2].MUX_bit.CH4 = 1;		//Udc
 	NT_ADC->SEQ[3].MUX_bit.CH0 = 1;		//Ток фазы B
 	NT_ADC->SEQ[4].MUX_bit.CH2 = 1;		//Ток фазы A
 	NT_ADC->SEQ[5].MUX_bit.CH16 = 1;	//Температура
+	NT_ADC->SEQ[6].MUX_bit.CH10 = 1;   //Задание
 #endif
 
 }
@@ -222,15 +230,20 @@ void AdcDrv_fast_calc(TAdcDrv *p) {
 	while (NT_ADC->SEQ[5].FSTAT_bit.FLOAD > 0)	//пока фифо не опустеет
 	{
 		//несколько точек из фифо измерений одного и того же
-		p->TBuf[p->TPointer] = NT_ADC->SEQ[5].FIFO_bit.DATA;
-		p->TPointer = (++p->TPointer) & 3;
+		//так как температуру измерять с большой частотой не нужно,
+		//то для ускорения кода не будем использовать массив точек (как для токов)
+		p->T_temp = NT_ADC->SEQ[5].FIFO_bit.DATA;
 	}
-
+	while (NT_ADC->SEQ[6].FSTAT_bit.FLOAD > 0)	//пока фифо не опустеет
+	{
+		//несколько точек из фифо измерений одного и того же
+		p->ref_temp = NT_ADC->SEQ[6].FIFO_bit.DATA;
+	}
 
 	p->Udc_temp = 0;
 	p->IB_temp = 0;
 	p->IA_temp = 0;
-	p->T_temp = 0;
+
 
 	//усреднялка
 	int i;
@@ -261,16 +274,6 @@ void AdcDrv_fast_calc(TAdcDrv *p) {
 	//делим на длину выборки (1-4 точки), получая колечную величину аналогового сигнала
 	p->Udc_temp = p->Udc_temp / p->UdcSampleLength;
 
-	for (i = 0; i < p->TSampleLength; i++) {//берем нужное число точек, начиная с самой новой
-		int j = p->TPointer - i;
-		if (j < 0)	//если перешли через 0 - начинаем с 3-й (массив из 4 точек)
-			j = 4 + j;
-		p->T_temp += p->TBuf[j];
-	}
-	//делим на длину выборки (1-4 точки)
-	p->T_temp = p->T_temp / p->TSampleLength;
-
-
 #endif
 #ifdef HW_VECTORCARD_DRV8312_EVM
 	//комплект HW_VECTORCARD_DRV8312_EVM отличается от HW_VECTORCARD_DRV8301_EVM в 5 раз меньшим коэффициентом усиления и другим знаком
@@ -293,6 +296,7 @@ void AdcDrv_fast_calc(TAdcDrv *p) {
 	p->Udc_meas = p->UdcGainNom * (p->Udc_temp + p->Udc_meas_offset);
 	p->Imeas_c = -p->Imeas_a - p->Imeas_b;
 	p->T_meas = p->TGainNom * (p->T_temp);		//датчик температуры без смещения
+	p->ref_meas = p->refGainNom * ((p->ref_temp + p->ref_meas_offset));
 #endif
 
 
@@ -365,6 +369,7 @@ void AdcDrv_slow_calc(TAdcDrv *p) {
 	p->IdGainNom = _IQ16mpy(p->Imeas_d_gain, drv_params._1_I_nom) << 1;
 	p->UdcGainNom = _IQ16mpy(p->Udc_meas_gain, drv_params._1_Udc_nom) << 4;
 	p->TGainNom = _IQ16mpy(p->T_meas_gain, _IQ(0.05)) << 4;	//0.05 = 1/20, где 20 градусов по Цельсию - номинальная (базовая) температура
+	p->refGainNom = _IQ16mpy(p->ref_meas_gain, _IQ(1.0/100)) << 4;
 }
 
 //! Миллисекундный расчет

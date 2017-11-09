@@ -71,6 +71,7 @@ void DIO_Init()
 
 void DIO_slow_calc()
 {
+	/*
 	// ѕолучаем вектор состояния дискретных выходов с учЄтом маски инвертирования
 	Uint16 output = output_vect ^ output_mask;
 	// ¬ыводим управляющее воздействие по ¬ыходу 1
@@ -88,7 +89,7 @@ void DIO_slow_calc()
 		D_OUT3_OFF;
     else
     	D_OUT3_ON;
-
+*/
 
 	// ќбновляем коэффициенты фильтрации дискретных входов
 	fIn1.T = inputKf;

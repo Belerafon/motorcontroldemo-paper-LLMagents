@@ -35,13 +35,13 @@
 //#define HW_VECTORCARD_SIMULATOR
 
 //Отладочная плата НИИЭТ с имитационными моделями двигателей
-#define HW_NIIET_BOARD_SIMULATOR
+//#define HW_NIIET_BOARD_SIMULATOR
 
 //Контроллер МК40.4 НПФ ВЕКТОР
 //#define HW_VECTOR_MK_40_4
 
 //Контроллер Motor Control Board
-//#define HW_MOTORCONTROLBOARD
+#define HW_MOTORCONTROLBOARD
 
 //Для UART, выбирается чем его занять - MODBUS или CANtoRS драйвером
 //#define MODBUS_ENA
@@ -66,9 +66,11 @@
 //! Векторная структура управления с энкодером и с контуром положения для синхронной машины
 #define CTRL_RUN_VECTOR_SM_ENCODER_POS		10
 
-//! Векторное управление для асинхронного двигателя с энкодером.
+//! Векторное управление для асинхронного двигателя с энкодером с контуром скорости
 #define CTRL_RUN_VECTOR_IM_ENCODER			55
 
+//! Векторное управление для асинхронного двигателя с энкодером с контуром скорости и положения
+#define CTRL_RUN_VECTOR_IM_ENCODER_POS		60
 
 //! Режим калибровки датчика положения
 #define CTRL_AUTO_SENSOR_TUNING		        29

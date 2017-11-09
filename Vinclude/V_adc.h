@@ -105,10 +105,11 @@ extern "C"
     int32 TGainNom;					//!< Вспомогательный коэфф. усиления.
     int16 T_temp;					//!<Временная переменная
 
-    int16 TSampleLength;			//длина выборки (кол-во точек на периоде ШИМ)
-	int16 TPointer;				//номер последней выборки
-	int16 TBuf[4];				//массив точек для усреднения
-
+    int16 ref_meas_gain;
+    int16 ref_meas_offset;
+    int32 ref_meas;
+    int32 refGainNom;
+    int16 ref_temp;
 
     void (*init)(struct SAdcDrv *);
     void (*fast_calc)(struct SAdcDrv*);
@@ -132,7 +133,7 @@ extern "C"
     800,0,0,0,0, \
 	4,0,{0}, \
 	100,0,0,0, \
-	4,0,{0}, \
+    54,0,0,0,0, \
     AdcDrv_init,\
     AdcDrv_fast_calc,\
     AdcDrv_ms_calc,\

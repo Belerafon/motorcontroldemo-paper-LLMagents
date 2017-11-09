@@ -62,6 +62,7 @@ void SM_Ctrl_ms_Calc(TSM_Ctrl *p) {
 
 //! \memberof TSM_Ctrl
 void SM_Ctrl_Fast_Calc(TSM_Ctrl *p) {
+	long Temp1;
 
 //если система находится в перееинициализации,
 //то пропускаем контур управления
@@ -163,6 +164,9 @@ void SM_Ctrl_Fast_Calc(TSM_Ctrl *p) {
 		}
 		if (p->run_mode == CTRL_RUN_VECTOR_IM_ENCODER) {//векторная СУ синхронной машины  с обратной связью по энкодеру и контуром положения
 			p->state = CTRL_RUN_VECTOR_IM_ENCODER;
+		}
+		if (p->run_mode == CTRL_RUN_VECTOR_IM_ENCODER_POS) {//векторная СУ синхронной машины  с обратной связью по энкодеру и контуром положения
+			p->state = CTRL_RUN_VECTOR_IM_ENCODER_POS;
 		}
 		if (p->run_mode == CTRL_AUTO_SENSOR_TUNING) {//автоматическая настройка смещений в ДПР (частотно-токовая+доп. логика)
 			p->state = CTRL_AUTO_SENSOR_TUNING;
@@ -595,7 +599,7 @@ void SM_Ctrl_Fast_Calc(TSM_Ctrl *p) {
 	}
 
 
-	case CTRL_RUN_VECTOR_IM_ENCODER: {            //Датчиковая СУ с энкодером
+	case CTRL_RUN_VECTOR_IM_ENCODER: { //Датчиковая СУ для АД с энкодером и контуром скорости
 		if (p->E == 1) {
 			/*ENTRY START*/
 			pwm.On(&pwm);            //Включение ШИМ
@@ -688,6 +692,161 @@ void SM_Ctrl_Fast_Calc(TSM_Ctrl *p) {
 		break;
 	}
 
+	case CTRL_RUN_VECTOR_IM_ENCODER_POS: { //Датчиковая СУ для АД с энкодером и контурами скорости и положения
+		if (p->E == 1) {
+			/*ENTRY START*/
+			pwm.On(&pwm);            //Включение ШИМ
+			RotorObserver.psi_d=0;
+			RotorObserver.psi_q=0;
+			rmp.output = 0;            //Обнуление задатчика интенсивности
+			if (dlog.StartBits & (1 << 4)) //Если пользователь задал этот бит осциллографирования
+				dlog.set_mode(1, &dlog);  //Запуск осциллографа по этому событию
+			/*ENTRY END*/
+		}
+		/*DO START*/
+		{
+			cur_par.Is = _IQmag(pid_iq.pid_fdb_reg3,pid_id.pid_fdb_reg3) ; //Текущий ток статора - амплитуда из токов d и q
+			cur_par.speed = posspeedEqep.speed_elec; //posspeedEqep.speed.output;//Текущая скорость - с ДПР фильтрованная
+
+			//Преобразование токов из трехфазной системы координат в двухфазную
+			clarke.as = adc.Imeas_a;
+			clarke.bs = adc.Imeas_b;
+			clarke.calc(&clarke);
+			cur_par.Ialpha = clarke.ds;
+			cur_par.Ibeta = clarke.qs;
+
+
+/*          //Для демо-режима контура положения сделаем задание положения, изменяющегося по синусу
+			//Как быстро менять задание - пусть управляется из переменной для отладки DebugW1
+
+			if (DebugW1!=0){//если какая-то скорость вращения задана
+				p->AngleDemo+=(DebugW1>>10);//инкрементируем переменную
+				if (p->AngleDemo>_IQ(2))//период равен 2, что в о.е. дает 360*2 градусов
+					p->AngleDemo=0;
+
+				//задание угла в контур положения
+				//пусть будет синус от линейно увеличивающейся переменной, да еще и в 4 раза увеличим
+				refs.theta_elec=_IQsinPU(p->AngleDemo)<<2;
+			}
+*/
+
+			/*
+//Другой демо-режим контура положения - задавать положение от двигателя датчика, абсолютного энкодера с интерфейсом SSI
+//Для работы датчика его нужно, собственно, подключить (в комплект поставки не входит!),
+//а также выбрать его в настройках
+
+#define REVOLUTION_DROP_NUMBER 3
+			//чтобы можно было вращать неограниченно в одну сторону и не переполнилась переменная по положению
+			//но чтобы нельзя было накрутить 100500 оборотов вперед привода и он крутил бы дальше и дальше
+			//ограничим максимальное расхождение в обототах числом REVOLUTION_DROP_NUMBER
+			if (labs(SSI_Encoder.RevolutionCounter-posspeedEqep.RevolutionCounter)>REVOLUTION_DROP_NUMBER){
+				if (posspeedEqep.RevolutionCounter>SSI_Encoder.RevolutionCounter){
+					posspeedEqep.RevolutionCounter=SSI_Encoder.RevolutionCounter+REVOLUTION_DROP_NUMBER;
+				}
+				if (SSI_Encoder.RevolutionCounter>posspeedEqep.RevolutionCounter){
+					SSI_Encoder.RevolutionCounter=posspeedEqep.RevolutionCounter+REVOLUTION_DROP_NUMBER;
+				}
+			}
+			if ((posspeedEqep.RevolutionCounter>10) || (SSI_Encoder.RevolutionCounter>10)){
+				posspeedEqep.RevolutionCounter-=10;
+				SSI_Encoder.RevolutionCounter-=10;
+			}
+			if ((posspeedEqep.RevolutionCounter<-10) || (SSI_Encoder.RevolutionCounter<-10)){
+				posspeedEqep.RevolutionCounter+=10;
+				SSI_Encoder.RevolutionCounter+=10;
+			}
+
+			//задание угла - от SSI энкодера
+			refs.theta_elec=SSI_Encoder.theta_elecContinouos;
+*/
+
+			refs.theta_elec=adc.ref_meas<<2; //задание положения от потенциометра
+
+			//текущий угол с датчика положения, переведенный в электрический из механического
+			cur_par.ThetaCurr = posspeedEqep.theta_elecContinouos;
+			cur_par.ThetaRefCurr=refs.theta_elec;//заданный угол электрический (продублируем в эту переменную задание для удобства наблюдения)
+
+			//ошибка - разница между заданием и текущим углом. Эта разница обычно считается внутри ПИД регулятора,
+			//однако в данном случае нужно после расчета произвести ограничение, чтобы в регуляторе ничего не переполнилось
+			long posRefError=refs.theta_elec - cur_par.ThetaCurr;
+
+
+			//ограничим ошибку - чтобы при расчете регулятора внутри него не было переполнения.
+			if (posRefError>_IQ(1))
+				posRefError=_IQ(1);
+			if (posRefError<-_IQ(1))
+				posRefError=-_IQ(1);
+
+
+			//обычно на ПИД регулятор подается задание и обратная связь, а внутри считается их разница.
+			//но разницу мы посчитали выше (и ограничили). Потому пусть задание на регулятор будет всё время нулевым,
+			//а в обратную связь подадим уже посчитанную и ограниченную ошибку (со знаком минус)
+			pid_pos.pid_ref_reg3 = 0;//задавать задание на положение надо через Temp1 (группа задания)
+			pid_pos.pid_fdb_reg3 = -posRefError;//обратная связь
+			pid_pos.pid_out_max=refs.speed_ref;//ограничение рег. положения - максимум задаваемой скорости
+			pid_pos.pid_out_min=-refs.speed_ref;//и в минус
+			pid_pos.saterr_reg3Add=pid_spd.saterr_reg3;//это улучшайзер. Учитывает насыщение рег. скорости и передает его в рег. положения.
+			pid_pos.calc(&pid_pos); //расчет регулятора положения
+
+			pid_spd.pid_ref_reg3 = pid_pos.pid_out_reg3; //на вход регулятора скорости - выход рег. положения
+			pid_spd.pid_fdb_reg3 = posspeedEqep.speed_filter.output; //обратная связь регулятора скорости - скорость ДПР
+
+			pid_spd.pid_out_max = refs.Iq_ref; //Максимум выхода регулятора скорости - заданный ток
+			pid_spd.pid_out_min = -refs.Iq_ref; //минимум рег. скор. - отрицательный ток
+			pid_spd.calc(&pid_spd); //расчет регулятора скорости
+
+
+			//Поворот токов фаз на угол Temp1
+			park.ds = clarke.ds;
+			park.qs = clarke.qs;
+			park.ang = posspeedEqep.theta_elec;
+			park.calc(&park); //расчет преобразования координат
+
+			RotorObserver.id=park.de;//на наблюдатель ротора АД - токи статора, повернутый на угол ДПРа
+			RotorObserver.iq=park.qe;
+			RotorObserver.calc(&RotorObserver);
+
+			Temp1 = RotorObserver.theta_psi_elec+posspeedEqep.theta_elec; //текущее угловое положение - с ДПР и наблюдателя ротора (оси x,y)
+			Temp1 &= 0x00FFFFFF; //Ограничение угла на 1.0 в формате 8.24
+			cur_par.ThetaRefCurr = Temp1;
+
+
+			//Теперь Temp1 - угол потокосцепления ротора. Повторяем векторную систему от синхронной машины для этого угла
+			park.ds = clarke.ds;
+			park.qs = clarke.qs;
+			//второе слагаемое - доворот для устойчивости регуляторов на высокой скорости. Дублироваться второй раз для ipark не должен!
+			park.ang = Temp1;
+			park.calc(&park);
+
+			//регуляторы токов d, q используются для регулирования осей x, y (чтобы не делать разных названий)
+			//задание рег. тока по оси y (оси момента) - выход регулятора скорости
+			pid_iq.pid_ref_reg3 = pid_spd.pid_out_reg3;
+			pid_iq.pid_fdb_reg3 = park.qe; //обратная связь рег. тока оси y - вычисленный ток по фазе y
+			pid_iq.calc(&pid_iq); //расчет регулятора тока оси y
+
+			pid_id.pid_ref_reg3 = _IQmpy(RotorObserver.FluxCurrentRatio,labs(pid_iq.pid_ref_reg3)); //задание тока по оси x - оси возбудения. Пропорционально амплитуде задания тока статора
+			if (pid_id.pid_ref_reg3 < RotorObserver.FluxCurrentMin)
+				pid_id.pid_ref_reg3=RotorObserver.FluxCurrentMin;
+			pid_id.pid_fdb_reg3 = park.de; //обратная связь рег. тока оси x - вычисленный ток по фазе x
+			pid_id.calc(&pid_id); //расчет регулятора тока оси x
+
+
+			//Обратный поворот на угол Temp1 для
+			//выходов регуляторов тока (напряжений по осям x и y)
+			ipark.de = pid_id.pid_out_reg3;
+			ipark.qe = pid_iq.pid_out_reg3;
+			ipark.ang = Temp1;
+			ipark.calc(&ipark);            //расчет преобразования координат
+
+			//Задание напряжение на модуль ШИМ после преобразования координат
+			pwm.UalphaRef = ipark.ds;            //Ось альфа
+			pwm.UbetaRef = ipark.qs;            //Ось бета
+			pwm.update(&pwm);            //Расчет модуля ШИМ
+
+			/*DO END*/
+		}
+		break;
+	}
 	case CTRL_DC_DRIVE: {  // ДПТ разомкнутый
 		if (p->E == 1) {
 			/*ENTRY START*/

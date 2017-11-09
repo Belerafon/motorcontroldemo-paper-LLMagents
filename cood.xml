@@ -3997,6 +3997,24 @@
 			<defaults default="0" min="" max=""/>
 			<description description=""/>
 		</obj_5116h.11h>
+		<obj_5116h.12h DataType="Editable" name="Коэффициент внешнего входа" addr="adc.ref_meas_gain" group="16" groupName="АЦП" fullgroup="16" callback="">
+			<format Type="IQ" Size="16" Signed="true" QValue="0" ScaleNum="0"/>
+			<text text="ADC_ext_gain" textID="642"/>
+			<defaults default="100" min="" max=""/>
+			<description description=""/>
+		</obj_5116h.12h>
+		<obj_5116h.13h DataType="Editable" name="Смещение внешнего входа" addr="adc.ref_meas_offset" group="16" groupName="АЦП" fullgroup="16" callback="">
+			<format Type="IQ" Size="16" Signed="true" QValue="0" ScaleNum="0"/>
+			<text text="ADC_ext_offset" textID="643"/>
+			<defaults default="0" min="" max=""/>
+			<description description=""/>
+		</obj_5116h.13h>
+		<obj_5116h.14h DataType="Viewable" name="Внешний аналоговый вход 1" addr="adc.ref_meas" group="16" groupName="АЦП" fullgroup="16" callback="">
+			<format Type="IQ" Size="32" Signed="true" QValue="24" ScaleNum="1"/>
+			<text text="ADC_ext1" textID="641"/>
+			<defaults default="0" min="" max=""/>
+			<description description=""/>
+		</obj_5116h.14h>
 		<obj_511Ah.00h DataType="Viewable" name="Модуль U/F" addr="" group="20" groupName="Кривая U-f" fullgroup="18" callback="">
 			<format Type="Root"/>
 			<text text="Закон U(f) (АД)" textID="428"/>

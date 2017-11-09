@@ -42,7 +42,7 @@ struct Sled;
 typedef volatile struct Sled Tled;
 
 struct Sled{
-	Uint16 timer1, timer2, timer3, timer4, timer5, timer6;
+	Uint16 timer1, timer2, timer3, timer4, timer5, timer6, timer7, timer8;
 	Uint16 mode, prevMode;
 	Uint16 mode3counter;
 	void (*init)(Tled*);
@@ -54,7 +54,7 @@ struct Sled{
 
 
 
-#define LED_DEFAULTS {0,0,0,0,0,0,0,0,0, LED_init, LED_toggle, LED_on, LED_off, LED_msCalc}
+#define LED_DEFAULTS {0,0,0,0,0,0,0,0,0,0,0, LED_init, LED_toggle, LED_on, LED_off, LED_msCalc}
 void LED_init (Tled*);
 void LED_toggle (Tled*, Uint16);
 void LED_on (Tled*, Uint16);
