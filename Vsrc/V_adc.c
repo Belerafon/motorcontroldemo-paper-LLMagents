@@ -177,22 +177,22 @@ void AdcDrv_init(TAdcDrv *p) {
 	// Настраиваем компараторы каждый на свой канал АЦП -
 	// из компараторов будем забирать оцифрованные данные, как из ADC result
 	NT_ADC->DCCTL_bit[4].CHNL = 4;		//Udc
-	NT_ADC->DCCTL_bit[0].CHNL = 0;		//Ток фазы B
-	NT_ADC->DCCTL_bit[2].CHNL = 2;		//Ток фазы A
+	NT_ADC->DCCTL_bit[0].CHNL = 0;		//Ток фазы A
+	NT_ADC->DCCTL_bit[2].CHNL = 2;		//Ток фазы C
 	NT_ADC->DCCTL_bit[16].CHNL = 16;	//Температура
 	NT_ADC->DCCTL_bit[10].CHNL = 10;	//Задание
 
 	//разрешение работы компараторов
 	NT_ADC->SEQ[2].DCP_bit.CMP4 = 1;	//Udc
-	NT_ADC->SEQ[3].DCP_bit.CMP0 = 1;	//Ток фазы B
-	NT_ADC->SEQ[4].DCP_bit.CMP2 = 1;	//Ток фазы A
+	NT_ADC->SEQ[3].DCP_bit.CMP0 = 1;	//Ток фазы A
+	NT_ADC->SEQ[4].DCP_bit.CMP2 = 1;	//Ток фазы C
 	NT_ADC->SEQ[5].DCP_bit.CMP16 = 1;	//Температура
 	NT_ADC->SEQ[6].DCP_bit.CMP10 = 1;   //Задание
 
 	//выбор каналов для измерений
 	NT_ADC->SEQ[2].MUX_bit.CH4 = 1;		//Udc
-	NT_ADC->SEQ[3].MUX_bit.CH0 = 1;		//Ток фазы B
-	NT_ADC->SEQ[4].MUX_bit.CH2 = 1;		//Ток фазы A
+	NT_ADC->SEQ[3].MUX_bit.CH0 = 1;		//Ток фазы A
+	NT_ADC->SEQ[4].MUX_bit.CH2 = 1;		//Ток фазы C
 	NT_ADC->SEQ[5].MUX_bit.CH16 = 1;	//Температура
 	NT_ADC->SEQ[6].MUX_bit.CH10 = 1;   //Задание
 #endif
@@ -206,6 +206,7 @@ void AdcDrv_init(TAdcDrv *p) {
 //! Токи фаз для повышения точности усредняются за несколько измерений
 
 //! \memberof TAdcDrv
+#if (defined(HW_VECTORCARD_DRV8301_EVM)) || (defined(HW_VECTORCARD_DRV8312_EVM)) || (defined(HW_VECTORCARD_SIMULATOR)) || (defined(HW_NIIET_BOARD_SIMULATOR)) || (defined(HW_VECTOR_MK_40_4))
 void AdcDrv_fast_calc(TAdcDrv *p) {
 
 #if (!defined(HW_VECTORCARD_SIMULATOR)) && (!defined(HW_NIIET_BOARD_SIMULATOR))
@@ -290,15 +291,6 @@ void AdcDrv_fast_calc(TAdcDrv *p) {
 	p->Imeas_c = -p->Imeas_a - p->Imeas_b;
 #endif
 
-#if defined(HW_MOTORCONTROLBOARD)
-	p->Imeas_a = p->IaGainNom * ((p->IA_temp + p->Imeas_a_offset));
-	p->Imeas_b = p->IbGainNom * ((p->IB_temp + p->Imeas_b_offset));
-	p->Udc_meas = p->UdcGainNom * (p->Udc_temp + p->Udc_meas_offset);
-	p->Imeas_c = -p->Imeas_a - p->Imeas_b;
-	p->T_meas = p->TGainNom * (p->T_temp);		//датчик температуры без смещения
-	p->ref_meas = p->refGainNom * ((p->ref_temp + p->ref_meas_offset));
-#endif
-
 
 
 #if (defined(HW_VECTORCARD_SIMULATOR)) || (defined(HW_NIIET_BOARD_SIMULATOR))
@@ -323,6 +315,87 @@ void AdcDrv_fast_calc(TAdcDrv *p) {
 #endif
 
 }
+#endif
+
+#if defined(HW_MOTORCONTROLBOARD)
+void AdcDrv_fast_calc(TAdcDrv *p) {
+
+	while (NT_ADC->SEQ[2].FSTAT_bit.FLOAD > 0)	//пока фифо не опустеет
+	{
+		//несколько точек из фифо измерений одного и того же
+		p->UdcBuf[p->UdcPointer] = NT_ADC->SEQ[2].FIFO_bit.DATA;
+		p->UdcPointer = (++p->UdcPointer) & 3;
+	}
+	while (NT_ADC->SEQ[3].FSTAT_bit.FLOAD > 0)	//пока фифо не опустеет
+	{
+		p->IABuf[p->IAPointer] =
+				(int16) ((NT_ADC->SEQ[3].FIFO_bit.DATA) << 4) ^ 0x8000;
+		p->IAPointer = (++p->IAPointer) & 3;
+	}
+	while (NT_ADC->SEQ[4].FSTAT_bit.FLOAD > 0)	//пока фифо не опустеет
+	{
+		p->ICBuf[p->ICPointer] =
+				(int16) ((NT_ADC->SEQ[4].FIFO_bit.DATA) << 4) ^ 0x8000;
+		p->ICPointer = (++p->ICPointer) & 3;
+	}
+	while (NT_ADC->SEQ[5].FSTAT_bit.FLOAD > 0)	//пока фифо не опустеет
+	{
+		//несколько точек из фифо измерений одного и того же
+		//так как температуру измерять с большой частотой не нужно,
+		//то для ускорения кода не будем использовать массив точек (как для токов)
+		p->T_temp = NT_ADC->SEQ[5].FIFO_bit.DATA;
+	}
+	while (NT_ADC->SEQ[6].FSTAT_bit.FLOAD > 0)	//пока фифо не опустеет
+	{
+		//несколько точек из фифо измерений одного и того же
+		p->ref_temp = NT_ADC->SEQ[6].FIFO_bit.DATA;
+	}
+
+	p->Udc_temp = 0;
+	p->IA_temp = 0;
+	p->IC_temp = 0;
+
+
+	//усреднялка
+	int i;
+	for (i = 0; i < p->IASampleLength; i++) {//берем нужное число точек, начиная с самой новой
+		int j = p->IAPointer - i;
+		if (j < 0)	//если перешли через 0 - начинаем с 3-й (массив из 4 точек)
+			j = 4 + j;
+		p->IA_temp += p->IABuf[j];
+	}
+	//делим на длину выборки (1-4 точки)
+	p->IA_temp = p->IA_temp / p->IASampleLength;
+
+	for (i = 0; i < p->ICSampleLength; i++) {//берем нужное число точек, начиная с самой новой
+		int j = p->ICPointer - i;
+		if (j < 0)	//если перешли через 0 - начинаем с 3-й (массив из 4 точек)
+			j = 4 + j;
+		p->IC_temp += p->ICBuf[j];
+	}
+	//делим на длину выборки (1-4 точки)
+	p->IC_temp = p->IC_temp / p->ICSampleLength;
+
+	for (i = 0; i < p->UdcSampleLength; i++) {//берем нужное число точек, начиная с самой новой
+		int j = p->UdcPointer - i;
+		if (j < 0)	//если перешли через 0 - начинаем с 3-й (массив из 4 точек)
+			j = 4 + j;
+		p->Udc_temp += p->UdcBuf[j];
+	}
+	//делим на длину выборки (1-4 точки), получая колечную величину аналогового сигнала
+	p->Udc_temp = p->Udc_temp / p->UdcSampleLength;
+
+
+	p->Imeas_a = p->IaGainNom * ((p->IA_temp + p->Imeas_a_offset));
+	p->Imeas_c = p->IcGainNom * ((p->IC_temp + p->Imeas_c_offset));
+	p->Udc_meas = p->UdcGainNom * (p->Udc_temp + p->Udc_meas_offset);
+	p->Imeas_b = -p->Imeas_a - p->Imeas_c;
+	p->T_meas = p->TGainNom * (p->T_temp);		//датчик температуры без смещения
+	p->ref_meas = p->refGainNom * ((p->ref_temp + p->ref_meas_offset));
+
+}
+#endif
+
 
 //!Медленный расчет.
 
