@@ -73,7 +73,7 @@ extern "C"
     int16 Imeas_c_offset; 
     int32 Imeas_c;        
     int32 IcGainNom;
-    int16 IC_temp;
+    int32 IC_temp;
 
     int16 ICSampleLength;			//длина выборки (кол-во точек на периоде ШИМ)
 	int16 ICPointer;				//номер последней выборки
