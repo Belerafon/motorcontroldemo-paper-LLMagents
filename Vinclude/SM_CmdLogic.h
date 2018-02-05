@@ -48,6 +48,8 @@ extern "C"
 //Для управления контроллером мы используем внешние дискретные входы с использованием фильтрации (см. V_DIO)
 #define	STARTBUTTON (BIT_IS_SET(input_vect, 0) ? 1 : 0)	//Проверка на уставку бита в векторе дискретных входов
 #define	STOPBUTTON 	(BIT_IS_SET(input_vect, 1) ? 1 : 0)	//Проверка на уставку бита в векторе дискретных входов
+#define	RESETBUTTON 	(BIT_IS_SET(input_vect, 2) ? 1 : 0)	//Проверка на уставку бита в векторе дискретных входов
+
 #endif
 
 #if !defined (HW_MOTORCONTROLBOARD) && !defined (HW_VECTORCARD_DRV8301_EVM) && !defined (HW_VECTORCARD_DRV8312_EVM)
@@ -76,6 +78,8 @@ extern "C"
     int StartButton;
     int StopButtonPrev;
     int StopButton;
+    int ResetButton;
+    int ResetButtonPrev;
     void (*init)(volatile struct SSM_CmdLogic*);//!<    Pointer to the init funcion
     void (*slow_calc)(volatile struct SSM_CmdLogic*);//!< Pointer to the calc funtion
     void (*ms_calc)(volatile struct SSM_CmdLogic*); //!< Pointer to the calc funtion
@@ -84,7 +88,7 @@ extern "C"
   typedef volatile  struct SSM_CmdLogic TSM_CmdLogic;
   
 //! Инициализатр по умолчанию
-#define SM_CMD_LOGIC_DEFAULTS {0,0,0,{0},0,0,0,0,0,\
+#define SM_CMD_LOGIC_DEFAULTS {0,0,0,{0},0,0,0,0,0,0,0,\
     SM_CmdLogicInit,\
     SM_CmdLogicSlow_Calc,\
     SM_CmdLogicms_Calc}

@@ -758,9 +758,11 @@ void SM_Ctrl_Fast_Calc(TSM_Ctrl *p) {
 
 			//задание угла - от SSI энкодера
 			refs.theta_elec=SSI_Encoder.theta_elecContinouos;
-*/
 
 			refs.theta_elec=adc.ref_meas<<2; //задание положения от потенциометра
+*/
+
+
 
 			//текущий угол с датчика положения, переведенный в электрический из механического
 			cur_par.ThetaCurr = posspeedEqep.theta_elecContinouos;

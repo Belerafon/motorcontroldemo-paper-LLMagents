@@ -69,6 +69,7 @@ void SM_CmdLogicSlow_Calc(TSM_CmdLogic *p) {
 void SM_CmdLogicms_Calc(TSM_CmdLogic *p) {
 	p->StartButton = STARTBUTTON;//обработка ножки старта
 	p->StopButton = STOPBUTTON;//обработка ножки стопа
+	p->ResetButton = RESETBUTTON;
 
 	//—тандартна€ обработка дискретного автомата
 	if (p->state_prev != p->state)
@@ -85,8 +86,10 @@ void SM_CmdLogicms_Calc(TSM_CmdLogic *p) {
 		cmd.bit.stop=1;
 	}
 
+
 	p->StartButtonPrev=p->StartButton;
 	p->StopButtonPrev=p->StopButton;
+	p->ResetButtonPrev = p->ResetButton;
 #endif
 	//определ€ем режим работы
 	switch (p->state) {
