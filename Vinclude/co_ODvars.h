@@ -726,6 +726,7 @@ struct SCo_OdVars{
  //данные для работы с энергонезависимой памятью
  T_UserMemoryContext	UM;
 
+ Uint16 ParamRestorationError;
  Uint16 co_requestCANInit;
  Uint16 co_callbackTag;			//передается в колбэк функции драйвера (соответствует 1 для 1го CAN и 2 для 2го CAN)
  Uint32 ISRDroppingCounter;
