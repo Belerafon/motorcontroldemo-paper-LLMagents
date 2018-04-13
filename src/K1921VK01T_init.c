@@ -75,6 +75,38 @@ void propReset(void) {
 //Впоследствии альт. функции для нужных ножек будут переназначены в соответствии с выполняемой задачей.
 void K1921VK01T_GPIO_SafeInit()
 {
+	//Вернем альтернативные функции ножек на состояние как после резета
+	//сначала все очистим
+	NT_GPIOA->ALTFUNCCLR = 0xFFFFFFFF;
+	NT_GPIOB->ALTFUNCCLR = 0xFFFFFFFF;
+	NT_GPIOC->ALTFUNCCLR = 0xFFFFFFFF;
+	NT_GPIOD->ALTFUNCCLR = 0xFFFFFFFF;
+	NT_GPIOE->ALTFUNCCLR = 0xFFFFFFFF;
+	NT_GPIOF->ALTFUNCCLR = 0xFFFFFFFF;
+	NT_GPIOG->ALTFUNCCLR = 0xFFFFFFFF;
+	NT_GPIOH->ALTFUNCCLR = 0xFFFFFFFF;
+
+	//вернем в работу житаг и сопутствующее
+	NT_GPIOA->ALTFUNCSET |= 0x0;
+	NT_GPIOB->ALTFUNCSET |= 0x7;
+	NT_GPIOC->ALTFUNCSET |= 0x0;
+	NT_GPIOD->ALTFUNCSET |= 0x800;
+	NT_GPIOE->ALTFUNCSET |= 0x403;
+	NT_GPIOF->ALTFUNCSET |= 0x0;
+	NT_GPIOG->ALTFUNCSET |= 0x0;
+	NT_GPIOH->ALTFUNCSET |= 0x0;
+
+	//все ножки - на вход
+	NT_GPIOA->OUTENCLR = 0xFFFFFFFF;
+	NT_GPIOB->OUTENCLR = 0xFFFFFFFF;
+	NT_GPIOC->OUTENCLR = 0xFFFFFFFF;
+	NT_GPIOD->OUTENCLR = 0xFFFFFFFF;
+	NT_GPIOE->OUTENCLR = 0xFFFFFFFF;
+	NT_GPIOF->OUTENCLR = 0xFFFFFFFF;
+	NT_GPIOG->OUTENCLR = 0xFFFFFFFF;
+	NT_GPIOH->OUTENCLR = 0xFFFFFFFF;
+
+	//номер альт. функции на "скорее всего незадействованный"
 	NT_COMMON_REG->GPIOPCTLA_bit.PIN0 = 2;	//RAM_DATA[12]
 	NT_COMMON_REG->GPIOPCTLA_bit.PIN1 = 2;	//trace_dat[3]
 	NT_COMMON_REG->GPIOPCTLA_bit.PIN2 = 2;	//RAM_Oen[0]
