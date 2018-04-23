@@ -88,10 +88,10 @@ void PWM_Module_Init(TPWM_Module *p) {
 
 	// Setup shadowing
 	NT_PWM0->CMPCTL_bit.SHDWAMODE = CC_SHADOW;   //включить SHADOW для сравнения
-	NT_PWM0->CMPCTL_bit.LOADAMODE = CC_CTR_ZERO;   // Load on period and zero
+	NT_PWM0->CMPCTL_bit.LOADAMODE = CC_CTR_ZERO;   // Load on zero
 
 	NT_PWM0->CMPCTL_bit.SHDWBMODE = CC_SHADOW;   //включить SHADOW для сравнения
-	NT_PWM0->CMPCTL_bit.LOADBMODE = CC_CTR_ZERO;   // Load on period and zero
+	NT_PWM0->CMPCTL_bit.LOADBMODE = CC_CTR_ZERO;   // Load on zero
 
 	// Set Compare values
 	NT_PWM0->CMPA_bit.CMPA = 0;                   // Set compare A value
@@ -154,10 +154,10 @@ void PWM_Module_Init(TPWM_Module *p) {
 
 	// Setup shadowing
 	NT_PWM1->CMPCTL_bit.SHDWAMODE = CC_SHADOW;   //включить SHADOW для сравнения
-	NT_PWM1->CMPCTL_bit.LOADAMODE = CC_CTR_ZERO;   // Load on period and zero
+	NT_PWM1->CMPCTL_bit.LOADAMODE = CC_CTR_ZERO;   // Load on zero
 
 	NT_PWM1->CMPCTL_bit.SHDWBMODE = CC_SHADOW;   //включить SHADOW для сравнения
-	NT_PWM1->CMPCTL_bit.LOADBMODE = CC_CTR_ZERO;   // Load on period and zero
+	NT_PWM1->CMPCTL_bit.LOADBMODE = CC_CTR_ZERO;   // Load on zero
 
 	// Set Compare values
 	NT_PWM1->CMPA_bit.CMPA = 0;                   // Set compare A value
@@ -215,10 +215,10 @@ void PWM_Module_Init(TPWM_Module *p) {
 
 	// Setup shadowing
 	NT_PWM2->CMPCTL_bit.SHDWAMODE = CC_SHADOW;   //включить SHADOW для сравнения
-	NT_PWM2->CMPCTL_bit.LOADAMODE = CC_CTR_ZERO;   // Load on period and zero
+	NT_PWM2->CMPCTL_bit.LOADAMODE = CC_CTR_ZERO;   // Load on zero
 
 	NT_PWM2->CMPCTL_bit.SHDWBMODE = CC_SHADOW;   //включить SHADOW для сравнения
-	NT_PWM2->CMPCTL_bit.LOADBMODE = CC_CTR_ZERO;   // Load on period and zero
+	NT_PWM2->CMPCTL_bit.LOADBMODE = CC_CTR_ZERO;   // Load on zero
 
 	// Set Compare values
 	NT_PWM2->CMPA_bit.CMPA = 0;                   // Set compare A value
