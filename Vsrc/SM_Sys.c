@@ -159,13 +159,13 @@ void SM_Sys_Init(TSM_Sys *p) {
 	NVIC_SetPriority(TIM1_IRQn, IRQ_PRIORITY_1K);
 
 	NVIC_EnableIRQ(CAP0_IRQn); //CAP0
-	NVIC_SetPriority(CAP3_IRQn, IRQ_PRIORITY_CAP);
+	NVIC_SetPriority(CAP0_IRQn, IRQ_PRIORITY_CAP);
 
 	NVIC_EnableIRQ(CAP1_IRQn); //CAP1
-	NVIC_SetPriority(CAP4_IRQn, IRQ_PRIORITY_CAP);
+	NVIC_SetPriority(CAP1_IRQn, IRQ_PRIORITY_CAP);
 
 	NVIC_EnableIRQ(CAP2_IRQn); //CAP2
-	NVIC_SetPriority(CAP5_IRQn, IRQ_PRIORITY_CAP);
+	NVIC_SetPriority(CAP2_IRQn, IRQ_PRIORITY_CAP);
 
 	NVIC_EnableIRQ(PWM0_TZ_IRQn); //PDP (в инверторе тексас нету такого пина)
 	NVIC_SetPriority(PWM0_TZ_IRQn, IRQ_PRIORITY_TZ);
