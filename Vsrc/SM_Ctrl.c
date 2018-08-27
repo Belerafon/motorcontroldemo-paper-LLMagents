@@ -559,7 +559,8 @@ void SM_Ctrl_Fast_Calc(TSM_Ctrl *p) {
 			pid_pos.calc(&pid_pos); //расчет регулятора положения
 
 			pid_spd.pid_ref_reg3 = pid_pos.pid_out_reg3; //на вход регулятора скорости - выход рег. положения
-			pid_spd.pid_fdb_reg3 = posspeedEqep.speed_filter.output; //обратная связь регулятора скорости - скорость ДПР
+//			pid_spd.pid_fdb_reg3 = posspeedEqep.speed_filter.output; //обратная связь регулятора скорости - скорость ДПР
+			pid_spd.pid_fdb_reg3 = cur_par.speed;
 
 			pid_spd.pid_out_max = refs.Iq_ref; //Максимум выхода регулятора скорости - заданный ток
 			pid_spd.pid_out_min = -refs.Iq_ref; //минимум рег. скор. - отрицательный ток
@@ -791,7 +792,8 @@ void SM_Ctrl_Fast_Calc(TSM_Ctrl *p) {
 			pid_pos.calc(&pid_pos); //расчет регулятора положения
 
 			pid_spd.pid_ref_reg3 = pid_pos.pid_out_reg3; //на вход регулятора скорости - выход рег. положения
-			pid_spd.pid_fdb_reg3 = posspeedEqep.speed_filter.output; //обратная связь регулятора скорости - скорость ДПР
+//			pid_spd.pid_fdb_reg3 = posspeedEqep.speed_filter.output; //обратная связь регулятора скорости - скорость ДПР
+			pid_spd.pid_fdb_reg3 = cur_par.speed;
 
 			pid_spd.pid_out_max = refs.Iq_ref; //Максимум выхода регулятора скорости - заданный ток
 			pid_spd.pid_out_min = -refs.Iq_ref; //минимум рег. скор. - отрицательный ток
