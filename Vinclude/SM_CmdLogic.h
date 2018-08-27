@@ -42,6 +42,7 @@ extern "C"
 #if defined (HW_VECTORCARD_DRV8301_EVM) || defined (HW_VECTORCARD_DRV8312_EVM)
 #define	STARTBUTTON	((NT_GPIOA->DATA & (1 << 14))==0)	//обработка ножки старта
 #define	STOPBUTTON	((NT_GPIOA->DATA & (1 << 13))==0)	//обработка ножки стопа
+#define	RESETBUTTON 	0
 #endif
 
 #if defined (HW_MOTORCONTROLBOARD)
@@ -55,6 +56,7 @@ extern "C"
 #if !defined (HW_MOTORCONTROLBOARD) && !defined (HW_VECTORCARD_DRV8301_EVM) && !defined (HW_VECTORCARD_DRV8312_EVM)
 #define	STARTBUTTON		0
 #define	STOPBUTTON		0
+#define	RESETBUTTON 	0
 #endif
 
 /*! \class TSM_CmdLogic
