@@ -48,7 +48,7 @@ void SM_Net_Init(TSM_Net *p) {
 	//логгер событий:
 	//	размер буфера: 50
 	//	стартовый адрес в SPI: 3000
-	FaultLog.init(&FaultLog, 50, 3000, &RTCclock.packed_time);//ниже указатель на время может быть переопределен в зависимости от работы часов
+	FaultLog.init((TLogger*)&FaultLog, 50, 3000,(Uint32*) &RTCclock.packed_time);//ниже указатель на время может быть переопределен в зависимости от работы часов
 
 
 
@@ -119,7 +119,7 @@ void SM_Net_Slow_Calc(TSM_Net *p) {
 #endif
 
 	if (RTCclock.ClockOk)//часы работают?
-		FaultLog.time_ptr = &RTCclock.packed_time; //время для банка аварий из часов
+		FaultLog.time_ptr = (Uint32*) &RTCclock.packed_time; //время для банка аварий из часов
 	else
 		FaultLog.time_ptr = (Uint32*) &global_time.PowerOn_time;//если не работают, то из модуля подсчета времени наработки
 }

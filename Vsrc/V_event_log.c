@@ -179,7 +179,7 @@ Uint16 Logger_Event_Write(TLogger* p,Uint16 code)
 	p->INTERNAL_last_log_code = code;
 	__enable_irq();
 	//пишем в FIFO
-	return p->FIFO.write(&(p->FIFO),&event);
+	return p->FIFO.write((TEventFIFO*)&(p->FIFO),&event);
 }
 
 //прочитать аварию из банка, сложить данные в TEvent* event
@@ -215,7 +215,7 @@ void Logger_Background_Calc(TLogger* p)
 	Uint16 ret;
 	TEvent event;
 	//чтобы не сильно затормаживать фоновый цикл будем записывать по 1 записи за раз
-	ret = p->FIFO.read(&(p->FIFO),&event);
+	ret = p->FIFO.read((TEventFIFO*)&(p->FIFO),&event);
 	if (ret == EVENT_FIFO_SUCCESSFUL)
 	{
 		//пишем в Ёнќ«”
