@@ -41,15 +41,20 @@ extern "C" {
 
 //! \memberof TRMPCtrl
 void V_RMP_CTRL_calc(TRMPCtrl *p) {
-	//выход меньше входа?
-	if (p->output < p->input)
-		p->output += p->step;//увелчичиваем с заданным темпом выход
-	if (p->output > p->input)
-		p->output -= p->step;
 
-	if ((labs(p->output - p->input) <= p->step) || (p->T==0)) {//вошли в задание с точность до шага или ЗИ вообще отключен
-		p->output = p->input;//выход равен входу
+	if ((labs(p->output - p->input) <= p->step) || (p->T==0))	//вошли в задание с точность до шага или ЗИ вообще отключен
+	{
+		p->output = p->input;									//выход равен входу
 	}
+	else if (p->output < p->input)								//иначе выход меньше входа?
+	{
+		p->output += p->step;									//увелчичиваем с заданным темпом выход
+	}
+	else														//иначе
+	{
+		p->output -= p->step;									//уменьшаем с заданным темпом выход
+	}
+
 }
 
 //! Вспомогательная функция задатчика интенсивности
