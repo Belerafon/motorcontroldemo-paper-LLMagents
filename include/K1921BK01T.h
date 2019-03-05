@@ -1,11 +1,11 @@
 /**
 ******************************************************************************
-* @file    K1921BK01T.h
+* @file    K1921VK01T.h
 * @author  Angioscan Electronics Application Team
 * @version V1.3.4
 * @date    01.04.2016
 * @brief   This file contains all the Special Function Registers definitions
-*          for the NIIET K1921BK01T microcontroller.
+*          for the NIIET K1921VK01T microcontroller.
 ******************************************************************************
 *
 *
@@ -18,27 +18,34 @@
 *
 *                 COPYRIGHT 2014 - 2016 Angioscan Electronics
 *******************************************************************************
-* FILE K1921BK01T.h
+* FILE K1921VK01T.h
 */
-
-#if __STDC__ == 1
-//#error This file can not be used in Strict ANSI mode
-#endif
+/**
+  * Patch log:
+  *     - 14.02.2019 (SVD 2.1): return of GPIODSCTLx registers
+  */
 
 /* Define to prevent recursive inclusion -------------------------------------*/
-#ifndef __K1921BK01T_H
-#define __K1921BK01T_H
+#ifndef __K1921VK01T_H
+#define __K1921VK01T_H
 
 #define __I     volatile const                /*!< defines 'read only' permissions      */
 #define __O     volatile                      /*!< defines 'write only' permissions     */
 #define __IO    volatile                      /*!< defines 'read / write' permissions   */
+
+/* Start of section using anonymous unions */
+#if defined (__CC_ARM)
+  #pragma push
+  #pragma anon_unions
+#endif
 
 /* Configuration of the Cortex-M4F Processor and Core Peripherals */
 #define __CM4F_REV             0x0100   /*!< Cortex-M4F Core Revision r0p1                */
 #define __MPU_PRESENT             1     /*!< MPU present or not                           */
 #define __NVIC_PRIO_BITS          3     /*!< Number of Bits used for Priority Levels      */
 #define __Vendor_SysTickConfig    0     /*!< Set to 1 if different SysTick Config is used */
-#define __FPU_PRESENT 			  1     /*!< Дописано вручную */
+#define __FPU_PRESENT             1     /*!< FPU present or not                           */
+
 #include "stdint.h"
 
 #ifdef __cplusplus
@@ -46,7 +53,7 @@ extern "C" {
 #endif
 
 /******************************************************************************/
-/*                  K1921BK01T Interrupt Number Definition                    */
+/*                  K1921VK01T Interrupt Number Definition                    */
 /******************************************************************************/
 
 typedef enum IRQn
@@ -58,7 +65,7 @@ typedef enum IRQn
   PendSV_IRQn             = -2,       /*!< 14 Pend SV Interrupt               */
   SysTick_IRQn            = -1,       /*!< 15 System Tick Timer Interrupt     */
 
-/*-- K1921BK01T specific Interrupt Numbers -----------------------------------*/
+/*-- K1921VK01T specific Interrupt Numbers -----------------------------------*/
   WWDG_IRQn                =  0,      /*!< WWDG interrupt                     */
   I2C0_IRQn                =  1,      /*!< I2C_0 interrupt                    */
   I2C1_IRQn                =  2,      /*!< I2C_1 interrupt                    */
@@ -166,7 +173,7 @@ typedef enum IRQn
   SPI2_IRQn                =  104,    /*!< SPI_2 interrupt                    */
   SPI3_IRQn                =  105,    /*!< SPI_3 interrupt                    */
   UserFlash_IRQn           =  106,    /*!< UserFlash interrupt                */
-  GPIOA_IRQn               =  107,    /*!< GPIO Ђ interrupt                   */
+  GPIOA_IRQn               =  107,    /*!< GPIO A interrupt                   */
   GPIOB_IRQn               =  108,    /*!< GPIO B interrupt                   */
   GPIOC_IRQn               =  109,    /*!< GPIO C interrupt                   */
   GPIOD_IRQn               =  110,    /*!< GPIO D interrupt                   */
@@ -195,1242 +202,1244 @@ typedef enum IRQn
   USBOTG_IRQn              =  133,    /*!< USB OTG interrupt                  */
 } IRQn_Type;
 
+#include <core_cm4.h>                 /* Cortex-M# processor and core peripherals */
+
 /******************************************************************************/
 /*                         ADC controller registers                           */
 /******************************************************************************/
 
-/*-- ACTSS: Configuration secvensors register --------------------------------*/
+/*-- ACTSS: Enable sequencer register --------------------------------*/
 
 typedef struct {
-  uint32_t ASEN0                                  :1;                   /*!< enable secvensor 0 */
-  uint32_t ASEN1                                  :1;                   /*!< enable secvensor 1 */
-  uint32_t ASEN2                                  :1;                   /*!< enable secvensor 2 */
-  uint32_t ASEN3                                  :1;                   /*!< enable secvensor 3 */
-  uint32_t ASEN4                                  :1;                   /*!< enable secvensor 4 */
-  uint32_t ASEN5                                  :1;                   /*!< enable secvensor 5 */
-  uint32_t ASEN6                                  :1;                   /*!< enable secvensor 6 */
-  uint32_t ASEN7                                  :1;                   /*!< enable secvensor 7 */
+  uint32_t ASEN0                                  :1;                   /*!< Enable sequencer 0 */
+  uint32_t ASEN1                                  :1;                   /*!< Enable sequencer 1 */
+  uint32_t ASEN2                                  :1;                   /*!< Enable sequencer 2 */
+  uint32_t ASEN3                                  :1;                   /*!< Enable sequencer 3 */
+  uint32_t ASEN4                                  :1;                   /*!< Enable sequencer 4 */
+  uint32_t ASEN5                                  :1;                   /*!< Enable sequencer 5 */
+  uint32_t ASEN6                                  :1;                   /*!< Enable sequencer 6 */
+  uint32_t ASEN7                                  :1;                   /*!< Enable sequencer 7 */
   uint32_t Reserved0                              :24;                  /*!< Reserved */
 } _ADC_ACTSS_bits;
 
 /* Bit field positions: */
-#define ADC_ACTSS_ASEN0_Pos                                 0           /*!< enable secvensor 0 */
-#define ADC_ACTSS_ASEN1_Pos                                 1           /*!< enable secvensor 1 */
-#define ADC_ACTSS_ASEN2_Pos                                 2           /*!< enable secvensor 2 */
-#define ADC_ACTSS_ASEN3_Pos                                 3           /*!< enable secvensor 3 */
-#define ADC_ACTSS_ASEN4_Pos                                 4           /*!< enable secvensor 4 */
-#define ADC_ACTSS_ASEN5_Pos                                 5           /*!< enable secvensor 5 */
-#define ADC_ACTSS_ASEN6_Pos                                 6           /*!< enable secvensor 6 */
-#define ADC_ACTSS_ASEN7_Pos                                 7           /*!< enable secvensor 7 */
+#define ADC_ACTSS_ASEN0_Pos                                 0           /*!< Enable sequencer 0 */
+#define ADC_ACTSS_ASEN1_Pos                                 1           /*!< Enable sequencer 1 */
+#define ADC_ACTSS_ASEN2_Pos                                 2           /*!< Enable sequencer 2 */
+#define ADC_ACTSS_ASEN3_Pos                                 3           /*!< Enable sequencer 3 */
+#define ADC_ACTSS_ASEN4_Pos                                 4           /*!< Enable sequencer 4 */
+#define ADC_ACTSS_ASEN5_Pos                                 5           /*!< Enable sequencer 5 */
+#define ADC_ACTSS_ASEN6_Pos                                 6           /*!< Enable sequencer 6 */
+#define ADC_ACTSS_ASEN7_Pos                                 7           /*!< Enable sequencer 7 */
 
 /* Bit field masks: */
-#define ADC_ACTSS_ASEN0_Msk                                 0x00000001  /*!< enable secvensor 0 */
-#define ADC_ACTSS_ASEN1_Msk                                 0x00000002  /*!< enable secvensor 1 */
-#define ADC_ACTSS_ASEN2_Msk                                 0x00000004  /*!< enable secvensor 2 */
-#define ADC_ACTSS_ASEN3_Msk                                 0x00000008  /*!< enable secvensor 3 */
-#define ADC_ACTSS_ASEN4_Msk                                 0x00000010  /*!< enable secvensor 4 */
-#define ADC_ACTSS_ASEN5_Msk                                 0x00000020  /*!< enable secvensor 5 */
-#define ADC_ACTSS_ASEN6_Msk                                 0x00000040  /*!< enable secvensor 6 */
-#define ADC_ACTSS_ASEN7_Msk                                 0x00000080  /*!< enable secvensor 7 */
+#define ADC_ACTSS_ASEN0_Msk                                 0x00000001  /*!< Enable sequencer 0 */
+#define ADC_ACTSS_ASEN1_Msk                                 0x00000002  /*!< Enable sequencer 1 */
+#define ADC_ACTSS_ASEN2_Msk                                 0x00000004  /*!< Enable sequencer 2 */
+#define ADC_ACTSS_ASEN3_Msk                                 0x00000008  /*!< Enable sequencer 3 */
+#define ADC_ACTSS_ASEN4_Msk                                 0x00000010  /*!< Enable sequencer 4 */
+#define ADC_ACTSS_ASEN5_Msk                                 0x00000020  /*!< Enable sequencer 5 */
+#define ADC_ACTSS_ASEN6_Msk                                 0x00000040  /*!< Enable sequencer 6 */
+#define ADC_ACTSS_ASEN7_Msk                                 0x00000080  /*!< Enable sequencer 7 */
 
-/*-- RIS: Register unmasked interrupt ----------------------------------------*/
+/*-- RIS: Raw interrupt status register ----------------------------------------*/
 
 typedef struct {
-  uint32_t INR0                                   :1;                   /*!< ADC complete msr */
-  uint32_t INR1                                   :1;                   /*!< ADC complete msr */
-  uint32_t INR2                                   :1;                   /*!< ADC complete msr */
-  uint32_t INR3                                   :1;                   /*!< ADC complete msr */
-  uint32_t INR4                                   :1;                   /*!< ADC complete msr */
-  uint32_t INR5                                   :1;                   /*!< ADC complete msr */
-  uint32_t INR6                                   :1;                   /*!< ADC complete msr */
-  uint32_t INR7                                   :1;                   /*!< ADC complete msr */
-  uint32_t INRDC0                                 :1;                   /*!< Received interrupt from CMP 0 */
-  uint32_t INRDC1                                 :1;                   /*!< Received interrupt from CMP 1 */
-  uint32_t INRDC2                                 :1;                   /*!< Received interrupt from CMP 2 */
-  uint32_t INRDC3                                 :1;                   /*!< Received interrupt from CMP 3 */
-  uint32_t INRDC4                                 :1;                   /*!< Received interrupt from CMP 4 */
-  uint32_t INRDC5                                 :1;                   /*!< Received interrupt from CMP 5 */
-  uint32_t INRDC6                                 :1;                   /*!< Received interrupt from CMP 6 */
-  uint32_t INRDC7                                 :1;                   /*!< Received interrupt from CMP 7 */
-  uint32_t INRDC8                                 :1;                   /*!< Received interrupt from CMP 8 */
-  uint32_t INRDC9                                 :1;                   /*!< Received interrupt from CMP 9 */
-  uint32_t INRDC10                                :1;                   /*!< Received interrupt from CMP 10 */
-  uint32_t INRDC11                                :1;                   /*!< Received interrupt from CMP 11 */
-  uint32_t INRDC12                                :1;                   /*!< Received interrupt from CMP 12 */
-  uint32_t INRDC13                                :1;                   /*!< Received interrupt from CMP 13 */
-  uint32_t INRDC14                                :1;                   /*!< Received interrupt from CMP 14 */
-  uint32_t INRDC15                                :1;                   /*!< Received interrupt from CMP 15 */
-  uint32_t INRDC16                                :1;                   /*!< Received interrupt from CMP 16 */
-  uint32_t INRDC17                                :1;                   /*!< Received interrupt from CMP 17 */
-  uint32_t INRDC18                                :1;                   /*!< Received interrupt from CMP 18 */
-  uint32_t INRDC19                                :1;                   /*!< Received interrupt from CMP 19 */
-  uint32_t INRDC20                                :1;                   /*!< Received interrupt from CMP 20 */
-  uint32_t INRDC21                                :1;                   /*!< Received interrupt from CMP 21 */
-  uint32_t INRDC22                                :1;                   /*!< Received interrupt from CMP 22 */
-  uint32_t INRDC23                                :1;                   /*!< Received interrupt from CMP 23 */
+  uint32_t INR0                                   :1;                   /*!< Sequencer 0 raw interrupt status */
+  uint32_t INR1                                   :1;                   /*!< Sequencer 1 raw interrupt status */
+  uint32_t INR2                                   :1;                   /*!< Sequencer 2 raw interrupt status */
+  uint32_t INR3                                   :1;                   /*!< Sequencer 3 raw interrupt status */
+  uint32_t INR4                                   :1;                   /*!< Sequencer 4 raw interrupt status */
+  uint32_t INR5                                   :1;                   /*!< Sequencer 5 raw interrupt status */
+  uint32_t INR6                                   :1;                   /*!< Sequencer 6 raw interrupt status */
+  uint32_t INR7                                   :1;                   /*!< Sequencer 7 raw interrupt status */
+  uint32_t INRDC0                                 :1;                   /*!< DCMP 0 raw interrupt status */
+  uint32_t INRDC1                                 :1;                   /*!< DCMP 1 raw interrupt status */
+  uint32_t INRDC2                                 :1;                   /*!< DCMP 2 raw interrupt status */
+  uint32_t INRDC3                                 :1;                   /*!< DCMP 3 raw interrupt status */
+  uint32_t INRDC4                                 :1;                   /*!< DCMP 4 raw interrupt status */
+  uint32_t INRDC5                                 :1;                   /*!< DCMP 5 raw interrupt status */
+  uint32_t INRDC6                                 :1;                   /*!< DCMP 6 raw interrupt status */
+  uint32_t INRDC7                                 :1;                   /*!< DCMP 7 raw interrupt status */
+  uint32_t INRDC8                                 :1;                   /*!< DCMP 8 raw interrupt status */
+  uint32_t INRDC9                                 :1;                   /*!< DCMP 9 raw interrupt status */
+  uint32_t INRDC10                                :1;                   /*!< DCMP 10 raw interrupt status */
+  uint32_t INRDC11                                :1;                   /*!< DCMP 11 raw interrupt status */
+  uint32_t INRDC12                                :1;                   /*!< DCMP 12 raw interrupt status */
+  uint32_t INRDC13                                :1;                   /*!< DCMP 13 raw interrupt status */
+  uint32_t INRDC14                                :1;                   /*!< DCMP 14 raw interrupt status */
+  uint32_t INRDC15                                :1;                   /*!< DCMP 15 raw interrupt status */
+  uint32_t INRDC16                                :1;                   /*!< DCMP 16 raw interrupt status */
+  uint32_t INRDC17                                :1;                   /*!< DCMP 17 raw interrupt status */
+  uint32_t INRDC18                                :1;                   /*!< DCMP 18 raw interrupt status */
+  uint32_t INRDC19                                :1;                   /*!< DCMP 19 raw interrupt status */
+  uint32_t INRDC20                                :1;                   /*!< DCMP 20 raw interrupt status */
+  uint32_t INRDC21                                :1;                   /*!< DCMP 21 raw interrupt status */
+  uint32_t INRDC22                                :1;                   /*!< DCMP 22 raw interrupt status */
+  uint32_t INRDC23                                :1;                   /*!< DCMP 23 raw interrupt status */
 } _ADC_RIS_bits;
 
 /* Bit field positions: */
-#define ADC_RIS_INR0_Pos                                    0           /*!< ADC complete msr */
-#define ADC_RIS_INR1_Pos                                    1           /*!< ADC complete msr */
-#define ADC_RIS_INR2_Pos                                    2           /*!< ADC complete msr */
-#define ADC_RIS_INR3_Pos                                    3           /*!< ADC complete msr */
-#define ADC_RIS_INR4_Pos                                    4           /*!< ADC complete msr */
-#define ADC_RIS_INR5_Pos                                    5           /*!< ADC complete msr */
-#define ADC_RIS_INR6_Pos                                    6           /*!< ADC complete msr */
-#define ADC_RIS_INR7_Pos                                    7           /*!< ADC complete msr */
-#define ADC_RIS_INRDC0_Pos                                  8           /*!< Received interrupt from CMP 0 */
-#define ADC_RIS_INRDC1_Pos                                  9           /*!< Received interrupt from CMP 1 */
-#define ADC_RIS_INRDC2_Pos                                  10          /*!< Received interrupt from CMP 2 */
-#define ADC_RIS_INRDC3_Pos                                  11          /*!< Received interrupt from CMP 3 */
-#define ADC_RIS_INRDC4_Pos                                  12          /*!< Received interrupt from CMP 4 */
-#define ADC_RIS_INRDC5_Pos                                  13          /*!< Received interrupt from CMP 5 */
-#define ADC_RIS_INRDC6_Pos                                  14          /*!< Received interrupt from CMP 6 */
-#define ADC_RIS_INRDC7_Pos                                  15          /*!< Received interrupt from CMP 7 */
-#define ADC_RIS_INRDC8_Pos                                  16          /*!< Received interrupt from CMP 8 */
-#define ADC_RIS_INRDC9_Pos                                  17          /*!< Received interrupt from CMP 9 */
-#define ADC_RIS_INRDC10_Pos                                 18          /*!< Received interrupt from CMP 10 */
-#define ADC_RIS_INRDC11_Pos                                 19          /*!< Received interrupt from CMP 11 */
-#define ADC_RIS_INRDC12_Pos                                 20          /*!< Received interrupt from CMP 12 */
-#define ADC_RIS_INRDC13_Pos                                 21          /*!< Received interrupt from CMP 13 */
-#define ADC_RIS_INRDC14_Pos                                 22          /*!< Received interrupt from CMP 14 */
-#define ADC_RIS_INRDC15_Pos                                 23          /*!< Received interrupt from CMP 15 */
-#define ADC_RIS_INRDC16_Pos                                 24          /*!< Received interrupt from CMP 16 */
-#define ADC_RIS_INRDC17_Pos                                 25          /*!< Received interrupt from CMP 17 */
-#define ADC_RIS_INRDC18_Pos                                 26          /*!< Received interrupt from CMP 18 */
-#define ADC_RIS_INRDC19_Pos                                 27          /*!< Received interrupt from CMP 19 */
-#define ADC_RIS_INRDC20_Pos                                 28          /*!< Received interrupt from CMP 20 */
-#define ADC_RIS_INRDC21_Pos                                 29          /*!< Received interrupt from CMP 21 */
-#define ADC_RIS_INRDC22_Pos                                 30          /*!< Received interrupt from CMP 22 */
-#define ADC_RIS_INRDC23_Pos                                 31          /*!< Received interrupt from CMP 23 */
+#define ADC_RIS_INR0_Pos                                    0           /*!< Sequencer 0 raw interrupt status */
+#define ADC_RIS_INR1_Pos                                    1           /*!< Sequencer 1 raw interrupt status */
+#define ADC_RIS_INR2_Pos                                    2           /*!< Sequencer 2 raw interrupt status */
+#define ADC_RIS_INR3_Pos                                    3           /*!< Sequencer 3 raw interrupt status */
+#define ADC_RIS_INR4_Pos                                    4           /*!< Sequencer 4 raw interrupt status */
+#define ADC_RIS_INR5_Pos                                    5           /*!< Sequencer 5 raw interrupt status */
+#define ADC_RIS_INR6_Pos                                    6           /*!< Sequencer 6 raw interrupt status */
+#define ADC_RIS_INR7_Pos                                    7           /*!< Sequencer 7 raw interrupt status */
+#define ADC_RIS_INRDC0_Pos                                  8           /*!< DCMP 0 raw interrupt status */
+#define ADC_RIS_INRDC1_Pos                                  9           /*!< DCMP 1 raw interrupt status */
+#define ADC_RIS_INRDC2_Pos                                  10          /*!< DCMP 2 raw interrupt status */
+#define ADC_RIS_INRDC3_Pos                                  11          /*!< DCMP 3 raw interrupt status */
+#define ADC_RIS_INRDC4_Pos                                  12          /*!< DCMP 4 raw interrupt status */
+#define ADC_RIS_INRDC5_Pos                                  13          /*!< DCMP 5 raw interrupt status */
+#define ADC_RIS_INRDC6_Pos                                  14          /*!< DCMP 6 raw interrupt status */
+#define ADC_RIS_INRDC7_Pos                                  15          /*!< DCMP 7 raw interrupt status */
+#define ADC_RIS_INRDC8_Pos                                  16          /*!< DCMP 8 raw interrupt status */
+#define ADC_RIS_INRDC9_Pos                                  17          /*!< DCMP 9 raw interrupt status */
+#define ADC_RIS_INRDC10_Pos                                 18          /*!< DCMP 10 raw interrupt status */
+#define ADC_RIS_INRDC11_Pos                                 19          /*!< DCMP 11 raw interrupt status */
+#define ADC_RIS_INRDC12_Pos                                 20          /*!< DCMP 12 raw interrupt status */
+#define ADC_RIS_INRDC13_Pos                                 21          /*!< DCMP 13 raw interrupt status */
+#define ADC_RIS_INRDC14_Pos                                 22          /*!< DCMP 14 raw interrupt status */
+#define ADC_RIS_INRDC15_Pos                                 23          /*!< DCMP 15 raw interrupt status */
+#define ADC_RIS_INRDC16_Pos                                 24          /*!< DCMP 16 raw interrupt status */
+#define ADC_RIS_INRDC17_Pos                                 25          /*!< DCMP 17 raw interrupt status */
+#define ADC_RIS_INRDC18_Pos                                 26          /*!< DCMP 18 raw interrupt status */
+#define ADC_RIS_INRDC19_Pos                                 27          /*!< DCMP 19 raw interrupt status */
+#define ADC_RIS_INRDC20_Pos                                 28          /*!< DCMP 20 raw interrupt status */
+#define ADC_RIS_INRDC21_Pos                                 29          /*!< DCMP 21 raw interrupt status */
+#define ADC_RIS_INRDC22_Pos                                 30          /*!< DCMP 22 raw interrupt status */
+#define ADC_RIS_INRDC23_Pos                                 31          /*!< DCMP 23 raw interrupt status */
 
 /* Bit field masks: */
-#define ADC_RIS_INR0_Msk                                    0x00000001  /*!< ADC complete msr */
-#define ADC_RIS_INR1_Msk                                    0x00000002  /*!< ADC complete msr */
-#define ADC_RIS_INR2_Msk                                    0x00000004  /*!< ADC complete msr */
-#define ADC_RIS_INR3_Msk                                    0x00000008  /*!< ADC complete msr */
-#define ADC_RIS_INR4_Msk                                    0x00000010  /*!< ADC complete msr */
-#define ADC_RIS_INR5_Msk                                    0x00000020  /*!< ADC complete msr */
-#define ADC_RIS_INR6_Msk                                    0x00000040  /*!< ADC complete msr */
-#define ADC_RIS_INR7_Msk                                    0x00000080  /*!< ADC complete msr */
-#define ADC_RIS_INRDC0_Msk                                  0x00000100  /*!< Received interrupt from CMP 0 */
-#define ADC_RIS_INRDC1_Msk                                  0x00000200  /*!< Received interrupt from CMP 1 */
-#define ADC_RIS_INRDC2_Msk                                  0x00000400  /*!< Received interrupt from CMP 2 */
-#define ADC_RIS_INRDC3_Msk                                  0x00000800  /*!< Received interrupt from CMP 3 */
-#define ADC_RIS_INRDC4_Msk                                  0x00001000  /*!< Received interrupt from CMP 4 */
-#define ADC_RIS_INRDC5_Msk                                  0x00002000  /*!< Received interrupt from CMP 5 */
-#define ADC_RIS_INRDC6_Msk                                  0x00004000  /*!< Received interrupt from CMP 6 */
-#define ADC_RIS_INRDC7_Msk                                  0x00008000  /*!< Received interrupt from CMP 7 */
-#define ADC_RIS_INRDC8_Msk                                  0x00010000  /*!< Received interrupt from CMP 8 */
-#define ADC_RIS_INRDC9_Msk                                  0x00020000  /*!< Received interrupt from CMP 9 */
-#define ADC_RIS_INRDC10_Msk                                 0x00040000  /*!< Received interrupt from CMP 10 */
-#define ADC_RIS_INRDC11_Msk                                 0x00080000  /*!< Received interrupt from CMP 11 */
-#define ADC_RIS_INRDC12_Msk                                 0x00100000  /*!< Received interrupt from CMP 12 */
-#define ADC_RIS_INRDC13_Msk                                 0x00200000  /*!< Received interrupt from CMP 13 */
-#define ADC_RIS_INRDC14_Msk                                 0x00400000  /*!< Received interrupt from CMP 14 */
-#define ADC_RIS_INRDC15_Msk                                 0x00800000  /*!< Received interrupt from CMP 15 */
-#define ADC_RIS_INRDC16_Msk                                 0x01000000  /*!< Received interrupt from CMP 16 */
-#define ADC_RIS_INRDC17_Msk                                 0x02000000  /*!< Received interrupt from CMP 17 */
-#define ADC_RIS_INRDC18_Msk                                 0x04000000  /*!< Received interrupt from CMP 18 */
-#define ADC_RIS_INRDC19_Msk                                 0x08000000  /*!< Received interrupt from CMP 19 */
-#define ADC_RIS_INRDC20_Msk                                 0x10000000  /*!< Received interrupt from CMP 20 */
-#define ADC_RIS_INRDC21_Msk                                 0x20000000  /*!< Received interrupt from CMP 21 */
-#define ADC_RIS_INRDC22_Msk                                 0x40000000  /*!< Received interrupt from CMP 22 */
-#define ADC_RIS_INRDC23_Msk                                 0x80000000  /*!< Received interrupt from CMP 23 */
+#define ADC_RIS_INR0_Msk                                    0x00000001  /*!< Sequencer 0 raw interrupt status */
+#define ADC_RIS_INR1_Msk                                    0x00000002  /*!< Sequencer 1 raw interrupt status */
+#define ADC_RIS_INR2_Msk                                    0x00000004  /*!< Sequencer 2 raw interrupt status */
+#define ADC_RIS_INR3_Msk                                    0x00000008  /*!< Sequencer 3 raw interrupt status */
+#define ADC_RIS_INR4_Msk                                    0x00000010  /*!< Sequencer 4 raw interrupt status */
+#define ADC_RIS_INR5_Msk                                    0x00000020  /*!< Sequencer 5 raw interrupt status */
+#define ADC_RIS_INR6_Msk                                    0x00000040  /*!< Sequencer 6 raw interrupt status */
+#define ADC_RIS_INR7_Msk                                    0x00000080  /*!< Sequencer 7 raw interrupt status */
+#define ADC_RIS_INRDC0_Msk                                  0x00000100  /*!< DCMP 0 raw interrupt status */
+#define ADC_RIS_INRDC1_Msk                                  0x00000200  /*!< DCMP 1 raw interrupt status */
+#define ADC_RIS_INRDC2_Msk                                  0x00000400  /*!< DCMP 2 raw interrupt status */
+#define ADC_RIS_INRDC3_Msk                                  0x00000800  /*!< DCMP 3 raw interrupt status */
+#define ADC_RIS_INRDC4_Msk                                  0x00001000  /*!< DCMP 4 raw interrupt status */
+#define ADC_RIS_INRDC5_Msk                                  0x00002000  /*!< DCMP 5 raw interrupt status */
+#define ADC_RIS_INRDC6_Msk                                  0x00004000  /*!< DCMP 6 raw interrupt status */
+#define ADC_RIS_INRDC7_Msk                                  0x00008000  /*!< DCMP 7 raw interrupt status */
+#define ADC_RIS_INRDC8_Msk                                  0x00010000  /*!< DCMP 8 raw interrupt status */
+#define ADC_RIS_INRDC9_Msk                                  0x00020000  /*!< DCMP 9 raw interrupt status */
+#define ADC_RIS_INRDC10_Msk                                 0x00040000  /*!< DCMP 10 raw interrupt status */
+#define ADC_RIS_INRDC11_Msk                                 0x00080000  /*!< DCMP 11 raw interrupt status */
+#define ADC_RIS_INRDC12_Msk                                 0x00100000  /*!< DCMP 12 raw interrupt status */
+#define ADC_RIS_INRDC13_Msk                                 0x00200000  /*!< DCMP 13 raw interrupt status */
+#define ADC_RIS_INRDC14_Msk                                 0x00400000  /*!< DCMP 14 raw interrupt status */
+#define ADC_RIS_INRDC15_Msk                                 0x00800000  /*!< DCMP 15 raw interrupt status */
+#define ADC_RIS_INRDC16_Msk                                 0x01000000  /*!< DCMP 16 raw interrupt status */
+#define ADC_RIS_INRDC17_Msk                                 0x02000000  /*!< DCMP 17 raw interrupt status */
+#define ADC_RIS_INRDC18_Msk                                 0x04000000  /*!< DCMP 18 raw interrupt status */
+#define ADC_RIS_INRDC19_Msk                                 0x08000000  /*!< DCMP 19 raw interrupt status */
+#define ADC_RIS_INRDC20_Msk                                 0x10000000  /*!< DCMP 20 raw interrupt status */
+#define ADC_RIS_INRDC21_Msk                                 0x20000000  /*!< DCMP 21 raw interrupt status */
+#define ADC_RIS_INRDC22_Msk                                 0x40000000  /*!< DCMP 22 raw interrupt status */
+#define ADC_RIS_INRDC23_Msk                                 0x80000000  /*!< DCMP 23 raw interrupt status */
 
-/*-- IM: Register mask interrupt ---------------------------------------------*/
+/*-- IM: Interrupt mask register ---------------------------------------------*/
 
 typedef struct {
-  uint32_t MASK0                                  :1;                   /*!< Enable transmission interrupt line IS0 */
-  uint32_t MASK1                                  :1;                   /*!< Enable transmission interrupt line IS1 */
-  uint32_t MASK2                                  :1;                   /*!< Enable transmission interrupt line IS2 */
-  uint32_t MASK3                                  :1;                   /*!< Enable transmission interrupt line IS3 */
-  uint32_t MASK4                                  :1;                   /*!< Enable transmission interrupt line IS4 */
-  uint32_t MASK5                                  :1;                   /*!< Enable transmission interrupt line IS5 */
-  uint32_t MASK6                                  :1;                   /*!< Enable transmission interrupt line IS6 */
-  uint32_t MASK7                                  :1;                   /*!< Enable transmission interrupt line IS7 */
-  uint32_t MIDC0                                  :1;                   /*!< Transmit to controller by line IDC flag interrupt INRDC0 */
-  uint32_t MIDC1                                  :1;                   /*!< Transmit to controller by line IDC flag interrupt INRDC1 */
-  uint32_t MIDC2                                  :1;                   /*!< Transmit to controller by line IDC flag interrupt INRDC2 */
-  uint32_t MIDC3                                  :1;                   /*!< Transmit to controller by line IDC flag interrupt INRDC3 */
-  uint32_t MIDC4                                  :1;                   /*!< Transmit to controller by line IDC flag interrupt INRDC4 */
-  uint32_t MIDC5                                  :1;                   /*!< Transmit to controller by line IDC flag interrupt INRDC5 */
-  uint32_t MIDC6                                  :1;                   /*!< Transmit to controller by line IDC flag interrupt INRDC6 */
-  uint32_t MIDC7                                  :1;                   /*!< Transmit to controller by line IDC flag interrupt INRDC7 */
-  uint32_t MIDC8                                  :1;                   /*!< Transmit to controller by line IDC flag interrupt INRDC8 */
-  uint32_t MIDC9                                  :1;                   /*!< Transmit to controller by line IDC flag interrupt INRDC9 */
-  uint32_t MIDC10                                 :1;                   /*!< Transmit to controller by line IDC flag interrupt INRDC10 */
-  uint32_t MIDC11                                 :1;                   /*!< Transmit to controller by line IDC flag interrupt INRDC11 */
-  uint32_t MIDC12                                 :1;                   /*!< Transmit to controller by line IDC flag interrupt INRDC12 */
-  uint32_t MIDC13                                 :1;                   /*!< Transmit to controller by line IDC flag interrupt INRDC13 */
-  uint32_t MIDC14                                 :1;                   /*!< Transmit to controller by line IDC flag interrupt INRDC14 */
-  uint32_t MIDC15                                 :1;                   /*!< Transmit to controller by line IDC flag interrupt INRDC15 */
-  uint32_t MIDC16                                 :1;                   /*!< Transmit to controller by line IDC flag interrupt INRDC16 */
-  uint32_t MIDC17                                 :1;                   /*!< Transmit to controller by line IDC flag interrupt INRDC17 */
-  uint32_t MIDC18                                 :1;                   /*!< Transmit to controller by line IDC flag interrupt INRDC18 */
-  uint32_t MIDC19                                 :1;                   /*!< Transmit to controller by line IDC flag interrupt INRDC19 */
-  uint32_t MIDC20                                 :1;                   /*!< Transmit to controller by line IDC flag interrupt INRDC20 */
-  uint32_t MIDC21                                 :1;                   /*!< Transmit to controller by line IDC flag interrupt INRDC21 */
-  uint32_t MIDC22                                 :1;                   /*!< Transmit to controller by line IDC flag interrupt INRDC22 */
-  uint32_t MIDC23                                 :1;                   /*!< Transmit to controller by line IDC flag interrupt INRDC23 */
+  uint32_t MASK0                                  :1;                   /*!< Sequencer 0 interrupt mask */
+  uint32_t MASK1                                  :1;                   /*!< Sequencer 1 interrupt mask */
+  uint32_t MASK2                                  :1;                   /*!< Sequencer 2 interrupt mask */
+  uint32_t MASK3                                  :1;                   /*!< Sequencer 3 interrupt mask */
+  uint32_t MASK4                                  :1;                   /*!< Sequencer 4 interrupt mask */
+  uint32_t MASK5                                  :1;                   /*!< Sequencer 5 interrupt mask */
+  uint32_t MASK6                                  :1;                   /*!< Sequencer 6 interrupt mask */
+  uint32_t MASK7                                  :1;                   /*!< Sequencer 7 interrupt mask */
+  uint32_t MIDC0                                  :1;                   /*!< DCMP 0 interrupt mask */
+  uint32_t MIDC1                                  :1;                   /*!< DCMP 1 interrupt mask */
+  uint32_t MIDC2                                  :1;                   /*!< DCMP 2 interrupt mask */
+  uint32_t MIDC3                                  :1;                   /*!< DCMP 3 interrupt mask */
+  uint32_t MIDC4                                  :1;                   /*!< DCMP 4 interrupt mask */
+  uint32_t MIDC5                                  :1;                   /*!< DCMP 5 interrupt mask */
+  uint32_t MIDC6                                  :1;                   /*!< DCMP 6 interrupt mask */
+  uint32_t MIDC7                                  :1;                   /*!< DCMP 7 interrupt mask */
+  uint32_t MIDC8                                  :1;                   /*!< DCMP 8 interrupt mask */
+  uint32_t MIDC9                                  :1;                   /*!< DCMP 9 interrupt mask */
+  uint32_t MIDC10                                 :1;                   /*!< DCMP 10 interrupt mask */
+  uint32_t MIDC11                                 :1;                   /*!< DCMP 11 interrupt mask */
+  uint32_t MIDC12                                 :1;                   /*!< DCMP 12 interrupt mask */
+  uint32_t MIDC13                                 :1;                   /*!< DCMP 13 interrupt mask */
+  uint32_t MIDC14                                 :1;                   /*!< DCMP 14 interrupt mask */
+  uint32_t MIDC15                                 :1;                   /*!< DCMP 15 interrupt mask */
+  uint32_t MIDC16                                 :1;                   /*!< DCMP 16 interrupt mask */
+  uint32_t MIDC17                                 :1;                   /*!< DCMP 17 interrupt mask */
+  uint32_t MIDC18                                 :1;                   /*!< DCMP 18 interrupt mask */
+  uint32_t MIDC19                                 :1;                   /*!< DCMP 19 interrupt mask */
+  uint32_t MIDC20                                 :1;                   /*!< DCMP 20 interrupt mask */
+  uint32_t MIDC21                                 :1;                   /*!< DCMP 21 interrupt mask */
+  uint32_t MIDC22                                 :1;                   /*!< DCMP 22 interrupt mask */
+  uint32_t MIDC23                                 :1;                   /*!< DCMP 23 interrupt mask */
 } _ADC_IM_bits;
 
 /* Bit field positions: */
-#define ADC_IM_MASK0_Pos                                    0           /*!< Enable transmission interrupt line IS0 */
-#define ADC_IM_MASK1_Pos                                    1           /*!< Enable transmission interrupt line IS1 */
-#define ADC_IM_MASK2_Pos                                    2           /*!< Enable transmission interrupt line IS2 */
-#define ADC_IM_MASK3_Pos                                    3           /*!< Enable transmission interrupt line IS3 */
-#define ADC_IM_MASK4_Pos                                    4           /*!< Enable transmission interrupt line IS4 */
-#define ADC_IM_MASK5_Pos                                    5           /*!< Enable transmission interrupt line IS5 */
-#define ADC_IM_MASK6_Pos                                    6           /*!< Enable transmission interrupt line IS6 */
-#define ADC_IM_MASK7_Pos                                    7           /*!< Enable transmission interrupt line IS7 */
-#define ADC_IM_MIDC0_Pos                                    8           /*!< Transmit to controller by line IDC flag interrupt INRDC0 */
-#define ADC_IM_MIDC1_Pos                                    9           /*!< Transmit to controller by line IDC flag interrupt INRDC1 */
-#define ADC_IM_MIDC2_Pos                                    10          /*!< Transmit to controller by line IDC flag interrupt INRDC2 */
-#define ADC_IM_MIDC3_Pos                                    11          /*!< Transmit to controller by line IDC flag interrupt INRDC3 */
-#define ADC_IM_MIDC4_Pos                                    12          /*!< Transmit to controller by line IDC flag interrupt INRDC4 */
-#define ADC_IM_MIDC5_Pos                                    13          /*!< Transmit to controller by line IDC flag interrupt INRDC5 */
-#define ADC_IM_MIDC6_Pos                                    14          /*!< Transmit to controller by line IDC flag interrupt INRDC6 */
-#define ADC_IM_MIDC7_Pos                                    15          /*!< Transmit to controller by line IDC flag interrupt INRDC7 */
-#define ADC_IM_MIDC8_Pos                                    16          /*!< Transmit to controller by line IDC flag interrupt INRDC8 */
-#define ADC_IM_MIDC9_Pos                                    17          /*!< Transmit to controller by line IDC flag interrupt INRDC9 */
-#define ADC_IM_MIDC10_Pos                                   18          /*!< Transmit to controller by line IDC flag interrupt INRDC10 */
-#define ADC_IM_MIDC11_Pos                                   19          /*!< Transmit to controller by line IDC flag interrupt INRDC11 */
-#define ADC_IM_MIDC12_Pos                                   20          /*!< Transmit to controller by line IDC flag interrupt INRDC12 */
-#define ADC_IM_MIDC13_Pos                                   21          /*!< Transmit to controller by line IDC flag interrupt INRDC13 */
-#define ADC_IM_MIDC14_Pos                                   22          /*!< Transmit to controller by line IDC flag interrupt INRDC14 */
-#define ADC_IM_MIDC15_Pos                                   23          /*!< Transmit to controller by line IDC flag interrupt INRDC15 */
-#define ADC_IM_MIDC16_Pos                                   24          /*!< Transmit to controller by line IDC flag interrupt INRDC16 */
-#define ADC_IM_MIDC17_Pos                                   25          /*!< Transmit to controller by line IDC flag interrupt INRDC17 */
-#define ADC_IM_MIDC18_Pos                                   26          /*!< Transmit to controller by line IDC flag interrupt INRDC18 */
-#define ADC_IM_MIDC19_Pos                                   27          /*!< Transmit to controller by line IDC flag interrupt INRDC19 */
-#define ADC_IM_MIDC20_Pos                                   28          /*!< Transmit to controller by line IDC flag interrupt INRDC20 */
-#define ADC_IM_MIDC21_Pos                                   29          /*!< Transmit to controller by line IDC flag interrupt INRDC21 */
-#define ADC_IM_MIDC22_Pos                                   30          /*!< Transmit to controller by line IDC flag interrupt INRDC22 */
-#define ADC_IM_MIDC23_Pos                                   31          /*!< Transmit to controller by line IDC flag interrupt INRDC23 */
+#define ADC_IM_MASK0_Pos                                    0           /*!< Sequencer 0 interrupt mask */
+#define ADC_IM_MASK1_Pos                                    1           /*!< Sequencer 1 interrupt mask */
+#define ADC_IM_MASK2_Pos                                    2           /*!< Sequencer 2 interrupt mask */
+#define ADC_IM_MASK3_Pos                                    3           /*!< Sequencer 3 interrupt mask */
+#define ADC_IM_MASK4_Pos                                    4           /*!< Sequencer 4 interrupt mask */
+#define ADC_IM_MASK5_Pos                                    5           /*!< Sequencer 5 interrupt mask */
+#define ADC_IM_MASK6_Pos                                    6           /*!< Sequencer 6 interrupt mask */
+#define ADC_IM_MASK7_Pos                                    7           /*!< Sequencer 7 interrupt mask */
+#define ADC_IM_MIDC0_Pos                                    8           /*!< DCMP 0 interrupt mask*/
+#define ADC_IM_MIDC1_Pos                                    9           /*!< DCMP 1 interrupt mask*/
+#define ADC_IM_MIDC2_Pos                                    10          /*!< DCMP 2 interrupt mask*/
+#define ADC_IM_MIDC3_Pos                                    11          /*!< DCMP 3 interrupt mask*/
+#define ADC_IM_MIDC4_Pos                                    12          /*!< DCMP 4 interrupt mask*/
+#define ADC_IM_MIDC5_Pos                                    13          /*!< DCMP 5 interrupt mask*/
+#define ADC_IM_MIDC6_Pos                                    14          /*!< DCMP 6 interrupt mask*/
+#define ADC_IM_MIDC7_Pos                                    15          /*!< DCMP 7 interrupt mask*/
+#define ADC_IM_MIDC8_Pos                                    16          /*!< DCMP 8 interrupt mask*/
+#define ADC_IM_MIDC9_Pos                                    17          /*!< DCMP 9 interrupt mask*/
+#define ADC_IM_MIDC10_Pos                                   18          /*!< DCMP 10 interrupt mask */
+#define ADC_IM_MIDC11_Pos                                   19          /*!< DCMP 11 interrupt mask */
+#define ADC_IM_MIDC12_Pos                                   20          /*!< DCMP 12 interrupt mask */
+#define ADC_IM_MIDC13_Pos                                   21          /*!< DCMP 13 interrupt mask */
+#define ADC_IM_MIDC14_Pos                                   22          /*!< DCMP 14 interrupt mask */
+#define ADC_IM_MIDC15_Pos                                   23          /*!< DCMP 15 interrupt mask */
+#define ADC_IM_MIDC16_Pos                                   24          /*!< DCMP 16 interrupt mask */
+#define ADC_IM_MIDC17_Pos                                   25          /*!< DCMP 17 interrupt mask */
+#define ADC_IM_MIDC18_Pos                                   26          /*!< DCMP 18 interrupt mask */
+#define ADC_IM_MIDC19_Pos                                   27          /*!< DCMP 19 interrupt mask */
+#define ADC_IM_MIDC20_Pos                                   28          /*!< DCMP 20 interrupt mask */
+#define ADC_IM_MIDC21_Pos                                   29          /*!< DCMP 21 interrupt mask */
+#define ADC_IM_MIDC22_Pos                                   30          /*!< DCMP 22 interrupt mask */
+#define ADC_IM_MIDC23_Pos                                   31          /*!< DCMP 23 interrupt mask */
 
 /* Bit field masks: */
-#define ADC_IM_MASK0_Msk                                    0x00000001  /*!< Enable transmission interrupt line IS0 */
-#define ADC_IM_MASK1_Msk                                    0x00000002  /*!< Enable transmission interrupt line IS1 */
-#define ADC_IM_MASK2_Msk                                    0x00000004  /*!< Enable transmission interrupt line IS2 */
-#define ADC_IM_MASK3_Msk                                    0x00000008  /*!< Enable transmission interrupt line IS3 */
-#define ADC_IM_MASK4_Msk                                    0x00000010  /*!< Enable transmission interrupt line IS4 */
-#define ADC_IM_MASK5_Msk                                    0x00000020  /*!< Enable transmission interrupt line IS5 */
-#define ADC_IM_MASK6_Msk                                    0x00000040  /*!< Enable transmission interrupt line IS6 */
-#define ADC_IM_MASK7_Msk                                    0x00000080  /*!< Enable transmission interrupt line IS7 */
-#define ADC_IM_MIDC0_Msk                                    0x00000100  /*!< Transmit to controller by line IDC flag interrupt INRDC0 */
-#define ADC_IM_MIDC1_Msk                                    0x00000200  /*!< Transmit to controller by line IDC flag interrupt INRDC1 */
-#define ADC_IM_MIDC2_Msk                                    0x00000400  /*!< Transmit to controller by line IDC flag interrupt INRDC2 */
-#define ADC_IM_MIDC3_Msk                                    0x00000800  /*!< Transmit to controller by line IDC flag interrupt INRDC3 */
-#define ADC_IM_MIDC4_Msk                                    0x00001000  /*!< Transmit to controller by line IDC flag interrupt INRDC4 */
-#define ADC_IM_MIDC5_Msk                                    0x00002000  /*!< Transmit to controller by line IDC flag interrupt INRDC5 */
-#define ADC_IM_MIDC6_Msk                                    0x00004000  /*!< Transmit to controller by line IDC flag interrupt INRDC6 */
-#define ADC_IM_MIDC7_Msk                                    0x00008000  /*!< Transmit to controller by line IDC flag interrupt INRDC7 */
-#define ADC_IM_MIDC8_Msk                                    0x00010000  /*!< Transmit to controller by line IDC flag interrupt INRDC8 */
-#define ADC_IM_MIDC9_Msk                                    0x00020000  /*!< Transmit to controller by line IDC flag interrupt INRDC9 */
-#define ADC_IM_MIDC10_Msk                                   0x00040000  /*!< Transmit to controller by line IDC flag interrupt INRDC10 */
-#define ADC_IM_MIDC11_Msk                                   0x00080000  /*!< Transmit to controller by line IDC flag interrupt INRDC11 */
-#define ADC_IM_MIDC12_Msk                                   0x00100000  /*!< Transmit to controller by line IDC flag interrupt INRDC12 */
-#define ADC_IM_MIDC13_Msk                                   0x00200000  /*!< Transmit to controller by line IDC flag interrupt INRDC13 */
-#define ADC_IM_MIDC14_Msk                                   0x00400000  /*!< Transmit to controller by line IDC flag interrupt INRDC14 */
-#define ADC_IM_MIDC15_Msk                                   0x00800000  /*!< Transmit to controller by line IDC flag interrupt INRDC15 */
-#define ADC_IM_MIDC16_Msk                                   0x01000000  /*!< Transmit to controller by line IDC flag interrupt INRDC16 */
-#define ADC_IM_MIDC17_Msk                                   0x02000000  /*!< Transmit to controller by line IDC flag interrupt INRDC17 */
-#define ADC_IM_MIDC18_Msk                                   0x04000000  /*!< Transmit to controller by line IDC flag interrupt INRDC18 */
-#define ADC_IM_MIDC19_Msk                                   0x08000000  /*!< Transmit to controller by line IDC flag interrupt INRDC19 */
-#define ADC_IM_MIDC20_Msk                                   0x10000000  /*!< Transmit to controller by line IDC flag interrupt INRDC20 */
-#define ADC_IM_MIDC21_Msk                                   0x20000000  /*!< Transmit to controller by line IDC flag interrupt INRDC21 */
-#define ADC_IM_MIDC22_Msk                                   0x40000000  /*!< Transmit to controller by line IDC flag interrupt INRDC22 */
-#define ADC_IM_MIDC23_Msk                                   0x80000000  /*!< Transmit to controller by line IDC flag interrupt INRDC23 */
+#define ADC_IM_MASK0_Msk                                    0x00000001  /*!< Sequencer 0 interrupt mask */
+#define ADC_IM_MASK1_Msk                                    0x00000002  /*!< Sequencer 1 interrupt mask */
+#define ADC_IM_MASK2_Msk                                    0x00000004  /*!< Sequencer 2 interrupt mask */
+#define ADC_IM_MASK3_Msk                                    0x00000008  /*!< Sequencer 3 interrupt mask */
+#define ADC_IM_MASK4_Msk                                    0x00000010  /*!< Sequencer 4 interrupt mask */
+#define ADC_IM_MASK5_Msk                                    0x00000020  /*!< Sequencer 5 interrupt mask */
+#define ADC_IM_MASK6_Msk                                    0x00000040  /*!< Sequencer 6 interrupt mask */
+#define ADC_IM_MASK7_Msk                                    0x00000080  /*!< Sequencer 7 interrupt mask */
+#define ADC_IM_MIDC0_Msk                                    0x00000100  /*!< DCMP 0 interrupt mask*/
+#define ADC_IM_MIDC1_Msk                                    0x00000200  /*!< DCMP 1 interrupt mask*/
+#define ADC_IM_MIDC2_Msk                                    0x00000400  /*!< DCMP 2 interrupt mask*/
+#define ADC_IM_MIDC3_Msk                                    0x00000800  /*!< DCMP 3 interrupt mask*/
+#define ADC_IM_MIDC4_Msk                                    0x00001000  /*!< DCMP 4 interrupt mask*/
+#define ADC_IM_MIDC5_Msk                                    0x00002000  /*!< DCMP 5 interrupt mask*/
+#define ADC_IM_MIDC6_Msk                                    0x00004000  /*!< DCMP 6 interrupt mask*/
+#define ADC_IM_MIDC7_Msk                                    0x00008000  /*!< DCMP 7 interrupt mask*/
+#define ADC_IM_MIDC8_Msk                                    0x00010000  /*!< DCMP 8 interrupt mask*/
+#define ADC_IM_MIDC9_Msk                                    0x00020000  /*!< DCMP 9 interrupt mask*/
+#define ADC_IM_MIDC10_Msk                                   0x00040000  /*!< DCMP 10 interrupt mask */
+#define ADC_IM_MIDC11_Msk                                   0x00080000  /*!< DCMP 11 interrupt mask */
+#define ADC_IM_MIDC12_Msk                                   0x00100000  /*!< DCMP 12 interrupt mask */
+#define ADC_IM_MIDC13_Msk                                   0x00200000  /*!< DCMP 13 interrupt mask */
+#define ADC_IM_MIDC14_Msk                                   0x00400000  /*!< DCMP 14 interrupt mask */
+#define ADC_IM_MIDC15_Msk                                   0x00800000  /*!< DCMP 15 interrupt mask */
+#define ADC_IM_MIDC16_Msk                                   0x01000000  /*!< DCMP 16 interrupt mask */
+#define ADC_IM_MIDC17_Msk                                   0x02000000  /*!< DCMP 17 interrupt mask */
+#define ADC_IM_MIDC18_Msk                                   0x04000000  /*!< DCMP 18 interrupt mask */
+#define ADC_IM_MIDC19_Msk                                   0x08000000  /*!< DCMP 19 interrupt mask */
+#define ADC_IM_MIDC20_Msk                                   0x10000000  /*!< DCMP 20 interrupt mask */
+#define ADC_IM_MIDC21_Msk                                   0x20000000  /*!< DCMP 21 interrupt mask */
+#define ADC_IM_MIDC22_Msk                                   0x40000000  /*!< DCMP 22 interrupt mask */
+#define ADC_IM_MIDC23_Msk                                   0x80000000  /*!< DCMP 23 interrupt mask */
 
-/*-- ISC: Register reset interrupt -------------------------------------------*/
+/*-- ISC: Interrupt status and clear register -------------------------------------------*/
 
 typedef struct {
-  uint32_t IN0                                    :1;                   /*!< Status Indicator flag don`t reset interrupt INR0 */
-  uint32_t IN1                                    :1;                   /*!< Status Indicator flag don`t reset interrupt INR1 */
-  uint32_t IN2                                    :1;                   /*!< Status Indicator flag don`t reset interrupt INR2 */
-  uint32_t IN3                                    :1;                   /*!< Status Indicator flag don`t reset interrupt INR3 */
-  uint32_t IN4                                    :1;                   /*!< Status Indicator flag don`t reset interrupt INR4 */
-  uint32_t IN5                                    :1;                   /*!< Status Indicator flag don`t reset interrupt INR5 */
-  uint32_t IN6                                    :1;                   /*!< Status Indicator flag don`t reset interrupt INR6 */
-  uint32_t IN7                                    :1;                   /*!< Status Indicator flag don`t reset interrupt INR7 */
-  uint32_t DCIN0                                  :1;                   /*!< Status Indicator flag don`t reset interrupt on line INRDC0 */
-  uint32_t DCIN1                                  :1;                   /*!< Status Indicator flag don`t reset interrupt on line INRDC1 */
-  uint32_t DCIN2                                  :1;                   /*!< Status Indicator flag don`t reset interrupt on line INRDC2 */
-  uint32_t DCIN3                                  :1;                   /*!< Status Indicator flag don`t reset interrupt on line INRDC3 */
-  uint32_t DCIN4                                  :1;                   /*!< Status Indicator flag don`t reset interrupt on line INRDC4 */
-  uint32_t DCIN5                                  :1;                   /*!< Status Indicator flag don`t reset interrupt on line INRDC5 */
-  uint32_t DCIN6                                  :1;                   /*!< Status Indicator flag don`t reset interrupt on line INRDC6 */
-  uint32_t DCIN7                                  :1;                   /*!< Status Indicator flag don`t reset interrupt on line INRDC7 */
-  uint32_t DCIN8                                  :1;                   /*!< Status Indicator flag don`t reset interrupt on line INRDC8 */
-  uint32_t DCIN9                                  :1;                   /*!< Status Indicator flag don`t reset interrupt on line INRDC9 */
-  uint32_t DCIN10                                 :1;                   /*!< Status Indicator flag don`t reset interrupt on line INRDC10 */
-  uint32_t DCIN11                                 :1;                   /*!< Status Indicator flag don`t reset interrupt on line INRDC11 */
-  uint32_t DCIN12                                 :1;                   /*!< Status Indicator flag don`t reset interrupt on line INRDC12 */
-  uint32_t DCIN13                                 :1;                   /*!< Status Indicator flag don`t reset interrupt on line INRDC13 */
-  uint32_t DCIN14                                 :1;                   /*!< Status Indicator flag don`t reset interrupt on line INRDC14 */
-  uint32_t DCIN15                                 :1;                   /*!< Status Indicator flag don`t reset interrupt on line INRDC15 */
-  uint32_t DCIN16                                 :1;                   /*!< Status Indicator flag don`t reset interrupt on line INRDC16 */
-  uint32_t DCIN17                                 :1;                   /*!< Status Indicator flag don`t reset interrupt on line INRDC17 */
-  uint32_t DCIN18                                 :1;                   /*!< Status Indicator flag don`t reset interrupt on line INRDC18 */
-  uint32_t DCIN19                                 :1;                   /*!< Status Indicator flag don`t reset interrupt on line INRDC19 */
-  uint32_t DCIN20                                 :1;                   /*!< Status Indicator flag don`t reset interrupt on line INRDC20 */
-  uint32_t DCIN21                                 :1;                   /*!< Status Indicator flag don`t reset interrupt on line INRDC21 */
-  uint32_t DCIN22                                 :1;                   /*!< Status Indicator flag don`t reset interrupt on line INRDC22 */
-  uint32_t DCIN23                                 :1;                   /*!< Status Indicator flag don`t reset interrupt on line INRDC23 */
+  uint32_t IN0                                    :1;                   /*!< Sequencer 0 masked interrupt status / Write 1 to clear (also clear raw status) */
+  uint32_t IN1                                    :1;                   /*!< Sequencer 1 masked interrupt status / Write 1 to clear (also clear raw status) */
+  uint32_t IN2                                    :1;                   /*!< Sequencer 2 masked interrupt status / Write 1 to clear (also clear raw status) */
+  uint32_t IN3                                    :1;                   /*!< Sequencer 3 masked interrupt status / Write 1 to clear (also clear raw status) */
+  uint32_t IN4                                    :1;                   /*!< Sequencer 4 masked interrupt status / Write 1 to clear (also clear raw status) */
+  uint32_t IN5                                    :1;                   /*!< Sequencer 5 masked interrupt status / Write 1 to clear (also clear raw status) */
+  uint32_t IN6                                    :1;                   /*!< Sequencer 6 masked interrupt status / Write 1 to clear (also clear raw status) */
+  uint32_t IN7                                    :1;                   /*!< Sequencer 7 masked interrupt status / Write 1 to clear (also clear raw status) */
+  uint32_t DCIN0                                  :1;                   /*!< DCMP 0 masked interrupt status / Write 1 to clear (also clear raw status) */
+  uint32_t DCIN1                                  :1;                   /*!< DCMP 1 masked interrupt status / Write 1 to clear (also clear raw status) */
+  uint32_t DCIN2                                  :1;                   /*!< DCMP 2 masked interrupt status / Write 1 to clear (also clear raw status) */
+  uint32_t DCIN3                                  :1;                   /*!< DCMP 3 masked interrupt status / Write 1 to clear (also clear raw status) */
+  uint32_t DCIN4                                  :1;                   /*!< DCMP 4 masked interrupt status / Write 1 to clear (also clear raw status) */
+  uint32_t DCIN5                                  :1;                   /*!< DCMP 5 masked interrupt status / Write 1 to clear (also clear raw status) */
+  uint32_t DCIN6                                  :1;                   /*!< DCMP 6 masked interrupt status / Write 1 to clear (also clear raw status) */
+  uint32_t DCIN7                                  :1;                   /*!< DCMP 7 masked interrupt status / Write 1 to clear (also clear raw status) */
+  uint32_t DCIN8                                  :1;                   /*!< DCMP 8 masked interrupt status / Write 1 to clear (also clear raw status) */
+  uint32_t DCIN9                                  :1;                   /*!< DCMP 9 masked interrupt status / Write 1 to clear (also clear raw status) */
+  uint32_t DCIN10                                 :1;                   /*!< DCMP 10 masked interrupt status / Write 1 to clear (also clear raw status) */
+  uint32_t DCIN11                                 :1;                   /*!< DCMP 11 masked interrupt status / Write 1 to clear (also clear raw status) */
+  uint32_t DCIN12                                 :1;                   /*!< DCMP 12 masked interrupt status / Write 1 to clear (also clear raw status) */
+  uint32_t DCIN13                                 :1;                   /*!< DCMP 13 masked interrupt status / Write 1 to clear (also clear raw status) */
+  uint32_t DCIN14                                 :1;                   /*!< DCMP 14 masked interrupt status / Write 1 to clear (also clear raw status) */
+  uint32_t DCIN15                                 :1;                   /*!< DCMP 15 masked interrupt status / Write 1 to clear (also clear raw status) */
+  uint32_t DCIN16                                 :1;                   /*!< DCMP 16 masked interrupt status / Write 1 to clear (also clear raw status) */
+  uint32_t DCIN17                                 :1;                   /*!< DCMP 17 masked interrupt status / Write 1 to clear (also clear raw status) */
+  uint32_t DCIN18                                 :1;                   /*!< DCMP 18 masked interrupt status / Write 1 to clear (also clear raw status) */
+  uint32_t DCIN19                                 :1;                   /*!< DCMP 19 masked interrupt status / Write 1 to clear (also clear raw status) */
+  uint32_t DCIN20                                 :1;                   /*!< DCMP 20 masked interrupt status / Write 1 to clear (also clear raw status) */
+  uint32_t DCIN21                                 :1;                   /*!< DCMP 21 masked interrupt status / Write 1 to clear (also clear raw status) */
+  uint32_t DCIN22                                 :1;                   /*!< DCMP 22 masked interrupt status / Write 1 to clear (also clear raw status) */
+  uint32_t DCIN23                                 :1;                   /*!< DCMP 23 masked interrupt status / Write 1 to clear (also clear raw status) */
 } _ADC_ISC_bits;
 
 /* Bit field positions: */
-#define ADC_ISC_IN0_Pos                                     0           /*!< Status Indicator flag don`t reset interrupt INR0 */
-#define ADC_ISC_IN1_Pos                                     1           /*!< Status Indicator flag don`t reset interrupt INR1 */
-#define ADC_ISC_IN2_Pos                                     2           /*!< Status Indicator flag don`t reset interrupt INR2 */
-#define ADC_ISC_IN3_Pos                                     3           /*!< Status Indicator flag don`t reset interrupt INR3 */
-#define ADC_ISC_IN4_Pos                                     4           /*!< Status Indicator flag don`t reset interrupt INR4 */
-#define ADC_ISC_IN5_Pos                                     5           /*!< Status Indicator flag don`t reset interrupt INR5 */
-#define ADC_ISC_IN6_Pos                                     6           /*!< Status Indicator flag don`t reset interrupt INR6 */
-#define ADC_ISC_IN7_Pos                                     7           /*!< Status Indicator flag don`t reset interrupt INR7 */
-#define ADC_ISC_DCIN0_Pos                                   8           /*!< Status Indicator flag don`t reset interrupt on line INRDC0 */
-#define ADC_ISC_DCIN1_Pos                                   9           /*!< Status Indicator flag don`t reset interrupt on line INRDC1 */
-#define ADC_ISC_DCIN2_Pos                                   10          /*!< Status Indicator flag don`t reset interrupt on line INRDC2 */
-#define ADC_ISC_DCIN3_Pos                                   11          /*!< Status Indicator flag don`t reset interrupt on line INRDC3 */
-#define ADC_ISC_DCIN4_Pos                                   12          /*!< Status Indicator flag don`t reset interrupt on line INRDC4 */
-#define ADC_ISC_DCIN5_Pos                                   13          /*!< Status Indicator flag don`t reset interrupt on line INRDC5 */
-#define ADC_ISC_DCIN6_Pos                                   14          /*!< Status Indicator flag don`t reset interrupt on line INRDC6 */
-#define ADC_ISC_DCIN7_Pos                                   15          /*!< Status Indicator flag don`t reset interrupt on line INRDC7 */
-#define ADC_ISC_DCIN8_Pos                                   16          /*!< Status Indicator flag don`t reset interrupt on line INRDC8 */
-#define ADC_ISC_DCIN9_Pos                                   17          /*!< Status Indicator flag don`t reset interrupt on line INRDC9 */
-#define ADC_ISC_DCIN10_Pos                                  18          /*!< Status Indicator flag don`t reset interrupt on line INRDC10 */
-#define ADC_ISC_DCIN11_Pos                                  19          /*!< Status Indicator flag don`t reset interrupt on line INRDC11 */
-#define ADC_ISC_DCIN12_Pos                                  20          /*!< Status Indicator flag don`t reset interrupt on line INRDC12 */
-#define ADC_ISC_DCIN13_Pos                                  21          /*!< Status Indicator flag don`t reset interrupt on line INRDC13 */
-#define ADC_ISC_DCIN14_Pos                                  22          /*!< Status Indicator flag don`t reset interrupt on line INRDC14 */
-#define ADC_ISC_DCIN15_Pos                                  23          /*!< Status Indicator flag don`t reset interrupt on line INRDC15 */
-#define ADC_ISC_DCIN16_Pos                                  24          /*!< Status Indicator flag don`t reset interrupt on line INRDC16 */
-#define ADC_ISC_DCIN17_Pos                                  25          /*!< Status Indicator flag don`t reset interrupt on line INRDC17 */
-#define ADC_ISC_DCIN18_Pos                                  26          /*!< Status Indicator flag don`t reset interrupt on line INRDC18 */
-#define ADC_ISC_DCIN19_Pos                                  27          /*!< Status Indicator flag don`t reset interrupt on line INRDC19 */
-#define ADC_ISC_DCIN20_Pos                                  28          /*!< Status Indicator flag don`t reset interrupt on line INRDC20 */
-#define ADC_ISC_DCIN21_Pos                                  29          /*!< Status Indicator flag don`t reset interrupt on line INRDC21 */
-#define ADC_ISC_DCIN22_Pos                                  30          /*!< Status Indicator flag don`t reset interrupt on line INRDC22 */
-#define ADC_ISC_DCIN23_Pos                                  31          /*!< Status Indicator flag don`t reset interrupt on line INRDC23 */
+#define ADC_ISC_IN0_Pos                                     0           /*!< Sequencer 0 masked interrupt status / Write 1 to clear (also clear raw status) */
+#define ADC_ISC_IN1_Pos                                     1           /*!< Sequencer 1 masked interrupt status / Write 1 to clear (also clear raw status) */
+#define ADC_ISC_IN2_Pos                                     2           /*!< Sequencer 2 masked interrupt status / Write 1 to clear (also clear raw status) */
+#define ADC_ISC_IN3_Pos                                     3           /*!< Sequencer 3 masked interrupt status / Write 1 to clear (also clear raw status) */
+#define ADC_ISC_IN4_Pos                                     4           /*!< Sequencer 4 masked interrupt status / Write 1 to clear (also clear raw status) */
+#define ADC_ISC_IN5_Pos                                     5           /*!< Sequencer 5 masked interrupt status / Write 1 to clear (also clear raw status) */
+#define ADC_ISC_IN6_Pos                                     6           /*!< Sequencer 6 masked interrupt status / Write 1 to clear (also clear raw status) */
+#define ADC_ISC_IN7_Pos                                     7           /*!< Sequencer 7 masked interrupt status / Write 1 to clear (also clear raw status) */
+#define ADC_ISC_DCIN0_Pos                                   8           /*!< DCMP 0 masked interrupt status / Write 1 to clear (also clear raw status) */
+#define ADC_ISC_DCIN1_Pos                                   9           /*!< DCMP 1 masked interrupt status / Write 1 to clear (also clear raw status) */
+#define ADC_ISC_DCIN2_Pos                                   10          /*!< DCMP 2 masked interrupt status / Write 1 to clear (also clear raw status) */
+#define ADC_ISC_DCIN3_Pos                                   11          /*!< DCMP 3 masked interrupt status / Write 1 to clear (also clear raw status) */
+#define ADC_ISC_DCIN4_Pos                                   12          /*!< DCMP 4 masked interrupt status / Write 1 to clear (also clear raw status) */
+#define ADC_ISC_DCIN5_Pos                                   13          /*!< DCMP 5 masked interrupt status / Write 1 to clear (also clear raw status) */
+#define ADC_ISC_DCIN6_Pos                                   14          /*!< DCMP 6 masked interrupt status / Write 1 to clear (also clear raw status) */
+#define ADC_ISC_DCIN7_Pos                                   15          /*!< DCMP 7 masked interrupt status / Write 1 to clear (also clear raw status) */
+#define ADC_ISC_DCIN8_Pos                                   16          /*!< DCMP 8 masked interrupt status / Write 1 to clear (also clear raw status) */
+#define ADC_ISC_DCIN9_Pos                                   17          /*!< DCMP 9 masked interrupt status / Write 1 to clear (also clear raw status) */
+#define ADC_ISC_DCIN10_Pos                                  18          /*!< DCMP 10 masked interrupt status / Write 1 to clear (also clear raw status) */
+#define ADC_ISC_DCIN11_Pos                                  19          /*!< DCMP 11 masked interrupt status / Write 1 to clear (also clear raw status) */
+#define ADC_ISC_DCIN12_Pos                                  20          /*!< DCMP 12 masked interrupt status / Write 1 to clear (also clear raw status) */
+#define ADC_ISC_DCIN13_Pos                                  21          /*!< DCMP 13 masked interrupt status / Write 1 to clear (also clear raw status) */
+#define ADC_ISC_DCIN14_Pos                                  22          /*!< DCMP 14 masked interrupt status / Write 1 to clear (also clear raw status) */
+#define ADC_ISC_DCIN15_Pos                                  23          /*!< DCMP 15 masked interrupt status / Write 1 to clear (also clear raw status) */
+#define ADC_ISC_DCIN16_Pos                                  24          /*!< DCMP 16 masked interrupt status / Write 1 to clear (also clear raw status) */
+#define ADC_ISC_DCIN17_Pos                                  25          /*!< DCMP 17 masked interrupt status / Write 1 to clear (also clear raw status) */
+#define ADC_ISC_DCIN18_Pos                                  26          /*!< DCMP 18 masked interrupt status / Write 1 to clear (also clear raw status) */
+#define ADC_ISC_DCIN19_Pos                                  27          /*!< DCMP 19 masked interrupt status / Write 1 to clear (also clear raw status) */
+#define ADC_ISC_DCIN20_Pos                                  28          /*!< DCMP 20 masked interrupt status / Write 1 to clear (also clear raw status) */
+#define ADC_ISC_DCIN21_Pos                                  29          /*!< DCMP 21 masked interrupt status / Write 1 to clear (also clear raw status) */
+#define ADC_ISC_DCIN22_Pos                                  30          /*!< DCMP 22 masked interrupt status / Write 1 to clear (also clear raw status) */
+#define ADC_ISC_DCIN23_Pos                                  31          /*!< DCMP 23 masked interrupt status / Write 1 to clear (also clear raw status) */
 
 /* Bit field masks: */
-#define ADC_ISC_IN0_Msk                                     0x00000001  /*!< Status Indicator flag don`t reset interrupt INR0 */
-#define ADC_ISC_IN1_Msk                                     0x00000002  /*!< Status Indicator flag don`t reset interrupt INR1 */
-#define ADC_ISC_IN2_Msk                                     0x00000004  /*!< Status Indicator flag don`t reset interrupt INR2 */
-#define ADC_ISC_IN3_Msk                                     0x00000008  /*!< Status Indicator flag don`t reset interrupt INR3 */
-#define ADC_ISC_IN4_Msk                                     0x00000010  /*!< Status Indicator flag don`t reset interrupt INR4 */
-#define ADC_ISC_IN5_Msk                                     0x00000020  /*!< Status Indicator flag don`t reset interrupt INR5 */
-#define ADC_ISC_IN6_Msk                                     0x00000040  /*!< Status Indicator flag don`t reset interrupt INR6 */
-#define ADC_ISC_IN7_Msk                                     0x00000080  /*!< Status Indicator flag don`t reset interrupt INR7 */
-#define ADC_ISC_DCIN0_Msk                                   0x00000100  /*!< Status Indicator flag don`t reset interrupt on line INRDC0 */
-#define ADC_ISC_DCIN1_Msk                                   0x00000200  /*!< Status Indicator flag don`t reset interrupt on line INRDC1 */
-#define ADC_ISC_DCIN2_Msk                                   0x00000400  /*!< Status Indicator flag don`t reset interrupt on line INRDC2 */
-#define ADC_ISC_DCIN3_Msk                                   0x00000800  /*!< Status Indicator flag don`t reset interrupt on line INRDC3 */
-#define ADC_ISC_DCIN4_Msk                                   0x00001000  /*!< Status Indicator flag don`t reset interrupt on line INRDC4 */
-#define ADC_ISC_DCIN5_Msk                                   0x00002000  /*!< Status Indicator flag don`t reset interrupt on line INRDC5 */
-#define ADC_ISC_DCIN6_Msk                                   0x00004000  /*!< Status Indicator flag don`t reset interrupt on line INRDC6 */
-#define ADC_ISC_DCIN7_Msk                                   0x00008000  /*!< Status Indicator flag don`t reset interrupt on line INRDC7 */
-#define ADC_ISC_DCIN8_Msk                                   0x00010000  /*!< Status Indicator flag don`t reset interrupt on line INRDC8 */
-#define ADC_ISC_DCIN9_Msk                                   0x00020000  /*!< Status Indicator flag don`t reset interrupt on line INRDC9 */
-#define ADC_ISC_DCIN10_Msk                                  0x00040000  /*!< Status Indicator flag don`t reset interrupt on line INRDC10 */
-#define ADC_ISC_DCIN11_Msk                                  0x00080000  /*!< Status Indicator flag don`t reset interrupt on line INRDC11 */
-#define ADC_ISC_DCIN12_Msk                                  0x00100000  /*!< Status Indicator flag don`t reset interrupt on line INRDC12 */
-#define ADC_ISC_DCIN13_Msk                                  0x00200000  /*!< Status Indicator flag don`t reset interrupt on line INRDC13 */
-#define ADC_ISC_DCIN14_Msk                                  0x00400000  /*!< Status Indicator flag don`t reset interrupt on line INRDC14 */
-#define ADC_ISC_DCIN15_Msk                                  0x00800000  /*!< Status Indicator flag don`t reset interrupt on line INRDC15 */
-#define ADC_ISC_DCIN16_Msk                                  0x01000000  /*!< Status Indicator flag don`t reset interrupt on line INRDC16 */
-#define ADC_ISC_DCIN17_Msk                                  0x02000000  /*!< Status Indicator flag don`t reset interrupt on line INRDC17 */
-#define ADC_ISC_DCIN18_Msk                                  0x04000000  /*!< Status Indicator flag don`t reset interrupt on line INRDC18 */
-#define ADC_ISC_DCIN19_Msk                                  0x08000000  /*!< Status Indicator flag don`t reset interrupt on line INRDC19 */
-#define ADC_ISC_DCIN20_Msk                                  0x10000000  /*!< Status Indicator flag don`t reset interrupt on line INRDC20 */
-#define ADC_ISC_DCIN21_Msk                                  0x20000000  /*!< Status Indicator flag don`t reset interrupt on line INRDC21 */
-#define ADC_ISC_DCIN22_Msk                                  0x40000000  /*!< Status Indicator flag don`t reset interrupt on line INRDC22 */
-#define ADC_ISC_DCIN23_Msk                                  0x80000000  /*!< Status Indicator flag don`t reset interrupt on line INRDC23 */
+#define ADC_ISC_IN0_Msk                                     0x00000001  /*!< Sequencer 0 masked interrupt status / Write 1 to clear (also clear raw status) */
+#define ADC_ISC_IN1_Msk                                     0x00000002  /*!< Sequencer 1 masked interrupt status / Write 1 to clear (also clear raw status) */
+#define ADC_ISC_IN2_Msk                                     0x00000004  /*!< Sequencer 2 masked interrupt status / Write 1 to clear (also clear raw status) */
+#define ADC_ISC_IN3_Msk                                     0x00000008  /*!< Sequencer 3 masked interrupt status / Write 1 to clear (also clear raw status) */
+#define ADC_ISC_IN4_Msk                                     0x00000010  /*!< Sequencer 4 masked interrupt status / Write 1 to clear (also clear raw status) */
+#define ADC_ISC_IN5_Msk                                     0x00000020  /*!< Sequencer 5 masked interrupt status / Write 1 to clear (also clear raw status) */
+#define ADC_ISC_IN6_Msk                                     0x00000040  /*!< Sequencer 6 masked interrupt status / Write 1 to clear (also clear raw status) */
+#define ADC_ISC_IN7_Msk                                     0x00000080  /*!< Sequencer 7 masked interrupt status / Write 1 to clear (also clear raw status) */
+#define ADC_ISC_DCIN0_Msk                                   0x00000100  /*!< DCMP 0 masked interrupt status / Write 1 to clear (also clear raw status) */
+#define ADC_ISC_DCIN1_Msk                                   0x00000200  /*!< DCMP 1 masked interrupt status / Write 1 to clear (also clear raw status) */
+#define ADC_ISC_DCIN2_Msk                                   0x00000400  /*!< DCMP 2 masked interrupt status / Write 1 to clear (also clear raw status) */
+#define ADC_ISC_DCIN3_Msk                                   0x00000800  /*!< DCMP 3 masked interrupt status / Write 1 to clear (also clear raw status) */
+#define ADC_ISC_DCIN4_Msk                                   0x00001000  /*!< DCMP 4 masked interrupt status / Write 1 to clear (also clear raw status) */
+#define ADC_ISC_DCIN5_Msk                                   0x00002000  /*!< DCMP 5 masked interrupt status / Write 1 to clear (also clear raw status) */
+#define ADC_ISC_DCIN6_Msk                                   0x00004000  /*!< DCMP 6 masked interrupt status / Write 1 to clear (also clear raw status) */
+#define ADC_ISC_DCIN7_Msk                                   0x00008000  /*!< DCMP 7 masked interrupt status / Write 1 to clear (also clear raw status) */
+#define ADC_ISC_DCIN8_Msk                                   0x00010000  /*!< DCMP 8 masked interrupt status / Write 1 to clear (also clear raw status) */
+#define ADC_ISC_DCIN9_Msk                                   0x00020000  /*!< DCMP 9 masked interrupt status / Write 1 to clear (also clear raw status) */
+#define ADC_ISC_DCIN10_Msk                                  0x00040000  /*!< DCMP 10 masked interrupt status / Write 1 to clear (also clear raw status) */
+#define ADC_ISC_DCIN11_Msk                                  0x00080000  /*!< DCMP 11 masked interrupt status / Write 1 to clear (also clear raw status) */
+#define ADC_ISC_DCIN12_Msk                                  0x00100000  /*!< DCMP 12 masked interrupt status / Write 1 to clear (also clear raw status) */
+#define ADC_ISC_DCIN13_Msk                                  0x00200000  /*!< DCMP 13 masked interrupt status / Write 1 to clear (also clear raw status) */
+#define ADC_ISC_DCIN14_Msk                                  0x00400000  /*!< DCMP 14 masked interrupt status / Write 1 to clear (also clear raw status) */
+#define ADC_ISC_DCIN15_Msk                                  0x00800000  /*!< DCMP 15 masked interrupt status / Write 1 to clear (also clear raw status) */
+#define ADC_ISC_DCIN16_Msk                                  0x01000000  /*!< DCMP 16 masked interrupt status / Write 1 to clear (also clear raw status) */
+#define ADC_ISC_DCIN17_Msk                                  0x02000000  /*!< DCMP 17 masked interrupt status / Write 1 to clear (also clear raw status) */
+#define ADC_ISC_DCIN18_Msk                                  0x04000000  /*!< DCMP 18 masked interrupt status / Write 1 to clear (also clear raw status) */
+#define ADC_ISC_DCIN19_Msk                                  0x08000000  /*!< DCMP 19 masked interrupt status / Write 1 to clear (also clear raw status) */
+#define ADC_ISC_DCIN20_Msk                                  0x10000000  /*!< DCMP 20 masked interrupt status / Write 1 to clear (also clear raw status) */
+#define ADC_ISC_DCIN21_Msk                                  0x20000000  /*!< DCMP 21 masked interrupt status / Write 1 to clear (also clear raw status) */
+#define ADC_ISC_DCIN22_Msk                                  0x40000000  /*!< DCMP 22 masked interrupt status / Write 1 to clear (also clear raw status) */
+#define ADC_ISC_DCIN23_Msk                                  0x80000000  /*!< DCMP 23 masked interrupt status / Write 1 to clear (also clear raw status) */
 
-/*-- OSTAT: Register flags FIFO overflow -------------------------------------*/
+/*-- OSTAT: FIFO overflow status register -------------------------------------*/
 
 typedef struct {
-  uint32_t OV0                                    :1;                   /*!< FIFO secvensor0 overflow */
-  uint32_t OV1                                    :1;                   /*!< FIFO secvensor1 overflow */
-  uint32_t OV2                                    :1;                   /*!< FIFO secvensor2 overflow */
-  uint32_t OV3                                    :1;                   /*!< FIFO secvensor3 overflow */
-  uint32_t OV4                                    :1;                   /*!< FIFO secvensor4 overflow */
-  uint32_t OV5                                    :1;                   /*!< FIFO secvensor5 overflow */
-  uint32_t OV6                                    :1;                   /*!< FIFO secvensor6 overflow */
-  uint32_t OV7                                    :1;                   /*!< FIFO secvensor7 overflow */
+  uint32_t OV0                                    :1;                   /*!< Sequencer 0 FIFO overflow */
+  uint32_t OV1                                    :1;                   /*!< Sequencer 1 FIFO overflow */
+  uint32_t OV2                                    :1;                   /*!< Sequencer 2 FIFO overflow */
+  uint32_t OV3                                    :1;                   /*!< Sequencer 3 FIFO overflow */
+  uint32_t OV4                                    :1;                   /*!< Sequencer 4 FIFO overflow */
+  uint32_t OV5                                    :1;                   /*!< Sequencer 5 FIFO overflow */
+  uint32_t OV6                                    :1;                   /*!< Sequencer 6 FIFO overflow */
+  uint32_t OV7                                    :1;                   /*!< Sequencer 7 FIFO overflow */
   uint32_t Reserved0                              :8;                   /*!< Reserved */
-  uint32_t DOV0                                   :1;                   /*!< Error DMA FIFFO0 */
-  uint32_t DOV1                                   :1;                   /*!< Error DMA FIFFO1 */
-  uint32_t DOV2                                   :1;                   /*!< Error DMA FIFFO2 */
-  uint32_t DOV3                                   :1;                   /*!< Error DMA FIFFO3 */
-  uint32_t DOV4                                   :1;                   /*!< Error DMA FIFFO4 */
-  uint32_t DOV5                                   :1;                   /*!< Error DMA FIFFO5 */
-  uint32_t DOV6                                   :1;                   /*!< Error DMA FIFFO6 */
-  uint32_t DOV7                                   :1;                   /*!< Error DMA FIFFO7 */
+  uint32_t DOV0                                   :1;                   /*!< Sequencer 0 FIFO DMA request overflow */
+  uint32_t DOV1                                   :1;                   /*!< Sequencer 1 FIFO DMA request overflow */
+  uint32_t DOV2                                   :1;                   /*!< Sequencer 2 FIFO DMA request overflow */
+  uint32_t DOV3                                   :1;                   /*!< Sequencer 3 FIFO DMA request overflow */
+  uint32_t DOV4                                   :1;                   /*!< Sequencer 4 FIFO DMA request overflow */
+  uint32_t DOV5                                   :1;                   /*!< Sequencer 5 FIFO DMA request overflow */
+  uint32_t DOV6                                   :1;                   /*!< Sequencer 6 FIFO DMA request overflow */
+  uint32_t DOV7                                   :1;                   /*!< Sequencer 7 FIFO DMA request overflow */
   uint32_t Reserved1                              :8;                   /*!< Reserved */
 } _ADC_OSTAT_bits;
 
 /* Bit field positions: */
-#define ADC_OSTAT_OV0_Pos                                   0           /*!< FIFO secvensor0 overflow */
-#define ADC_OSTAT_OV1_Pos                                   1           /*!< FIFO secvensor1 overflow */
-#define ADC_OSTAT_OV2_Pos                                   2           /*!< FIFO secvensor2 overflow */
-#define ADC_OSTAT_OV3_Pos                                   3           /*!< FIFO secvensor3 overflow */
-#define ADC_OSTAT_OV4_Pos                                   4           /*!< FIFO secvensor4 overflow */
-#define ADC_OSTAT_OV5_Pos                                   5           /*!< FIFO secvensor5 overflow */
-#define ADC_OSTAT_OV6_Pos                                   6           /*!< FIFO secvensor6 overflow */
-#define ADC_OSTAT_OV7_Pos                                   7           /*!< FIFO secvensor7 overflow */
-#define ADC_OSTAT_DOV0_Pos                                  16          /*!< Error DMA FIFFO0 */
-#define ADC_OSTAT_DOV1_Pos                                  17          /*!< Error DMA FIFFO1 */
-#define ADC_OSTAT_DOV2_Pos                                  18          /*!< Error DMA FIFFO2 */
-#define ADC_OSTAT_DOV3_Pos                                  19          /*!< Error DMA FIFFO3 */
-#define ADC_OSTAT_DOV4_Pos                                  20          /*!< Error DMA FIFFO4 */
-#define ADC_OSTAT_DOV5_Pos                                  21          /*!< Error DMA FIFFO5 */
-#define ADC_OSTAT_DOV6_Pos                                  22          /*!< Error DMA FIFFO6 */
-#define ADC_OSTAT_DOV7_Pos                                  23          /*!< Error DMA FIFFO7 */
+#define ADC_OSTAT_OV0_Pos                                   0           /*!< Sequencer 0 FIFO overflow */
+#define ADC_OSTAT_OV1_Pos                                   1           /*!< Sequencer 1 FIFO overflow */
+#define ADC_OSTAT_OV2_Pos                                   2           /*!< Sequencer 2 FIFO overflow */
+#define ADC_OSTAT_OV3_Pos                                   3           /*!< Sequencer 3 FIFO overflow */
+#define ADC_OSTAT_OV4_Pos                                   4           /*!< Sequencer 4 FIFO overflow */
+#define ADC_OSTAT_OV5_Pos                                   5           /*!< Sequencer 5 FIFO overflow */
+#define ADC_OSTAT_OV6_Pos                                   6           /*!< Sequencer 6 FIFO overflow */
+#define ADC_OSTAT_OV7_Pos                                   7           /*!< Sequencer 7 FIFO overflow */
+#define ADC_OSTAT_DOV0_Pos                                  16          /*!< Sequencer 0 FIFO DMA request overflow */
+#define ADC_OSTAT_DOV1_Pos                                  17          /*!< Sequencer 1 FIFO DMA request overflow */
+#define ADC_OSTAT_DOV2_Pos                                  18          /*!< Sequencer 2 FIFO DMA request overflow */
+#define ADC_OSTAT_DOV3_Pos                                  19          /*!< Sequencer 3 FIFO DMA request overflow */
+#define ADC_OSTAT_DOV4_Pos                                  20          /*!< Sequencer 4 FIFO DMA request overflow */
+#define ADC_OSTAT_DOV5_Pos                                  21          /*!< Sequencer 5 FIFO DMA request overflow */
+#define ADC_OSTAT_DOV6_Pos                                  22          /*!< Sequencer 6 FIFO DMA request overflow */
+#define ADC_OSTAT_DOV7_Pos                                  23          /*!< Sequencer 7 FIFO DMA request overflow */
 
 /* Bit field masks: */
-#define ADC_OSTAT_OV0_Msk                                   0x00000001  /*!< FIFO secvensor0 overflow */
-#define ADC_OSTAT_OV1_Msk                                   0x00000002  /*!< FIFO secvensor1 overflow */
-#define ADC_OSTAT_OV2_Msk                                   0x00000004  /*!< FIFO secvensor2 overflow */
-#define ADC_OSTAT_OV3_Msk                                   0x00000008  /*!< FIFO secvensor3 overflow */
-#define ADC_OSTAT_OV4_Msk                                   0x00000010  /*!< FIFO secvensor4 overflow */
-#define ADC_OSTAT_OV5_Msk                                   0x00000020  /*!< FIFO secvensor5 overflow */
-#define ADC_OSTAT_OV6_Msk                                   0x00000040  /*!< FIFO secvensor6 overflow */
-#define ADC_OSTAT_OV7_Msk                                   0x00000080  /*!< FIFO secvensor7 overflow */
-#define ADC_OSTAT_DOV0_Msk                                  0x00010000  /*!< Error DMA FIFFO0 */
-#define ADC_OSTAT_DOV1_Msk                                  0x00020000  /*!< Error DMA FIFFO1 */
-#define ADC_OSTAT_DOV2_Msk                                  0x00040000  /*!< Error DMA FIFFO2 */
-#define ADC_OSTAT_DOV3_Msk                                  0x00080000  /*!< Error DMA FIFFO3 */
-#define ADC_OSTAT_DOV4_Msk                                  0x00100000  /*!< Error DMA FIFFO4 */
-#define ADC_OSTAT_DOV5_Msk                                  0x00200000  /*!< Error DMA FIFFO5 */
-#define ADC_OSTAT_DOV6_Msk                                  0x00400000  /*!< Error DMA FIFFO6 */
-#define ADC_OSTAT_DOV7_Msk                                  0x00800000  /*!< Error DMA FIFFO7 */
+#define ADC_OSTAT_OV0_Msk                                   0x00000001  /*!< Sequencer 0 FIFO overflow */
+#define ADC_OSTAT_OV1_Msk                                   0x00000002  /*!< Sequencer 1 FIFO overflow */
+#define ADC_OSTAT_OV2_Msk                                   0x00000004  /*!< Sequencer 2 FIFO overflow */
+#define ADC_OSTAT_OV3_Msk                                   0x00000008  /*!< Sequencer 3 FIFO overflow */
+#define ADC_OSTAT_OV4_Msk                                   0x00000010  /*!< Sequencer 4 FIFO overflow */
+#define ADC_OSTAT_OV5_Msk                                   0x00000020  /*!< Sequencer 5 FIFO overflow */
+#define ADC_OSTAT_OV6_Msk                                   0x00000040  /*!< Sequencer 6 FIFO overflow */
+#define ADC_OSTAT_OV7_Msk                                   0x00000080  /*!< Sequencer 7 FIFO overflow */
+#define ADC_OSTAT_DOV0_Msk                                  0x00010000  /*!< Sequencer 0 FIFO DMA request overflow */
+#define ADC_OSTAT_DOV1_Msk                                  0x00020000  /*!< Sequencer 1 FIFO DMA request overflow */
+#define ADC_OSTAT_DOV2_Msk                                  0x00040000  /*!< Sequencer 2 FIFO DMA request overflow */
+#define ADC_OSTAT_DOV3_Msk                                  0x00080000  /*!< Sequencer 3 FIFO DMA request overflow */
+#define ADC_OSTAT_DOV4_Msk                                  0x00100000  /*!< Sequencer 4 FIFO DMA request overflow */
+#define ADC_OSTAT_DOV5_Msk                                  0x00200000  /*!< Sequencer 5 FIFO DMA request overflow */
+#define ADC_OSTAT_DOV6_Msk                                  0x00400000  /*!< Sequencer 6 FIFO DMA request overflow */
+#define ADC_OSTAT_DOV7_Msk                                  0x00800000  /*!< Sequencer 7 FIFO DMA request overflow */
 
-/*-- EMUX: Select register triggering events sequencer -----------------------*/
+/*-- EMUX: Sequencer start event selection register -----------------------*/
 
 typedef struct {
-  uint32_t EM0                                    :4;                   /*!< select event for seqensor SS0 */
-  uint32_t EM1                                    :4;                   /*!< select event for SS1 */
-  uint32_t EM2                                    :4;                   /*!< select event for SS2 */
-  uint32_t EM3                                    :4;                   /*!< select event for SS3 */
-  uint32_t EM4                                    :4;                   /*!< select event for SS4 */
-  uint32_t EM5                                    :4;                   /*!< select event for SS5 */
-  uint32_t EM6                                    :4;                   /*!< select event for SS6 */
-  uint32_t EM7                                    :4;                   /*!< select event for SS7 */
+  uint32_t EM0                                    :4;                   /*!< Select start event for sequencer 0 */
+  uint32_t EM1                                    :4;                   /*!< Select start event for sequencer 1 */
+  uint32_t EM2                                    :4;                   /*!< Select start event for sequencer 2 */
+  uint32_t EM3                                    :4;                   /*!< Select start event for sequencer 3 */
+  uint32_t EM4                                    :4;                   /*!< Select start event for sequencer 4 */
+  uint32_t EM5                                    :4;                   /*!< Select start event for sequencer 5 */
+  uint32_t EM6                                    :4;                   /*!< Select start event for sequencer 6 */
+  uint32_t EM7                                    :4;                   /*!< Select start event for sequencer 7 */
 } _ADC_EMUX_bits;
 
 /* Bit field positions: */
-#define ADC_EMUX_EM0_Pos                                    0           /*!< select event for seqensor SS0 */
-#define ADC_EMUX_EM1_Pos                                    4           /*!< select event for SS1 */
-#define ADC_EMUX_EM2_Pos                                    8           /*!< select event for SS2 */
-#define ADC_EMUX_EM3_Pos                                    12          /*!< select event for SS3 */
-#define ADC_EMUX_EM4_Pos                                    16          /*!< select event for SS4 */
-#define ADC_EMUX_EM5_Pos                                    20          /*!< select event for SS5 */
-#define ADC_EMUX_EM6_Pos                                    24          /*!< select event for SS6 */
-#define ADC_EMUX_EM7_Pos                                    28          /*!< select event for SS7 */
+#define ADC_EMUX_EM0_Pos                                    0           /*!< Select start event for sequencer 0 */
+#define ADC_EMUX_EM1_Pos                                    4           /*!< Select start event for sequencer 1 */
+#define ADC_EMUX_EM2_Pos                                    8           /*!< Select start event for sequencer 2 */
+#define ADC_EMUX_EM3_Pos                                    12          /*!< Select start event for sequencer 3 */
+#define ADC_EMUX_EM4_Pos                                    16          /*!< Select start event for sequencer 4 */
+#define ADC_EMUX_EM5_Pos                                    20          /*!< Select start event for sequencer 5 */
+#define ADC_EMUX_EM6_Pos                                    24          /*!< Select start event for sequencer 6 */
+#define ADC_EMUX_EM7_Pos                                    28          /*!< Select start event for sequencer 7 */
 
 /* Bit field masks: */
-#define ADC_EMUX_EM0_Msk                                    0x0000000F  /*!< select event for seqensor SS0 */
-#define ADC_EMUX_EM1_Msk                                    0x000000F0  /*!< select event for SS1 */
-#define ADC_EMUX_EM2_Msk                                    0x00000F00  /*!< select event for SS2 */
-#define ADC_EMUX_EM3_Msk                                    0x0000F000  /*!< select event for SS3 */
-#define ADC_EMUX_EM4_Msk                                    0x000F0000  /*!< select event for SS4 */
-#define ADC_EMUX_EM5_Msk                                    0x00F00000  /*!< select event for SS5 */
-#define ADC_EMUX_EM6_Msk                                    0x0F000000  /*!< select event for SS6 */
-#define ADC_EMUX_EM7_Msk                                    0xF0000000  /*!< select event for SS7 */
+#define ADC_EMUX_EM0_Msk                                    0x0000000F  /*!< Select start event for sequencer 0 */
+#define ADC_EMUX_EM1_Msk                                    0x000000F0  /*!< Select start event for sequencer 1 */
+#define ADC_EMUX_EM2_Msk                                    0x00000F00  /*!< Select start event for sequencer 2 */
+#define ADC_EMUX_EM3_Msk                                    0x0000F000  /*!< Select start event for sequencer 3 */
+#define ADC_EMUX_EM4_Msk                                    0x000F0000  /*!< Select start event for sequencer 4 */
+#define ADC_EMUX_EM5_Msk                                    0x00F00000  /*!< Select start event for sequencer 5 */
+#define ADC_EMUX_EM6_Msk                                    0x0F000000  /*!< Select start event for sequencer 6 */
+#define ADC_EMUX_EM7_Msk                                    0xF0000000  /*!< Select start event for sequencer 7 */
 
-/*-- USTAT: Register FIFO empty ----------------------------------------------*/
+/*-- USTAT: FIFO underflow status register ----------------------------------------------*/
 
 typedef struct {
-  uint32_t UV0                                    :1;                   /*!< fifo0 underflow */
-  uint32_t UV1                                    :1;                   /*!< fifo1 underflow */
-  uint32_t UV2                                    :1;                   /*!< fifo2 underflow */
-  uint32_t UV3                                    :1;                   /*!< fifo3 underflow */
-  uint32_t UV4                                    :1;                   /*!< fifo4 underflow */
-  uint32_t UV5                                    :1;                   /*!< fifo5 underflow */
-  uint32_t UV6                                    :1;                   /*!< fifo6 underflow */
-  uint32_t UV7                                    :1;                   /*!< fifo7 underflow */
+  uint32_t UV0                                    :1;                   /*!< Sequencer 0 FIFO underflow */
+  uint32_t UV1                                    :1;                   /*!< Sequencer 1 FIFO underflow */
+  uint32_t UV2                                    :1;                   /*!< Sequencer 2 FIFO underflow */
+  uint32_t UV3                                    :1;                   /*!< Sequencer 3 FIFO underflow */
+  uint32_t UV4                                    :1;                   /*!< Sequencer 4 FIFO underflow */
+  uint32_t UV5                                    :1;                   /*!< Sequencer 5 FIFO underflow */
+  uint32_t UV6                                    :1;                   /*!< Sequencer 6 FIFO underflow */
+  uint32_t UV7                                    :1;                   /*!< Sequencer 7 FIFO underflow */
   uint32_t Reserved0                              :24;                  /*!< Reserved */
 } _ADC_USTAT_bits;
 
 /* Bit field positions: */
-#define ADC_USTAT_UV0_Pos                                   0           /*!< fifo0 underflow */
-#define ADC_USTAT_UV1_Pos                                   1           /*!< fifo1 underflow */
-#define ADC_USTAT_UV2_Pos                                   2           /*!< fifo2 underflow */
-#define ADC_USTAT_UV3_Pos                                   3           /*!< fifo3 underflow */
-#define ADC_USTAT_UV4_Pos                                   4           /*!< fifo4 underflow */
-#define ADC_USTAT_UV5_Pos                                   5           /*!< fifo5 underflow */
-#define ADC_USTAT_UV6_Pos                                   6           /*!< fifo6 underflow */
-#define ADC_USTAT_UV7_Pos                                   7           /*!< fifo7 underflow */
+#define ADC_USTAT_UV0_Pos                                   0           /*!< Sequencer 0 FIFO underflow */
+#define ADC_USTAT_UV1_Pos                                   1           /*!< Sequencer 1 FIFO underflow */
+#define ADC_USTAT_UV2_Pos                                   2           /*!< Sequencer 2 FIFO underflow */
+#define ADC_USTAT_UV3_Pos                                   3           /*!< Sequencer 3 FIFO underflow */
+#define ADC_USTAT_UV4_Pos                                   4           /*!< Sequencer 4 FIFO underflow */
+#define ADC_USTAT_UV5_Pos                                   5           /*!< Sequencer 5 FIFO underflow */
+#define ADC_USTAT_UV6_Pos                                   6           /*!< Sequencer 6 FIFO underflow */
+#define ADC_USTAT_UV7_Pos                                   7           /*!< Sequencer 7 FIFO underflow */
 
 /* Bit field masks: */
-#define ADC_USTAT_UV0_Msk                                   0x00000001  /*!< fifo0 underflow */
-#define ADC_USTAT_UV1_Msk                                   0x00000002  /*!< fifo1 underflow */
-#define ADC_USTAT_UV2_Msk                                   0x00000004  /*!< fifo2 underflow */
-#define ADC_USTAT_UV3_Msk                                   0x00000008  /*!< fifo3 underflow */
-#define ADC_USTAT_UV4_Msk                                   0x00000010  /*!< fifo4 underflow */
-#define ADC_USTAT_UV5_Msk                                   0x00000020  /*!< fifo5 underflow */
-#define ADC_USTAT_UV6_Msk                                   0x00000040  /*!< fifo6 underflow */
-#define ADC_USTAT_UV7_Msk                                   0x00000080  /*!< fifo7 underflow */
+#define ADC_USTAT_UV0_Msk                                   0x00000001  /*!< Sequencer 0 FIFO underflow */
+#define ADC_USTAT_UV1_Msk                                   0x00000002  /*!< Sequencer 1 FIFO underflow */
+#define ADC_USTAT_UV2_Msk                                   0x00000004  /*!< Sequencer 2 FIFO underflow */
+#define ADC_USTAT_UV3_Msk                                   0x00000008  /*!< Sequencer 3 FIFO underflow */
+#define ADC_USTAT_UV4_Msk                                   0x00000010  /*!< Sequencer 4 FIFO underflow */
+#define ADC_USTAT_UV5_Msk                                   0x00000020  /*!< Sequencer 5 FIFO underflow */
+#define ADC_USTAT_UV6_Msk                                   0x00000040  /*!< Sequencer 6 FIFO underflow */
+#define ADC_USTAT_UV7_Msk                                   0x00000080  /*!< Sequencer 7 FIFO underflow */
 
-/*-- SPC0: Register delay start ADC0, ADC1 -----------------------------------*/
+/*-- SPC0: ADC0, ADC1 start delay register  -----------------------------------*/
 
 typedef struct {
-  uint32_t PHASE0                                 :12;                  /*!< Delay start ADC0 (Channel 0,1) */
+  uint32_t PHASE0                                 :12;                  /*!< ADC0 start delay (channel 0,1) */
   uint32_t Reserved0                              :4;                   /*!< Reserved */
-  uint32_t PHASE1                                 :12;                  /*!< Delay start ADC1 (Channel 2,3) */
+  uint32_t PHASE1                                 :12;                  /*!< ADC1 start delay (channel 2,3) */
   uint32_t Reserved1                              :4;                   /*!< Reserved */
 } _ADC_SPC0_bits;
 
 /* Bit field positions: */
-#define ADC_SPC0_PHASE0_Pos                                 0           /*!< Delay start ADC0 (Channel 0,1) */
-#define ADC_SPC0_PHASE1_Pos                                 16          /*!< Delay start ADC1 (Channel 2,3) */
+#define ADC_SPC0_PHASE0_Pos                                 0           /*!< ADC0 start delay (channel 0,1) */
+#define ADC_SPC0_PHASE1_Pos                                 16          /*!< ADC1 start delay (channel 2,3) */
 
 /* Bit field masks: */
-#define ADC_SPC0_PHASE0_Msk                                 0x00000FFF  /*!< Delay start ADC0 (Channel 0,1) */
-#define ADC_SPC0_PHASE1_Msk                                 0x0FFF0000  /*!< Delay start ADC1 (Channel 2,3) */
+#define ADC_SPC0_PHASE0_Msk                                 0x00000FFF  /*!< ADC0 start delay (channel 0,1) */
+#define ADC_SPC0_PHASE1_Msk                                 0x0FFF0000  /*!< ADC1 start delay (channel 2,3) */
 
-/*-- SPC1: Register delay start ADC2, ADC3 -----------------------------------*/
+/*-- SPC1: ADC2, ADC3 start delay register -----------------------------------*/
 
 typedef struct {
-  uint32_t PHASE2                                 :12;                  /*!< Delay start ADC2 (Channel 4,5) */
+  uint32_t PHASE2                                 :12;                  /*!< ADC2 start delay (channel 4,5) */
   uint32_t Reserved0                              :4;                   /*!< Reserved */
-  uint32_t PHASE3                                 :12;                  /*!< Delay start ADC3 (Channel 6,7) */
+  uint32_t PHASE3                                 :12;                  /*!< ADC3 start delay (channel 6,7) */
   uint32_t Reserved1                              :4;                   /*!< Reserved */
 } _ADC_SPC1_bits;
 
 /* Bit field positions: */
-#define ADC_SPC1_PHASE2_Pos                                 0           /*!< Delay start ADC2 (Channel 4,5) */
-#define ADC_SPC1_PHASE3_Pos                                 16          /*!< Delay start ADC3 (Channel 6,7) */
+#define ADC_SPC1_PHASE2_Pos                                 0           /*!< ADC2 start delay (channel 4,5) */
+#define ADC_SPC1_PHASE3_Pos                                 16          /*!< ADC3 start delay (channel 6,7) */
 
 /* Bit field masks: */
-#define ADC_SPC1_PHASE2_Msk                                 0x00000FFF  /*!< Delay start ADC2 (Channel 4,5) */
-#define ADC_SPC1_PHASE3_Msk                                 0x0FFF0000  /*!< Delay start ADC3 (Channel 6,7) */
+#define ADC_SPC1_PHASE2_Msk                                 0x00000FFF  /*!< ADC2 start delay (channel 4,5) */
+#define ADC_SPC1_PHASE3_Msk                                 0x0FFF0000  /*!< ADC3 start delay (channel 6,7) */
 
-/*-- SPC2: Register delay start ADC4, ADC5 -----------------------------------*/
+/*-- SPC2: ADC4, ADC5 start delay register -----------------------------------*/
 
 typedef struct {
-  uint32_t PHASE4                                 :12;                  /*!< Delay start ADC4(Channel 8,9) */
+  uint32_t PHASE4                                 :12;                  /*!< ADC4 start delay (channel 8,9) */
   uint32_t Reserved0                              :4;                   /*!< Reserved */
-  uint32_t PHASE5                                 :12;                  /*!< Delay start ADC5 (Channel 10,11) */
+  uint32_t PHASE5                                 :12;                  /*!< ADC5 start delay (channel 10,11) */
   uint32_t Reserved1                              :4;                   /*!< Reserved */
 } _ADC_SPC2_bits;
 
 /* Bit field positions: */
-#define ADC_SPC2_PHASE4_Pos                                 0           /*!< Delay start ADC4(Channel 8,9) */
-#define ADC_SPC2_PHASE5_Pos                                 16          /*!< Delay start ADC5 (Channel 10,11) */
+#define ADC_SPC2_PHASE4_Pos                                 0           /*!< ADC4 start delay (channel 8,9) */
+#define ADC_SPC2_PHASE5_Pos                                 16          /*!< ADC5 start delay (channel 10,11) */
 
 /* Bit field masks: */
-#define ADC_SPC2_PHASE4_Msk                                 0x00000FFF  /*!< Delay start ADC4(Channel 8,9) */
-#define ADC_SPC2_PHASE5_Msk                                 0x0FFF0000  /*!< Delay start ADC5 (Channel 10,11) */
+#define ADC_SPC2_PHASE4_Msk                                 0x00000FFF  /*!< ADC4 start delay (channel 8,9) */
+#define ADC_SPC2_PHASE5_Msk                                 0x0FFF0000  /*!< ADC5 start delay (channel 10,11) */
 
-/*-- SPC3: Register delay start ADC6, ADC7 -----------------------------------*/
+/*-- SPC3: ADC6, ADC7 start delay register -----------------------------------*/
 
 typedef struct {
-  uint32_t PHASE6                                 :12;                  /*!< Delay start ADC6 (Channel 12,13) */
+  uint32_t PHASE6                                 :12;                  /*!< ADC6 start delay (channel 12,13) */
   uint32_t Reserved0                              :4;                   /*!< Reserved */
-  uint32_t PHASE7                                 :12;                  /*!< Delay start ADC7 (Channel 14,15) */
+  uint32_t PHASE7                                 :12;                  /*!< ADC7 start delay (channel 14,15) */
   uint32_t Reserved1                              :4;                   /*!< Reserved */
 } _ADC_SPC3_bits;
 
 /* Bit field positions: */
-#define ADC_SPC3_PHASE6_Pos                                 0           /*!< Delay start ADC6 (Channel 12,13) */
-#define ADC_SPC3_PHASE7_Pos                                 16          /*!< Delay start ADC7 (Channel 14,15) */
+#define ADC_SPC3_PHASE6_Pos                                 0           /*!< ADC6 start delay (channel 12,13) */
+#define ADC_SPC3_PHASE7_Pos                                 16          /*!< ADC7 start delay (channel 14,15) */
 
 /* Bit field masks: */
-#define ADC_SPC3_PHASE6_Msk                                 0x00000FFF  /*!< Delay start ADC6 (Channel 12,13) */
-#define ADC_SPC3_PHASE7_Msk                                 0x0FFF0000  /*!< Delay start ADC7 (Channel 14,15) */
+#define ADC_SPC3_PHASE6_Msk                                 0x00000FFF  /*!< ADC6 start delay (channel 12,13) */
+#define ADC_SPC3_PHASE7_Msk                                 0x0FFF0000  /*!< ADC7 start delay (channel 14,15) */
 
-/*-- SPC4: Register delay start ADC8, ADC9 -----------------------------------*/
+/*-- SPC4: ADC8, ADC9 start delay register -----------------------------------*/
 
 typedef struct {
-  uint32_t PHASE8                                 :12;                  /*!< Delay start ADC8 (Channel 16,17) */
+  uint32_t PHASE8                                 :12;                  /*!< ADC8 start delay (channel 16,17) */
   uint32_t Reserved0                              :4;                   /*!< Reserved */
-  uint32_t PHASE9                                 :12;                  /*!< Delay start ADC9 (Channel 18,19) */
+  uint32_t PHASE9                                 :12;                  /*!< ADC9 start delay (channel 18,19) */
   uint32_t Reserved1                              :4;                   /*!< Reserved */
 } _ADC_SPC4_bits;
 
 /* Bit field positions: */
-#define ADC_SPC4_PHASE8_Pos                                 0           /*!< Delay start ADC8 (Channel 16,17) */
-#define ADC_SPC4_PHASE9_Pos                                 16          /*!< Delay start ADC9 (Channel 18,19) */
+#define ADC_SPC4_PHASE8_Pos                                 0           /*!< ADC8 start delay (channel 16,17) */
+#define ADC_SPC4_PHASE9_Pos                                 16          /*!< ADC9 start delay (channel 18,19) */
 
 /* Bit field masks: */
-#define ADC_SPC4_PHASE8_Msk                                 0x00000FFF  /*!< Delay start ADC8 (Channel 16,17) */
-#define ADC_SPC4_PHASE9_Msk                                 0x0FFF0000  /*!< Delay start ADC9 (Channel 18,19) */
+#define ADC_SPC4_PHASE8_Msk                                 0x00000FFF  /*!< ADC8 start delay (channel 16,17) */
+#define ADC_SPC4_PHASE9_Msk                                 0x0FFF0000  /*!< ADC9 start delay (channel 18,19) */
 
-/*-- SPC5: Register delay start ADC10, ADC11 ---------------------------------*/
+/*-- SPC5: ADC10, ADC11 start delay register ---------------------------------*/
 
 typedef struct {
-  uint32_t PHASE10                                :12;                  /*!< Delay start ADC10 (Channel 20,21) */
+  uint32_t PHASE10                                :12;                  /*!< ADC10 start delay (channel 20,21) */
   uint32_t Reserved0                              :4;                   /*!< Reserved */
-  uint32_t PHASE11                                :12;                  /*!< Delay start ADC11 (Channel 22,23) */
+  uint32_t PHASE11                                :12;                  /*!< ADC11 start delay (channel 22,23) */
   uint32_t Reserved1                              :4;                   /*!< Reserved */
 } _ADC_SPC5_bits;
 
 /* Bit field positions: */
-#define ADC_SPC5_PHASE10_Pos                                0           /*!< Delay start ADC10 (Channel 20,21) */
-#define ADC_SPC5_PHASE11_Pos                                16          /*!< Delay start ADC11 (Channel 22,23) */
+#define ADC_SPC5_PHASE10_Pos                                0           /*!< ADC10 start delay (channel 20,21) */
+#define ADC_SPC5_PHASE11_Pos                                16          /*!< ADC11 start delay (channel 22,23) */
 
 /* Bit field masks: */
-#define ADC_SPC5_PHASE10_Msk                                0x00000FFF  /*!< Delay start ADC10 (Channel 20,21) */
-#define ADC_SPC5_PHASE11_Msk                                0x0FFF0000  /*!< Delay start ADC11 (Channel 22,23) */
+#define ADC_SPC5_PHASE10_Msk                                0x00000FFF  /*!< ADC10 start delay (channel 20,21) */
+#define ADC_SPC5_PHASE11_Msk                                0x0FFF0000  /*!< ADC11 start delay (channel 22,23) */
 
-/*-- SAC: Register averagel control ------------------------------------------*/
+/*-- SAC: Average control (ADC0-7) register ------------------------------------------*/
 
 typedef struct {
-  uint32_t AVG0                                   :3;                   /*!< Averaging value0 */
+  uint32_t AVG0                                   :3;                   /*!< ADC0 average control */
   uint32_t Reserved0                              :1;                   /*!< Reserved */
-  uint32_t AVG1                                   :3;                   /*!< Averaging value1 */
+  uint32_t AVG1                                   :3;                   /*!< ADC1 average control */
   uint32_t Reserved1                              :1;                   /*!< Reserved */
-  uint32_t AVG2                                   :3;                   /*!< Averaging value2 */
+  uint32_t AVG2                                   :3;                   /*!< ADC2 average control */
   uint32_t Reserved2                              :1;                   /*!< Reserved */
-  uint32_t AVG3                                   :3;                   /*!< Averaging value3 */
+  uint32_t AVG3                                   :3;                   /*!< ADC3 average control */
   uint32_t Reserved3                              :1;                   /*!< Reserved */
-  uint32_t AVG4                                   :3;                   /*!< Averaging value4 */
+  uint32_t AVG4                                   :3;                   /*!< ADC4 average control */
   uint32_t Reserved4                              :1;                   /*!< Reserved */
-  uint32_t AVG5                                   :3;                   /*!< Averaging value5 */
+  uint32_t AVG5                                   :3;                   /*!< ADC5 average control */
   uint32_t Reserved5                              :1;                   /*!< Reserved */
-  uint32_t AVG6                                   :3;                   /*!< Averaging value6 */
+  uint32_t AVG6                                   :3;                   /*!< ADC6 average control */
   uint32_t Reserved6                              :1;                   /*!< Reserved */
-  uint32_t AVG7                                   :3;                   /*!< Averaging value7 */
+  uint32_t AVG7                                   :3;                   /*!< ADC7 average control */
   uint32_t Reserved7                              :1;                   /*!< Reserved */
 } _ADC_SAC_bits;
 
 /* Bit field positions: */
-#define ADC_SAC_AVG0_Pos                                    0           /*!< Averaging value0 */
-#define ADC_SAC_AVG1_Pos                                    4           /*!< Averaging value1 */
-#define ADC_SAC_AVG2_Pos                                    8           /*!< Averaging value2 */
-#define ADC_SAC_AVG3_Pos                                    12          /*!< Averaging value3 */
-#define ADC_SAC_AVG4_Pos                                    16          /*!< Averaging value4 */
-#define ADC_SAC_AVG5_Pos                                    20          /*!< Averaging value5 */
-#define ADC_SAC_AVG6_Pos                                    24          /*!< Averaging value6 */
-#define ADC_SAC_AVG7_Pos                                    28          /*!< Averaging value7 */
+#define ADC_SAC_AVG0_Pos                                    0           /*!< ADC0 average control */
+#define ADC_SAC_AVG1_Pos                                    4           /*!< ADC1 average control */
+#define ADC_SAC_AVG2_Pos                                    8           /*!< ADC2 average control */
+#define ADC_SAC_AVG3_Pos                                    12          /*!< ADC3 average control */
+#define ADC_SAC_AVG4_Pos                                    16          /*!< ADC4 average control */
+#define ADC_SAC_AVG5_Pos                                    20          /*!< ADC5 average control */
+#define ADC_SAC_AVG6_Pos                                    24          /*!< ADC6 average control */
+#define ADC_SAC_AVG7_Pos                                    28          /*!< ADC7 average control */
 
 /* Bit field masks: */
-#define ADC_SAC_AVG0_Msk                                    0x00000007  /*!< Averaging value0 */
-#define ADC_SAC_AVG1_Msk                                    0x00000070  /*!< Averaging value1 */
-#define ADC_SAC_AVG2_Msk                                    0x00000700  /*!< Averaging value2 */
-#define ADC_SAC_AVG3_Msk                                    0x00007000  /*!< Averaging value3 */
-#define ADC_SAC_AVG4_Msk                                    0x00070000  /*!< Averaging value4 */
-#define ADC_SAC_AVG5_Msk                                    0x00700000  /*!< Averaging value5 */
-#define ADC_SAC_AVG6_Msk                                    0x07000000  /*!< Averaging value6 */
-#define ADC_SAC_AVG7_Msk                                    0x70000000  /*!< Averaging value7 */
+#define ADC_SAC_AVG0_Msk                                    0x00000007  /*!< ADC0 average control */
+#define ADC_SAC_AVG1_Msk                                    0x00000070  /*!< ADC1 average control */
+#define ADC_SAC_AVG2_Msk                                    0x00000700  /*!< ADC2 average control */
+#define ADC_SAC_AVG3_Msk                                    0x00007000  /*!< ADC3 average control */
+#define ADC_SAC_AVG4_Msk                                    0x00070000  /*!< ADC4 average control */
+#define ADC_SAC_AVG5_Msk                                    0x00700000  /*!< ADC5 average control */
+#define ADC_SAC_AVG6_Msk                                    0x07000000  /*!< ADC6 average control */
+#define ADC_SAC_AVG7_Msk                                    0x70000000  /*!< ADC7 average control */
 
-/*-- RICNT: Counter interrupt reset register ---------------------------------*/
+/*-- RICNT: Interrupt counter reset control / Average control (ADC8-11) register ---------------------------------*/
 
 typedef struct {
-  uint32_t AVG8                                   :3;                   /*!< Averaging value8 */
+  uint32_t AVG8                                   :3;                   /*!< ADC8 average control */
   uint32_t Reserved0                              :1;                   /*!< Reserved */
-  uint32_t AVG9                                   :3;                   /*!< Averaging value9 */
+  uint32_t AVG9                                   :3;                   /*!< ADC9 average control */
   uint32_t Reserved1                              :1;                   /*!< Reserved */
-  uint32_t AVG10                                  :3;                   /*!< Averaging value10 */
+  uint32_t AVG10                                  :3;                   /*!< ADC10 average control */
   uint32_t Reserved2                              :1;                   /*!< Reserved */
-  uint32_t AVG11                                  :3;                   /*!< Averaging value11 */
+  uint32_t AVG11                                  :3;                   /*!< ADC11 average control */
   uint32_t Reserved3                              :1;                   /*!< Reserved */
-  uint32_t RICNT0                                 :1;                   /*!< Disable reset counter interrupt on start seqensor */
-  uint32_t RICNT1                                 :1;                   /*!< Disable reset counter interrupt on start seqensor */
-  uint32_t RICNT2                                 :1;                   /*!< Disable reset counter interrupt on start seqensor */
-  uint32_t RICNT3                                 :1;                   /*!< Disable reset counter interrupt on start seqensor */
-  uint32_t RICNT4                                 :1;                   /*!< Disable reset counter interrupt on start seqensor */
-  uint32_t RICNT5                                 :1;                   /*!< Disable reset counter interrupt on start seqensor */
-  uint32_t RICNT6                                 :1;                   /*!< Disable reset counter interrupt on start seqensor */
-  uint32_t RICNT7                                 :1;                   /*!< Disable reset counter interrupt on start seqensor */
+  uint32_t RICNT0                                 :1;                   /*!< Disable interrupt counter reset on sequencer 0 start */
+  uint32_t RICNT1                                 :1;                   /*!< Disable interrupt counter reset on sequencer 1 start */
+  uint32_t RICNT2                                 :1;                   /*!< Disable interrupt counter reset on sequencer 2 start */
+  uint32_t RICNT3                                 :1;                   /*!< Disable interrupt counter reset on sequencer 3 start */
+  uint32_t RICNT4                                 :1;                   /*!< Disable interrupt counter reset on sequencer 4 start */
+  uint32_t RICNT5                                 :1;                   /*!< Disable interrupt counter reset on sequencer 5 start */
+  uint32_t RICNT6                                 :1;                   /*!< Disable interrupt counter reset on sequencer 6 start */
+  uint32_t RICNT7                                 :1;                   /*!< Disable interrupt counter reset on sequencer 7 start */
   uint32_t Reserved4                              :8;                   /*!< Reserved */
 } _ADC_RICNT_bits;
 
 /* Bit field positions: */
-#define ADC_RICNT_AVG8_Pos                                  0           /*!< Averaging value8 */
-#define ADC_RICNT_AVG9_Pos                                  4           /*!< Averaging value9 */
-#define ADC_RICNT_AVG10_Pos                                 8           /*!< Averaging value10 */
-#define ADC_RICNT_AVG11_Pos                                 12          /*!< Averaging value11 */
-#define ADC_RICNT_RICNT0_Pos                                16          /*!< Disable reset counter interrupt on start seqensor */
-#define ADC_RICNT_RICNT1_Pos                                17          /*!< Disable reset counter interrupt on start seqensor */
-#define ADC_RICNT_RICNT2_Pos                                18          /*!< Disable reset counter interrupt on start seqensor */
-#define ADC_RICNT_RICNT3_Pos                                19          /*!< Disable reset counter interrupt on start seqensor */
-#define ADC_RICNT_RICNT4_Pos                                20          /*!< Disable reset counter interrupt on start seqensor */
-#define ADC_RICNT_RICNT5_Pos                                21          /*!< Disable reset counter interrupt on start seqensor */
-#define ADC_RICNT_RICNT6_Pos                                22          /*!< Disable reset counter interrupt on start seqensor */
-#define ADC_RICNT_RICNT7_Pos                                23          /*!< Disable reset counter interrupt on start seqensor */
+#define ADC_RICNT_AVG8_Pos                                  0           /*!< ADC8 average control */
+#define ADC_RICNT_AVG9_Pos                                  4           /*!< ADC9 average control */
+#define ADC_RICNT_AVG10_Pos                                 8           /*!< ADC10 average control */
+#define ADC_RICNT_AVG11_Pos                                 12          /*!< ADC11 average control */
+#define ADC_RICNT_RICNT0_Pos                                16          /*!< Disable interrupt counter reset on sequencer 0 start */
+#define ADC_RICNT_RICNT1_Pos                                17          /*!< Disable interrupt counter reset on sequencer 1 start */
+#define ADC_RICNT_RICNT2_Pos                                18          /*!< Disable interrupt counter reset on sequencer 2 start */
+#define ADC_RICNT_RICNT3_Pos                                19          /*!< Disable interrupt counter reset on sequencer 3 start */
+#define ADC_RICNT_RICNT4_Pos                                20          /*!< Disable interrupt counter reset on sequencer 4 start */
+#define ADC_RICNT_RICNT5_Pos                                21          /*!< Disable interrupt counter reset on sequencer 5 start */
+#define ADC_RICNT_RICNT6_Pos                                22          /*!< Disable interrupt counter reset on sequencer 6 start */
+#define ADC_RICNT_RICNT7_Pos                                23          /*!< Disable interrupt counter reset on sequencer 7 start */
 
 /* Bit field masks: */
-#define ADC_RICNT_AVG8_Msk                                  0x00000007  /*!< Averaging value8 */
-#define ADC_RICNT_AVG9_Msk                                  0x00000070  /*!< Averaging value9 */
-#define ADC_RICNT_AVG10_Msk                                 0x00000700  /*!< Averaging value10 */
-#define ADC_RICNT_AVG11_Msk                                 0x00007000  /*!< Averaging value11 */
-#define ADC_RICNT_RICNT0_Msk                                0x00010000  /*!< Disable reset counter interrupt on start seqensor */
-#define ADC_RICNT_RICNT1_Msk                                0x00020000  /*!< Disable reset counter interrupt on start seqensor */
-#define ADC_RICNT_RICNT2_Msk                                0x00040000  /*!< Disable reset counter interrupt on start seqensor */
-#define ADC_RICNT_RICNT3_Msk                                0x00080000  /*!< Disable reset counter interrupt on start seqensor */
-#define ADC_RICNT_RICNT4_Msk                                0x00100000  /*!< Disable reset counter interrupt on start seqensor */
-#define ADC_RICNT_RICNT5_Msk                                0x00200000  /*!< Disable reset counter interrupt on start seqensor */
-#define ADC_RICNT_RICNT6_Msk                                0x00400000  /*!< Disable reset counter interrupt on start seqensor */
-#define ADC_RICNT_RICNT7_Msk                                0x00800000  /*!< Disable reset counter interrupt on start seqensor */
+#define ADC_RICNT_AVG8_Msk                                  0x00000007  /*!< ADC8 average control */
+#define ADC_RICNT_AVG9_Msk                                  0x00000070  /*!< ADC9 average control */
+#define ADC_RICNT_AVG10_Msk                                 0x00000700  /*!< ADC10 average control */
+#define ADC_RICNT_AVG11_Msk                                 0x00007000  /*!< ADC11 average control */
+#define ADC_RICNT_RICNT0_Msk                                0x00010000  /*!< Disable interrupt counter reset on sequencer 0 start */
+#define ADC_RICNT_RICNT1_Msk                                0x00020000  /*!< Disable interrupt counter reset on sequencer 1 start */
+#define ADC_RICNT_RICNT2_Msk                                0x00040000  /*!< Disable interrupt counter reset on sequencer 2 start */
+#define ADC_RICNT_RICNT3_Msk                                0x00080000  /*!< Disable interrupt counter reset on sequencer 3 start */
+#define ADC_RICNT_RICNT4_Msk                                0x00100000  /*!< Disable interrupt counter reset on sequencer 4 start */
+#define ADC_RICNT_RICNT5_Msk                                0x00200000  /*!< Disable interrupt counter reset on sequencer 5 start */
+#define ADC_RICNT_RICNT6_Msk                                0x00400000  /*!< Disable interrupt counter reset on sequencer 6 start */
+#define ADC_RICNT_RICNT7_Msk                                0x00800000  /*!< Disable interrupt counter reset on sequencer 7 start */
 
-/*-- MUX: Select register triggering events sequencer ------------------------*/
+/*-- MUX: Sequencer ADC channels selection register ------------------------*/
 
 typedef struct {
-  uint32_t CH0                                    :1;                   /*!< enable measure chn0 */
-  uint32_t CH1                                    :1;                   /*!< enable measure chn1 */
-  uint32_t CH2                                    :1;                   /*!< enable measure chn2 */
-  uint32_t CH3                                    :1;                   /*!< enable measure chn3 */
-  uint32_t CH4                                    :1;                   /*!< enable measure chn4 */
-  uint32_t CH5                                    :1;                   /*!< enable measure chn5 */
-  uint32_t CH6                                    :1;                   /*!< enable measure chn6 */
-  uint32_t CH7                                    :1;                   /*!< enable measure chn7 */
-  uint32_t CH8                                    :1;                   /*!< enable measure chn8 */
-  uint32_t CH9                                    :1;                   /*!< enable measure chn9 */
-  uint32_t CH10                                   :1;                   /*!< enable measure chn10 */
-  uint32_t CH11                                   :1;                   /*!< enable measure chn11 */
-  uint32_t CH12                                   :1;                   /*!< enable measure chn12 */
-  uint32_t CH13                                   :1;                   /*!< enable measure chn13 */
-  uint32_t CH14                                   :1;                   /*!< enable measure chn14 */
-  uint32_t CH15                                   :1;                   /*!< enable measure chn15 */
-  uint32_t CH16                                   :1;                   /*!< enable measure chn16 */
-  uint32_t CH17                                   :1;                   /*!< enable measure chn17 */
-  uint32_t CH18                                   :1;                   /*!< enable measure chn18 */
-  uint32_t CH19                                   :1;                   /*!< enable measure chn19 */
-  uint32_t CH20                                   :1;                   /*!< enable measure chn20 */
-  uint32_t CH21                                   :1;                   /*!< enable measure chn21 */
-  uint32_t CH22                                   :1;                   /*!< enable measure chn22 */
-  uint32_t CH23                                   :1;                   /*!< enable measure chn23 */
+  uint32_t CH0                                    :1;                   /*!< Enable measure on channnel 0 (ADC0 A) */
+  uint32_t CH1                                    :1;                   /*!< Enable measure on channnel 1 (ADC0 B) */
+  uint32_t CH2                                    :1;                   /*!< Enable measure on channnel 2 (ADC1 A) */
+  uint32_t CH3                                    :1;                   /*!< Enable measure on channnel 3 (ADC1 B) */
+  uint32_t CH4                                    :1;                   /*!< Enable measure on channnel 4 (ADC2 A) */
+  uint32_t CH5                                    :1;                   /*!< Enable measure on channnel 5 (ADC2 B) */
+  uint32_t CH6                                    :1;                   /*!< Enable measure on channnel 6 (ADC3 A) */
+  uint32_t CH7                                    :1;                   /*!< Enable measure on channnel 7 (ADC3 B) */
+  uint32_t CH8                                    :1;                   /*!< Enable measure on channnel 8 (ADC4 A) */
+  uint32_t CH9                                    :1;                   /*!< Enable measure on channnel 9 (ADC4 B) */
+  uint32_t CH10                                   :1;                   /*!< Enable measure on channnel 10 (ADC5 A) */
+  uint32_t CH11                                   :1;                   /*!< Enable measure on channnel 11 (ADC5 B) */
+  uint32_t CH12                                   :1;                   /*!< Enable measure on channnel 12 (ADC6 A) */
+  uint32_t CH13                                   :1;                   /*!< Enable measure on channnel 13 (ADC6 B) */
+  uint32_t CH14                                   :1;                   /*!< Enable measure on channnel 14 (ADC7 A) */
+  uint32_t CH15                                   :1;                   /*!< Enable measure on channnel 15 (ADC7 B) */
+  uint32_t CH16                                   :1;                   /*!< Enable measure on channnel 16 (ADC8 A) */
+  uint32_t CH17                                   :1;                   /*!< Enable measure on channnel 17 (ADC8 B) */
+  uint32_t CH18                                   :1;                   /*!< Enable measure on channnel 18 (ADC9 A) */
+  uint32_t CH19                                   :1;                   /*!< Enable measure on channnel 19 (ADC9 B) */
+  uint32_t CH20                                   :1;                   /*!< Enable measure on channnel 20 (ADC10 A) */
+  uint32_t CH21                                   :1;                   /*!< Enable measure on channnel 21 (ADC10 B) */
+  uint32_t CH22                                   :1;                   /*!< Enable measure on channnel 22 (ADC11 A) */
+  uint32_t CH23                                   :1;                   /*!< Enable measure on channnel 23 (ADC11 B) */
   uint32_t Reserved0                              :8;                   /*!< Reserved */
 } _ADC_MUX_bits;
 
 /* Bit field positions: */
-#define ADC_MUX_CH0_Pos                                     0           /*!< enable measure chn0 */
-#define ADC_MUX_CH1_Pos                                     1           /*!< enable measure chn1 */
-#define ADC_MUX_CH2_Pos                                     2           /*!< enable measure chn2 */
-#define ADC_MUX_CH3_Pos                                     3           /*!< enable measure chn3 */
-#define ADC_MUX_CH4_Pos                                     4           /*!< enable measure chn4 */
-#define ADC_MUX_CH5_Pos                                     5           /*!< enable measure chn5 */
-#define ADC_MUX_CH6_Pos                                     6           /*!< enable measure chn6 */
-#define ADC_MUX_CH7_Pos                                     7           /*!< enable measure chn7 */
-#define ADC_MUX_CH8_Pos                                     8           /*!< enable measure chn8 */
-#define ADC_MUX_CH9_Pos                                     9           /*!< enable measure chn9 */
-#define ADC_MUX_CH10_Pos                                    10          /*!< enable measure chn10 */
-#define ADC_MUX_CH11_Pos                                    11          /*!< enable measure chn11 */
-#define ADC_MUX_CH12_Pos                                    12          /*!< enable measure chn12 */
-#define ADC_MUX_CH13_Pos                                    13          /*!< enable measure chn13 */
-#define ADC_MUX_CH14_Pos                                    14          /*!< enable measure chn14 */
-#define ADC_MUX_CH15_Pos                                    15          /*!< enable measure chn15 */
-#define ADC_MUX_CH16_Pos                                    16          /*!< enable measure chn16 */
-#define ADC_MUX_CH17_Pos                                    17          /*!< enable measure chn17 */
-#define ADC_MUX_CH18_Pos                                    18          /*!< enable measure chn18 */
-#define ADC_MUX_CH19_Pos                                    19          /*!< enable measure chn19 */
-#define ADC_MUX_CH20_Pos                                    20          /*!< enable measure chn20 */
-#define ADC_MUX_CH21_Pos                                    21          /*!< enable measure chn21 */
-#define ADC_MUX_CH22_Pos                                    22          /*!< enable measure chn22 */
-#define ADC_MUX_CH23_Pos                                    23          /*!< enable measure chn23 */
+#define ADC_MUX_CH0_Pos                                     0           /*!< Enable measure on channnel 0 (ADC0 A) */
+#define ADC_MUX_CH1_Pos                                     1           /*!< Enable measure on channnel 1 (ADC0 B) */
+#define ADC_MUX_CH2_Pos                                     2           /*!< Enable measure on channnel 2 (ADC1 A) */
+#define ADC_MUX_CH3_Pos                                     3           /*!< Enable measure on channnel 3 (ADC1 B) */
+#define ADC_MUX_CH4_Pos                                     4           /*!< Enable measure on channnel 4 (ADC2 A) */
+#define ADC_MUX_CH5_Pos                                     5           /*!< Enable measure on channnel 5 (ADC2 B) */
+#define ADC_MUX_CH6_Pos                                     6           /*!< Enable measure on channnel 6 (ADC3 A) */
+#define ADC_MUX_CH7_Pos                                     7           /*!< Enable measure on channnel 7 (ADC3 B) */
+#define ADC_MUX_CH8_Pos                                     8           /*!< Enable measure on channnel 8 (ADC4 A) */
+#define ADC_MUX_CH9_Pos                                     9           /*!< Enable measure on channnel 9 (ADC4 B) */
+#define ADC_MUX_CH10_Pos                                    10          /*!< Enable measure on channnel 10 (ADC5 A) */
+#define ADC_MUX_CH11_Pos                                    11          /*!< Enable measure on channnel 11 (ADC5 B) */
+#define ADC_MUX_CH12_Pos                                    12          /*!< Enable measure on channnel 12 (ADC6 A) */
+#define ADC_MUX_CH13_Pos                                    13          /*!< Enable measure on channnel 13 (ADC6 B) */
+#define ADC_MUX_CH14_Pos                                    14          /*!< Enable measure on channnel 14 (ADC7 A) */
+#define ADC_MUX_CH15_Pos                                    15          /*!< Enable measure on channnel 15 (ADC7 B) */
+#define ADC_MUX_CH16_Pos                                    16          /*!< Enable measure on channnel 16 (ADC8 A) */
+#define ADC_MUX_CH17_Pos                                    17          /*!< Enable measure on channnel 17 (ADC8 B) */
+#define ADC_MUX_CH18_Pos                                    18          /*!< Enable measure on channnel 18 (ADC9 A) */
+#define ADC_MUX_CH19_Pos                                    19          /*!< Enable measure on channnel 19 (ADC9 B) */
+#define ADC_MUX_CH20_Pos                                    20          /*!< Enable measure on channnel 20 (ADC10 A) */
+#define ADC_MUX_CH21_Pos                                    21          /*!< Enable measure on channnel 21 (ADC10 B) */
+#define ADC_MUX_CH22_Pos                                    22          /*!< Enable measure on channnel 22 (ADC11 A) */
+#define ADC_MUX_CH23_Pos                                    23          /*!< Enable measure on channnel 23 (ADC11 B) */
 
 /* Bit field masks: */
-#define ADC_MUX_CH0_Msk                                     0x00000001  /*!< enable measure chn0 */
-#define ADC_MUX_CH1_Msk                                     0x00000002  /*!< enable measure chn1 */
-#define ADC_MUX_CH2_Msk                                     0x00000004  /*!< enable measure chn2 */
-#define ADC_MUX_CH3_Msk                                     0x00000008  /*!< enable measure chn3 */
-#define ADC_MUX_CH4_Msk                                     0x00000010  /*!< enable measure chn4 */
-#define ADC_MUX_CH5_Msk                                     0x00000020  /*!< enable measure chn5 */
-#define ADC_MUX_CH6_Msk                                     0x00000040  /*!< enable measure chn6 */
-#define ADC_MUX_CH7_Msk                                     0x00000080  /*!< enable measure chn7 */
-#define ADC_MUX_CH8_Msk                                     0x00000100  /*!< enable measure chn8 */
-#define ADC_MUX_CH9_Msk                                     0x00000200  /*!< enable measure chn9 */
-#define ADC_MUX_CH10_Msk                                    0x00000400  /*!< enable measure chn10 */
-#define ADC_MUX_CH11_Msk                                    0x00000800  /*!< enable measure chn11 */
-#define ADC_MUX_CH12_Msk                                    0x00001000  /*!< enable measure chn12 */
-#define ADC_MUX_CH13_Msk                                    0x00002000  /*!< enable measure chn13 */
-#define ADC_MUX_CH14_Msk                                    0x00004000  /*!< enable measure chn14 */
-#define ADC_MUX_CH15_Msk                                    0x00008000  /*!< enable measure chn15 */
-#define ADC_MUX_CH16_Msk                                    0x00010000  /*!< enable measure chn16 */
-#define ADC_MUX_CH17_Msk                                    0x00020000  /*!< enable measure chn17 */
-#define ADC_MUX_CH18_Msk                                    0x00040000  /*!< enable measure chn18 */
-#define ADC_MUX_CH19_Msk                                    0x00080000  /*!< enable measure chn19 */
-#define ADC_MUX_CH20_Msk                                    0x00100000  /*!< enable measure chn20 */
-#define ADC_MUX_CH21_Msk                                    0x00200000  /*!< enable measure chn21 */
-#define ADC_MUX_CH22_Msk                                    0x00400000  /*!< enable measure chn22 */
-#define ADC_MUX_CH23_Msk                                    0x00800000  /*!< enable measure chn23 */
+#define ADC_MUX_CH0_Msk                                     0x00000001  /*!< Enable measure on channnel 0 (ADC0 A) */
+#define ADC_MUX_CH1_Msk                                     0x00000002  /*!< Enable measure on channnel 1 (ADC0 B) */
+#define ADC_MUX_CH2_Msk                                     0x00000004  /*!< Enable measure on channnel 2 (ADC1 A) */
+#define ADC_MUX_CH3_Msk                                     0x00000008  /*!< Enable measure on channnel 3 (ADC1 B) */
+#define ADC_MUX_CH4_Msk                                     0x00000010  /*!< Enable measure on channnel 4 (ADC2 A) */
+#define ADC_MUX_CH5_Msk                                     0x00000020  /*!< Enable measure on channnel 5 (ADC2 B) */
+#define ADC_MUX_CH6_Msk                                     0x00000040  /*!< Enable measure on channnel 6 (ADC3 A) */
+#define ADC_MUX_CH7_Msk                                     0x00000080  /*!< Enable measure on channnel 7 (ADC3 B) */
+#define ADC_MUX_CH8_Msk                                     0x00000100  /*!< Enable measure on channnel 8 (ADC4 A) */
+#define ADC_MUX_CH9_Msk                                     0x00000200  /*!< Enable measure on channnel 9 (ADC4 B) */
+#define ADC_MUX_CH10_Msk                                    0x00000400  /*!< Enable measure on channnel 10 (ADC5 A) */
+#define ADC_MUX_CH11_Msk                                    0x00000800  /*!< Enable measure on channnel 11 (ADC5 B) */
+#define ADC_MUX_CH12_Msk                                    0x00001000  /*!< Enable measure on channnel 12 (ADC6 A) */
+#define ADC_MUX_CH13_Msk                                    0x00002000  /*!< Enable measure on channnel 13 (ADC6 B) */
+#define ADC_MUX_CH14_Msk                                    0x00004000  /*!< Enable measure on channnel 14 (ADC7 A) */
+#define ADC_MUX_CH15_Msk                                    0x00008000  /*!< Enable measure on channnel 15 (ADC7 B) */
+#define ADC_MUX_CH16_Msk                                    0x00010000  /*!< Enable measure on channnel 16 (ADC8 A) */
+#define ADC_MUX_CH17_Msk                                    0x00020000  /*!< Enable measure on channnel 17 (ADC8 B) */
+#define ADC_MUX_CH18_Msk                                    0x00040000  /*!< Enable measure on channnel 18 (ADC9 A) */
+#define ADC_MUX_CH19_Msk                                    0x00080000  /*!< Enable measure on channnel 19 (ADC9 B) */
+#define ADC_MUX_CH20_Msk                                    0x00100000  /*!< Enable measure on channnel 20 (ADC10 A) */
+#define ADC_MUX_CH21_Msk                                    0x00200000  /*!< Enable measure on channnel 21 (ADC10 B) */
+#define ADC_MUX_CH22_Msk                                    0x00400000  /*!< Enable measure on channnel 22 (ADC11 A) */
+#define ADC_MUX_CH23_Msk                                    0x00800000  /*!< Enable measure on channnel 23 (ADC11 B) */
 
-/*-- CTL: Register control ---------------------------------------------------*/
+/*-- CTL: Sequencer control register ---------------------------------------------------*/
 
 typedef struct {
-  uint32_t RCNT                                   :8;                   /*!< Number restart seqensor ADC */
+  uint32_t RCNT                                   :8;                   /*!< Number of ADC restarts by seqensor */
   uint32_t Reserved0                              :8;                   /*!< Reserved */
-  uint32_t ICNT                                   :8;                   /*!< Cyclical generation interrupt */
-  uint32_t WMARK                                  :3;                   /*!< number meas., writing in FIFO */
+  uint32_t ICNT                                   :8;                   /*!< Number of ADC restarts for interrupt generation */
+  uint32_t WMARK                                  :3;                   /*!< FIFO load threshold for DMA request generation */
   uint32_t Reserved1                              :1;                   /*!< Reserved */
-  uint32_t DMAEN                                  :1;                   /*!< Enable uses DMA */
+  uint32_t DMAEN                                  :1;                   /*!< Enable DMA use */
   uint32_t Reserved2                              :3;                   /*!< Reserved */
 } _ADC_CTL_bits;
 
 /* Bit field positions: */
-#define ADC_CTL_RCNT_Pos                                    0           /*!< Number restart seqensor ADC */
-#define ADC_CTL_ICNT_Pos                                    16          /*!< Cyclical generation interrupt */
-#define ADC_CTL_WMARK_Pos                                   24          /*!< number meas., writing in FIFO */
-#define ADC_CTL_DMAEN_Pos                                   28          /*!< Enable uses DMA */
+#define ADC_CTL_RCNT_Pos                                    0           /*!< NNumber of ADC restarts by seqensor */
+#define ADC_CTL_ICNT_Pos                                    16          /*!< Number of ADC restarts for interrupt generation */
+#define ADC_CTL_WMARK_Pos                                   24          /*!< FIFO load threshold for DMA request generation */
+#define ADC_CTL_DMAEN_Pos                                   28          /*!< Enable DMA use */
 
 /* Bit field masks: */
-#define ADC_CTL_RCNT_Msk                                    0x000000FF  /*!< Number restart seqensor ADC */
-#define ADC_CTL_ICNT_Msk                                    0x00FF0000  /*!< Cyclical generation interrupt */
-#define ADC_CTL_WMARK_Msk                                   0x07000000  /*!< number meas., writing in FIFO */
-#define ADC_CTL_DMAEN_Msk                                   0x10000000  /*!< Enable uses DMA */
+#define ADC_CTL_RCNT_Msk                                    0x000000FF  /*!< Number of ADC restarts by seqensor */
+#define ADC_CTL_ICNT_Msk                                    0x00FF0000  /*!< Number of ADC restarts for interrupt generation */
+#define ADC_CTL_WMARK_Msk                                   0x07000000  /*!< FIFO load threshold for DMA request generation */
+#define ADC_CTL_DMAEN_Msk                                   0x10000000  /*!< Enable DMA use */
 
-/*-- FSTAT: Register flags FIFO overflow -------------------------------------*/
+/*-- FSTAT: Sequencer FIFO load status register -------------------------------------*/
 
 typedef struct {
-  uint32_t FLOAD                                  :6;                   /*!< Value of count FIFO sequencer */
+  uint32_t FLOAD                                  :6;                   /*!< Sequencer FIFO current load value */
   uint32_t Reserved0                              :26;                  /*!< Reserved */
 } _ADC_FSTAT_bits;
 
 /* Bit field positions: */
-#define ADC_FSTAT_FLOAD_Pos                                 0           /*!< Value of count FIFO sequencer */
+#define ADC_FSTAT_FLOAD_Pos                                 0           /*!< Sequencer FIFO current load value */
 
 /* Bit field masks: */
-#define ADC_FSTAT_FLOAD_Msk                                 0x0000003F  /*!< Value of count FIFO sequencer */
+#define ADC_FSTAT_FLOAD_Msk                                 0x0000003F  /*!< Sequencer FIFO current load value */
 
-/*-- OP: Register flags measurements -----------------------------------------*/
+/*-- OP: Sequencer ADC restart counter register -----------------------------------------*/
 
 typedef struct {
-  uint32_t RCNT                                   :8;                   /*!< Number realize measuring by sequencer  */
+  uint32_t RCNT                                   :8;                   /*!< Current number of ADC restarts by seqensor */
   uint32_t Reserved0                              :8;                   /*!< Reserved */
-  uint32_t ICNT                                   :8;                   /*!< Value interrupt count */
+  uint32_t ICNT                                   :8;                   /*!< Current number of ADC restarts for interrupt generation */
   uint32_t Reserved1                              :8;                   /*!< Reserved */
 } _ADC_OP_bits;
 
 /* Bit field positions: */
-#define ADC_OP_RCNT_Pos                                     0           /*!< Number realize measuring by sequencer  */
-#define ADC_OP_ICNT_Pos                                     16          /*!< Value interrupt count */
+#define ADC_OP_RCNT_Pos                                     0           /*!< Current number of ADC restarts by seqensor */
+#define ADC_OP_ICNT_Pos                                     16          /*!< Current number of ADC restarts for interrupt generation */
 
 /* Bit field masks: */
-#define ADC_OP_RCNT_Msk                                     0x000000FF  /*!< Number realize measuring by sequencer  */
-#define ADC_OP_ICNT_Msk                                     0x00FF0000  /*!< Value interrupt count */
+#define ADC_OP_RCNT_Msk                                     0x000000FF  /*!< Current number of ADC restarts by seqensor */
+#define ADC_OP_ICNT_Msk                                     0x00FF0000  /*!< Current number of ADC restarts for interrupt generation */
 
-/*-- DCP: Register selection of comparator -----------------------------------*/
+/*-- DCP: Sequencer digital comparator selection register -----------------------------------*/
 
 typedef struct {
-  uint32_t CMP0                                   :1;                   /*!< enable cmp1 */
-  uint32_t CMP1                                   :1;                   /*!< enable cmp1 */
-  uint32_t CMP2                                   :1;                   /*!< enable cmp2 */
-  uint32_t CMP3                                   :1;                   /*!< enable cmp3 */
-  uint32_t CMP4                                   :1;                   /*!< enable cmp4 */
-  uint32_t CMP5                                   :1;                   /*!< enable cmp5 */
-  uint32_t CMP6                                   :1;                   /*!< enable cmp6 */
-  uint32_t CMP7                                   :1;                   /*!< enable cmp7 */
-  uint32_t CMP8                                   :1;                   /*!< enable cmp8 */
-  uint32_t CMP9                                   :1;                   /*!< enable cmp9 */
-  uint32_t CMP10                                  :1;                   /*!< enable cmp10 */
-  uint32_t CMP11                                  :1;                   /*!< enable cmp11 */
-  uint32_t CMP12                                  :1;                   /*!< enable cmp12 */
-  uint32_t CMP13                                  :1;                   /*!< enable cmp13 */
-  uint32_t CMP14                                  :1;                   /*!< enable cmp14 */
-  uint32_t CMP15                                  :1;                   /*!< enable cmp15 */
-  uint32_t CMP16                                  :1;                   /*!< enable cmp16 */
-  uint32_t CMP17                                  :1;                   /*!< enable cmp17 */
-  uint32_t CMP18                                  :1;                   /*!< enable cmp18 */
-  uint32_t CMP19                                  :1;                   /*!< enable cmp19 */
-  uint32_t CMP20                                  :1;                   /*!< enable cmp20 */
-  uint32_t CMP21                                  :1;                   /*!< enable cmp21 */
-  uint32_t CMP22                                  :1;                   /*!< enable cmp22 */
-  uint32_t CMP23                                  :1;                   /*!< enable cmp23 */
+  uint32_t CMP0                                   :1;                   /*!< Enable DCMP 0 */
+  uint32_t CMP1                                   :1;                   /*!< Enable DCMP 1 */
+  uint32_t CMP2                                   :1;                   /*!< Enable DCMP 2 */
+  uint32_t CMP3                                   :1;                   /*!< Enable DCMP 3 */
+  uint32_t CMP4                                   :1;                   /*!< Enable DCMP 4 */
+  uint32_t CMP5                                   :1;                   /*!< Enable DCMP 5 */
+  uint32_t CMP6                                   :1;                   /*!< Enable DCMP 6 */
+  uint32_t CMP7                                   :1;                   /*!< Enable DCMP 7 */
+  uint32_t CMP8                                   :1;                   /*!< Enable DCMP 8 */
+  uint32_t CMP9                                   :1;                   /*!< Enable DCMP 9 */
+  uint32_t CMP10                                  :1;                   /*!< Enable DCMP 10 */
+  uint32_t CMP11                                  :1;                   /*!< Enable DCMP 11 */
+  uint32_t CMP12                                  :1;                   /*!< Enable DCMP 12 */
+  uint32_t CMP13                                  :1;                   /*!< Enable DCMP 13 */
+  uint32_t CMP14                                  :1;                   /*!< Enable DCMP 14 */
+  uint32_t CMP15                                  :1;                   /*!< Enable DCMP 15 */
+  uint32_t CMP16                                  :1;                   /*!< Enable DCMP 16 */
+  uint32_t CMP17                                  :1;                   /*!< Enable DCMP 17 */
+  uint32_t CMP18                                  :1;                   /*!< Enable DCMP 18 */
+  uint32_t CMP19                                  :1;                   /*!< Enable DCMP 19 */
+  uint32_t CMP20                                  :1;                   /*!< Enable DCMP 20 */
+  uint32_t CMP21                                  :1;                   /*!< Enable DCMP 21 */
+  uint32_t CMP22                                  :1;                   /*!< Enable DCMP 22 */
+  uint32_t CMP23                                  :1;                   /*!< Enable DCMP 23 */
   uint32_t Reserved0                              :8;                   /*!< Reserved */
 } _ADC_DCP_bits;
 
 /* Bit field positions: */
-#define ADC_DCP_CMP0_Pos                                    0           /*!< enable cmp1 */
-#define ADC_DCP_CMP1_Pos                                    1           /*!< enable cmp1 */
-#define ADC_DCP_CMP2_Pos                                    2           /*!< enable cmp2 */
-#define ADC_DCP_CMP3_Pos                                    3           /*!< enable cmp3 */
-#define ADC_DCP_CMP4_Pos                                    4           /*!< enable cmp4 */
-#define ADC_DCP_CMP5_Pos                                    5           /*!< enable cmp5 */
-#define ADC_DCP_CMP6_Pos                                    6           /*!< enable cmp6 */
-#define ADC_DCP_CMP7_Pos                                    7           /*!< enable cmp7 */
-#define ADC_DCP_CMP8_Pos                                    8           /*!< enable cmp8 */
-#define ADC_DCP_CMP9_Pos                                    9           /*!< enable cmp9 */
-#define ADC_DCP_CMP10_Pos                                   10          /*!< enable cmp10 */
-#define ADC_DCP_CMP11_Pos                                   11          /*!< enable cmp11 */
-#define ADC_DCP_CMP12_Pos                                   12          /*!< enable cmp12 */
-#define ADC_DCP_CMP13_Pos                                   13          /*!< enable cmp13 */
-#define ADC_DCP_CMP14_Pos                                   14          /*!< enable cmp14 */
-#define ADC_DCP_CMP15_Pos                                   15          /*!< enable cmp15 */
-#define ADC_DCP_CMP16_Pos                                   16          /*!< enable cmp16 */
-#define ADC_DCP_CMP17_Pos                                   17          /*!< enable cmp17 */
-#define ADC_DCP_CMP18_Pos                                   18          /*!< enable cmp18 */
-#define ADC_DCP_CMP19_Pos                                   19          /*!< enable cmp19 */
-#define ADC_DCP_CMP20_Pos                                   20          /*!< enable cmp20 */
-#define ADC_DCP_CMP21_Pos                                   21          /*!< enable cmp21 */
-#define ADC_DCP_CMP22_Pos                                   22          /*!< enable cmp22 */
-#define ADC_DCP_CMP23_Pos                                   23          /*!< enable cmp23 */
+#define ADC_DCP_CMP0_Pos                                    0           /*!< Enable DCMP 0 */
+#define ADC_DCP_CMP1_Pos                                    1           /*!< Enable DCMP 1 */
+#define ADC_DCP_CMP2_Pos                                    2           /*!< Enable DCMP 2 */
+#define ADC_DCP_CMP3_Pos                                    3           /*!< Enable DCMP 3 */
+#define ADC_DCP_CMP4_Pos                                    4           /*!< Enable DCMP 4 */
+#define ADC_DCP_CMP5_Pos                                    5           /*!< Enable DCMP 5 */
+#define ADC_DCP_CMP6_Pos                                    6           /*!< Enable DCMP 6 */
+#define ADC_DCP_CMP7_Pos                                    7           /*!< Enable DCMP 7 */
+#define ADC_DCP_CMP8_Pos                                    8           /*!< Enable DCMP 8 */
+#define ADC_DCP_CMP9_Pos                                    9           /*!< Enable DCMP 9 */
+#define ADC_DCP_CMP10_Pos                                   10          /*!< Enable DCMP 10 */
+#define ADC_DCP_CMP11_Pos                                   11          /*!< Enable DCMP 11 */
+#define ADC_DCP_CMP12_Pos                                   12          /*!< Enable DCMP 12 */
+#define ADC_DCP_CMP13_Pos                                   13          /*!< Enable DCMP 13 */
+#define ADC_DCP_CMP14_Pos                                   14          /*!< Enable DCMP 14 */
+#define ADC_DCP_CMP15_Pos                                   15          /*!< Enable DCMP 15 */
+#define ADC_DCP_CMP16_Pos                                   16          /*!< Enable DCMP 16 */
+#define ADC_DCP_CMP17_Pos                                   17          /*!< Enable DCMP 17 */
+#define ADC_DCP_CMP18_Pos                                   18          /*!< Enable DCMP 18 */
+#define ADC_DCP_CMP19_Pos                                   19          /*!< Enable DCMP 19 */
+#define ADC_DCP_CMP20_Pos                                   20          /*!< Enable DCMP 20 */
+#define ADC_DCP_CMP21_Pos                                   21          /*!< Enable DCMP 21 */
+#define ADC_DCP_CMP22_Pos                                   22          /*!< Enable DCMP 22 */
+#define ADC_DCP_CMP23_Pos                                   23          /*!< Enable DCMP 23 */
 
 /* Bit field masks: */
-#define ADC_DCP_CMP0_Msk                                    0x00000001  /*!< enable cmp1 */
-#define ADC_DCP_CMP1_Msk                                    0x00000002  /*!< enable cmp1 */
-#define ADC_DCP_CMP2_Msk                                    0x00000004  /*!< enable cmp2 */
-#define ADC_DCP_CMP3_Msk                                    0x00000008  /*!< enable cmp3 */
-#define ADC_DCP_CMP4_Msk                                    0x00000010  /*!< enable cmp4 */
-#define ADC_DCP_CMP5_Msk                                    0x00000020  /*!< enable cmp5 */
-#define ADC_DCP_CMP6_Msk                                    0x00000040  /*!< enable cmp6 */
-#define ADC_DCP_CMP7_Msk                                    0x00000080  /*!< enable cmp7 */
-#define ADC_DCP_CMP8_Msk                                    0x00000100  /*!< enable cmp8 */
-#define ADC_DCP_CMP9_Msk                                    0x00000200  /*!< enable cmp9 */
-#define ADC_DCP_CMP10_Msk                                   0x00000400  /*!< enable cmp10 */
-#define ADC_DCP_CMP11_Msk                                   0x00000800  /*!< enable cmp11 */
-#define ADC_DCP_CMP12_Msk                                   0x00001000  /*!< enable cmp12 */
-#define ADC_DCP_CMP13_Msk                                   0x00002000  /*!< enable cmp13 */
-#define ADC_DCP_CMP14_Msk                                   0x00004000  /*!< enable cmp14 */
-#define ADC_DCP_CMP15_Msk                                   0x00008000  /*!< enable cmp15 */
-#define ADC_DCP_CMP16_Msk                                   0x00010000  /*!< enable cmp16 */
-#define ADC_DCP_CMP17_Msk                                   0x00020000  /*!< enable cmp17 */
-#define ADC_DCP_CMP18_Msk                                   0x00040000  /*!< enable cmp18 */
-#define ADC_DCP_CMP19_Msk                                   0x00080000  /*!< enable cmp19 */
-#define ADC_DCP_CMP20_Msk                                   0x00100000  /*!< enable cmp20 */
-#define ADC_DCP_CMP21_Msk                                   0x00200000  /*!< enable cmp21 */
-#define ADC_DCP_CMP22_Msk                                   0x00400000  /*!< enable cmp22 */
-#define ADC_DCP_CMP23_Msk                                   0x00800000  /*!< enable cmp23 */
+#define ADC_DCP_CMP0_Msk                                    0x00000001  /*!< Enable DCMP 0 */
+#define ADC_DCP_CMP1_Msk                                    0x00000002  /*!< Enable DCMP 1 */
+#define ADC_DCP_CMP2_Msk                                    0x00000004  /*!< Enable DCMP 2 */
+#define ADC_DCP_CMP3_Msk                                    0x00000008  /*!< Enable DCMP 3 */
+#define ADC_DCP_CMP4_Msk                                    0x00000010  /*!< Enable DCMP 4 */
+#define ADC_DCP_CMP5_Msk                                    0x00000020  /*!< Enable DCMP 5 */
+#define ADC_DCP_CMP6_Msk                                    0x00000040  /*!< Enable DCMP 6 */
+#define ADC_DCP_CMP7_Msk                                    0x00000080  /*!< Enable DCMP 7 */
+#define ADC_DCP_CMP8_Msk                                    0x00000100  /*!< Enable DCMP 8 */
+#define ADC_DCP_CMP9_Msk                                    0x00000200  /*!< Enable DCMP 9 */
+#define ADC_DCP_CMP10_Msk                                   0x00000400  /*!< Enable DCMP 10 */
+#define ADC_DCP_CMP11_Msk                                   0x00000800  /*!< Enable DCMP 11 */
+#define ADC_DCP_CMP12_Msk                                   0x00001000  /*!< Enable DCMP 12 */
+#define ADC_DCP_CMP13_Msk                                   0x00002000  /*!< Enable DCMP 13 */
+#define ADC_DCP_CMP14_Msk                                   0x00004000  /*!< Enable DCMP 14 */
+#define ADC_DCP_CMP15_Msk                                   0x00008000  /*!< Enable DCMP 15 */
+#define ADC_DCP_CMP16_Msk                                   0x00010000  /*!< Enable DCMP 16 */
+#define ADC_DCP_CMP17_Msk                                   0x00020000  /*!< Enable DCMP 17 */
+#define ADC_DCP_CMP18_Msk                                   0x00040000  /*!< Enable DCMP 18 */
+#define ADC_DCP_CMP19_Msk                                   0x00080000  /*!< Enable DCMP 19 */
+#define ADC_DCP_CMP20_Msk                                   0x00100000  /*!< Enable DCMP 20 */
+#define ADC_DCP_CMP21_Msk                                   0x00200000  /*!< Enable DCMP 21 */
+#define ADC_DCP_CMP22_Msk                                   0x00400000  /*!< Enable DCMP 22 */
+#define ADC_DCP_CMP23_Msk                                   0x00800000  /*!< Enable DCMP 23 */
 
-/*-- TMR: Register restart timer sequencer modules ADC -----------------------*/
+/*-- TMR: Sequencer ADC restart timer register -----------------------*/
 
 typedef struct {
-  uint32_t TMR                                    :24;                  /*!< Maximum value of the timer counter restarts sequencer modules ADC */
+  uint32_t TMR                                    :24;                  /*!< Sequencer ADC restart timer value */
   uint32_t Reserved0                              :8;                   /*!< Reserved */
 } _ADC_TMR_bits;
 
 /* Bit field positions: */
-#define ADC_TMR_TMR_Pos                                     0           /*!< Maximum value of the timer counter restarts sequencer modules ADC */
+#define ADC_TMR_TMR_Pos                                     0           /*!< Sequencer ADC restart timer value */
 
 /* Bit field masks: */
-#define ADC_TMR_TMR_Msk                                     0x00FFFFFF  /*!< Maximum value of the timer counter restarts sequencer modules ADC */
+#define ADC_TMR_TMR_Msk                                     0x00FFFFFF  /*!< Sequencer ADC restart timer value */
 
-/*-- FIFO: Register FIFO result of seqensor ----------------------------------*/
+/*-- FIFO: Sequencer FIFO register ----------------------------------*/
 
 typedef struct {
-  uint32_t DATA                                   :16;                  /*!< Value of AD conversion */
+  uint32_t DATA                                   :16;                  /*!< AD conversion value */
   uint32_t Reserved0                              :16;                  /*!< Reserved */
 } _ADC_FIFO_bits;
 
 /* Bit field positions: */
-#define ADC_FIFO_DATA_Pos                                   0           /*!< Value of AD conversion */
+#define ADC_FIFO_DATA_Pos                                   0           /*!< AD conversion value */
 
 /* Bit field masks: */
-#define ADC_FIFO_DATA_Msk                                   0x0000FFFF  /*!< Value of AD conversion */
+#define ADC_FIFO_DATA_Msk                                   0x0000FFFF  /*!< AD conversion value */
 
-/*-- DCCTL: Register control comparator --------------------------------------*/
+/*-- DCCTL: Digital comparator control register --------------------------------------*/
 
 typedef struct {
-  uint32_t CIM                                    :2;                   /*!< Generating mode interrupt measurement channel */
-  uint32_t CIC                                    :2;                   /*!< Putting conditions on the measurement interrupt channel */
-  uint32_t CIE                                    :1;                   /*!< Enable generating measurement interrupt channel */
+  uint32_t CIM                                    :2;                   /*!< DCMP interrupt generation mode */
+  uint32_t CIC                                    :2;                   /*!< DCMP interrupt generation compare conditions */
+  uint32_t CIE                                    :1;                   /*!< Enable DCMP interrupt generation */
   uint32_t Reserved0                              :3;                   /*!< Reserved */
-  uint32_t CTM                                    :2;                   /*!< Trigger mode on the measurement channel */
-  uint32_t CTC                                    :2;                   /*!< Trigger conditions on the measurement channel */
-  uint32_t CTE                                    :1;                   /*!< Start trigger */
+  uint32_t CTM                                    :2;                   /*!< DCMP output trigger mode */
+  uint32_t CTC                                    :2;                   /*!< DCMP output trigger compare conditions */
+  uint32_t CTE                                    :1;                   /*!< Enable DCMP output trigger */
   uint32_t Reserved1                              :3;                   /*!< Reserved */
-  uint32_t CHNL                                   :5;                   /*!< Channel select */
+  uint32_t CHNL                                   :5;                   /*!< ADC channel selection */
   uint32_t Reserved2                              :11;                  /*!< Reserved */
 } _ADC_DCCTL_bits;
 
 /* Bit field positions: */
-#define ADC_DCCTL_CIM_Pos                                   0           /*!< Generating mode interrupt measurement channel */
-#define ADC_DCCTL_CIC_Pos                                   2           /*!< Putting conditions on the measurement interrupt channel */
-#define ADC_DCCTL_CIE_Pos                                   4           /*!< Enable generating measurement interrupt channel */
-#define ADC_DCCTL_CTM_Pos                                   8           /*!< Trigger mode on the measurement channel */
-#define ADC_DCCTL_CTC_Pos                                   10          /*!< Trigger conditions on the measurement channel */
-#define ADC_DCCTL_CTE_Pos                                   12          /*!< Start trigger */
-#define ADC_DCCTL_CHNL_Pos                                  16          /*!< Channel select */
+#define ADC_DCCTL_CIM_Pos                                   0           /*!< DCMP interrupt generation mode */
+#define ADC_DCCTL_CIC_Pos                                   2           /*!< DCMP interrupt generation compare conditions */
+#define ADC_DCCTL_CIE_Pos                                   4           /*!< Enable DCMP interrupt generation */
+#define ADC_DCCTL_CTM_Pos                                   8           /*!< DCMP output trigger mode */
+#define ADC_DCCTL_CTC_Pos                                   10          /*!< DCMP output trigger compare conditions */
+#define ADC_DCCTL_CTE_Pos                                   12          /*!< Enable DCMP output trigger */
+#define ADC_DCCTL_CHNL_Pos                                  16          /*!< ADC channel selection */
 
 /* Bit field masks: */
-#define ADC_DCCTL_CIM_Msk                                   0x00000003  /*!< Generating mode interrupt measurement channel */
-#define ADC_DCCTL_CIC_Msk                                   0x0000000C  /*!< Putting conditions on the measurement interrupt channel */
-#define ADC_DCCTL_CIE_Msk                                   0x00000010  /*!< Enable generating measurement interrupt channel */
-#define ADC_DCCTL_CTM_Msk                                   0x00000300  /*!< Trigger mode on the measurement channel */
-#define ADC_DCCTL_CTC_Msk                                   0x00000C00  /*!< Trigger conditions on the measurement channel */
-#define ADC_DCCTL_CTE_Msk                                   0x00001000  /*!< Start trigger */
-#define ADC_DCCTL_CHNL_Msk                                  0x001F0000  /*!< Channel select */
+#define ADC_DCCTL_CIM_Msk                                   0x00000003  /*!< DCMP interrupt generation mode */
+#define ADC_DCCTL_CIC_Msk                                   0x0000000C  /*!< DCMP interrupt generation compare conditions */
+#define ADC_DCCTL_CIE_Msk                                   0x00000010  /*!< Enable DCMP interrupt generation */
+#define ADC_DCCTL_CTM_Msk                                   0x00000300  /*!< DCMP output trigger mode */
+#define ADC_DCCTL_CTC_Msk                                   0x00000C00  /*!< DCMP output trigger compare conditions */
+#define ADC_DCCTL_CTE_Msk                                   0x00001000  /*!< Enable DCMP output trigger */
+#define ADC_DCCTL_CHNL_Msk                                  0x001F0000  /*!< ADC channel selection */
 
-/*-- DCCMP: Register range comparator ----------------------------------------*/
+/*-- DCCMP: Digital comparator range register ----------------------------------------*/
 
 typedef struct {
-  uint32_t COMP0                                  :12;                  /*!< lower range */
+  uint32_t COMP0                                  :12;                  /*!< Low threshold compare value */
   uint32_t Reserved0                              :4;                   /*!< Reserved */
-  uint32_t COMP1                                  :12;                  /*!< upper range */
+  uint32_t COMP1                                  :12;                  /*!< High threshold compare value */
   uint32_t Reserved1                              :4;                   /*!< Reserved */
 } _ADC_DCCMP_bits;
 
 /* Bit field positions: */
-#define ADC_DCCMP_COMP0_Pos                                 0           /*!< lower range */
-#define ADC_DCCMP_COMP1_Pos                                 16          /*!< upper range */
+#define ADC_DCCMP_COMP0_Pos                                 0           /*!< Low threshold compare value */
+#define ADC_DCCMP_COMP1_Pos                                 16          /*!< High threshold compare value */
 
 /* Bit field masks: */
-#define ADC_DCCMP_COMP0_Msk                                 0x00000FFF  /*!< lower range */
-#define ADC_DCCMP_COMP1_Msk                                 0x0FFF0000  /*!< upper range */
+#define ADC_DCCMP_COMP0_Msk                                 0x00000FFF  /*!< Low threshold compare value */
+#define ADC_DCCMP_COMP1_Msk                                 0x0FFF0000  /*!< High threshold compare value */
 
-/*-- DCVAL: Register measurement comparator ----------------------------------*/
+/*-- DCVAL: Digital comparator measure value register ----------------------------------*/
 
 typedef struct {
-  uint32_t VAL                                    :12;                  /*!< Last measurement that was used in the comparison */
+  uint32_t VAL                                    :12;                  /*!< Value of last compared AD conversion result */
   uint32_t Reserved0                              :20;                  /*!< Reserved */
 } _ADC_DCVAL_bits;
 
 /* Bit field positions: */
-#define ADC_DCVAL_VAL_Pos                                   0           /*!< Last measurement that was used in the comparison */
+#define ADC_DCVAL_VAL_Pos                                   0           /*!< Value of last compared AD conversion result */
 
 /* Bit field masks: */
-#define ADC_DCVAL_VAL_Msk                                   0x00000FFF  /*!< Last measurement that was used in the comparison */
+#define ADC_DCVAL_VAL_Msk                                   0x00000FFF  /*!< Value of last compared AD conversion result */
 
-/*-- DCRTC: High register reset comparators ----------------------------------*/
+/*-- DCRTC: Digital comparator output trigger status register ----------------------------------*/
 
 typedef struct {
-  uint32_t DCTRIG0                                :1;                   /*!< Reset trigger comp0 */
-  uint32_t DCTRIG1                                :1;                   /*!< Reset trigger comp1 */
-  uint32_t DCTRIG2                                :1;                   /*!< Reset trigger comp2 */
-  uint32_t DCTRIG3                                :1;                   /*!< Reset trigger comp3 */
-  uint32_t DCTRIG4                                :1;                   /*!< Reset trigger comp4 */
-  uint32_t DCTRIG5                                :1;                   /*!< Reset trigger comp5 */
-  uint32_t DCTRIG6                                :1;                   /*!< Reset trigger comp6 */
-  uint32_t DCTRIG7                                :1;                   /*!< Reset trigger comp7 */
-  uint32_t DCTRIG8                                :1;                   /*!< Reset trigger comp8 */
-  uint32_t DCTRIG9                                :1;                   /*!< Reset trigger comp9 */
-  uint32_t DCTRIG10                               :1;                   /*!< Reset trigger comp10 */
-  uint32_t DCTRIG11                               :1;                   /*!< Reset trigger comp11 */
-  uint32_t DCTRIG12                               :1;                   /*!< Reset trigger comp12 */
-  uint32_t DCTRIG13                               :1;                   /*!< Reset trigger comp13 */
-  uint32_t DCTRIG14                               :1;                   /*!< Reset trigger comp14 */
-  uint32_t DCTRIG15                               :1;                   /*!< Reset trigger comp15 */
-  uint32_t DCTRIG16                               :1;                   /*!< Reset trigger comp16 */
-  uint32_t DCTRIG17                               :1;                   /*!< Reset trigger comp17 */
-  uint32_t DCTRIG18                               :1;                   /*!< Reset trigger comp18 */
-  uint32_t DCTRIG19                               :1;                   /*!< Reset trigger comp19 */
-  uint32_t DCTRIG20                               :1;                   /*!< Reset trigger comp20 */
-  uint32_t DCTRIG21                               :1;                   /*!< Reset trigger comp21 */
-  uint32_t DCTRIG22                               :1;                   /*!< Reset trigger comp22 */
-  uint32_t DCTRIG23                               :1;                   /*!< Reset trigger comp23 */
+  uint32_t DCTRIG0                                :1;                   /*!< DCMP 0 output trigger status */
+  uint32_t DCTRIG1                                :1;                   /*!< DCMP 1 output trigger status */
+  uint32_t DCTRIG2                                :1;                   /*!< DCMP 2 output trigger status */
+  uint32_t DCTRIG3                                :1;                   /*!< DCMP 3 output trigger status */
+  uint32_t DCTRIG4                                :1;                   /*!< DCMP 4 output trigger status */
+  uint32_t DCTRIG5                                :1;                   /*!< DCMP 5 output trigger status */
+  uint32_t DCTRIG6                                :1;                   /*!< DCMP 6 output trigger status */
+  uint32_t DCTRIG7                                :1;                   /*!< DCMP 7 output trigger status */
+  uint32_t DCTRIG8                                :1;                   /*!< DCMP 8 output trigger status */
+  uint32_t DCTRIG9                                :1;                   /*!< DCMP 9 output trigger status */
+  uint32_t DCTRIG10                               :1;                   /*!< DCMP 10 output trigger status */
+  uint32_t DCTRIG11                               :1;                   /*!< DCMP 11 output trigger status */
+  uint32_t DCTRIG12                               :1;                   /*!< DCMP 12 output trigger status */
+  uint32_t DCTRIG13                               :1;                   /*!< DCMP 13 output trigger status */
+  uint32_t DCTRIG14                               :1;                   /*!< DCMP 14 output trigger status */
+  uint32_t DCTRIG15                               :1;                   /*!< DCMP 15 output trigger status */
+  uint32_t DCTRIG16                               :1;                   /*!< DCMP 16 output trigger status */
+  uint32_t DCTRIG17                               :1;                   /*!< DCMP 17 output trigger status */
+  uint32_t DCTRIG18                               :1;                   /*!< DCMP 18 output trigger status */
+  uint32_t DCTRIG19                               :1;                   /*!< DCMP 19 output trigger status */
+  uint32_t DCTRIG20                               :1;                   /*!< DCMP 20 output trigger status */
+  uint32_t DCTRIG21                               :1;                   /*!< DCMP 21 output trigger status */
+  uint32_t DCTRIG22                               :1;                   /*!< DCMP 22 output trigger status */
+  uint32_t DCTRIG23                               :1;                   /*!< DCMP 23 output trigger status */
   uint32_t Reserved0                              :8;                   /*!< Reserved */
 } _ADC_DCRTC_bits;
 
 /* Bit field positions: */
-#define ADC_DCRTC_DCTRIG0_Pos                               0           /*!< Reset trigger comp0 */
-#define ADC_DCRTC_DCTRIG1_Pos                               1           /*!< Reset trigger comp1 */
-#define ADC_DCRTC_DCTRIG2_Pos                               2           /*!< Reset trigger comp2 */
-#define ADC_DCRTC_DCTRIG3_Pos                               3           /*!< Reset trigger comp3 */
-#define ADC_DCRTC_DCTRIG4_Pos                               4           /*!< Reset trigger comp4 */
-#define ADC_DCRTC_DCTRIG5_Pos                               5           /*!< Reset trigger comp5 */
-#define ADC_DCRTC_DCTRIG6_Pos                               6           /*!< Reset trigger comp6 */
-#define ADC_DCRTC_DCTRIG7_Pos                               7           /*!< Reset trigger comp7 */
-#define ADC_DCRTC_DCTRIG8_Pos                               8           /*!< Reset trigger comp8 */
-#define ADC_DCRTC_DCTRIG9_Pos                               9           /*!< Reset trigger comp9 */
-#define ADC_DCRTC_DCTRIG10_Pos                              10          /*!< Reset trigger comp10 */
-#define ADC_DCRTC_DCTRIG11_Pos                              11          /*!< Reset trigger comp11 */
-#define ADC_DCRTC_DCTRIG12_Pos                              12          /*!< Reset trigger comp12 */
-#define ADC_DCRTC_DCTRIG13_Pos                              13          /*!< Reset trigger comp13 */
-#define ADC_DCRTC_DCTRIG14_Pos                              14          /*!< Reset trigger comp14 */
-#define ADC_DCRTC_DCTRIG15_Pos                              15          /*!< Reset trigger comp15 */
-#define ADC_DCRTC_DCTRIG16_Pos                              16          /*!< Reset trigger comp16 */
-#define ADC_DCRTC_DCTRIG17_Pos                              17          /*!< Reset trigger comp17 */
-#define ADC_DCRTC_DCTRIG18_Pos                              18          /*!< Reset trigger comp18 */
-#define ADC_DCRTC_DCTRIG19_Pos                              19          /*!< Reset trigger comp19 */
-#define ADC_DCRTC_DCTRIG20_Pos                              20          /*!< Reset trigger comp20 */
-#define ADC_DCRTC_DCTRIG21_Pos                              21          /*!< Reset trigger comp21 */
-#define ADC_DCRTC_DCTRIG22_Pos                              22          /*!< Reset trigger comp22 */
-#define ADC_DCRTC_DCTRIG23_Pos                              23          /*!< Reset trigger comp23 */
+#define ADC_DCRTC_DCTRIG0_Pos                               0           /*!< DCMP 0 output trigger status */
+#define ADC_DCRTC_DCTRIG1_Pos                               1           /*!< DCMP 1 output trigger status */
+#define ADC_DCRTC_DCTRIG2_Pos                               2           /*!< DCMP 2 output trigger status */
+#define ADC_DCRTC_DCTRIG3_Pos                               3           /*!< DCMP 3 output trigger status */
+#define ADC_DCRTC_DCTRIG4_Pos                               4           /*!< DCMP 4 output trigger status */
+#define ADC_DCRTC_DCTRIG5_Pos                               5           /*!< DCMP 5 output trigger status */
+#define ADC_DCRTC_DCTRIG6_Pos                               6           /*!< DCMP 6 output trigger status */
+#define ADC_DCRTC_DCTRIG7_Pos                               7           /*!< DCMP 7 output trigger status */
+#define ADC_DCRTC_DCTRIG8_Pos                               8           /*!< DCMP 8 output trigger status */
+#define ADC_DCRTC_DCTRIG9_Pos                               9           /*!< DCMP 9 output trigger status */
+#define ADC_DCRTC_DCTRIG10_Pos                              10          /*!< DCMP 10 output trigger status */
+#define ADC_DCRTC_DCTRIG11_Pos                              11          /*!< DCMP 11 output trigger status */
+#define ADC_DCRTC_DCTRIG12_Pos                              12          /*!< DCMP 12 output trigger status */
+#define ADC_DCRTC_DCTRIG13_Pos                              13          /*!< DCMP 13 output trigger status */
+#define ADC_DCRTC_DCTRIG14_Pos                              14          /*!< DCMP 14 output trigger status */
+#define ADC_DCRTC_DCTRIG15_Pos                              15          /*!< DCMP 15 output trigger status */
+#define ADC_DCRTC_DCTRIG16_Pos                              16          /*!< DCMP 16 output trigger status */
+#define ADC_DCRTC_DCTRIG17_Pos                              17          /*!< DCMP 17 output trigger status */
+#define ADC_DCRTC_DCTRIG18_Pos                              18          /*!< DCMP 18 output trigger status */
+#define ADC_DCRTC_DCTRIG19_Pos                              19          /*!< DCMP 19 output trigger status */
+#define ADC_DCRTC_DCTRIG20_Pos                              20          /*!< DCMP 20 output trigger status */
+#define ADC_DCRTC_DCTRIG21_Pos                              21          /*!< DCMP 21 output trigger status */
+#define ADC_DCRTC_DCTRIG22_Pos                              22          /*!< DCMP 22 output trigger status */
+#define ADC_DCRTC_DCTRIG23_Pos                              23          /*!< DCMP 23 output trigger status */
 
 /* Bit field masks: */
-#define ADC_DCRTC_DCTRIG0_Msk                               0x00000001  /*!< Reset trigger comp0 */
-#define ADC_DCRTC_DCTRIG1_Msk                               0x00000002  /*!< Reset trigger comp1 */
-#define ADC_DCRTC_DCTRIG2_Msk                               0x00000004  /*!< Reset trigger comp2 */
-#define ADC_DCRTC_DCTRIG3_Msk                               0x00000008  /*!< Reset trigger comp3 */
-#define ADC_DCRTC_DCTRIG4_Msk                               0x00000010  /*!< Reset trigger comp4 */
-#define ADC_DCRTC_DCTRIG5_Msk                               0x00000020  /*!< Reset trigger comp5 */
-#define ADC_DCRTC_DCTRIG6_Msk                               0x00000040  /*!< Reset trigger comp6 */
-#define ADC_DCRTC_DCTRIG7_Msk                               0x00000080  /*!< Reset trigger comp7 */
-#define ADC_DCRTC_DCTRIG8_Msk                               0x00000100  /*!< Reset trigger comp8 */
-#define ADC_DCRTC_DCTRIG9_Msk                               0x00000200  /*!< Reset trigger comp9 */
-#define ADC_DCRTC_DCTRIG10_Msk                              0x00000400  /*!< Reset trigger comp10 */
-#define ADC_DCRTC_DCTRIG11_Msk                              0x00000800  /*!< Reset trigger comp11 */
-#define ADC_DCRTC_DCTRIG12_Msk                              0x00001000  /*!< Reset trigger comp12 */
-#define ADC_DCRTC_DCTRIG13_Msk                              0x00002000  /*!< Reset trigger comp13 */
-#define ADC_DCRTC_DCTRIG14_Msk                              0x00004000  /*!< Reset trigger comp14 */
-#define ADC_DCRTC_DCTRIG15_Msk                              0x00008000  /*!< Reset trigger comp15 */
-#define ADC_DCRTC_DCTRIG16_Msk                              0x00010000  /*!< Reset trigger comp16 */
-#define ADC_DCRTC_DCTRIG17_Msk                              0x00020000  /*!< Reset trigger comp17 */
-#define ADC_DCRTC_DCTRIG18_Msk                              0x00040000  /*!< Reset trigger comp18 */
-#define ADC_DCRTC_DCTRIG19_Msk                              0x00080000  /*!< Reset trigger comp19 */
-#define ADC_DCRTC_DCTRIG20_Msk                              0x00100000  /*!< Reset trigger comp20 */
-#define ADC_DCRTC_DCTRIG21_Msk                              0x00200000  /*!< Reset trigger comp21 */
-#define ADC_DCRTC_DCTRIG22_Msk                              0x00400000  /*!< Reset trigger comp22 */
-#define ADC_DCRTC_DCTRIG23_Msk                              0x00800000  /*!< Reset trigger comp23 */
+#define ADC_DCRTC_DCTRIG0_Msk                               0x00000001  /*!< DCMP 0 output trigger status */
+#define ADC_DCRTC_DCTRIG1_Msk                               0x00000002  /*!< DCMP 1 output trigger status */
+#define ADC_DCRTC_DCTRIG2_Msk                               0x00000004  /*!< DCMP 2 output trigger status */
+#define ADC_DCRTC_DCTRIG3_Msk                               0x00000008  /*!< DCMP 3 output trigger status */
+#define ADC_DCRTC_DCTRIG4_Msk                               0x00000010  /*!< DCMP 4 output trigger status */
+#define ADC_DCRTC_DCTRIG5_Msk                               0x00000020  /*!< DCMP 5 output trigger status */
+#define ADC_DCRTC_DCTRIG6_Msk                               0x00000040  /*!< DCMP 6 output trigger status */
+#define ADC_DCRTC_DCTRIG7_Msk                               0x00000080  /*!< DCMP 7 output trigger status */
+#define ADC_DCRTC_DCTRIG8_Msk                               0x00000100  /*!< DCMP 8 output trigger status */
+#define ADC_DCRTC_DCTRIG9_Msk                               0x00000200  /*!< DCMP 9 output trigger status */
+#define ADC_DCRTC_DCTRIG10_Msk                              0x00000400  /*!< DCMP 10 output trigger status */
+#define ADC_DCRTC_DCTRIG11_Msk                              0x00000800  /*!< DCMP 11 output trigger status */
+#define ADC_DCRTC_DCTRIG12_Msk                              0x00001000  /*!< DCMP 12 output trigger status */
+#define ADC_DCRTC_DCTRIG13_Msk                              0x00002000  /*!< DCMP 13 output trigger status */
+#define ADC_DCRTC_DCTRIG14_Msk                              0x00004000  /*!< DCMP 14 output trigger status */
+#define ADC_DCRTC_DCTRIG15_Msk                              0x00008000  /*!< DCMP 15 output trigger status */
+#define ADC_DCRTC_DCTRIG16_Msk                              0x00010000  /*!< DCMP 16 output trigger status */
+#define ADC_DCRTC_DCTRIG17_Msk                              0x00020000  /*!< DCMP 17 output trigger status */
+#define ADC_DCRTC_DCTRIG18_Msk                              0x00040000  /*!< DCMP 18 output trigger status */
+#define ADC_DCRTC_DCTRIG19_Msk                              0x00080000  /*!< DCMP 19 output trigger status */
+#define ADC_DCRTC_DCTRIG20_Msk                              0x00100000  /*!< DCMP 20 output trigger status */
+#define ADC_DCRTC_DCTRIG21_Msk                              0x00200000  /*!< DCMP 21 output trigger status */
+#define ADC_DCRTC_DCTRIG22_Msk                              0x00400000  /*!< DCMP 22 output trigger status */
+#define ADC_DCRTC_DCTRIG23_Msk                              0x00800000  /*!< DCMP 23 output trigger status */
 
-/*-- PP: Register ADC settings -----------------------------------------------*/
+/*-- PP: ADC control register -----------------------------------------------*/
 
 typedef struct {
   uint32_t Reserved0                              :16;                  /*!< Reserved */
-  uint32_t OM                                     :8;                   /*!< Mode ADC */
+  uint32_t OM                                     :8;                   /*!< ADC mode */
   uint32_t Reserved1                              :7;                   /*!< Reserved */
   uint32_t ENA                                    :1;                   /*!< Enable ADC */
 } _ADC_PP_bits;
 
 /* Bit field positions: */
-#define ADC_PP_OM_Pos                                       16          /*!< Mode ADC */
+#define ADC_PP_OM_Pos                                       16          /*!< ADC mode */
 #define ADC_PP_ENA_Pos                                      31          /*!< Enable ADC */
 
 /* Bit field masks: */
-#define ADC_PP_OM_Msk                                       0x00FF0000  /*!< Mode ADC */
+#define ADC_PP_OM_Msk                                       0x00FF0000  /*!< ADC mode */
 #define ADC_PP_ENA_Msk                                      0x80000000  /*!< Enable ADC */
 
-/*-- PSSI: Register synchronizing sequencers ---------------------------------*/
+/*-- PSSI: Sequencer sync register ---------------------------------*/
 
 typedef struct {
-  uint32_t SS0                                    :1;                   /*!< Enable run sequencer0 */
-  uint32_t SS1                                    :1;                   /*!< Enable run sequencer1 */
-  uint32_t SS2                                    :1;                   /*!< Enable run sequencer2 */
-  uint32_t SS3                                    :1;                   /*!< Enable run sequencer3 */
-  uint32_t SS4                                    :1;                   /*!< Enable run sequencer4 */
-  uint32_t SS5                                    :1;                   /*!< Enable run sequencer5 */
-  uint32_t SS6                                    :1;                   /*!< Enable run sequencer6 */
-  uint32_t SS7                                    :1;                   /*!< Enable run sequencer7 */
+  uint32_t SS0                                    :1;                   /*!< Enable sequencer 0 software sync */
+  uint32_t SS1                                    :1;                   /*!< Enable sequencer 1 software sync */
+  uint32_t SS2                                    :1;                   /*!< Enable sequencer 2 software sync */
+  uint32_t SS3                                    :1;                   /*!< Enable sequencer 3 software sync */
+  uint32_t SS4                                    :1;                   /*!< Enable sequencer 4 software sync */
+  uint32_t SS5                                    :1;                   /*!< Enable sequencer 5 software sync */
+  uint32_t SS6                                    :1;                   /*!< Enable sequencer 6 software sync */
+  uint32_t SS7                                    :1;                   /*!< Enable sequencer 7 software sync */
   uint32_t Reserved0                              :23;                  /*!< Reserved */
-  uint32_t GSYNC                                  :1;                   /*!< Enable run all secvensors */
+  uint32_t GSYNC                                  :1;                   /*!< Sync all sequencers */
 } _ADC_PSSI_bits;
 
 /* Bit field positions: */
-#define ADC_PSSI_SS0_Pos                                    0           /*!< Enable run sequencer0 */
-#define ADC_PSSI_SS1_Pos                                    1           /*!< Enable run sequencer1 */
-#define ADC_PSSI_SS2_Pos                                    2           /*!< Enable run sequencer2 */
-#define ADC_PSSI_SS3_Pos                                    3           /*!< Enable run sequencer3 */
-#define ADC_PSSI_SS4_Pos                                    4           /*!< Enable run sequencer4 */
-#define ADC_PSSI_SS5_Pos                                    5           /*!< Enable run sequencer5 */
-#define ADC_PSSI_SS6_Pos                                    6           /*!< Enable run sequencer6 */
-#define ADC_PSSI_SS7_Pos                                    7           /*!< Enable run sequencer7 */
-#define ADC_PSSI_GSYNC_Pos                                  31          /*!< Enable run all secvensors */
+#define ADC_PSSI_SS0_Pos                                    0           /*!< Enable sequencer 0 software sync */
+#define ADC_PSSI_SS1_Pos                                    1           /*!< Enable sequencer 1 software sync */
+#define ADC_PSSI_SS2_Pos                                    2           /*!< Enable sequencer 2 software sync */
+#define ADC_PSSI_SS3_Pos                                    3           /*!< Enable sequencer 3 software sync */
+#define ADC_PSSI_SS4_Pos                                    4           /*!< Enable sequencer 4 software sync */
+#define ADC_PSSI_SS5_Pos                                    5           /*!< Enable sequencer 5 software sync */
+#define ADC_PSSI_SS6_Pos                                    6           /*!< Enable sequencer 6 software sync */
+#define ADC_PSSI_SS7_Pos                                    7           /*!< Enable sequencer 7 software sync */
+#define ADC_PSSI_GSYNC_Pos                                  31          /*!< Sync all sequencers */
 
 /* Bit field masks: */
-#define ADC_PSSI_SS0_Msk                                    0x00000001  /*!< Enable run sequencer0 */
-#define ADC_PSSI_SS1_Msk                                    0x00000002  /*!< Enable run sequencer1 */
-#define ADC_PSSI_SS2_Msk                                    0x00000004  /*!< Enable run sequencer2 */
-#define ADC_PSSI_SS3_Msk                                    0x00000008  /*!< Enable run sequencer3 */
-#define ADC_PSSI_SS4_Msk                                    0x00000010  /*!< Enable run sequencer4 */
-#define ADC_PSSI_SS5_Msk                                    0x00000020  /*!< Enable run sequencer5 */
-#define ADC_PSSI_SS6_Msk                                    0x00000040  /*!< Enable run sequencer6 */
-#define ADC_PSSI_SS7_Msk                                    0x00000080  /*!< Enable run sequencer7 */
-#define ADC_PSSI_GSYNC_Msk                                  0x80000000  /*!< Enable run all secvensors */
+#define ADC_PSSI_SS0_Msk                                    0x00000001  /*!< Enable sequencer 0 software sync */
+#define ADC_PSSI_SS1_Msk                                    0x00000002  /*!< Enable sequencer 1 software sync */
+#define ADC_PSSI_SS2_Msk                                    0x00000004  /*!< Enable sequencer 2 software sync */
+#define ADC_PSSI_SS3_Msk                                    0x00000008  /*!< Enable sequencer 3 software sync */
+#define ADC_PSSI_SS4_Msk                                    0x00000010  /*!< Enable sequencer 4 software sync */
+#define ADC_PSSI_SS5_Msk                                    0x00000020  /*!< Enable sequencer 5 software sync */
+#define ADC_PSSI_SS6_Msk                                    0x00000040  /*!< Enable sequencer 6 software sync */
+#define ADC_PSSI_SS7_Msk                                    0x00000080  /*!< Enable sequencer 7 software sync */
+#define ADC_PSSI_GSYNC_Msk                                  0x80000000  /*!< Sync all sequencers */
 
 /*-- Register map for ADC peripheral -----------------------------------------*/
 
 typedef struct {
-  union {                                                               /*!< Select register triggering events sequencer */
+  union {                                                               /*!< Sequencer ADC channels selection register */
     __IO uint32_t MUX;                                                  /*!< MUX    : type used for word access */
     __IO _ADC_MUX_bits MUX_bit;                                         /*!< MUX_bit: structure used for bit access */
   };
-  union {                                                               /*!< Register control */
+  union {                                                               /*!< Sequencer control register */
     __IO uint32_t CTL;                                                  /*!< CTL    : type used for word access */
     __IO _ADC_CTL_bits CTL_bit;                                         /*!< CTL_bit: structure used for bit access */
   };
   uint32_t Reserved0;                                                   /*!< Reserved */
-  union {                                                               /*!< Register flags FIFO overflow */
+  union {                                                               /*!< Sequencer FIFO load status register*/
     __I  uint32_t FSTAT;                                                /*!< FSTAT    : type used for word access */
     __I  _ADC_FSTAT_bits FSTAT_bit;                                     /*!< FSTAT_bit: structure used for bit access */
   };
-  union {                                                               /*!< Register flags measurements */
+  union {                                                               /*!< Sequencer ADC restart counter register */
     __IO uint32_t OP;                                                   /*!< OP    : type used for word access */
     __IO _ADC_OP_bits OP_bit;                                           /*!< OP_bit: structure used for bit access */
   };
-  union {                                                               /*!< Register selection of comparator */
+  union {                                                               /*!< Sequencer digital comparator selection register */
     __IO uint32_t DCP;                                                  /*!< DCP    : type used for word access */
     __IO _ADC_DCP_bits DCP_bit;                                         /*!< DCP_bit: structure used for bit access */
   };
-  union {                                                               /*!< Register restart timer sequencer modules ADC */
+  union {                                                               /*!< Sequencer ADC restart timer register */
     __IO uint32_t TMR;                                                  /*!< TMR    : type used for word access */
     __IO _ADC_TMR_bits TMR_bit;                                         /*!< TMR_bit: structure used for bit access */
   };
-  union {                                                               /*!< Register FIFO result of seqensor */
+  union {                                                               /*!< Sequencer FIFO register */
     __I  uint32_t FIFO;                                                 /*!< FIFO    : type used for word access */
     __I  _ADC_FIFO_bits FIFO_bit;                                       /*!< FIFO_bit: structure used for bit access */
   };
 } NT_SEQ_TypeDef;
 
 typedef struct {
-  union {                                                               /*!< Configuration secvensors register */
+  union {                                                               /*!< Enable sequencer register */
     __IO uint32_t ACTSS;                                                /*!< ACTSS    : type used for word access */
     __IO _ADC_ACTSS_bits ACTSS_bit;                                     /*!< ACTSS_bit: structure used for bit access */
   };
-  union {                                                               /*!< Register unmasked interrupt */
+  union {                                                               /*!< Raw interrupt status register */
     __I  uint32_t RIS;                                                  /*!< RIS    : type used for word access */
     __I  _ADC_RIS_bits RIS_bit;                                         /*!< RIS_bit: structure used for bit access */
   };
-  union {                                                               /*!< Register mask interrupt */
+  union {                                                               /*!< Interrupt mask register */
     __IO uint32_t IM;                                                   /*!< IM    : type used for word access */
     __IO _ADC_IM_bits IM_bit;                                           /*!< IM_bit: structure used for bit access */
   };
-  union {                                                               /*!< Register reset interrupt */
+  union {                                                               /*!< Interrupt status and clear register */
     __IO uint32_t ISC;                                                  /*!< ISC    : type used for word access */
     __IO _ADC_ISC_bits ISC_bit;                                         /*!< ISC_bit: structure used for bit access */
   };
-  union {                                                               /*!< Register flags FIFO overflow */
+  union {                                                               /*!< FIFO overflow status register */
     __IO uint32_t OSTAT;                                                /*!< OSTAT    : type used for word access */
     __IO _ADC_OSTAT_bits OSTAT_bit;                                     /*!< OSTAT_bit: structure used for bit access */
   };
-  union {                                                               /*!< Select register triggering events sequencer */
+  union {                                                               /*!< Sequencer start event selection register */
     __IO uint32_t EMUX;                                                 /*!< EMUX    : type used for word access */
     __IO _ADC_EMUX_bits EMUX_bit;                                       /*!< EMUX_bit: structure used for bit access */
   };
-  union {                                                               /*!< Register FIFO empty */
+  union {                                                               /*!< FIFO underflow status register */
     __IO uint32_t USTAT;                                                /*!< USTAT    : type used for word access */
     __IO _ADC_USTAT_bits USTAT_bit;                                     /*!< USTAT_bit: structure used for bit access */
   };
   uint32_t Reserved0;                                                   /*!< Reserved */
-  union {                                                               /*!< Register delay start ADC0, ADC1 */
+  union {                                                               /*!< ADC0, ADC1 start delay register */
     __IO uint32_t SPC0;                                                 /*!< SPC0    : type used for word access */
     __IO _ADC_SPC0_bits SPC0_bit;                                       /*!< SPC0_bit: structure used for bit access */
   };
-  union {                                                               /*!< Register delay start ADC2, ADC3 */
+  union {                                                               /*!< ADC2, ADC3 start delay register */
     __IO uint32_t SPC1;                                                 /*!< SPC1    : type used for word access */
     __IO _ADC_SPC1_bits SPC1_bit;                                       /*!< SPC1_bit: structure used for bit access */
   };
-  union {                                                               /*!< Register delay start ADC4, ADC5 */
+  union {                                                               /*!< ADC4, ADC5 start delay register */
     __IO uint32_t SPC2;                                                 /*!< SPC2    : type used for word access */
     __IO _ADC_SPC2_bits SPC2_bit;                                       /*!< SPC2_bit: structure used for bit access */
   };
-  union {                                                               /*!< Register delay start ADC6, ADC7 */
+  union {                                                               /*!< ADC6, ADC7 start delay register */
     __IO uint32_t SPC3;                                                 /*!< SPC3    : type used for word access */
     __IO _ADC_SPC3_bits SPC3_bit;                                       /*!< SPC3_bit: structure used for bit access */
   };
-  union {                                                               /*!< Register delay start ADC8, ADC9 */
+  union {                                                               /*!< ADC8, ADC9 start delay register */
     __IO uint32_t SPC4;                                                 /*!< SPC4    : type used for word access */
     __IO _ADC_SPC4_bits SPC4_bit;                                       /*!< SPC4_bit: structure used for bit access */
   };
-  union {                                                               /*!< Register delay start ADC10, ADC11 */
+  union {                                                               /*!< ADC10, ADC11 start delay register */
     __IO uint32_t SPC5;                                                 /*!< SPC5    : type used for word access */
     __IO _ADC_SPC5_bits SPC5_bit;                                       /*!< SPC5_bit: structure used for bit access */
   };
-  union {                                                               /*!< Register averagel control */
+  union {                                                               /*!< Average control (ADC0-7) register */
     __IO uint32_t SAC;                                                  /*!< SAC    : type used for word access */
     __IO _ADC_SAC_bits SAC_bit;                                         /*!< SAC_bit: structure used for bit access */
   };
-  union {                                                               /*!< Counter interrupt reset register */
+  union {                                                               /*!< Interrupt counter reset control / Average control (ADC8-11) register */
     __IO uint32_t RICNT;                                                /*!< RICNT    : type used for word access */
     __IO _ADC_RICNT_bits RICNT_bit;                                     /*!< RICNT_bit: structure used for bit access */
   };
   NT_SEQ_TypeDef SEQ[8];
-  union {                                                               /*!< Register control comparator */
+  union {                                                               /*!< Digital comparator control register */
     __IO uint32_t DCCTL[24];                                            /*!< DCCTL    : type used for word access */
     __IO _ADC_DCCTL_bits DCCTL_bit[24];                                 /*!< DCCTL_bit: structure used for bit access */
   };
-  union {                                                               /*!< Register range comparator */
+  union {                                                               /*!< Digital comparator range register */
     __IO uint32_t DCCMP[24];                                            /*!< DCCMP    : type used for word access */
     __IO _ADC_DCCMP_bits DCCMP_bit[24];                                 /*!< DCCMP_bit: structure used for bit access */
   };
-  union {                                                               /*!< Register measurement comparator */
+  union {                                                               /*!< Digital comparator measure value register */
     __I  uint32_t DCVAL[24];                                            /*!< DCVAL    : type used for word access */
     __I  _ADC_DCVAL_bits DCVAL_bit[24];                                 /*!< DCVAL_bit: structure used for bit access */
   };
   uint32_t Reserved1[35];                                               /*!< Reserved */
-  union {                                                               /*!< High register reset comparators */
+  union {                                                               /*!< Digital comparator output trigger status register */
     __O  uint32_t DCRTC;                                                /*!< DCRTC    : type used for word access */
     __O  _ADC_DCRTC_bits DCRTC_bit;                                     /*!< DCRTC_bit: structure used for bit access */
   };
   uint32_t Reserved2[4];                                                /*!< Reserved */
-  union {                                                               /*!< Register ADC settings */
+  union {                                                               /*!< ADC control register */
     __IO uint32_t PP[12];                                               /*!< PP    : type used for word access */
     __IO _ADC_PP_bits PP_bit[12];                                       /*!< PP_bit: structure used for bit access */
   };
   uint32_t Reserved3[50];                                               /*!< Reserved */
-  union {                                                               /*!< Register synchronizing sequencers */
+  union {                                                               /*!< Sequencer sync register */
     __IO uint32_t PSSI;                                                 /*!< PSSI    : type used for word access */
     __IO _ADC_PSSI_bits PSSI_bit;                                       /*!< PSSI_bit: structure used for bit access */
   };
@@ -1440,18 +1449,18 @@ typedef struct {
 /*                         GPIO controller regisres                           */
 /******************************************************************************/
 
-/*-- DATA: Data Input register -----------------------------------------------*/
+/*-- DATA: Data input register -----------------------------------------------*/
 
 typedef struct {
-  uint32_t DATA                                   :16;                  /*!< Data on port */
+  uint32_t DATA                                   :16;                  /*!< Sampled at port */
   uint32_t Reserved0                              :16;                  /*!< Reserved */
 } _GPIO_DATA_bits;
 
 /* Bit field positions: */
-#define GPIO_DATA_DATA_Pos                                  0           /*!< Data on port */
+#define GPIO_DATA_DATA_Pos                                  0           /*!< Sampled at port */
 
 /* Bit field masks: */
-#define GPIO_DATA_DATA_Msk                                  0x0000FFFF  /*!< Data on port */
+#define GPIO_DATA_DATA_Msk                                  0x0000FFFF  /*!< Sampled at port */
 
 /*-- DATAOUT: Data output register -------------------------------------------*/
 
@@ -1466,180 +1475,180 @@ typedef struct {
 /* Bit field masks: */
 #define GPIO_DATAOUT_DATAOUT_Msk                            0x0000FFFF  /*!< Data output */
 
-/*-- OUTENSET: Enable output for port register -------------------------------*/
+/*-- OUTENSET: Output enable set register -------------------------------*/
 
 typedef struct {
-  uint32_t OUTENSET                               :16;                  /*!< Enable output on pin of port */
+  uint32_t OUTENSET                               :16;                  /*!< Set the output enable */
   uint32_t Reserved0                              :16;                  /*!< Reserved */
 } _GPIO_OUTENSET_bits;
 
 /* Bit field positions: */
-#define GPIO_OUTENSET_OUTENSET_Pos                          0           /*!< Enable output on pin of port */
+#define GPIO_OUTENSET_OUTENSET_Pos                          0           /*!< Set the output enable */
 
 /* Bit field masks: */
-#define GPIO_OUTENSET_OUTENSET_Msk                          0x0000FFFF  /*!< Enable output on pin of port */
+#define GPIO_OUTENSET_OUTENSET_Msk                          0x0000FFFF  /*!< Set the output enable */
 
-/*-- OUTENCLR: Enable output for port ----------------------------------------*/
+/*-- OUTENCLR: Output enable clear register ----------------------------------------*/
 
 typedef struct {
-  uint32_t OUTENCLR                               :16;                  /*!< Enable output pin in 3rd state */
+  uint32_t OUTENCLR                               :16;                  /*!< Clear the output enable */
   uint32_t Reserved0                              :16;                  /*!< Reserved */
 } _GPIO_OUTENCLR_bits;
 
 /* Bit field positions: */
-#define GPIO_OUTENCLR_OUTENCLR_Pos                          0           /*!< Enable output pin in 3rd state */
+#define GPIO_OUTENCLR_OUTENCLR_Pos                          0           /*!< Clear the output enable */
 
 /* Bit field masks: */
-#define GPIO_OUTENCLR_OUTENCLR_Msk                          0x0000FFFF  /*!< Enable output pin in 3rd state */
+#define GPIO_OUTENCLR_OUTENCLR_Msk                          0x0000FFFF  /*!< Clear the output enable */
 
-/*-- ALTFUNCSET: Enable alternate function port register ---------------------*/
+/*-- ALTFUNCSET: Alternative function set register ---------------------*/
 
 typedef struct {
-  uint32_t ALTFUNCSET                             :16;                  /*!< Enable alternate function mode */
+  uint32_t ALTFUNCSET                             :16;                  /*!< Set the alternative function enable */
   uint32_t Reserved0                              :16;                  /*!< Reserved */
 } _GPIO_ALTFUNCSET_bits;
 
 /* Bit field positions: */
-#define GPIO_ALTFUNCSET_ALTFUNCSET_Pos                      0           /*!< Enable alternate function mode */
+#define GPIO_ALTFUNCSET_ALTFUNCSET_Pos                      0           /*!< Set the alternative function enable */
 
 /* Bit field masks: */
-#define GPIO_ALTFUNCSET_ALTFUNCSET_Msk                      0x0000FFFF  /*!< Enable alternate function mode */
+#define GPIO_ALTFUNCSET_ALTFUNCSET_Msk                      0x0000FFFF  /*!< Set the alternative function enable */
 
-/*-- ALTFUNCCLR: Disable alternate function port register --------------------*/
+/*-- ALTFUNCCLR: Alternative function clear register --------------------*/
 
 typedef struct {
-  uint32_t ALTFUNCCLR                             :16;                  /*!< Disable alternate function mode */
+  uint32_t ALTFUNCCLR                             :16;                  /*!< Clear the alternative function enable */
   uint32_t Reserved0                              :16;                  /*!< Reserved */
 } _GPIO_ALTFUNCCLR_bits;
 
 /* Bit field positions: */
-#define GPIO_ALTFUNCCLR_ALTFUNCCLR_Pos                      0           /*!< Disable alternate function mode */
+#define GPIO_ALTFUNCCLR_ALTFUNCCLR_Pos                      0           /*!< Clear the alternative function enable */
 
 /* Bit field masks: */
-#define GPIO_ALTFUNCCLR_ALTFUNCCLR_Msk                      0x0000FFFF  /*!< Disable alternate function mode */
+#define GPIO_ALTFUNCCLR_ALTFUNCCLR_Msk                      0x0000FFFF  /*!< Clear the alternative function enable */
 
-/*-- INTENSET: Enable interrupt on Pin of PORT register ----------------------*/
+/*-- INTENSET: Interrupt enable set register ----------------------*/
 
 typedef struct {
-  uint32_t INTENSET                               :16;                  /*!< Enable interrupt on Pin of PORT */
+  uint32_t INTENSET                               :16;                  /*!< Set the interrupt enable */
   uint32_t Reserved0                              :16;                  /*!< Reserved */
 } _GPIO_INTENSET_bits;
 
 /* Bit field positions: */
-#define GPIO_INTENSET_INTENSET_Pos                          0           /*!< Enable interrupt on Pin of PORT */
+#define GPIO_INTENSET_INTENSET_Pos                          0           /*!< Set the interrupt enable */
 
 /* Bit field masks: */
-#define GPIO_INTENSET_INTENSET_Msk                          0x0000FFFF  /*!< Enable interrupt on Pin of PORT */
+#define GPIO_INTENSET_INTENSET_Msk                          0x0000FFFF  /*!< Set the interrupt enable */
 
-/*-- INTENCLR: Disable interrupt on Pin of PORT register ---------------------*/
+/*-- INTENCLR: Interrupt enable clear register ---------------------*/
 
 typedef struct {
-  uint32_t INTENCLR                               :16;                  /*!< Disable interrupt on Pin of PORT */
+  uint32_t INTENCLR                               :16;                  /*!< Clear the interrupt enable  */
   uint32_t Reserved0                              :16;                  /*!< Reserved */
 } _GPIO_INTENCLR_bits;
 
 /* Bit field positions: */
-#define GPIO_INTENCLR_INTENCLR_Pos                          0           /*!< Disable interrupt on Pin of PORT */
+#define GPIO_INTENCLR_INTENCLR_Pos                          0           /*!< Clear the interrupt enable */
 
 /* Bit field masks: */
-#define GPIO_INTENCLR_INTENCLR_Msk                          0x0000FFFF  /*!< Disable interrupt on Pin of PORT */
+#define GPIO_INTENCLR_INTENCLR_Msk                          0x0000FFFF  /*!< Clear the interrupt enable */
 
-/*-- INTTYPESET: Setup type of interrupt register ----------------------------*/
+/*-- INTTYPESET: Interrupt type set register ----------------------------*/
 
 typedef struct {
-  uint32_t INTTYPESET                             :16;                  /*!< Setup type of interrupt */
+  uint32_t INTTYPESET                             :16;                  /*!< Set the interrupt type */
   uint32_t Reserved0                              :16;                  /*!< Reserved */
 } _GPIO_INTTYPESET_bits;
 
 /* Bit field positions: */
-#define GPIO_INTTYPESET_INTTYPESET_Pos                      0           /*!< Setup type of interrupt */
+#define GPIO_INTTYPESET_INTTYPESET_Pos                      0           /*!< Set the interrupt type */
 
 /* Bit field masks: */
-#define GPIO_INTTYPESET_INTTYPESET_Msk                      0x0000FFFF  /*!< Setup type of interrupt */
+#define GPIO_INTTYPESET_INTTYPESET_Msk                      0x0000FFFF  /*!< Set the interrupt type */
 
-/*-- INTTYPECLR: Reset type of interrupt register ----------------------------*/
+/*-- INTTYPECLR: Interrupt type clear register ----------------------------*/
 
 typedef struct {
-  uint32_t INTTYPECLR                             :16;                  /*!< Reset type of interrupt */
+  uint32_t INTTYPECLR                             :16;                  /*!< Clear the interrupt type */
   uint32_t Reserved0                              :16;                  /*!< Reserved */
 } _GPIO_INTTYPECLR_bits;
 
 /* Bit field positions: */
-#define GPIO_INTTYPECLR_INTTYPECLR_Pos                      0           /*!< Reset type of interrupt */
+#define GPIO_INTTYPECLR_INTTYPECLR_Pos                      0           /*!< Clear the interrupt type */
 
 /* Bit field masks: */
-#define GPIO_INTTYPECLR_INTTYPECLR_Msk                      0x0000FFFF  /*!< Reset type of interrupt */
+#define GPIO_INTTYPECLR_INTTYPECLR_Msk                      0x0000FFFF  /*!< Clear the interrupt type */
 
-/*-- INTPOLSET: Setup polarity interrupt register ----------------------------*/
+/*-- INTPOLSET: Interrupt polarity set register ----------------------------*/
 
 typedef struct {
-  uint32_t INTPOLSET                              :16;                  /*!< Setup polarity interrupt */
+  uint32_t INTPOLSET                              :16;                  /*!< Set the interrupt polarity */
   uint32_t Reserved0                              :16;                  /*!< Reserved */
 } _GPIO_INTPOLSET_bits;
 
 /* Bit field positions: */
-#define GPIO_INTPOLSET_INTPOLSET_Pos                        0           /*!< Setup polarity interrupt */
+#define GPIO_INTPOLSET_INTPOLSET_Pos                        0           /*!< Set the interrupt polarity */
 
 /* Bit field masks: */
-#define GPIO_INTPOLSET_INTPOLSET_Msk                        0x0000FFFF  /*!< Setup polarity interrupt */
+#define GPIO_INTPOLSET_INTPOLSET_Msk                        0x0000FFFF  /*!< Set the interrupt polarity */
 
-/*-- INTPOLCLR: Reset polarity interrupt register ----------------------------*/
+/*-- INTPOLCLR: Interrupt polarity clear register ----------------------------*/
 
 typedef struct {
-  uint32_t INTPOLCLR                              :16;                  /*!< Reset polarity interrupt */
+  uint32_t INTPOLCLR                              :16;                  /*!< Clear the interrupt polarity */
   uint32_t Reserved0                              :16;                  /*!< Reserved */
 } _GPIO_INTPOLCLR_bits;
 
 /* Bit field positions: */
-#define GPIO_INTPOLCLR_INTPOLCLR_Pos                        0           /*!< Reset polarity interrupt */
+#define GPIO_INTPOLCLR_INTPOLCLR_Pos                        0           /*!< Clear the interrupt polarity */
 
 /* Bit field masks: */
-#define GPIO_INTPOLCLR_INTPOLCLR_Msk                        0x0000FFFF  /*!< Reset polarity interrupt */
+#define GPIO_INTPOLCLR_INTPOLCLR_Msk                        0x0000FFFF  /*!< Clear the interrupt polarity */
 
-/*-- INTSTATUS: State interrupt register Register transfer ports A and B  output open collector */
+/*-- INTSTATUS: Interrupt status register */
 
 typedef struct {
-  uint32_t INTSTATUS                              :16;                  /*!< State interrupt */
+  uint32_t INTSTATUS                              :16;                  /*!< Interrupt status */
   uint32_t Reserved0                              :16;                  /*!< Reserved */
 } _GPIO_INTSTATUS_bits;
 
 /* Bit field positions: */
-#define GPIO_INTSTATUS_INTSTATUS_Pos                        0           /*!< State interrupt */
+#define GPIO_INTSTATUS_INTSTATUS_Pos                        0           /*!< Interrupt status */
 
 /* Bit field masks: */
-#define GPIO_INTSTATUS_INTSTATUS_Msk                        0x0000FFFF  /*!< State interrupt */
+#define GPIO_INTSTATUS_INTSTATUS_Msk                        0x0000FFFF  /*!< Interrupt status */
 
-/*-- MASKLOWBYTE: Mask register low byte of port -----------------------------*/
+/*-- MASKLOWBYTE: Lower byte masked access register -----------------------------*/
 
 typedef struct {
-  uint32_t MASKLB                                 :8;                   /*!< Mask low byte */
+  uint32_t MASKLB                                 :8;                   /*!< Data for lower byte masked access */
   uint32_t Reserved0                              :24;                  /*!< Reserved */
 } _GPIO_MASKLOWBYTE_bits;
 
 /* Bit field positions: */
-#define GPIO_MASKLOWBYTE_MASKLB_Pos                         0           /*!< Mask low byte */
+#define GPIO_MASKLOWBYTE_MASKLB_Pos                         0           /*!< Data for lower byte masked access */
 
 /* Bit field masks: */
-#define GPIO_MASKLOWBYTE_MASKLB_Msk                         0x000000FF  /*!< Mask low byte */
+#define GPIO_MASKLOWBYTE_MASKLB_Msk                         0x000000FF  /*!< Data for lower byte masked access */
 
-/*-- MASKHIGHBYTE: Mask register High byte of port ---------------------------*/
+/*-- MASKHIGHBYTE: Higher byte masked access register ---------------------------*/
 
 typedef struct {
   uint32_t Reserved0                              :8;                   /*!< Reserved */
-  uint32_t MASKHB                                 :8;                   /*!< Mask high byte */
+  uint32_t MASKHB                                 :8;                   /*!< Data for higher byte masked access */
   uint32_t Reserved1                              :16;                  /*!< Reserved */
 } _GPIO_MASKHIGHBYTE_bits;
 
 /* Bit field positions: */
-#define GPIO_MASKHIGHBYTE_MASKHB_Pos                        8           /*!< Mask high byte */
+#define GPIO_MASKHIGHBYTE_MASKHB_Pos                        8           /*!< Data for higher byte masked access */
 
 /* Bit field masks: */
-#define GPIO_MASKHIGHBYTE_MASKHB_Msk                        0x0000FF00  /*!< Mask high byte */
+#define GPIO_MASKHIGHBYTE_MASKHB_Msk                        0x0000FF00  /*!< Data for higher byte masked access */
 
 /*-- Register map for GPIO peripheral ----------------------------------------*/
 
 typedef struct {
-  union {                                                               /*!< Data Input register */
+  union {                                                               /*!< Data input register */
     __IO uint32_t DATA;                                                 /*!< DATA    : type used for word access */
     __IO _GPIO_DATA_bits DATA_bit;                                      /*!< DATA_bit: structure used for bit access */
   };
@@ -1648,56 +1657,56 @@ typedef struct {
     __IO _GPIO_DATAOUT_bits DATAOUT_bit;                                /*!< DATAOUT_bit: structure used for bit access */
   };
   uint32_t Reserved0[2];                                                /*!< Reserved */
-  union {                                                               /*!< Enable output for port register */
+  union {                                                               /*!< Output enable set register */
     __IO uint32_t OUTENSET;                                             /*!< OUTENSET    : type used for word access */
     __IO _GPIO_OUTENSET_bits OUTENSET_bit;                              /*!< OUTENSET_bit: structure used for bit access */
   };
-  union {                                                               /*!< Enable output for port */
+  union {                                                               /*!< Output enable clear register */
     __IO uint32_t OUTENCLR;                                             /*!< OUTENCLR    : type used for word access */
     __IO _GPIO_OUTENCLR_bits OUTENCLR_bit;                              /*!< OUTENCLR_bit: structure used for bit access */
   };
-  union {                                                               /*!< Enable alternate function port register */
+  union {                                                               /*!< Alternative function set register */
     __IO uint32_t ALTFUNCSET;                                           /*!< ALTFUNCSET    : type used for word access */
     __IO _GPIO_ALTFUNCSET_bits ALTFUNCSET_bit;                          /*!< ALTFUNCSET_bit: structure used for bit access */
   };
-  union {                                                               /*!< Disable alternate function port register */
+  union {                                                               /*!< Alternative function clear register */
     __IO uint32_t ALTFUNCCLR;                                           /*!< ALTFUNCCLR    : type used for word access */
     __IO _GPIO_ALTFUNCCLR_bits ALTFUNCCLR_bit;                          /*!< ALTFUNCCLR_bit: structure used for bit access */
   };
-  union {                                                               /*!< Enable interrupt on Pin of PORT register */
+  union {                                                               /*!< Interrupt enable set register */
     __IO uint32_t INTENSET;                                             /*!< INTENSET    : type used for word access */
     __IO _GPIO_INTENSET_bits INTENSET_bit;                              /*!< INTENSET_bit: structure used for bit access */
   };
-  union {                                                               /*!< Disable interrupt on Pin of PORT register */
+  union {                                                               /*!< Interrupt enable clear register */
     __IO uint32_t INTENCLR;                                             /*!< INTENCLR    : type used for word access */
     __IO _GPIO_INTENCLR_bits INTENCLR_bit;                              /*!< INTENCLR_bit: structure used for bit access */
   };
-  union {                                                               /*!< Setup type of interrupt register */
+  union {                                                               /*!< Interrupt type set register */
     __IO uint32_t INTTYPESET;                                           /*!< INTTYPESET    : type used for word access */
     __IO _GPIO_INTTYPESET_bits INTTYPESET_bit;                          /*!< INTTYPESET_bit: structure used for bit access */
   };
-  union {                                                               /*!< Reset type of interrupt register */
+  union {                                                               /*!< Interrupt type clear register*/
     __IO uint32_t INTTYPECLR;                                           /*!< INTTYPECLR    : type used for word access */
     __IO _GPIO_INTTYPECLR_bits INTTYPECLR_bit;                          /*!< INTTYPECLR_bit: structure used for bit access */
   };
-  union {                                                               /*!< Setup polarity interrupt register */
+  union {                                                               /*!< Interrupt polarity set register */
     __IO uint32_t INTPOLSET;                                            /*!< INTPOLSET    : type used for word access */
     __IO _GPIO_INTPOLSET_bits INTPOLSET_bit;                            /*!< INTPOLSET_bit: structure used for bit access */
   };
-  union {                                                               /*!< Reset polarity interrupt register */
+  union {                                                               /*!< Interrupt polarity clear register */
     __IO uint32_t INTPOLCLR;                                            /*!< INTPOLCLR    : type used for word access */
     __IO _GPIO_INTPOLCLR_bits INTPOLCLR_bit;                            /*!< INTPOLCLR_bit: structure used for bit access */
   };
-  union {                                                               /*!< State interrupt register Register transfer ports A and B  output open collector */
+  union {                                                               /*!< Interrupt status register */
     __IO uint32_t INTSTATUS;                                            /*!< INTSTATUS    : type used for word access */
     __IO _GPIO_INTSTATUS_bits INTSTATUS_bit;                            /*!< INTSTATUS_bit: structure used for bit access */
   };
   uint32_t Reserved1[241];                                              /*!< Reserved */
-  union {                                                               /*!< Mask register low byte of port */
+  union {                                                               /*!< Lower byte masked access register */
     __IO uint32_t MASKLOWBYTE[256];                                     /*!< MASKLOWBYTE    : type used for word access */
     __IO _GPIO_MASKLOWBYTE_bits MASKLOWBYTE_bit[256];                   /*!< MASKLOWBYTE_bit: structure used for bit access */
   };
-  union {                                                               /*!< Mask register High byte of port */
+  union {                                                               /*!< Higher byte masked access register */
     __IO uint32_t MASKHIGHBYTE[256];                                    /*!< MASKHIGHBYTE    : type used for word access */
     __IO _GPIO_MASKHIGHBYTE_bits MASKHIGHBYTE_bit[256];                 /*!< MASKHIGHBYTE_bit: structure used for bit access */
   };
@@ -1707,1075 +1716,1075 @@ typedef struct {
 /*                          Common block registers                            */
 /******************************************************************************/
 
-/*-- GPIODEN0: Enable output PORT A,B register -------------------------------*/
+/*-- GPIODEN0: Port A,B digital enable register -------------------------------*/
 
 typedef struct {
-  uint32_t PORTA                                  :16;                  /*!< Enabled output PORT A */
-  uint32_t PORTB                                  :16;                  /*!< Enabled output PORT B */
+  uint32_t PORTA                                  :16;                  /*!< Port A digital output (GPIO or ALTFUNC) enable */
+  uint32_t PORTB                                  :16;                  /*!< Port B digital output (GPIO or ALTFUNC) enable */
 } _COMMON_REG_GPIODEN0_bits;
 
 /* Bit field positions: */
-#define COMMON_REG_GPIODEN0_PORTA_Pos                       0           /*!< Enabled output PORT A */
-#define COMMON_REG_GPIODEN0_PORTB_Pos                       16          /*!< Enabled output PORT B */
+#define COMMON_REG_GPIODEN0_PORTA_Pos                       0           /*!< Port A digital output (GPIO or ALTFUNC) enable */
+#define COMMON_REG_GPIODEN0_PORTB_Pos                       16          /*!< Port B digital output (GPIO or ALTFUNC) enable */
 
 /* Bit field masks: */
-#define COMMON_REG_GPIODEN0_PORTA_Msk                       0x0000FFFF  /*!< Enabled output PORT A */
-#define COMMON_REG_GPIODEN0_PORTB_Msk                       0xFFFF0000  /*!< Enabled output PORT B */
+#define COMMON_REG_GPIODEN0_PORTA_Msk                       0x0000FFFF  /*!< Port A digital output (GPIO or ALTFUNC) enable */
+#define COMMON_REG_GPIODEN0_PORTB_Msk                       0xFFFF0000  /*!< Port B digital output (GPIO or ALTFUNC) enable */
 
-/*-- GPIODEN1: Enable output PORT C,D register -------------------------------*/
+/*-- GPIODEN1: Port C,D digital enable register -------------------------------*/
 
 typedef struct {
-  uint32_t PORTC                                  :16;                  /*!< Enabled output PORT C */
-  uint32_t PORTD                                  :16;                  /*!< Enabled output PORT D */
+  uint32_t PORTC                                  :16;                  /*!< Port C digital output (GPIO or ALTFUNC) enable */
+  uint32_t PORTD                                  :16;                  /*!< Port D digital output (GPIO or ALTFUNC) enable */
 } _COMMON_REG_GPIODEN1_bits;
 
 /* Bit field positions: */
-#define COMMON_REG_GPIODEN1_PORTC_Pos                       0           /*!< Enabled output PORT C */
-#define COMMON_REG_GPIODEN1_PORTD_Pos                       16          /*!< Enabled output PORT D */
+#define COMMON_REG_GPIODEN1_PORTC_Pos                       0           /*!< Port C digital output (GPIO or ALTFUNC) enable */
+#define COMMON_REG_GPIODEN1_PORTD_Pos                       16          /*!< Port D digital output (GPIO or ALTFUNC) enable */
 
 /* Bit field masks: */
-#define COMMON_REG_GPIODEN1_PORTC_Msk                       0x0000FFFF  /*!< Enabled output PORT C */
-#define COMMON_REG_GPIODEN1_PORTD_Msk                       0xFFFF0000  /*!< Enabled output PORT D */
+#define COMMON_REG_GPIODEN1_PORTC_Msk                       0x0000FFFF  /*!< Port C digital output (GPIO or ALTFUNC) enable */
+#define COMMON_REG_GPIODEN1_PORTD_Msk                       0xFFFF0000  /*!< Port D digital output (GPIO or ALTFUNC) enable */
 
-/*-- GPIODEN2: Enable output PORT E,F register -------------------------------*/
+/*-- GPIODEN2: Port E,F digital enable register -------------------------------*/
 
 typedef struct {
-  uint32_t PORTE                                  :16;                  /*!< Enabled output PORT E */
-  uint32_t PORTF                                  :16;                  /*!< Enabled output PORT F */
+  uint32_t PORTE                                  :16;                  /*!< Port E digital output (GPIO or ALTFUNC) enable */
+  uint32_t PORTF                                  :16;                  /*!< Port F digital output (GPIO or ALTFUNC) enable */
 } _COMMON_REG_GPIODEN2_bits;
 
 /* Bit field positions: */
-#define COMMON_REG_GPIODEN2_PORTE_Pos                       0           /*!< Enabled output PORT E */
-#define COMMON_REG_GPIODEN2_PORTF_Pos                       16          /*!< Enabled output PORT F */
+#define COMMON_REG_GPIODEN2_PORTE_Pos                       0           /*!< Port E digital output (GPIO or ALTFUNC) enable */
+#define COMMON_REG_GPIODEN2_PORTF_Pos                       16          /*!< Port F digital output (GPIO or ALTFUNC) enable */
 
 /* Bit field masks: */
-#define COMMON_REG_GPIODEN2_PORTE_Msk                       0x0000FFFF  /*!< Enabled output PORT E */
-#define COMMON_REG_GPIODEN2_PORTF_Msk                       0xFFFF0000  /*!< Enabled output PORT F */
+#define COMMON_REG_GPIODEN2_PORTE_Msk                       0x0000FFFF  /*!< Port E digital output (GPIO or ALTFUNC) enable */
+#define COMMON_REG_GPIODEN2_PORTF_Msk                       0xFFFF0000  /*!< Port F digital output (GPIO or ALTFUNC) enable */
 
-/*-- GPIODEN3: Enable output PORT G,H register -------------------------------*/
+/*-- GPIODEN3: Port G,H digital enable register -------------------------------*/
 
 typedef struct {
-  uint32_t PORTG                                  :16;                  /*!< Enabled output PORT G */
-  uint32_t PORTH                                  :16;                  /*!< Enabled output PORT H */
+  uint32_t PORTG                                  :16;                  /*!< Port G digital output (GPIO or ALTFUNC) enable */
+  uint32_t PORTH                                  :16;                  /*!< Port H digital output (GPIO or ALTFUNC) enable */
 } _COMMON_REG_GPIODEN3_bits;
 
 /* Bit field positions: */
-#define COMMON_REG_GPIODEN3_PORTG_Pos                       0           /*!< Enabled output PORT G */
-#define COMMON_REG_GPIODEN3_PORTH_Pos                       16          /*!< Enabled output PORT H */
+#define COMMON_REG_GPIODEN3_PORTG_Pos                       0           /*!< Port G digital output (GPIO or ALTFUNC) enable */
+#define COMMON_REG_GPIODEN3_PORTH_Pos                       16          /*!< Port H digital output (GPIO or ALTFUNC) enable */
 
 /* Bit field masks: */
-#define COMMON_REG_GPIODEN3_PORTG_Msk                       0x0000FFFF  /*!< Enabled output PORT G */
-#define COMMON_REG_GPIODEN3_PORTH_Msk                       0xFFFF0000  /*!< Enabled output PORT H */
+#define COMMON_REG_GPIODEN3_PORTG_Msk                       0x0000FFFF  /*!< Port G digital output (GPIO or ALTFUNC) enable */
+#define COMMON_REG_GPIODEN3_PORTH_Msk                       0xFFFF0000  /*!< Port H digital output (GPIO or ALTFUNC) enable */
 
-/*-- GPIOPCTLA: Alternate function PORTA register ----------------------------*/
+/*-- GPIOPCTLA: Port A alternative function selection register ----------------------------*/
 
 typedef struct {
-  uint32_t PIN0                                   :2;                   /*!< Select alternative function on PIN */
-  uint32_t PIN1                                   :2;                   /*!< Select alternative function on PIN */
-  uint32_t PIN2                                   :2;                   /*!< Select alternative function on PIN */
-  uint32_t PIN3                                   :2;                   /*!< Select alternative function on PIN */
-  uint32_t PIN4                                   :2;                   /*!< Select alternative function on PIN */
-  uint32_t PIN5                                   :2;                   /*!< Select alternative function on PIN */
-  uint32_t PIN6                                   :2;                   /*!< Select alternative function on PIN */
-  uint32_t PIN7                                   :2;                   /*!< Select alternative function on PIN */
-  uint32_t PIN8                                   :2;                   /*!< Select alternative function on PIN */
-  uint32_t PIN9                                   :2;                   /*!< Select alternative function on PIN */
-  uint32_t PIN10                                  :2;                   /*!< Select alternative function on PIN */
-  uint32_t PIN11                                  :2;                   /*!< Select alternative function on PIN */
-  uint32_t PIN12                                  :2;                   /*!< Select alternative function on PIN */
-  uint32_t PIN13                                  :2;                   /*!< Select alternative function on PIN */
-  uint32_t PIN14                                  :2;                   /*!< Select alternative function on PIN */
-  uint32_t PIN15                                  :2;                   /*!< Select alternative function on PIN */
+  uint32_t PIN0                                   :2;                   /*!< Pin A0 alternative function selection */
+  uint32_t PIN1                                   :2;                   /*!< Pin A1 alternative function selection */
+  uint32_t PIN2                                   :2;                   /*!< Pin A2 alternative function selection */
+  uint32_t PIN3                                   :2;                   /*!< Pin A3 alternative function selection */
+  uint32_t PIN4                                   :2;                   /*!< Pin A4 alternative function selection */
+  uint32_t PIN5                                   :2;                   /*!< Pin A5 alternative function selection */
+  uint32_t PIN6                                   :2;                   /*!< Pin A6 alternative function selection */
+  uint32_t PIN7                                   :2;                   /*!< Pin A7 alternative function selection */
+  uint32_t PIN8                                   :2;                   /*!< Pin A8 alternative function selection */
+  uint32_t PIN9                                   :2;                   /*!< Pin A9 alternative function selection */
+  uint32_t PIN10                                  :2;                   /*!< Pin A10 alternative function selection */
+  uint32_t PIN11                                  :2;                   /*!< Pin A11 alternative function selection */
+  uint32_t PIN12                                  :2;                   /*!< Pin A12 alternative function selection */
+  uint32_t PIN13                                  :2;                   /*!< Pin A13 alternative function selection */
+  uint32_t PIN14                                  :2;                   /*!< Pin A14 alternative function selection */
+  uint32_t PIN15                                  :2;                   /*!< Pin A15 alternative function selection */
 } _COMMON_REG_GPIOPCTLA_bits;
 
 /* Bit field positions: */
-#define COMMON_REG_GPIOPCTLA_PIN0_Pos                       0           /*!< Select alternative function on PIN */
-#define COMMON_REG_GPIOPCTLA_PIN1_Pos                       2           /*!< Select alternative function on PIN */
-#define COMMON_REG_GPIOPCTLA_PIN2_Pos                       4           /*!< Select alternative function on PIN */
-#define COMMON_REG_GPIOPCTLA_PIN3_Pos                       6           /*!< Select alternative function on PIN */
-#define COMMON_REG_GPIOPCTLA_PIN4_Pos                       8           /*!< Select alternative function on PIN */
-#define COMMON_REG_GPIOPCTLA_PIN5_Pos                       10          /*!< Select alternative function on PIN */
-#define COMMON_REG_GPIOPCTLA_PIN6_Pos                       12          /*!< Select alternative function on PIN */
-#define COMMON_REG_GPIOPCTLA_PIN7_Pos                       14          /*!< Select alternative function on PIN */
-#define COMMON_REG_GPIOPCTLA_PIN8_Pos                       16          /*!< Select alternative function on PIN */
-#define COMMON_REG_GPIOPCTLA_PIN9_Pos                       18          /*!< Select alternative function on PIN */
-#define COMMON_REG_GPIOPCTLA_PIN10_Pos                      20          /*!< Select alternative function on PIN */
-#define COMMON_REG_GPIOPCTLA_PIN11_Pos                      22          /*!< Select alternative function on PIN */
-#define COMMON_REG_GPIOPCTLA_PIN12_Pos                      24          /*!< Select alternative function on PIN */
-#define COMMON_REG_GPIOPCTLA_PIN13_Pos                      26          /*!< Select alternative function on PIN */
-#define COMMON_REG_GPIOPCTLA_PIN14_Pos                      28          /*!< Select alternative function on PIN */
-#define COMMON_REG_GPIOPCTLA_PIN15_Pos                      30          /*!< Select alternative function on PIN */
+#define COMMON_REG_GPIOPCTLA_PIN0_Pos                       0           /*!< Pin A0 alternative function selection */
+#define COMMON_REG_GPIOPCTLA_PIN1_Pos                       2           /*!< Pin A1 alternative function selection */
+#define COMMON_REG_GPIOPCTLA_PIN2_Pos                       4           /*!< Pin A2 alternative function selection */
+#define COMMON_REG_GPIOPCTLA_PIN3_Pos                       6           /*!< Pin A3 alternative function selection */
+#define COMMON_REG_GPIOPCTLA_PIN4_Pos                       8           /*!< Pin A4 alternative function selection */
+#define COMMON_REG_GPIOPCTLA_PIN5_Pos                       10          /*!< Pin A5 alternative function selection */
+#define COMMON_REG_GPIOPCTLA_PIN6_Pos                       12          /*!< Pin A6 alternative function selection */
+#define COMMON_REG_GPIOPCTLA_PIN7_Pos                       14          /*!< Pin A7 alternative function selection */
+#define COMMON_REG_GPIOPCTLA_PIN8_Pos                       16          /*!< Pin A8 alternative function selection */
+#define COMMON_REG_GPIOPCTLA_PIN9_Pos                       18          /*!< Pin A9 alternative function selection */
+#define COMMON_REG_GPIOPCTLA_PIN10_Pos                      20          /*!< Pin A10 alternative function selection */
+#define COMMON_REG_GPIOPCTLA_PIN11_Pos                      22          /*!< Pin A11 alternative function selection */
+#define COMMON_REG_GPIOPCTLA_PIN12_Pos                      24          /*!< Pin A12 alternative function selection */
+#define COMMON_REG_GPIOPCTLA_PIN13_Pos                      26          /*!< Pin A13 alternative function selection */
+#define COMMON_REG_GPIOPCTLA_PIN14_Pos                      28          /*!< Pin A14 alternative function selection */
+#define COMMON_REG_GPIOPCTLA_PIN15_Pos                      30          /*!< Pin A15 alternative function selection */
 
 /* Bit field masks: */
-#define COMMON_REG_GPIOPCTLA_PIN0_Msk                       0x00000003  /*!< Select alternative function on PIN */
-#define COMMON_REG_GPIOPCTLA_PIN1_Msk                       0x0000000C  /*!< Select alternative function on PIN */
-#define COMMON_REG_GPIOPCTLA_PIN2_Msk                       0x00000030  /*!< Select alternative function on PIN */
-#define COMMON_REG_GPIOPCTLA_PIN3_Msk                       0x000000C0  /*!< Select alternative function on PIN */
-#define COMMON_REG_GPIOPCTLA_PIN4_Msk                       0x00000300  /*!< Select alternative function on PIN */
-#define COMMON_REG_GPIOPCTLA_PIN5_Msk                       0x00000C00  /*!< Select alternative function on PIN */
-#define COMMON_REG_GPIOPCTLA_PIN6_Msk                       0x00003000  /*!< Select alternative function on PIN */
-#define COMMON_REG_GPIOPCTLA_PIN7_Msk                       0x0000C000  /*!< Select alternative function on PIN */
-#define COMMON_REG_GPIOPCTLA_PIN8_Msk                       0x00030000  /*!< Select alternative function on PIN */
-#define COMMON_REG_GPIOPCTLA_PIN9_Msk                       0x000C0000  /*!< Select alternative function on PIN */
-#define COMMON_REG_GPIOPCTLA_PIN10_Msk                      0x00300000  /*!< Select alternative function on PIN */
-#define COMMON_REG_GPIOPCTLA_PIN11_Msk                      0x00C00000  /*!< Select alternative function on PIN */
-#define COMMON_REG_GPIOPCTLA_PIN12_Msk                      0x03000000  /*!< Select alternative function on PIN */
-#define COMMON_REG_GPIOPCTLA_PIN13_Msk                      0x0C000000  /*!< Select alternative function on PIN */
-#define COMMON_REG_GPIOPCTLA_PIN14_Msk                      0x30000000  /*!< Select alternative function on PIN */
-#define COMMON_REG_GPIOPCTLA_PIN15_Msk                      0xC0000000  /*!< Select alternative function on PIN */
+#define COMMON_REG_GPIOPCTLA_PIN0_Msk                       0x00000003  /*!< Pin A0 alternative function selection */
+#define COMMON_REG_GPIOPCTLA_PIN1_Msk                       0x0000000C  /*!< Pin A1 alternative function selection */
+#define COMMON_REG_GPIOPCTLA_PIN2_Msk                       0x00000030  /*!< Pin A2 alternative function selection */
+#define COMMON_REG_GPIOPCTLA_PIN3_Msk                       0x000000C0  /*!< Pin A3 alternative function selection */
+#define COMMON_REG_GPIOPCTLA_PIN4_Msk                       0x00000300  /*!< Pin A4 alternative function selection */
+#define COMMON_REG_GPIOPCTLA_PIN5_Msk                       0x00000C00  /*!< Pin A5 alternative function selection */
+#define COMMON_REG_GPIOPCTLA_PIN6_Msk                       0x00003000  /*!< Pin A6 alternative function selection */
+#define COMMON_REG_GPIOPCTLA_PIN7_Msk                       0x0000C000  /*!< Pin A7 alternative function selection */
+#define COMMON_REG_GPIOPCTLA_PIN8_Msk                       0x00030000  /*!< Pin A8 alternative function selection */
+#define COMMON_REG_GPIOPCTLA_PIN9_Msk                       0x000C0000  /*!< Pin A9 alternative function selection */
+#define COMMON_REG_GPIOPCTLA_PIN10_Msk                      0x00300000  /*!< Pin A10 alternative function selection */
+#define COMMON_REG_GPIOPCTLA_PIN11_Msk                      0x00C00000  /*!< Pin A11 alternative function selection */
+#define COMMON_REG_GPIOPCTLA_PIN12_Msk                      0x03000000  /*!< Pin A12 alternative function selection */
+#define COMMON_REG_GPIOPCTLA_PIN13_Msk                      0x0C000000  /*!< Pin A13 alternative function selection */
+#define COMMON_REG_GPIOPCTLA_PIN14_Msk                      0x30000000  /*!< Pin A14 alternative function selection */
+#define COMMON_REG_GPIOPCTLA_PIN15_Msk                      0xC0000000  /*!< Pin A15 alternative function selection */
 
-/*-- GPIOPCTLB: Alternate function PORTB register ----------------------------*/
+/*-- GPIOPCTLB: Port B alternative function selection register ----------------------------*/
 
 typedef struct {
-  uint32_t PIN0                                   :2;                   /*!< Select alternative function on PIN */
-  uint32_t PIN1                                   :2;                   /*!< Select alternative function on PIN */
-  uint32_t PIN2                                   :2;                   /*!< Select alternative function on PIN */
-  uint32_t PIN3                                   :2;                   /*!< Select alternative function on PIN */
-  uint32_t PIN4                                   :2;                   /*!< Select alternative function on PIN */
-  uint32_t PIN5                                   :2;                   /*!< Select alternative function on PIN */
-  uint32_t PIN6                                   :2;                   /*!< Select alternative function on PIN */
-  uint32_t PIN7                                   :2;                   /*!< Select alternative function on PIN */
-  uint32_t PIN8                                   :2;                   /*!< Select alternative function on PIN */
-  uint32_t PIN9                                   :2;                   /*!< Select alternative function on PIN */
-  uint32_t PIN10                                  :2;                   /*!< Select alternative function on PIN */
-  uint32_t PIN11                                  :2;                   /*!< Select alternative function on PIN */
-  uint32_t PIN12                                  :2;                   /*!< Select alternative function on PIN */
-  uint32_t PIN13                                  :2;                   /*!< Select alternative function on PIN */
-  uint32_t PIN14                                  :2;                   /*!< Select alternative function on PIN */
-  uint32_t PIN15                                  :2;                   /*!< Select alternative function on PIN */
+  uint32_t PIN0                                   :2;                   /*!< Pin B0 alternative function selection */
+  uint32_t PIN1                                   :2;                   /*!< Pin B1 alternative function selection */
+  uint32_t PIN2                                   :2;                   /*!< Pin B2 alternative function selection */
+  uint32_t PIN3                                   :2;                   /*!< Pin B3 alternative function selection */
+  uint32_t PIN4                                   :2;                   /*!< Pin B4 alternative function selection */
+  uint32_t PIN5                                   :2;                   /*!< Pin B5 alternative function selection */
+  uint32_t PIN6                                   :2;                   /*!< Pin B6 alternative function selection */
+  uint32_t PIN7                                   :2;                   /*!< Pin B7 alternative function selection */
+  uint32_t PIN8                                   :2;                   /*!< Pin B8 alternative function selection */
+  uint32_t PIN9                                   :2;                   /*!< Pin B9 alternative function selection */
+  uint32_t PIN10                                  :2;                   /*!< Pin B10 alternative function selection */
+  uint32_t PIN11                                  :2;                   /*!< Pin B11 alternative function selection */
+  uint32_t PIN12                                  :2;                   /*!< Pin B12 alternative function selection */
+  uint32_t PIN13                                  :2;                   /*!< Pin B13 alternative function selection */
+  uint32_t PIN14                                  :2;                   /*!< Pin B14 alternative function selection */
+  uint32_t PIN15                                  :2;                   /*!< Pin B15 alternative function selection */
 } _COMMON_REG_GPIOPCTLB_bits;
 
 /* Bit field positions: */
-#define COMMON_REG_GPIOPCTLB_PIN0_Pos                       0           /*!< Select alternative function on PIN */
-#define COMMON_REG_GPIOPCTLB_PIN1_Pos                       2           /*!< Select alternative function on PIN */
-#define COMMON_REG_GPIOPCTLB_PIN2_Pos                       4           /*!< Select alternative function on PIN */
-#define COMMON_REG_GPIOPCTLB_PIN3_Pos                       6           /*!< Select alternative function on PIN */
-#define COMMON_REG_GPIOPCTLB_PIN4_Pos                       8           /*!< Select alternative function on PIN */
-#define COMMON_REG_GPIOPCTLB_PIN5_Pos                       10          /*!< Select alternative function on PIN */
-#define COMMON_REG_GPIOPCTLB_PIN6_Pos                       12          /*!< Select alternative function on PIN */
-#define COMMON_REG_GPIOPCTLB_PIN7_Pos                       14          /*!< Select alternative function on PIN */
-#define COMMON_REG_GPIOPCTLB_PIN8_Pos                       16          /*!< Select alternative function on PIN */
-#define COMMON_REG_GPIOPCTLB_PIN9_Pos                       18          /*!< Select alternative function on PIN */
-#define COMMON_REG_GPIOPCTLB_PIN10_Pos                      20          /*!< Select alternative function on PIN */
-#define COMMON_REG_GPIOPCTLB_PIN11_Pos                      22          /*!< Select alternative function on PIN */
-#define COMMON_REG_GPIOPCTLB_PIN12_Pos                      24          /*!< Select alternative function on PIN */
-#define COMMON_REG_GPIOPCTLB_PIN13_Pos                      26          /*!< Select alternative function on PIN */
-#define COMMON_REG_GPIOPCTLB_PIN14_Pos                      28          /*!< Select alternative function on PIN */
-#define COMMON_REG_GPIOPCTLB_PIN15_Pos                      30          /*!< Select alternative function on PIN */
+#define COMMON_REG_GPIOPCTLB_PIN0_Pos                       0           /*!< Pin B0 alternative function selection */
+#define COMMON_REG_GPIOPCTLB_PIN1_Pos                       2           /*!< Pin B1 alternative function selection */
+#define COMMON_REG_GPIOPCTLB_PIN2_Pos                       4           /*!< Pin B2 alternative function selection */
+#define COMMON_REG_GPIOPCTLB_PIN3_Pos                       6           /*!< Pin B3 alternative function selection */
+#define COMMON_REG_GPIOPCTLB_PIN4_Pos                       8           /*!< Pin B4 alternative function selection */
+#define COMMON_REG_GPIOPCTLB_PIN5_Pos                       10          /*!< Pin B5 alternative function selection */
+#define COMMON_REG_GPIOPCTLB_PIN6_Pos                       12          /*!< Pin B6 alternative function selection */
+#define COMMON_REG_GPIOPCTLB_PIN7_Pos                       14          /*!< Pin B7 alternative function selection */
+#define COMMON_REG_GPIOPCTLB_PIN8_Pos                       16          /*!< Pin B8 alternative function selection */
+#define COMMON_REG_GPIOPCTLB_PIN9_Pos                       18          /*!< Pin B9 alternative function selection */
+#define COMMON_REG_GPIOPCTLB_PIN10_Pos                      20          /*!< Pin B10 alternative function selection */
+#define COMMON_REG_GPIOPCTLB_PIN11_Pos                      22          /*!< Pin B11 alternative function selection */
+#define COMMON_REG_GPIOPCTLB_PIN12_Pos                      24          /*!< Pin B12 alternative function selection */
+#define COMMON_REG_GPIOPCTLB_PIN13_Pos                      26          /*!< Pin B13 alternative function selection */
+#define COMMON_REG_GPIOPCTLB_PIN14_Pos                      28          /*!< Pin B14 alternative function selection */
+#define COMMON_REG_GPIOPCTLB_PIN15_Pos                      30          /*!< Pin B15 alternative function selection */
 
 /* Bit field masks: */
-#define COMMON_REG_GPIOPCTLB_PIN0_Msk                       0x00000003  /*!< Select alternative function on PIN */
-#define COMMON_REG_GPIOPCTLB_PIN1_Msk                       0x0000000C  /*!< Select alternative function on PIN */
-#define COMMON_REG_GPIOPCTLB_PIN2_Msk                       0x00000030  /*!< Select alternative function on PIN */
-#define COMMON_REG_GPIOPCTLB_PIN3_Msk                       0x000000C0  /*!< Select alternative function on PIN */
-#define COMMON_REG_GPIOPCTLB_PIN4_Msk                       0x00000300  /*!< Select alternative function on PIN */
-#define COMMON_REG_GPIOPCTLB_PIN5_Msk                       0x00000C00  /*!< Select alternative function on PIN */
-#define COMMON_REG_GPIOPCTLB_PIN6_Msk                       0x00003000  /*!< Select alternative function on PIN */
-#define COMMON_REG_GPIOPCTLB_PIN7_Msk                       0x0000C000  /*!< Select alternative function on PIN */
-#define COMMON_REG_GPIOPCTLB_PIN8_Msk                       0x00030000  /*!< Select alternative function on PIN */
-#define COMMON_REG_GPIOPCTLB_PIN9_Msk                       0x000C0000  /*!< Select alternative function on PIN */
-#define COMMON_REG_GPIOPCTLB_PIN10_Msk                      0x00300000  /*!< Select alternative function on PIN */
-#define COMMON_REG_GPIOPCTLB_PIN11_Msk                      0x00C00000  /*!< Select alternative function on PIN */
-#define COMMON_REG_GPIOPCTLB_PIN12_Msk                      0x03000000  /*!< Select alternative function on PIN */
-#define COMMON_REG_GPIOPCTLB_PIN13_Msk                      0x0C000000  /*!< Select alternative function on PIN */
-#define COMMON_REG_GPIOPCTLB_PIN14_Msk                      0x30000000  /*!< Select alternative function on PIN */
-#define COMMON_REG_GPIOPCTLB_PIN15_Msk                      0xC0000000  /*!< Select alternative function on PIN */
+#define COMMON_REG_GPIOPCTLB_PIN0_Msk                       0x00000003  /*!< Pin B0 alternative function selection */
+#define COMMON_REG_GPIOPCTLB_PIN1_Msk                       0x0000000C  /*!< Pin B1 alternative function selection */
+#define COMMON_REG_GPIOPCTLB_PIN2_Msk                       0x00000030  /*!< Pin B2 alternative function selection */
+#define COMMON_REG_GPIOPCTLB_PIN3_Msk                       0x000000C0  /*!< Pin B3 alternative function selection */
+#define COMMON_REG_GPIOPCTLB_PIN4_Msk                       0x00000300  /*!< Pin B4 alternative function selection */
+#define COMMON_REG_GPIOPCTLB_PIN5_Msk                       0x00000C00  /*!< Pin B5 alternative function selection */
+#define COMMON_REG_GPIOPCTLB_PIN6_Msk                       0x00003000  /*!< Pin B6 alternative function selection */
+#define COMMON_REG_GPIOPCTLB_PIN7_Msk                       0x0000C000  /*!< Pin B7 alternative function selection */
+#define COMMON_REG_GPIOPCTLB_PIN8_Msk                       0x00030000  /*!< Pin B8 alternative function selection */
+#define COMMON_REG_GPIOPCTLB_PIN9_Msk                       0x000C0000  /*!< Pin B9 alternative function selection */
+#define COMMON_REG_GPIOPCTLB_PIN10_Msk                      0x00300000  /*!< Pin B10 alternative function selection */
+#define COMMON_REG_GPIOPCTLB_PIN11_Msk                      0x00C00000  /*!< Pin B11 alternative function selection */
+#define COMMON_REG_GPIOPCTLB_PIN12_Msk                      0x03000000  /*!< Pin B12 alternative function selection */
+#define COMMON_REG_GPIOPCTLB_PIN13_Msk                      0x0C000000  /*!< Pin B13 alternative function selection */
+#define COMMON_REG_GPIOPCTLB_PIN14_Msk                      0x30000000  /*!< Pin B14 alternative function selection */
+#define COMMON_REG_GPIOPCTLB_PIN15_Msk                      0xC0000000  /*!< Pin B15 alternative function selection */
 
-/*-- GPIOPCTLC: Alternate function PORTC register ----------------------------*/
+/*-- GPIOPCTLC: Port C alternative function selection register ----------------------------*/
 
 typedef struct {
-  uint32_t PIN0                                   :2;                   /*!< Select alternative function on PIN */
-  uint32_t PIN1                                   :2;                   /*!< Select alternative function on PIN */
-  uint32_t PIN2                                   :2;                   /*!< Select alternative function on PIN */
-  uint32_t PIN3                                   :2;                   /*!< Select alternative function on PIN */
-  uint32_t PIN4                                   :2;                   /*!< Select alternative function on PIN */
-  uint32_t PIN5                                   :2;                   /*!< Select alternative function on PIN */
-  uint32_t PIN6                                   :2;                   /*!< Select alternative function on PIN */
-  uint32_t PIN7                                   :2;                   /*!< Select alternative function on PIN */
-  uint32_t PIN8                                   :2;                   /*!< Select alternative function on PIN */
-  uint32_t PIN9                                   :2;                   /*!< Select alternative function on PIN */
-  uint32_t PIN10                                  :2;                   /*!< Select alternative function on PIN */
-  uint32_t PIN11                                  :2;                   /*!< Select alternative function on PIN */
-  uint32_t PIN12                                  :2;                   /*!< Select alternative function on PIN */
-  uint32_t PIN13                                  :2;                   /*!< Select alternative function on PIN */
-  uint32_t PIN14                                  :2;                   /*!< Select alternative function on PIN */
-  uint32_t PIN15                                  :2;                   /*!< Select alternative function on PIN */
+  uint32_t PIN0                                   :2;                   /*!< Pin C0 alternative function selection */
+  uint32_t PIN1                                   :2;                   /*!< Pin C1 alternative function selection */
+  uint32_t PIN2                                   :2;                   /*!< Pin C2 alternative function selection */
+  uint32_t PIN3                                   :2;                   /*!< Pin C3 alternative function selection */
+  uint32_t PIN4                                   :2;                   /*!< Pin C4 alternative function selection */
+  uint32_t PIN5                                   :2;                   /*!< Pin C5 alternative function selection */
+  uint32_t PIN6                                   :2;                   /*!< Pin C6 alternative function selection */
+  uint32_t PIN7                                   :2;                   /*!< Pin C7 alternative function selection */
+  uint32_t PIN8                                   :2;                   /*!< Pin C8 alternative function selection */
+  uint32_t PIN9                                   :2;                   /*!< Pin C9 alternative function selection */
+  uint32_t PIN10                                  :2;                   /*!< Pin C10 alternative function selection */
+  uint32_t PIN11                                  :2;                   /*!< Pin C11 alternative function selection */
+  uint32_t PIN12                                  :2;                   /*!< Pin C12 alternative function selection */
+  uint32_t PIN13                                  :2;                   /*!< Pin C13 alternative function selection */
+  uint32_t PIN14                                  :2;                   /*!< Pin C14 alternative function selection */
+  uint32_t PIN15                                  :2;                   /*!< Pin C15 alternative function selection */
 } _COMMON_REG_GPIOPCTLC_bits;
 
 /* Bit field positions: */
-#define COMMON_REG_GPIOPCTLC_PIN0_Pos                       0           /*!< Select alternative function on PIN */
-#define COMMON_REG_GPIOPCTLC_PIN1_Pos                       2           /*!< Select alternative function on PIN */
-#define COMMON_REG_GPIOPCTLC_PIN2_Pos                       4           /*!< Select alternative function on PIN */
-#define COMMON_REG_GPIOPCTLC_PIN3_Pos                       6           /*!< Select alternative function on PIN */
-#define COMMON_REG_GPIOPCTLC_PIN4_Pos                       8           /*!< Select alternative function on PIN */
-#define COMMON_REG_GPIOPCTLC_PIN5_Pos                       10          /*!< Select alternative function on PIN */
-#define COMMON_REG_GPIOPCTLC_PIN6_Pos                       12          /*!< Select alternative function on PIN */
-#define COMMON_REG_GPIOPCTLC_PIN7_Pos                       14          /*!< Select alternative function on PIN */
-#define COMMON_REG_GPIOPCTLC_PIN8_Pos                       16          /*!< Select alternative function on PIN */
-#define COMMON_REG_GPIOPCTLC_PIN9_Pos                       18          /*!< Select alternative function on PIN */
-#define COMMON_REG_GPIOPCTLC_PIN10_Pos                      20          /*!< Select alternative function on PIN */
-#define COMMON_REG_GPIOPCTLC_PIN11_Pos                      22          /*!< Select alternative function on PIN */
-#define COMMON_REG_GPIOPCTLC_PIN12_Pos                      24          /*!< Select alternative function on PIN */
-#define COMMON_REG_GPIOPCTLC_PIN13_Pos                      26          /*!< Select alternative function on PIN */
-#define COMMON_REG_GPIOPCTLC_PIN14_Pos                      28          /*!< Select alternative function on PIN */
-#define COMMON_REG_GPIOPCTLC_PIN15_Pos                      30          /*!< Select alternative function on PIN */
+#define COMMON_REG_GPIOPCTLC_PIN0_Pos                       0           /*!< Pin C0 alternative function selection */
+#define COMMON_REG_GPIOPCTLC_PIN1_Pos                       2           /*!< Pin C1 alternative function selection */
+#define COMMON_REG_GPIOPCTLC_PIN2_Pos                       4           /*!< Pin C2 alternative function selection */
+#define COMMON_REG_GPIOPCTLC_PIN3_Pos                       6           /*!< Pin C3 alternative function selection */
+#define COMMON_REG_GPIOPCTLC_PIN4_Pos                       8           /*!< Pin C4 alternative function selection */
+#define COMMON_REG_GPIOPCTLC_PIN5_Pos                       10          /*!< Pin C5 alternative function selection */
+#define COMMON_REG_GPIOPCTLC_PIN6_Pos                       12          /*!< Pin C6 alternative function selection */
+#define COMMON_REG_GPIOPCTLC_PIN7_Pos                       14          /*!< Pin C7 alternative function selection */
+#define COMMON_REG_GPIOPCTLC_PIN8_Pos                       16          /*!< Pin C8 alternative function selection */
+#define COMMON_REG_GPIOPCTLC_PIN9_Pos                       18          /*!< Pin C9 alternative function selection */
+#define COMMON_REG_GPIOPCTLC_PIN10_Pos                      20          /*!< Pin C10 alternative function selection */
+#define COMMON_REG_GPIOPCTLC_PIN11_Pos                      22          /*!< Pin C11 alternative function selection */
+#define COMMON_REG_GPIOPCTLC_PIN12_Pos                      24          /*!< Pin C12 alternative function selection */
+#define COMMON_REG_GPIOPCTLC_PIN13_Pos                      26          /*!< Pin C13 alternative function selection */
+#define COMMON_REG_GPIOPCTLC_PIN14_Pos                      28          /*!< Pin C14 alternative function selection */
+#define COMMON_REG_GPIOPCTLC_PIN15_Pos                      30          /*!< Pin C15 alternative function selection */
 
 /* Bit field masks: */
-#define COMMON_REG_GPIOPCTLC_PIN0_Msk                       0x00000003  /*!< Select alternative function on PIN */
-#define COMMON_REG_GPIOPCTLC_PIN1_Msk                       0x0000000C  /*!< Select alternative function on PIN */
-#define COMMON_REG_GPIOPCTLC_PIN2_Msk                       0x00000030  /*!< Select alternative function on PIN */
-#define COMMON_REG_GPIOPCTLC_PIN3_Msk                       0x000000C0  /*!< Select alternative function on PIN */
-#define COMMON_REG_GPIOPCTLC_PIN4_Msk                       0x00000300  /*!< Select alternative function on PIN */
-#define COMMON_REG_GPIOPCTLC_PIN5_Msk                       0x00000C00  /*!< Select alternative function on PIN */
-#define COMMON_REG_GPIOPCTLC_PIN6_Msk                       0x00003000  /*!< Select alternative function on PIN */
-#define COMMON_REG_GPIOPCTLC_PIN7_Msk                       0x0000C000  /*!< Select alternative function on PIN */
-#define COMMON_REG_GPIOPCTLC_PIN8_Msk                       0x00030000  /*!< Select alternative function on PIN */
-#define COMMON_REG_GPIOPCTLC_PIN9_Msk                       0x000C0000  /*!< Select alternative function on PIN */
-#define COMMON_REG_GPIOPCTLC_PIN10_Msk                      0x00300000  /*!< Select alternative function on PIN */
-#define COMMON_REG_GPIOPCTLC_PIN11_Msk                      0x00C00000  /*!< Select alternative function on PIN */
-#define COMMON_REG_GPIOPCTLC_PIN12_Msk                      0x03000000  /*!< Select alternative function on PIN */
-#define COMMON_REG_GPIOPCTLC_PIN13_Msk                      0x0C000000  /*!< Select alternative function on PIN */
-#define COMMON_REG_GPIOPCTLC_PIN14_Msk                      0x30000000  /*!< Select alternative function on PIN */
-#define COMMON_REG_GPIOPCTLC_PIN15_Msk                      0xC0000000  /*!< Select alternative function on PIN */
+#define COMMON_REG_GPIOPCTLC_PIN0_Msk                       0x00000003  /*!< Pin C0 alternative function selection */
+#define COMMON_REG_GPIOPCTLC_PIN1_Msk                       0x0000000C  /*!< Pin C1 alternative function selection */
+#define COMMON_REG_GPIOPCTLC_PIN2_Msk                       0x00000030  /*!< Pin C2 alternative function selection */
+#define COMMON_REG_GPIOPCTLC_PIN3_Msk                       0x000000C0  /*!< Pin C3 alternative function selection */
+#define COMMON_REG_GPIOPCTLC_PIN4_Msk                       0x00000300  /*!< Pin C4 alternative function selection */
+#define COMMON_REG_GPIOPCTLC_PIN5_Msk                       0x00000C00  /*!< Pin C5 alternative function selection */
+#define COMMON_REG_GPIOPCTLC_PIN6_Msk                       0x00003000  /*!< Pin C6 alternative function selection */
+#define COMMON_REG_GPIOPCTLC_PIN7_Msk                       0x0000C000  /*!< Pin C7 alternative function selection */
+#define COMMON_REG_GPIOPCTLC_PIN8_Msk                       0x00030000  /*!< Pin C8 alternative function selection */
+#define COMMON_REG_GPIOPCTLC_PIN9_Msk                       0x000C0000  /*!< Pin C9 alternative function selection */
+#define COMMON_REG_GPIOPCTLC_PIN10_Msk                      0x00300000  /*!< Pin C10 alternative function selection */
+#define COMMON_REG_GPIOPCTLC_PIN11_Msk                      0x00C00000  /*!< Pin C11 alternative function selection */
+#define COMMON_REG_GPIOPCTLC_PIN12_Msk                      0x03000000  /*!< Pin C12 alternative function selection */
+#define COMMON_REG_GPIOPCTLC_PIN13_Msk                      0x0C000000  /*!< Pin C13 alternative function selection */
+#define COMMON_REG_GPIOPCTLC_PIN14_Msk                      0x30000000  /*!< Pin C14 alternative function selection */
+#define COMMON_REG_GPIOPCTLC_PIN15_Msk                      0xC0000000  /*!< Pin C15 alternative function selection */
 
-/*-- GPIOPCTLD: Alternate function PORTD register ----------------------------*/
+/*-- GPIOPCTLD: Port D alternative function selection register ----------------------------*/
 
 typedef struct {
-  uint32_t PIN0                                   :2;                   /*!< Select alternative function on PIN */
-  uint32_t PIN1                                   :2;                   /*!< Select alternative function on PIN */
-  uint32_t PIN2                                   :2;                   /*!< Select alternative function on PIN */
-  uint32_t PIN3                                   :2;                   /*!< Select alternative function on PIN */
-  uint32_t PIN4                                   :2;                   /*!< Select alternative function on PIN */
-  uint32_t PIN5                                   :2;                   /*!< Select alternative function on PIN */
-  uint32_t PIN6                                   :2;                   /*!< Select alternative function on PIN */
-  uint32_t PIN7                                   :2;                   /*!< Select alternative function on PIN */
-  uint32_t PIN8                                   :2;                   /*!< Select alternative function on PIN */
-  uint32_t PIN9                                   :2;                   /*!< Select alternative function on PIN */
-  uint32_t PIN10                                  :2;                   /*!< Select alternative function on PIN */
-  uint32_t PIN11                                  :2;                   /*!< Select alternative function on PIN */
-  uint32_t PIN12                                  :2;                   /*!< Select alternative function on PIN */
-  uint32_t PIN13                                  :2;                   /*!< Select alternative function on PIN */
-  uint32_t PIN14                                  :2;                   /*!< Select alternative function on PIN */
-  uint32_t PIN15                                  :2;                   /*!< Select alternative function on PIN */
+  uint32_t PIN0                                   :2;                   /*!< Pin D0 alternative function selection */
+  uint32_t PIN1                                   :2;                   /*!< Pin D1 alternative function selection */
+  uint32_t PIN2                                   :2;                   /*!< Pin D2 alternative function selection */
+  uint32_t PIN3                                   :2;                   /*!< Pin D3 alternative function selection */
+  uint32_t PIN4                                   :2;                   /*!< Pin D4 alternative function selection */
+  uint32_t PIN5                                   :2;                   /*!< Pin D5 alternative function selection */
+  uint32_t PIN6                                   :2;                   /*!< Pin D6 alternative function selection */
+  uint32_t PIN7                                   :2;                   /*!< Pin D7 alternative function selection */
+  uint32_t PIN8                                   :2;                   /*!< Pin D8 alternative function selection */
+  uint32_t PIN9                                   :2;                   /*!< Pin D9 alternative function selection */
+  uint32_t PIN10                                  :2;                   /*!< Pin D10 alternative function selection */
+  uint32_t PIN11                                  :2;                   /*!< Pin D11 alternative function selection */
+  uint32_t PIN12                                  :2;                   /*!< Pin D12 alternative function selection */
+  uint32_t PIN13                                  :2;                   /*!< Pin D13 alternative function selection */
+  uint32_t PIN14                                  :2;                   /*!< Pin D14 alternative function selection */
+  uint32_t PIN15                                  :2;                   /*!< Pin D15 alternative function selection */
 } _COMMON_REG_GPIOPCTLD_bits;
 
 /* Bit field positions: */
-#define COMMON_REG_GPIOPCTLD_PIN0_Pos                       0           /*!< Select alternative function on PIN */
-#define COMMON_REG_GPIOPCTLD_PIN1_Pos                       2           /*!< Select alternative function on PIN */
-#define COMMON_REG_GPIOPCTLD_PIN2_Pos                       4           /*!< Select alternative function on PIN */
-#define COMMON_REG_GPIOPCTLD_PIN3_Pos                       6           /*!< Select alternative function on PIN */
-#define COMMON_REG_GPIOPCTLD_PIN4_Pos                       8           /*!< Select alternative function on PIN */
-#define COMMON_REG_GPIOPCTLD_PIN5_Pos                       10          /*!< Select alternative function on PIN */
-#define COMMON_REG_GPIOPCTLD_PIN6_Pos                       12          /*!< Select alternative function on PIN */
-#define COMMON_REG_GPIOPCTLD_PIN7_Pos                       14          /*!< Select alternative function on PIN */
-#define COMMON_REG_GPIOPCTLD_PIN8_Pos                       16          /*!< Select alternative function on PIN */
-#define COMMON_REG_GPIOPCTLD_PIN9_Pos                       18          /*!< Select alternative function on PIN */
-#define COMMON_REG_GPIOPCTLD_PIN10_Pos                      20          /*!< Select alternative function on PIN */
-#define COMMON_REG_GPIOPCTLD_PIN11_Pos                      22          /*!< Select alternative function on PIN */
-#define COMMON_REG_GPIOPCTLD_PIN12_Pos                      24          /*!< Select alternative function on PIN */
-#define COMMON_REG_GPIOPCTLD_PIN13_Pos                      26          /*!< Select alternative function on PIN */
-#define COMMON_REG_GPIOPCTLD_PIN14_Pos                      28          /*!< Select alternative function on PIN */
-#define COMMON_REG_GPIOPCTLD_PIN15_Pos                      30          /*!< Select alternative function on PIN */
+#define COMMON_REG_GPIOPCTLD_PIN0_Pos                       0           /*!< Pin D0 alternative function selection */
+#define COMMON_REG_GPIOPCTLD_PIN1_Pos                       2           /*!< Pin D1 alternative function selection */
+#define COMMON_REG_GPIOPCTLD_PIN2_Pos                       4           /*!< Pin D2 alternative function selection */
+#define COMMON_REG_GPIOPCTLD_PIN3_Pos                       6           /*!< Pin D3 alternative function selection */
+#define COMMON_REG_GPIOPCTLD_PIN4_Pos                       8           /*!< Pin D4 alternative function selection */
+#define COMMON_REG_GPIOPCTLD_PIN5_Pos                       10          /*!< Pin D5 alternative function selection */
+#define COMMON_REG_GPIOPCTLD_PIN6_Pos                       12          /*!< Pin D6 alternative function selection */
+#define COMMON_REG_GPIOPCTLD_PIN7_Pos                       14          /*!< Pin D7 alternative function selection */
+#define COMMON_REG_GPIOPCTLD_PIN8_Pos                       16          /*!< Pin D8 alternative function selection */
+#define COMMON_REG_GPIOPCTLD_PIN9_Pos                       18          /*!< Pin D9 alternative function selection */
+#define COMMON_REG_GPIOPCTLD_PIN10_Pos                      20          /*!< Pin D10 alternative function selection */
+#define COMMON_REG_GPIOPCTLD_PIN11_Pos                      22          /*!< Pin D11 alternative function selection */
+#define COMMON_REG_GPIOPCTLD_PIN12_Pos                      24          /*!< Pin D12 alternative function selection */
+#define COMMON_REG_GPIOPCTLD_PIN13_Pos                      26          /*!< Pin D13 alternative function selection */
+#define COMMON_REG_GPIOPCTLD_PIN14_Pos                      28          /*!< Pin D14 alternative function selection */
+#define COMMON_REG_GPIOPCTLD_PIN15_Pos                      30          /*!< Pin D15 alternative function selection */
 
 /* Bit field masks: */
-#define COMMON_REG_GPIOPCTLD_PIN0_Msk                       0x00000003  /*!< Select alternative function on PIN */
-#define COMMON_REG_GPIOPCTLD_PIN1_Msk                       0x0000000C  /*!< Select alternative function on PIN */
-#define COMMON_REG_GPIOPCTLD_PIN2_Msk                       0x00000030  /*!< Select alternative function on PIN */
-#define COMMON_REG_GPIOPCTLD_PIN3_Msk                       0x000000C0  /*!< Select alternative function on PIN */
-#define COMMON_REG_GPIOPCTLD_PIN4_Msk                       0x00000300  /*!< Select alternative function on PIN */
-#define COMMON_REG_GPIOPCTLD_PIN5_Msk                       0x00000C00  /*!< Select alternative function on PIN */
-#define COMMON_REG_GPIOPCTLD_PIN6_Msk                       0x00003000  /*!< Select alternative function on PIN */
-#define COMMON_REG_GPIOPCTLD_PIN7_Msk                       0x0000C000  /*!< Select alternative function on PIN */
-#define COMMON_REG_GPIOPCTLD_PIN8_Msk                       0x00030000  /*!< Select alternative function on PIN */
-#define COMMON_REG_GPIOPCTLD_PIN9_Msk                       0x000C0000  /*!< Select alternative function on PIN */
-#define COMMON_REG_GPIOPCTLD_PIN10_Msk                      0x00300000  /*!< Select alternative function on PIN */
-#define COMMON_REG_GPIOPCTLD_PIN11_Msk                      0x00C00000  /*!< Select alternative function on PIN */
-#define COMMON_REG_GPIOPCTLD_PIN12_Msk                      0x03000000  /*!< Select alternative function on PIN */
-#define COMMON_REG_GPIOPCTLD_PIN13_Msk                      0x0C000000  /*!< Select alternative function on PIN */
-#define COMMON_REG_GPIOPCTLD_PIN14_Msk                      0x30000000  /*!< Select alternative function on PIN */
-#define COMMON_REG_GPIOPCTLD_PIN15_Msk                      0xC0000000  /*!< Select alternative function on PIN */
+#define COMMON_REG_GPIOPCTLD_PIN0_Msk                       0x00000003  /*!< Pin D0 alternative function selection */
+#define COMMON_REG_GPIOPCTLD_PIN1_Msk                       0x0000000C  /*!< Pin D1 alternative function selection */
+#define COMMON_REG_GPIOPCTLD_PIN2_Msk                       0x00000030  /*!< Pin D2 alternative function selection */
+#define COMMON_REG_GPIOPCTLD_PIN3_Msk                       0x000000C0  /*!< Pin D3 alternative function selection */
+#define COMMON_REG_GPIOPCTLD_PIN4_Msk                       0x00000300  /*!< Pin D4 alternative function selection */
+#define COMMON_REG_GPIOPCTLD_PIN5_Msk                       0x00000C00  /*!< Pin D5 alternative function selection */
+#define COMMON_REG_GPIOPCTLD_PIN6_Msk                       0x00003000  /*!< Pin D6 alternative function selection */
+#define COMMON_REG_GPIOPCTLD_PIN7_Msk                       0x0000C000  /*!< Pin D7 alternative function selection */
+#define COMMON_REG_GPIOPCTLD_PIN8_Msk                       0x00030000  /*!< Pin D8 alternative function selection */
+#define COMMON_REG_GPIOPCTLD_PIN9_Msk                       0x000C0000  /*!< Pin D9 alternative function selection */
+#define COMMON_REG_GPIOPCTLD_PIN10_Msk                      0x00300000  /*!< Pin D10 alternative function selection */
+#define COMMON_REG_GPIOPCTLD_PIN11_Msk                      0x00C00000  /*!< Pin D11 alternative function selection */
+#define COMMON_REG_GPIOPCTLD_PIN12_Msk                      0x03000000  /*!< Pin D12 alternative function selection */
+#define COMMON_REG_GPIOPCTLD_PIN13_Msk                      0x0C000000  /*!< Pin D13 alternative function selection */
+#define COMMON_REG_GPIOPCTLD_PIN14_Msk                      0x30000000  /*!< Pin D14 alternative function selection */
+#define COMMON_REG_GPIOPCTLD_PIN15_Msk                      0xC0000000  /*!< Pin D15 alternative function selection */
 
-/*-- GPIOPCTLE: Alternate function PORTE register ----------------------------*/
+/*-- GPIOPCTLE: Port E alternative function selection register ----------------------------*/
 
 typedef struct {
-  uint32_t PIN0                                   :2;                   /*!< Select alternative function on PIN */
-  uint32_t PIN1                                   :2;                   /*!< Select alternative function on PIN */
-  uint32_t PIN2                                   :2;                   /*!< Select alternative function on PIN */
-  uint32_t PIN3                                   :2;                   /*!< Select alternative function on PIN */
-  uint32_t PIN4                                   :2;                   /*!< Select alternative function on PIN */
-  uint32_t PIN5                                   :2;                   /*!< Select alternative function on PIN */
-  uint32_t PIN6                                   :2;                   /*!< Select alternative function on PIN */
-  uint32_t PIN7                                   :2;                   /*!< Select alternative function on PIN */
-  uint32_t PIN8                                   :2;                   /*!< Select alternative function on PIN */
-  uint32_t PIN9                                   :2;                   /*!< Select alternative function on PIN */
-  uint32_t PIN10                                  :2;                   /*!< Select alternative function on PIN */
-  uint32_t PIN11                                  :2;                   /*!< Select alternative function on PIN */
-  uint32_t PIN12                                  :2;                   /*!< Select alternative function on PIN */
-  uint32_t PIN13                                  :2;                   /*!< Select alternative function on PIN */
-  uint32_t PIN14                                  :2;                   /*!< Select alternative function on PIN */
-  uint32_t PIN15                                  :2;                   /*!< Select alternative function on PIN */
+  uint32_t PIN0                                   :2;                   /*!< Pin E0 alternative function selection */
+  uint32_t PIN1                                   :2;                   /*!< Pin E1 alternative function selection */
+  uint32_t PIN2                                   :2;                   /*!< Pin E2 alternative function selection */
+  uint32_t PIN3                                   :2;                   /*!< Pin E3 alternative function selection */
+  uint32_t PIN4                                   :2;                   /*!< Pin E4 alternative function selection */
+  uint32_t PIN5                                   :2;                   /*!< Pin E5 alternative function selection */
+  uint32_t PIN6                                   :2;                   /*!< Pin E6 alternative function selection */
+  uint32_t PIN7                                   :2;                   /*!< Pin E7 alternative function selection */
+  uint32_t PIN8                                   :2;                   /*!< Pin E8 alternative function selection */
+  uint32_t PIN9                                   :2;                   /*!< Pin E9 alternative function selection */
+  uint32_t PIN10                                  :2;                   /*!< Pin E10 alternative function selection */
+  uint32_t PIN11                                  :2;                   /*!< Pin E11 alternative function selection */
+  uint32_t PIN12                                  :2;                   /*!< Pin E12 alternative function selection */
+  uint32_t PIN13                                  :2;                   /*!< Pin E13 alternative function selection */
+  uint32_t PIN14                                  :2;                   /*!< Pin E14 alternative function selection */
+  uint32_t PIN15                                  :2;                   /*!< Pin E15 alternative function selection */
 } _COMMON_REG_GPIOPCTLE_bits;
 
 /* Bit field positions: */
-#define COMMON_REG_GPIOPCTLE_PIN0_Pos                       0           /*!< Select alternative function on PIN */
-#define COMMON_REG_GPIOPCTLE_PIN1_Pos                       2           /*!< Select alternative function on PIN */
-#define COMMON_REG_GPIOPCTLE_PIN2_Pos                       4           /*!< Select alternative function on PIN */
-#define COMMON_REG_GPIOPCTLE_PIN3_Pos                       6           /*!< Select alternative function on PIN */
-#define COMMON_REG_GPIOPCTLE_PIN4_Pos                       8           /*!< Select alternative function on PIN */
-#define COMMON_REG_GPIOPCTLE_PIN5_Pos                       10          /*!< Select alternative function on PIN */
-#define COMMON_REG_GPIOPCTLE_PIN6_Pos                       12          /*!< Select alternative function on PIN */
-#define COMMON_REG_GPIOPCTLE_PIN7_Pos                       14          /*!< Select alternative function on PIN */
-#define COMMON_REG_GPIOPCTLE_PIN8_Pos                       16          /*!< Select alternative function on PIN */
-#define COMMON_REG_GPIOPCTLE_PIN9_Pos                       18          /*!< Select alternative function on PIN */
-#define COMMON_REG_GPIOPCTLE_PIN10_Pos                      20          /*!< Select alternative function on PIN */
-#define COMMON_REG_GPIOPCTLE_PIN11_Pos                      22          /*!< Select alternative function on PIN */
-#define COMMON_REG_GPIOPCTLE_PIN12_Pos                      24          /*!< Select alternative function on PIN */
-#define COMMON_REG_GPIOPCTLE_PIN13_Pos                      26          /*!< Select alternative function on PIN */
-#define COMMON_REG_GPIOPCTLE_PIN14_Pos                      28          /*!< Select alternative function on PIN */
-#define COMMON_REG_GPIOPCTLE_PIN15_Pos                      30          /*!< Select alternative function on PIN */
+#define COMMON_REG_GPIOPCTLE_PIN0_Pos                       0           /*!< Pin E0 alternative function selection */
+#define COMMON_REG_GPIOPCTLE_PIN1_Pos                       2           /*!< Pin E1 alternative function selection */
+#define COMMON_REG_GPIOPCTLE_PIN2_Pos                       4           /*!< Pin E2 alternative function selection */
+#define COMMON_REG_GPIOPCTLE_PIN3_Pos                       6           /*!< Pin E3 alternative function selection */
+#define COMMON_REG_GPIOPCTLE_PIN4_Pos                       8           /*!< Pin E4 alternative function selection */
+#define COMMON_REG_GPIOPCTLE_PIN5_Pos                       10          /*!< Pin E5 alternative function selection */
+#define COMMON_REG_GPIOPCTLE_PIN6_Pos                       12          /*!< Pin E6 alternative function selection */
+#define COMMON_REG_GPIOPCTLE_PIN7_Pos                       14          /*!< Pin E7 alternative function selection */
+#define COMMON_REG_GPIOPCTLE_PIN8_Pos                       16          /*!< Pin E8 alternative function selection */
+#define COMMON_REG_GPIOPCTLE_PIN9_Pos                       18          /*!< Pin E9 alternative function selection */
+#define COMMON_REG_GPIOPCTLE_PIN10_Pos                      20          /*!< Pin E10 alternative function selection */
+#define COMMON_REG_GPIOPCTLE_PIN11_Pos                      22          /*!< Pin E11 alternative function selection */
+#define COMMON_REG_GPIOPCTLE_PIN12_Pos                      24          /*!< Pin E12 alternative function selection */
+#define COMMON_REG_GPIOPCTLE_PIN13_Pos                      26          /*!< Pin E13 alternative function selection */
+#define COMMON_REG_GPIOPCTLE_PIN14_Pos                      28          /*!< Pin E14 alternative function selection */
+#define COMMON_REG_GPIOPCTLE_PIN15_Pos                      30          /*!< Pin E15 alternative function selection */
 
 /* Bit field masks: */
-#define COMMON_REG_GPIOPCTLE_PIN0_Msk                       0x00000003  /*!< Select alternative function on PIN */
-#define COMMON_REG_GPIOPCTLE_PIN1_Msk                       0x0000000C  /*!< Select alternative function on PIN */
-#define COMMON_REG_GPIOPCTLE_PIN2_Msk                       0x00000030  /*!< Select alternative function on PIN */
-#define COMMON_REG_GPIOPCTLE_PIN3_Msk                       0x000000C0  /*!< Select alternative function on PIN */
-#define COMMON_REG_GPIOPCTLE_PIN4_Msk                       0x00000300  /*!< Select alternative function on PIN */
-#define COMMON_REG_GPIOPCTLE_PIN5_Msk                       0x00000C00  /*!< Select alternative function on PIN */
-#define COMMON_REG_GPIOPCTLE_PIN6_Msk                       0x00003000  /*!< Select alternative function on PIN */
-#define COMMON_REG_GPIOPCTLE_PIN7_Msk                       0x0000C000  /*!< Select alternative function on PIN */
-#define COMMON_REG_GPIOPCTLE_PIN8_Msk                       0x00030000  /*!< Select alternative function on PIN */
-#define COMMON_REG_GPIOPCTLE_PIN9_Msk                       0x000C0000  /*!< Select alternative function on PIN */
-#define COMMON_REG_GPIOPCTLE_PIN10_Msk                      0x00300000  /*!< Select alternative function on PIN */
-#define COMMON_REG_GPIOPCTLE_PIN11_Msk                      0x00C00000  /*!< Select alternative function on PIN */
-#define COMMON_REG_GPIOPCTLE_PIN12_Msk                      0x03000000  /*!< Select alternative function on PIN */
-#define COMMON_REG_GPIOPCTLE_PIN13_Msk                      0x0C000000  /*!< Select alternative function on PIN */
-#define COMMON_REG_GPIOPCTLE_PIN14_Msk                      0x30000000  /*!< Select alternative function on PIN */
-#define COMMON_REG_GPIOPCTLE_PIN15_Msk                      0xC0000000  /*!< Select alternative function on PIN */
+#define COMMON_REG_GPIOPCTLE_PIN0_Msk                       0x00000003  /*!< Pin E0 alternative function selection */
+#define COMMON_REG_GPIOPCTLE_PIN1_Msk                       0x0000000C  /*!< Pin E1 alternative function selection */
+#define COMMON_REG_GPIOPCTLE_PIN2_Msk                       0x00000030  /*!< Pin E2 alternative function selection */
+#define COMMON_REG_GPIOPCTLE_PIN3_Msk                       0x000000C0  /*!< Pin E3 alternative function selection */
+#define COMMON_REG_GPIOPCTLE_PIN4_Msk                       0x00000300  /*!< Pin E4 alternative function selection */
+#define COMMON_REG_GPIOPCTLE_PIN5_Msk                       0x00000C00  /*!< Pin E5 alternative function selection */
+#define COMMON_REG_GPIOPCTLE_PIN6_Msk                       0x00003000  /*!< Pin E6 alternative function selection */
+#define COMMON_REG_GPIOPCTLE_PIN7_Msk                       0x0000C000  /*!< Pin E7 alternative function selection */
+#define COMMON_REG_GPIOPCTLE_PIN8_Msk                       0x00030000  /*!< Pin E8 alternative function selection */
+#define COMMON_REG_GPIOPCTLE_PIN9_Msk                       0x000C0000  /*!< Pin E9 alternative function selection */
+#define COMMON_REG_GPIOPCTLE_PIN10_Msk                      0x00300000  /*!< Pin E10 alternative function selection */
+#define COMMON_REG_GPIOPCTLE_PIN11_Msk                      0x00C00000  /*!< Pin E11 alternative function selection */
+#define COMMON_REG_GPIOPCTLE_PIN12_Msk                      0x03000000  /*!< Pin E12 alternative function selection */
+#define COMMON_REG_GPIOPCTLE_PIN13_Msk                      0x0C000000  /*!< Pin E13 alternative function selection */
+#define COMMON_REG_GPIOPCTLE_PIN14_Msk                      0x30000000  /*!< Pin E14 alternative function selection */
+#define COMMON_REG_GPIOPCTLE_PIN15_Msk                      0xC0000000  /*!< Pin E15 alternative function selection */
 
-/*-- GPIOPCTLF: Alternate function PORTF register ----------------------------*/
+/*-- GPIOPCTLF: Port F alternative function selection register ----------------------------*/
 
 typedef struct {
-  uint32_t PIN0                                   :2;                   /*!< Select alternative function on PIN */
-  uint32_t PIN1                                   :2;                   /*!< Select alternative function on PIN */
-  uint32_t PIN2                                   :2;                   /*!< Select alternative function on PIN */
-  uint32_t PIN3                                   :2;                   /*!< Select alternative function on PIN */
-  uint32_t PIN4                                   :2;                   /*!< Select alternative function on PIN */
-  uint32_t PIN5                                   :2;                   /*!< Select alternative function on PIN */
-  uint32_t PIN6                                   :2;                   /*!< Select alternative function on PIN */
-  uint32_t PIN7                                   :2;                   /*!< Select alternative function on PIN */
-  uint32_t PIN8                                   :2;                   /*!< Select alternative function on PIN */
-  uint32_t PIN9                                   :2;                   /*!< Select alternative function on PIN */
-  uint32_t PIN10                                  :2;                   /*!< Select alternative function on PIN */
-  uint32_t PIN11                                  :2;                   /*!< Select alternative function on PIN */
-  uint32_t PIN12                                  :2;                   /*!< Select alternative function on PIN */
-  uint32_t PIN13                                  :2;                   /*!< Select alternative function on PIN */
-  uint32_t PIN14                                  :2;                   /*!< Select alternative function on PIN */
-  uint32_t PIN15                                  :2;                   /*!< Select alternative function on PIN */
+  uint32_t PIN0                                   :2;                   /*!< Pin F0 alternative function selection */
+  uint32_t PIN1                                   :2;                   /*!< Pin F1 alternative function selection */
+  uint32_t PIN2                                   :2;                   /*!< Pin F2 alternative function selection */
+  uint32_t PIN3                                   :2;                   /*!< Pin F3 alternative function selection */
+  uint32_t PIN4                                   :2;                   /*!< Pin F4 alternative function selection */
+  uint32_t PIN5                                   :2;                   /*!< Pin F5 alternative function selection */
+  uint32_t PIN6                                   :2;                   /*!< Pin F6 alternative function selection */
+  uint32_t PIN7                                   :2;                   /*!< Pin F7 alternative function selection */
+  uint32_t PIN8                                   :2;                   /*!< Pin F8 alternative function selection */
+  uint32_t PIN9                                   :2;                   /*!< Pin F9 alternative function selection */
+  uint32_t PIN10                                  :2;                   /*!< Pin F10 alternative function selection */
+  uint32_t PIN11                                  :2;                   /*!< Pin F11 alternative function selection */
+  uint32_t PIN12                                  :2;                   /*!< Pin F12 alternative function selection */
+  uint32_t PIN13                                  :2;                   /*!< Pin F13 alternative function selection */
+  uint32_t PIN14                                  :2;                   /*!< Pin F14 alternative function selection */
+  uint32_t PIN15                                  :2;                   /*!< Pin F15 alternative function selection */
 } _COMMON_REG_GPIOPCTLF_bits;
 
 /* Bit field positions: */
-#define COMMON_REG_GPIOPCTLF_PIN0_Pos                       0           /*!< Select alternative function on PIN */
-#define COMMON_REG_GPIOPCTLF_PIN1_Pos                       2           /*!< Select alternative function on PIN */
-#define COMMON_REG_GPIOPCTLF_PIN2_Pos                       4           /*!< Select alternative function on PIN */
-#define COMMON_REG_GPIOPCTLF_PIN3_Pos                       6           /*!< Select alternative function on PIN */
-#define COMMON_REG_GPIOPCTLF_PIN4_Pos                       8           /*!< Select alternative function on PIN */
-#define COMMON_REG_GPIOPCTLF_PIN5_Pos                       10          /*!< Select alternative function on PIN */
-#define COMMON_REG_GPIOPCTLF_PIN6_Pos                       12          /*!< Select alternative function on PIN */
-#define COMMON_REG_GPIOPCTLF_PIN7_Pos                       14          /*!< Select alternative function on PIN */
-#define COMMON_REG_GPIOPCTLF_PIN8_Pos                       16          /*!< Select alternative function on PIN */
-#define COMMON_REG_GPIOPCTLF_PIN9_Pos                       18          /*!< Select alternative function on PIN */
-#define COMMON_REG_GPIOPCTLF_PIN10_Pos                      20          /*!< Select alternative function on PIN */
-#define COMMON_REG_GPIOPCTLF_PIN11_Pos                      22          /*!< Select alternative function on PIN */
-#define COMMON_REG_GPIOPCTLF_PIN12_Pos                      24          /*!< Select alternative function on PIN */
-#define COMMON_REG_GPIOPCTLF_PIN13_Pos                      26          /*!< Select alternative function on PIN */
-#define COMMON_REG_GPIOPCTLF_PIN14_Pos                      28          /*!< Select alternative function on PIN */
-#define COMMON_REG_GPIOPCTLF_PIN15_Pos                      30          /*!< Select alternative function on PIN */
+#define COMMON_REG_GPIOPCTLF_PIN0_Pos                       0           /*!< Pin F0 alternative function selection */
+#define COMMON_REG_GPIOPCTLF_PIN1_Pos                       2           /*!< Pin F1 alternative function selection */
+#define COMMON_REG_GPIOPCTLF_PIN2_Pos                       4           /*!< Pin F2 alternative function selection */
+#define COMMON_REG_GPIOPCTLF_PIN3_Pos                       6           /*!< Pin F3 alternative function selection */
+#define COMMON_REG_GPIOPCTLF_PIN4_Pos                       8           /*!< Pin F4 alternative function selection */
+#define COMMON_REG_GPIOPCTLF_PIN5_Pos                       10          /*!< Pin F5 alternative function selection */
+#define COMMON_REG_GPIOPCTLF_PIN6_Pos                       12          /*!< Pin F6 alternative function selection */
+#define COMMON_REG_GPIOPCTLF_PIN7_Pos                       14          /*!< Pin F7 alternative function selection */
+#define COMMON_REG_GPIOPCTLF_PIN8_Pos                       16          /*!< Pin F8 alternative function selection */
+#define COMMON_REG_GPIOPCTLF_PIN9_Pos                       18          /*!< Pin F9 alternative function selection */
+#define COMMON_REG_GPIOPCTLF_PIN10_Pos                      20          /*!< Pin F10 alternative function selection */
+#define COMMON_REG_GPIOPCTLF_PIN11_Pos                      22          /*!< Pin F11 alternative function selection */
+#define COMMON_REG_GPIOPCTLF_PIN12_Pos                      24          /*!< Pin F12 alternative function selection */
+#define COMMON_REG_GPIOPCTLF_PIN13_Pos                      26          /*!< Pin F13 alternative function selection */
+#define COMMON_REG_GPIOPCTLF_PIN14_Pos                      28          /*!< Pin F14 alternative function selection */
+#define COMMON_REG_GPIOPCTLF_PIN15_Pos                      30          /*!< Pin F15 alternative function selection */
 
 /* Bit field masks: */
-#define COMMON_REG_GPIOPCTLF_PIN0_Msk                       0x00000003  /*!< Select alternative function on PIN */
-#define COMMON_REG_GPIOPCTLF_PIN1_Msk                       0x0000000C  /*!< Select alternative function on PIN */
-#define COMMON_REG_GPIOPCTLF_PIN2_Msk                       0x00000030  /*!< Select alternative function on PIN */
-#define COMMON_REG_GPIOPCTLF_PIN3_Msk                       0x000000C0  /*!< Select alternative function on PIN */
-#define COMMON_REG_GPIOPCTLF_PIN4_Msk                       0x00000300  /*!< Select alternative function on PIN */
-#define COMMON_REG_GPIOPCTLF_PIN5_Msk                       0x00000C00  /*!< Select alternative function on PIN */
-#define COMMON_REG_GPIOPCTLF_PIN6_Msk                       0x00003000  /*!< Select alternative function on PIN */
-#define COMMON_REG_GPIOPCTLF_PIN7_Msk                       0x0000C000  /*!< Select alternative function on PIN */
-#define COMMON_REG_GPIOPCTLF_PIN8_Msk                       0x00030000  /*!< Select alternative function on PIN */
-#define COMMON_REG_GPIOPCTLF_PIN9_Msk                       0x000C0000  /*!< Select alternative function on PIN */
-#define COMMON_REG_GPIOPCTLF_PIN10_Msk                      0x00300000  /*!< Select alternative function on PIN */
-#define COMMON_REG_GPIOPCTLF_PIN11_Msk                      0x00C00000  /*!< Select alternative function on PIN */
-#define COMMON_REG_GPIOPCTLF_PIN12_Msk                      0x03000000  /*!< Select alternative function on PIN */
-#define COMMON_REG_GPIOPCTLF_PIN13_Msk                      0x0C000000  /*!< Select alternative function on PIN */
-#define COMMON_REG_GPIOPCTLF_PIN14_Msk                      0x30000000  /*!< Select alternative function on PIN */
-#define COMMON_REG_GPIOPCTLF_PIN15_Msk                      0xC0000000  /*!< Select alternative function on PIN */
+#define COMMON_REG_GPIOPCTLF_PIN0_Msk                       0x00000003  /*!< Pin F0 alternative function selection */
+#define COMMON_REG_GPIOPCTLF_PIN1_Msk                       0x0000000C  /*!< Pin F1 alternative function selection */
+#define COMMON_REG_GPIOPCTLF_PIN2_Msk                       0x00000030  /*!< Pin F2 alternative function selection */
+#define COMMON_REG_GPIOPCTLF_PIN3_Msk                       0x000000C0  /*!< Pin F3 alternative function selection */
+#define COMMON_REG_GPIOPCTLF_PIN4_Msk                       0x00000300  /*!< Pin F4 alternative function selection */
+#define COMMON_REG_GPIOPCTLF_PIN5_Msk                       0x00000C00  /*!< Pin F5 alternative function selection */
+#define COMMON_REG_GPIOPCTLF_PIN6_Msk                       0x00003000  /*!< Pin F6 alternative function selection */
+#define COMMON_REG_GPIOPCTLF_PIN7_Msk                       0x0000C000  /*!< Pin F7 alternative function selection */
+#define COMMON_REG_GPIOPCTLF_PIN8_Msk                       0x00030000  /*!< Pin F8 alternative function selection */
+#define COMMON_REG_GPIOPCTLF_PIN9_Msk                       0x000C0000  /*!< Pin F9 alternative function selection */
+#define COMMON_REG_GPIOPCTLF_PIN10_Msk                      0x00300000  /*!< Pin F10 alternative function selection */
+#define COMMON_REG_GPIOPCTLF_PIN11_Msk                      0x00C00000  /*!< Pin F11 alternative function selection */
+#define COMMON_REG_GPIOPCTLF_PIN12_Msk                      0x03000000  /*!< Pin F12 alternative function selection */
+#define COMMON_REG_GPIOPCTLF_PIN13_Msk                      0x0C000000  /*!< Pin F13 alternative function selection */
+#define COMMON_REG_GPIOPCTLF_PIN14_Msk                      0x30000000  /*!< Pin F14 alternative function selection */
+#define COMMON_REG_GPIOPCTLF_PIN15_Msk                      0xC0000000  /*!< Pin F15 alternative function selection */
 
-/*-- GPIOPCTLG: Alternate function PORTG register ----------------------------*/
+/*-- GPIOPCTLG: Port G alternative function selection register ----------------------------*/
 
 typedef struct {
-  uint32_t PIN0                                   :2;                   /*!< Select alternative function on PIN */
-  uint32_t PIN1                                   :2;                   /*!< Select alternative function on PIN */
-  uint32_t PIN2                                   :2;                   /*!< Select alternative function on PIN */
-  uint32_t PIN3                                   :2;                   /*!< Select alternative function on PIN */
-  uint32_t PIN4                                   :2;                   /*!< Select alternative function on PIN */
-  uint32_t PIN5                                   :2;                   /*!< Select alternative function on PIN */
-  uint32_t PIN6                                   :2;                   /*!< Select alternative function on PIN */
-  uint32_t PIN7                                   :2;                   /*!< Select alternative function on PIN */
-  uint32_t PIN8                                   :2;                   /*!< Select alternative function on PIN */
-  uint32_t PIN9                                   :2;                   /*!< Select alternative function on PIN */
-  uint32_t PIN10                                  :2;                   /*!< Select alternative function on PIN */
-  uint32_t PIN11                                  :2;                   /*!< Select alternative function on PIN */
-  uint32_t PIN12                                  :2;                   /*!< Select alternative function on PIN */
-  uint32_t PIN13                                  :2;                   /*!< Select alternative function on PIN */
-  uint32_t PIN14                                  :2;                   /*!< Select alternative function on PIN */
-  uint32_t PIN15                                  :2;                   /*!< Select alternative function on PIN */
+  uint32_t PIN0                                   :2;                   /*!< Pin G0 alternative function selection */
+  uint32_t PIN1                                   :2;                   /*!< Pin G1 alternative function selection */
+  uint32_t PIN2                                   :2;                   /*!< Pin G2 alternative function selection */
+  uint32_t PIN3                                   :2;                   /*!< Pin G3 alternative function selection */
+  uint32_t PIN4                                   :2;                   /*!< Pin G4 alternative function selection */
+  uint32_t PIN5                                   :2;                   /*!< Pin G5 alternative function selection */
+  uint32_t PIN6                                   :2;                   /*!< Pin G6 alternative function selection */
+  uint32_t PIN7                                   :2;                   /*!< Pin G7 alternative function selection */
+  uint32_t PIN8                                   :2;                   /*!< Pin G8 alternative function selection */
+  uint32_t PIN9                                   :2;                   /*!< Pin G9 alternative function selection */
+  uint32_t PIN10                                  :2;                   /*!< Pin G10 alternative function selection */
+  uint32_t PIN11                                  :2;                   /*!< Pin G11 alternative function selection */
+  uint32_t PIN12                                  :2;                   /*!< Pin G12 alternative function selection */
+  uint32_t PIN13                                  :2;                   /*!< Pin G13 alternative function selection */
+  uint32_t PIN14                                  :2;                   /*!< Pin G14 alternative function selection */
+  uint32_t PIN15                                  :2;                   /*!< Pin G15 alternative function selection */
 } _COMMON_REG_GPIOPCTLG_bits;
 
 /* Bit field positions: */
-#define COMMON_REG_GPIOPCTLG_PIN0_Pos                       0           /*!< Select alternative function on PIN */
-#define COMMON_REG_GPIOPCTLG_PIN1_Pos                       2           /*!< Select alternative function on PIN */
-#define COMMON_REG_GPIOPCTLG_PIN2_Pos                       4           /*!< Select alternative function on PIN */
-#define COMMON_REG_GPIOPCTLG_PIN3_Pos                       6           /*!< Select alternative function on PIN */
-#define COMMON_REG_GPIOPCTLG_PIN4_Pos                       8           /*!< Select alternative function on PIN */
-#define COMMON_REG_GPIOPCTLG_PIN5_Pos                       10          /*!< Select alternative function on PIN */
-#define COMMON_REG_GPIOPCTLG_PIN6_Pos                       12          /*!< Select alternative function on PIN */
-#define COMMON_REG_GPIOPCTLG_PIN7_Pos                       14          /*!< Select alternative function on PIN */
-#define COMMON_REG_GPIOPCTLG_PIN8_Pos                       16          /*!< Select alternative function on PIN */
-#define COMMON_REG_GPIOPCTLG_PIN9_Pos                       18          /*!< Select alternative function on PIN */
-#define COMMON_REG_GPIOPCTLG_PIN10_Pos                      20          /*!< Select alternative function on PIN */
-#define COMMON_REG_GPIOPCTLG_PIN11_Pos                      22          /*!< Select alternative function on PIN */
-#define COMMON_REG_GPIOPCTLG_PIN12_Pos                      24          /*!< Select alternative function on PIN */
-#define COMMON_REG_GPIOPCTLG_PIN13_Pos                      26          /*!< Select alternative function on PIN */
-#define COMMON_REG_GPIOPCTLG_PIN14_Pos                      28          /*!< Select alternative function on PIN */
-#define COMMON_REG_GPIOPCTLG_PIN15_Pos                      30          /*!< Select alternative function on PIN */
+#define COMMON_REG_GPIOPCTLG_PIN0_Pos                       0           /*!< Pin G0 alternative function selection */
+#define COMMON_REG_GPIOPCTLG_PIN1_Pos                       2           /*!< Pin G1 alternative function selection */
+#define COMMON_REG_GPIOPCTLG_PIN2_Pos                       4           /*!< Pin G2 alternative function selection */
+#define COMMON_REG_GPIOPCTLG_PIN3_Pos                       6           /*!< Pin G3 alternative function selection */
+#define COMMON_REG_GPIOPCTLG_PIN4_Pos                       8           /*!< Pin G4 alternative function selection */
+#define COMMON_REG_GPIOPCTLG_PIN5_Pos                       10          /*!< Pin G5 alternative function selection */
+#define COMMON_REG_GPIOPCTLG_PIN6_Pos                       12          /*!< Pin G6 alternative function selection */
+#define COMMON_REG_GPIOPCTLG_PIN7_Pos                       14          /*!< Pin G7 alternative function selection */
+#define COMMON_REG_GPIOPCTLG_PIN8_Pos                       16          /*!< Pin G8 alternative function selection */
+#define COMMON_REG_GPIOPCTLG_PIN9_Pos                       18          /*!< Pin G9 alternative function selection */
+#define COMMON_REG_GPIOPCTLG_PIN10_Pos                      20          /*!< Pin G10 alternative function selection */
+#define COMMON_REG_GPIOPCTLG_PIN11_Pos                      22          /*!< Pin G11 alternative function selection */
+#define COMMON_REG_GPIOPCTLG_PIN12_Pos                      24          /*!< Pin G12 alternative function selection */
+#define COMMON_REG_GPIOPCTLG_PIN13_Pos                      26          /*!< Pin G13 alternative function selection */
+#define COMMON_REG_GPIOPCTLG_PIN14_Pos                      28          /*!< Pin G14 alternative function selection */
+#define COMMON_REG_GPIOPCTLG_PIN15_Pos                      30          /*!< Pin G15 alternative function selection */
 
 /* Bit field masks: */
-#define COMMON_REG_GPIOPCTLG_PIN0_Msk                       0x00000003  /*!< Select alternative function on PIN */
-#define COMMON_REG_GPIOPCTLG_PIN1_Msk                       0x0000000C  /*!< Select alternative function on PIN */
-#define COMMON_REG_GPIOPCTLG_PIN2_Msk                       0x00000030  /*!< Select alternative function on PIN */
-#define COMMON_REG_GPIOPCTLG_PIN3_Msk                       0x000000C0  /*!< Select alternative function on PIN */
-#define COMMON_REG_GPIOPCTLG_PIN4_Msk                       0x00000300  /*!< Select alternative function on PIN */
-#define COMMON_REG_GPIOPCTLG_PIN5_Msk                       0x00000C00  /*!< Select alternative function on PIN */
-#define COMMON_REG_GPIOPCTLG_PIN6_Msk                       0x00003000  /*!< Select alternative function on PIN */
-#define COMMON_REG_GPIOPCTLG_PIN7_Msk                       0x0000C000  /*!< Select alternative function on PIN */
-#define COMMON_REG_GPIOPCTLG_PIN8_Msk                       0x00030000  /*!< Select alternative function on PIN */
-#define COMMON_REG_GPIOPCTLG_PIN9_Msk                       0x000C0000  /*!< Select alternative function on PIN */
-#define COMMON_REG_GPIOPCTLG_PIN10_Msk                      0x00300000  /*!< Select alternative function on PIN */
-#define COMMON_REG_GPIOPCTLG_PIN11_Msk                      0x00C00000  /*!< Select alternative function on PIN */
-#define COMMON_REG_GPIOPCTLG_PIN12_Msk                      0x03000000  /*!< Select alternative function on PIN */
-#define COMMON_REG_GPIOPCTLG_PIN13_Msk                      0x0C000000  /*!< Select alternative function on PIN */
-#define COMMON_REG_GPIOPCTLG_PIN14_Msk                      0x30000000  /*!< Select alternative function on PIN */
-#define COMMON_REG_GPIOPCTLG_PIN15_Msk                      0xC0000000  /*!< Select alternative function on PIN */
+#define COMMON_REG_GPIOPCTLG_PIN0_Msk                       0x00000003  /*!< Pin G0 alternative function selection */
+#define COMMON_REG_GPIOPCTLG_PIN1_Msk                       0x0000000C  /*!< Pin G1 alternative function selection */
+#define COMMON_REG_GPIOPCTLG_PIN2_Msk                       0x00000030  /*!< Pin G2 alternative function selection */
+#define COMMON_REG_GPIOPCTLG_PIN3_Msk                       0x000000C0  /*!< Pin G3 alternative function selection */
+#define COMMON_REG_GPIOPCTLG_PIN4_Msk                       0x00000300  /*!< Pin G4 alternative function selection */
+#define COMMON_REG_GPIOPCTLG_PIN5_Msk                       0x00000C00  /*!< Pin G5 alternative function selection */
+#define COMMON_REG_GPIOPCTLG_PIN6_Msk                       0x00003000  /*!< Pin G6 alternative function selection */
+#define COMMON_REG_GPIOPCTLG_PIN7_Msk                       0x0000C000  /*!< Pin G7 alternative function selection */
+#define COMMON_REG_GPIOPCTLG_PIN8_Msk                       0x00030000  /*!< Pin G8 alternative function selection */
+#define COMMON_REG_GPIOPCTLG_PIN9_Msk                       0x000C0000  /*!< Pin G9 alternative function selection */
+#define COMMON_REG_GPIOPCTLG_PIN10_Msk                      0x00300000  /*!< Pin G10 alternative function selection */
+#define COMMON_REG_GPIOPCTLG_PIN11_Msk                      0x00C00000  /*!< Pin G11 alternative function selection */
+#define COMMON_REG_GPIOPCTLG_PIN12_Msk                      0x03000000  /*!< Pin G12 alternative function selection */
+#define COMMON_REG_GPIOPCTLG_PIN13_Msk                      0x0C000000  /*!< Pin G13 alternative function selection */
+#define COMMON_REG_GPIOPCTLG_PIN14_Msk                      0x30000000  /*!< Pin G14 alternative function selection */
+#define COMMON_REG_GPIOPCTLG_PIN15_Msk                      0xC0000000  /*!< Pin G15 alternative function selection */
 
-/*-- GPIOPCTLH: Alternate function PORTH register ----------------------------*/
+/*-- GPIOPCTLH: Port H alternative function selection register ----------------------------*/
 
 typedef struct {
-  uint32_t PIN0                                   :2;                   /*!< Select alternative function on PIN */
-  uint32_t PIN1                                   :2;                   /*!< Select alternative function on PIN */
-  uint32_t PIN2                                   :2;                   /*!< Select alternative function on PIN */
-  uint32_t PIN3                                   :2;                   /*!< Select alternative function on PIN */
-  uint32_t PIN4                                   :2;                   /*!< Select alternative function on PIN */
-  uint32_t PIN5                                   :2;                   /*!< Select alternative function on PIN */
-  uint32_t PIN6                                   :2;                   /*!< Select alternative function on PIN */
-  uint32_t PIN7                                   :2;                   /*!< Select alternative function on PIN */
-  uint32_t PIN8                                   :2;                   /*!< Select alternative function on PIN */
-  uint32_t PIN9                                   :2;                   /*!< Select alternative function on PIN */
-  uint32_t PIN10                                  :2;                   /*!< Select alternative function on PIN */
-  uint32_t PIN11                                  :2;                   /*!< Select alternative function on PIN */
-  uint32_t PIN12                                  :2;                   /*!< Select alternative function on PIN */
-  uint32_t PIN13                                  :2;                   /*!< Select alternative function on PIN */
-  uint32_t PIN14                                  :2;                   /*!< Select alternative function on PIN */
-  uint32_t PIN15                                  :2;                   /*!< Select alternative function on PIN */
+  uint32_t PIN0                                   :2;                   /*!< Pin H0 alternative function selection */
+  uint32_t PIN1                                   :2;                   /*!< Pin H1 alternative function selection */
+  uint32_t PIN2                                   :2;                   /*!< Pin H2 alternative function selection */
+  uint32_t PIN3                                   :2;                   /*!< Pin H3 alternative function selection */
+  uint32_t PIN4                                   :2;                   /*!< Pin H4 alternative function selection */
+  uint32_t PIN5                                   :2;                   /*!< Pin H5 alternative function selection */
+  uint32_t PIN6                                   :2;                   /*!< Pin H6 alternative function selection */
+  uint32_t PIN7                                   :2;                   /*!< Pin H7 alternative function selection */
+  uint32_t PIN8                                   :2;                   /*!< Pin H8 alternative function selection */
+  uint32_t PIN9                                   :2;                   /*!< Pin H9 alternative function selection */
+  uint32_t PIN10                                  :2;                   /*!< Pin H10 alternative function selection */
+  uint32_t PIN11                                  :2;                   /*!< Pin H11 alternative function selection */
+  uint32_t PIN12                                  :2;                   /*!< Pin H12 alternative function selection */
+  uint32_t PIN13                                  :2;                   /*!< Pin H13 alternative function selection */
+  uint32_t PIN14                                  :2;                   /*!< Pin H14 alternative function selection */
+  uint32_t PIN15                                  :2;                   /*!< Pin H15 alternative function selection */
 } _COMMON_REG_GPIOPCTLH_bits;
 
 /* Bit field positions: */
-#define COMMON_REG_GPIOPCTLH_PIN0_Pos                       0           /*!< Select alternative function on PIN */
-#define COMMON_REG_GPIOPCTLH_PIN1_Pos                       2           /*!< Select alternative function on PIN */
-#define COMMON_REG_GPIOPCTLH_PIN2_Pos                       4           /*!< Select alternative function on PIN */
-#define COMMON_REG_GPIOPCTLH_PIN3_Pos                       6           /*!< Select alternative function on PIN */
-#define COMMON_REG_GPIOPCTLH_PIN4_Pos                       8           /*!< Select alternative function on PIN */
-#define COMMON_REG_GPIOPCTLH_PIN5_Pos                       10          /*!< Select alternative function on PIN */
-#define COMMON_REG_GPIOPCTLH_PIN6_Pos                       12          /*!< Select alternative function on PIN */
-#define COMMON_REG_GPIOPCTLH_PIN7_Pos                       14          /*!< Select alternative function on PIN */
-#define COMMON_REG_GPIOPCTLH_PIN8_Pos                       16          /*!< Select alternative function on PIN */
-#define COMMON_REG_GPIOPCTLH_PIN9_Pos                       18          /*!< Select alternative function on PIN */
-#define COMMON_REG_GPIOPCTLH_PIN10_Pos                      20          /*!< Select alternative function on PIN */
-#define COMMON_REG_GPIOPCTLH_PIN11_Pos                      22          /*!< Select alternative function on PIN */
-#define COMMON_REG_GPIOPCTLH_PIN12_Pos                      24          /*!< Select alternative function on PIN */
-#define COMMON_REG_GPIOPCTLH_PIN13_Pos                      26          /*!< Select alternative function on PIN */
-#define COMMON_REG_GPIOPCTLH_PIN14_Pos                      28          /*!< Select alternative function on PIN */
-#define COMMON_REG_GPIOPCTLH_PIN15_Pos                      30          /*!< Select alternative function on PIN */
+#define COMMON_REG_GPIOPCTLH_PIN0_Pos                       0           /*!< Pin H0 alternative function selection */
+#define COMMON_REG_GPIOPCTLH_PIN1_Pos                       2           /*!< Pin H1 alternative function selection */
+#define COMMON_REG_GPIOPCTLH_PIN2_Pos                       4           /*!< Pin H2 alternative function selection */
+#define COMMON_REG_GPIOPCTLH_PIN3_Pos                       6           /*!< Pin H3 alternative function selection */
+#define COMMON_REG_GPIOPCTLH_PIN4_Pos                       8           /*!< Pin H4 alternative function selection */
+#define COMMON_REG_GPIOPCTLH_PIN5_Pos                       10          /*!< Pin H5 alternative function selection */
+#define COMMON_REG_GPIOPCTLH_PIN6_Pos                       12          /*!< Pin H6 alternative function selection */
+#define COMMON_REG_GPIOPCTLH_PIN7_Pos                       14          /*!< Pin H7 alternative function selection */
+#define COMMON_REG_GPIOPCTLH_PIN8_Pos                       16          /*!< Pin H8 alternative function selection */
+#define COMMON_REG_GPIOPCTLH_PIN9_Pos                       18          /*!< Pin H9 alternative function selection */
+#define COMMON_REG_GPIOPCTLH_PIN10_Pos                      20          /*!< Pin H10 alternative function selection */
+#define COMMON_REG_GPIOPCTLH_PIN11_Pos                      22          /*!< Pin H11 alternative function selection */
+#define COMMON_REG_GPIOPCTLH_PIN12_Pos                      24          /*!< Pin H12 alternative function selection */
+#define COMMON_REG_GPIOPCTLH_PIN13_Pos                      26          /*!< Pin H13 alternative function selection */
+#define COMMON_REG_GPIOPCTLH_PIN14_Pos                      28          /*!< Pin H14 alternative function selection */
+#define COMMON_REG_GPIOPCTLH_PIN15_Pos                      30          /*!< Pin H15 alternative function selection */
 
 /* Bit field masks: */
-#define COMMON_REG_GPIOPCTLH_PIN0_Msk                       0x00000003  /*!< Select alternative function on PIN */
-#define COMMON_REG_GPIOPCTLH_PIN1_Msk                       0x0000000C  /*!< Select alternative function on PIN */
-#define COMMON_REG_GPIOPCTLH_PIN2_Msk                       0x00000030  /*!< Select alternative function on PIN */
-#define COMMON_REG_GPIOPCTLH_PIN3_Msk                       0x000000C0  /*!< Select alternative function on PIN */
-#define COMMON_REG_GPIOPCTLH_PIN4_Msk                       0x00000300  /*!< Select alternative function on PIN */
-#define COMMON_REG_GPIOPCTLH_PIN5_Msk                       0x00000C00  /*!< Select alternative function on PIN */
-#define COMMON_REG_GPIOPCTLH_PIN6_Msk                       0x00003000  /*!< Select alternative function on PIN */
-#define COMMON_REG_GPIOPCTLH_PIN7_Msk                       0x0000C000  /*!< Select alternative function on PIN */
-#define COMMON_REG_GPIOPCTLH_PIN8_Msk                       0x00030000  /*!< Select alternative function on PIN */
-#define COMMON_REG_GPIOPCTLH_PIN9_Msk                       0x000C0000  /*!< Select alternative function on PIN */
-#define COMMON_REG_GPIOPCTLH_PIN10_Msk                      0x00300000  /*!< Select alternative function on PIN */
-#define COMMON_REG_GPIOPCTLH_PIN11_Msk                      0x00C00000  /*!< Select alternative function on PIN */
-#define COMMON_REG_GPIOPCTLH_PIN12_Msk                      0x03000000  /*!< Select alternative function on PIN */
-#define COMMON_REG_GPIOPCTLH_PIN13_Msk                      0x0C000000  /*!< Select alternative function on PIN */
-#define COMMON_REG_GPIOPCTLH_PIN14_Msk                      0x30000000  /*!< Select alternative function on PIN */
-#define COMMON_REG_GPIOPCTLH_PIN15_Msk                      0xC0000000  /*!< Select alternative function on PIN */
+#define COMMON_REG_GPIOPCTLH_PIN0_Msk                       0x00000003  /*!< Pin H0 alternative function selection */
+#define COMMON_REG_GPIOPCTLH_PIN1_Msk                       0x0000000C  /*!< Pin H1 alternative function selection */
+#define COMMON_REG_GPIOPCTLH_PIN2_Msk                       0x00000030  /*!< Pin H2 alternative function selection */
+#define COMMON_REG_GPIOPCTLH_PIN3_Msk                       0x000000C0  /*!< Pin H3 alternative function selection */
+#define COMMON_REG_GPIOPCTLH_PIN4_Msk                       0x00000300  /*!< Pin H4 alternative function selection */
+#define COMMON_REG_GPIOPCTLH_PIN5_Msk                       0x00000C00  /*!< Pin H5 alternative function selection */
+#define COMMON_REG_GPIOPCTLH_PIN6_Msk                       0x00003000  /*!< Pin H6 alternative function selection */
+#define COMMON_REG_GPIOPCTLH_PIN7_Msk                       0x0000C000  /*!< Pin H7 alternative function selection */
+#define COMMON_REG_GPIOPCTLH_PIN8_Msk                       0x00030000  /*!< Pin H8 alternative function selection */
+#define COMMON_REG_GPIOPCTLH_PIN9_Msk                       0x000C0000  /*!< Pin H9 alternative function selection */
+#define COMMON_REG_GPIOPCTLH_PIN10_Msk                      0x00300000  /*!< Pin H10 alternative function selection */
+#define COMMON_REG_GPIOPCTLH_PIN11_Msk                      0x00C00000  /*!< Pin H11 alternative function selection */
+#define COMMON_REG_GPIOPCTLH_PIN12_Msk                      0x03000000  /*!< Pin H12 alternative function selection */
+#define COMMON_REG_GPIOPCTLH_PIN13_Msk                      0x0C000000  /*!< Pin H13 alternative function selection */
+#define COMMON_REG_GPIOPCTLH_PIN14_Msk                      0x30000000  /*!< Pin H14 alternative function selection */
+#define COMMON_REG_GPIOPCTLH_PIN15_Msk                      0xC0000000  /*!< Pin H15 alternative function selection */
 
-/*-- GPIOODCTL0: Control register circuit 'Pull-up' ports A, B ---------------*/
+/*-- GPIOODCTL0: Port A,B open-drain enable register ---------------*/
 
 typedef struct {
-  uint32_t PORTA                                  :16;                  /*!< Enable Pull-up of each PIN for Port A */
-  uint32_t PORTB                                  :16;                  /*!< Enable Pull-up of each PIN for Port B */
+  uint32_t PORTA                                  :16;                  /*!< Port A open-drain enable */
+  uint32_t PORTB                                  :16;                  /*!< Port B open-drain enable */
 } _COMMON_REG_GPIOODCTL0_bits;
 
 /* Bit field positions: */
-#define COMMON_REG_GPIOODCTL0_PORTA_Pos                     0           /*!< Enable Pull-up of each PIN for Port A */
-#define COMMON_REG_GPIOODCTL0_PORTB_Pos                     16          /*!< Enable Pull-up of each PIN for Port B */
+#define COMMON_REG_GPIOODCTL0_PORTA_Pos                     0           /*!< Port A open-drain enable */
+#define COMMON_REG_GPIOODCTL0_PORTB_Pos                     16          /*!< Port B open-drain enable */
 
 /* Bit field masks: */
-#define COMMON_REG_GPIOODCTL0_PORTA_Msk                     0x0000FFFF  /*!< Enable Pull-up of each PIN for Port A */
-#define COMMON_REG_GPIOODCTL0_PORTB_Msk                     0xFFFF0000  /*!< Enable Pull-up of each PIN for Port B */
+#define COMMON_REG_GPIOODCTL0_PORTA_Msk                     0x0000FFFF  /*!< Port A open-drain enable */
+#define COMMON_REG_GPIOODCTL0_PORTB_Msk                     0xFFFF0000  /*!< Port B open-drain enable */
 
-/*-- GPIOODCTL1: Control register circuit 'Pull-up' ports C, D ---------------*/
+/*-- GPIOODCTL1: Port C,D open-drain enable register ---------------*/
 
 typedef struct {
-  uint32_t PORTC                                  :16;                  /*!< Enable Pull-up of each PIN for Port C */
-  uint32_t PORTD                                  :16;                  /*!< Enable Pull-up of each PIN for Port D */
+  uint32_t PORTC                                  :16;                  /*!< Port C open-drain enable */
+  uint32_t PORTD                                  :16;                  /*!< Port D open-drain enable */
 } _COMMON_REG_GPIOODCTL1_bits;
 
 /* Bit field positions: */
-#define COMMON_REG_GPIOODCTL1_PORTC_Pos                     0           /*!< Enable Pull-up of each PIN for Port C */
-#define COMMON_REG_GPIOODCTL1_PORTD_Pos                     16          /*!< Enable Pull-up of each PIN for Port D */
+#define COMMON_REG_GPIOODCTL1_PORTC_Pos                     0           /*!< Port C open-drain enable */
+#define COMMON_REG_GPIOODCTL1_PORTD_Pos                     16          /*!< Port D open-drain enable */
 
 /* Bit field masks: */
-#define COMMON_REG_GPIOODCTL1_PORTC_Msk                     0x0000FFFF  /*!< Enable Pull-up of each PIN for Port C */
-#define COMMON_REG_GPIOODCTL1_PORTD_Msk                     0xFFFF0000  /*!< Enable Pull-up of each PIN for Port D */
+#define COMMON_REG_GPIOODCTL1_PORTC_Msk                     0x0000FFFF  /*!< Port C open-drain enable */
+#define COMMON_REG_GPIOODCTL1_PORTD_Msk                     0xFFFF0000  /*!< Port D open-drain enable */
 
-/*-- GPIOODCTL2: Control register circuit 'Pull-up' ports E, F ---------------*/
+/*-- GPIOODCTL2: Port E,F open-drain enable register ---------------*/
 
 typedef struct {
-  uint32_t PORTE                                  :16;                  /*!< Enable Pull-up of each PIN for Port E */
-  uint32_t PORTF                                  :16;                  /*!< Enable Pull-up of each PIN for Port F */
+  uint32_t PORTE                                  :16;                  /*!< Port E open-drain enable */
+  uint32_t PORTF                                  :16;                  /*!< Port F open-drain enable */
 } _COMMON_REG_GPIOODCTL2_bits;
 
 /* Bit field positions: */
-#define COMMON_REG_GPIOODCTL2_PORTE_Pos                     0           /*!< Enable Pull-up of each PIN for Port E */
-#define COMMON_REG_GPIOODCTL2_PORTF_Pos                     16          /*!< Enable Pull-up of each PIN for Port F */
+#define COMMON_REG_GPIOODCTL2_PORTE_Pos                     0           /*!< Port E open-drain enable */
+#define COMMON_REG_GPIOODCTL2_PORTF_Pos                     16          /*!< Port F open-drain enable */
 
 /* Bit field masks: */
-#define COMMON_REG_GPIOODCTL2_PORTE_Msk                     0x0000FFFF  /*!< Enable Pull-up of each PIN for Port E */
-#define COMMON_REG_GPIOODCTL2_PORTF_Msk                     0xFFFF0000  /*!< Enable Pull-up of each PIN for Port F */
+#define COMMON_REG_GPIOODCTL2_PORTE_Msk                     0x0000FFFF  /*!< Port E open-drain enable */
+#define COMMON_REG_GPIOODCTL2_PORTF_Msk                     0xFFFF0000  /*!< Port F open-drain enable */
 
-/*-- GPIOODCTL3: Control register circuit 'Pull-up' ports G, H ---------------*/
+/*-- GPIOODCTL3: Port G,H open-drain enable register ---------------*/
 
 typedef struct {
-  uint32_t PORTG                                  :16;                  /*!< Enable Pull-up of each PIN for Port G */
-  uint32_t PORTH                                  :16;                  /*!< Enable Pull-up of each PIN for Port H */
+  uint32_t PORTG                                  :16;                  /*!< Port G open-drain enable */
+  uint32_t PORTH                                  :16;                  /*!< Port H open-drain enable */
 } _COMMON_REG_GPIOODCTL3_bits;
 
 /* Bit field positions: */
-#define COMMON_REG_GPIOODCTL3_PORTG_Pos                     0           /*!< Enable Pull-up of each PIN for Port G */
-#define COMMON_REG_GPIOODCTL3_PORTH_Pos                     16          /*!< Enable Pull-up of each PIN for Port H */
+#define COMMON_REG_GPIOODCTL3_PORTG_Pos                     0           /*!< Port G open-drain enable */
+#define COMMON_REG_GPIOODCTL3_PORTH_Pos                     16          /*!< Port H open-drain enable */
 
 /* Bit field masks: */
-#define COMMON_REG_GPIOODCTL3_PORTG_Msk                     0x0000FFFF  /*!< Enable Pull-up of each PIN for Port G */
-#define COMMON_REG_GPIOODCTL3_PORTH_Msk                     0xFFFF0000  /*!< Enable Pull-up of each PIN for Port H */
+#define COMMON_REG_GPIOODCTL3_PORTG_Msk                     0x0000FFFF  /*!< Port G open-drain enable */
+#define COMMON_REG_GPIOODCTL3_PORTH_Msk                     0xFFFF0000  /*!< Port H open-drain enable */
 
-/*-- GPIOODSCTL0: Control register output capability ports A,B ---------------*/
+/*-- GPIODSCTL0: Port A,B strength control register ---------------*/
 
 typedef struct {
-  uint32_t PORTA                                  :16;                  /*!< Enable current of each PIN 16mA instead of 8mA for Port A */
-  uint32_t PORTB                                  :16;                  /*!< Enable current of each PIN 16mA instead of 8mA for Port B */
-} _COMMON_REG_GPIOODSCTL0_bits;
+  uint32_t PORTA                                  :16;                  /*!< Port A strength control */
+  uint32_t PORTB                                  :16;                  /*!< Port B strength control */
+} _COMMON_REG_GPIODSCTL0_bits;
 
 /* Bit field positions: */
-#define COMMON_REG_GPIOODSCTL0_PORTA_Pos                    0           /*!< Enable current of each PIN 16mA instead of 8mA for Port A */
-#define COMMON_REG_GPIOODSCTL0_PORTB_Pos                    16          /*!< Enable current of each PIN 16mA instead of 8mA for Port B */
+#define COMMON_REG_GPIODSCTL0_PORTA_Pos                    0           /*!< Port A strength control */
+#define COMMON_REG_GPIODSCTL0_PORTB_Pos                    16          /*!< Port B strength control */
 
 /* Bit field masks: */
-#define COMMON_REG_GPIOODSCTL0_PORTA_Msk                    0x0000FFFF  /*!< Enable current of each PIN 16mA instead of 8mA for Port A */
-#define COMMON_REG_GPIOODSCTL0_PORTB_Msk                    0xFFFF0000  /*!< Enable current of each PIN 16mA instead of 8mA for Port B */
+#define COMMON_REG_GPIODSCTL0_PORTA_Msk                    0x0000FFFF  /*!< Port A strength control */
+#define COMMON_REG_GPIODSCTL0_PORTB_Msk                    0xFFFF0000  /*!< Port B strength control */
 
-/*-- GPIOODSCTL1: Control register output capability ports C,D ---------------*/
+/*-- GPIODSCTL1: Port C,D strength control register ---------------*/
 
 typedef struct {
-  uint32_t PORTC                                  :16;                  /*!< Enable current of each PIN 16mA instead of 8mA for Port C */
-  uint32_t PORTD                                  :16;                  /*!< Enable current of each PIN 16mA instead of 8mA for Port D */
-} _COMMON_REG_GPIOODSCTL1_bits;
+  uint32_t PORTC                                  :16;                  /*!< Port C strength control */
+  uint32_t PORTD                                  :16;                  /*!< Port D strength control */
+} _COMMON_REG_GPIODSCTL1_bits;
 
 /* Bit field positions: */
-#define COMMON_REG_GPIOODSCTL1_PORTC_Pos                    0           /*!< Enable current of each PIN 16mA instead of 8mA for Port C */
-#define COMMON_REG_GPIOODSCTL1_PORTD_Pos                    16          /*!< Enable current of each PIN 16mA instead of 8mA for Port D */
+#define COMMON_REG_GPIODSCTL1_PORTC_Pos                    0           /*!< Port C strength control */
+#define COMMON_REG_GPIODSCTL1_PORTD_Pos                    16          /*!< Port D strength control */
 
 /* Bit field masks: */
-#define COMMON_REG_GPIOODSCTL1_PORTC_Msk                    0x0000FFFF  /*!< Enable current of each PIN 16mA instead of 8mA for Port C */
-#define COMMON_REG_GPIOODSCTL1_PORTD_Msk                    0xFFFF0000  /*!< Enable current of each PIN 16mA instead of 8mA for Port D */
+#define COMMON_REG_GPIODSCTL1_PORTC_Msk                    0x0000FFFF  /*!< Port C strength control */
+#define COMMON_REG_GPIODSCTL1_PORTD_Msk                    0xFFFF0000  /*!< Port D strength control */
 
-/*-- GPIOODSCTL2: Control register output capability ports E,F ---------------*/
+/*-- GPIODSCTL2: Port E,F strength control register ---------------*/
 
 typedef struct {
-  uint32_t PORTE                                  :16;                  /*!< Enable current of each PIN 16mA instead of 8mA for Port E */
-  uint32_t PORTF                                  :16;                  /*!< Enable current of each PIN 16mA instead of 8mA for Port F */
-} _COMMON_REG_GPIOODSCTL2_bits;
+  uint32_t PORTE                                  :16;                  /*!< Port E strength control */
+  uint32_t PORTF                                  :16;                  /*!< Port F strength control */
+} _COMMON_REG_GPIODSCTL2_bits;
 
 /* Bit field positions: */
-#define COMMON_REG_GPIOODSCTL2_PORTE_Pos                    0           /*!< Enable current of each PIN 16mA instead of 8mA for Port E */
-#define COMMON_REG_GPIOODSCTL2_PORTF_Pos                    16          /*!< Enable current of each PIN 16mA instead of 8mA for Port F */
+#define COMMON_REG_GPIODSCTL2_PORTE_Pos                    0           /*!< Port E strength control */
+#define COMMON_REG_GPIODSCTL2_PORTF_Pos                    16          /*!< Port F strength control */
 
 /* Bit field masks: */
-#define COMMON_REG_GPIOODSCTL2_PORTE_Msk                    0x0000FFFF  /*!< Enable current of each PIN 16mA instead of 8mA for Port E */
-#define COMMON_REG_GPIOODSCTL2_PORTF_Msk                    0xFFFF0000  /*!< Enable current of each PIN 16mA instead of 8mA for Port F */
+#define COMMON_REG_GPIODSCTL2_PORTE_Msk                    0x0000FFFF  /*!< Port E strength control */
+#define COMMON_REG_GPIODSCTL2_PORTF_Msk                    0xFFFF0000  /*!< Port F strength control */
 
-/*-- GPIOODSCTL3: Control register output capability ports G,H ---------------*/
+/*-- GPIODSCTL3: Port G,H strength control register ---------------*/
 
 typedef struct {
-  uint32_t PORTG                                  :16;                  /*!< Enable current of each PIN 16mA instead of 8mA for Port G */
-  uint32_t PORTH                                  :16;                  /*!< Enable current of each PIN 16mA instead of 8mA for Port H */
-} _COMMON_REG_GPIOODSCTL3_bits;
+  uint32_t PORTG                                  :16;                  /*!< Port G strength control */
+  uint32_t PORTH                                  :16;                  /*!< Port H strength control */
+} _COMMON_REG_GPIODSCTL3_bits;
 
 /* Bit field positions: */
-#define COMMON_REG_GPIOODSCTL3_PORTG_Pos                    0           /*!< Enable current of each PIN 16mA instead of 8mA for Port G */
-#define COMMON_REG_GPIOODSCTL3_PORTH_Pos                    16          /*!< Enable current of each PIN 16mA instead of 8mA for Port H */
+#define COMMON_REG_GPIODSCTL3_PORTG_Pos                    0           /*!< Port G strength control */
+#define COMMON_REG_GPIODSCTL3_PORTH_Pos                    16          /*!< Port H strength control */
 
 /* Bit field masks: */
-#define COMMON_REG_GPIOODSCTL3_PORTG_Msk                    0x0000FFFF  /*!< Enable current of each PIN 16mA instead of 8mA for Port G */
-#define COMMON_REG_GPIOODSCTL3_PORTH_Msk                    0xFFFF0000  /*!< Enable current of each PIN 16mA instead of 8mA for Port H */
+#define COMMON_REG_GPIODSCTL3_PORTG_Msk                    0x0000FFFF  /*!< Port G strength control */
+#define COMMON_REG_GPIODSCTL3_PORTH_Msk                    0xFFFF0000  /*!< Port H strength control */
 
-/*-- GPIOPUCTL0: Control register circuit 'Pull-up' ports A, B ---------------*/
+/*-- GPIOPUCTL0: Port A,B pull-up enable register ---------------*/
 
 typedef struct {
-  uint32_t PORTA                                  :16;                  /*!< Enable Pull-up of each PIN for Port A */
-  uint32_t PORTB                                  :16;                  /*!< Enable Pull-up of each PIN for Port B */
+  uint32_t PORTA                                  :16;                  /*!< Port A pull-up enable */
+  uint32_t PORTB                                  :16;                  /*!< Port B pull-up enable */
 } _COMMON_REG_GPIOPUCTL0_bits;
 
 /* Bit field positions: */
-#define COMMON_REG_GPIOPUCTL0_PORTA_Pos                     0           /*!< Enable Pull-up of each PIN for Port A */
-#define COMMON_REG_GPIOPUCTL0_PORTB_Pos                     16          /*!< Enable Pull-up of each PIN for Port B */
+#define COMMON_REG_GPIOPUCTL0_PORTA_Pos                     0           /*!< Port A pull-up enable */
+#define COMMON_REG_GPIOPUCTL0_PORTB_Pos                     16          /*!< Port B pull-up enable */
 
 /* Bit field masks: */
-#define COMMON_REG_GPIOPUCTL0_PORTA_Msk                     0x0000FFFF  /*!< Enable Pull-up of each PIN for Port A */
-#define COMMON_REG_GPIOPUCTL0_PORTB_Msk                     0xFFFF0000  /*!< Enable Pull-up of each PIN for Port B */
+#define COMMON_REG_GPIOPUCTL0_PORTA_Msk                     0x0000FFFF  /*!< Port A pull-up enable */
+#define COMMON_REG_GPIOPUCTL0_PORTB_Msk                     0xFFFF0000  /*!< Port B pull-up enable */
 
-/*-- GPIOPUCTL1: Control register circuit 'Pull-up' ports C, D ---------------*/
+/*-- GPIOPUCTL1: Port C,D pull-up enable register ---------------*/
 
 typedef struct {
-  uint32_t PORTC                                  :16;                  /*!< Enable Pull-up of each PIN for Port C */
-  uint32_t PORTD                                  :16;                  /*!< Enable Pull-up of each PIN for Port D */
+  uint32_t PORTC                                  :16;                  /*!< Port C pull-up enable */
+  uint32_t PORTD                                  :16;                  /*!< Port D pull-up enable */
 } _COMMON_REG_GPIOPUCTL1_bits;
 
 /* Bit field positions: */
-#define COMMON_REG_GPIOPUCTL1_PORTC_Pos                     0           /*!< Enable Pull-up of each PIN for Port C */
-#define COMMON_REG_GPIOPUCTL1_PORTD_Pos                     16          /*!< Enable Pull-up of each PIN for Port D */
+#define COMMON_REG_GPIOPUCTL1_PORTC_Pos                     0           /*!< Port C pull-up enable */
+#define COMMON_REG_GPIOPUCTL1_PORTD_Pos                     16          /*!< Port D pull-up enable */
 
 /* Bit field masks: */
-#define COMMON_REG_GPIOPUCTL1_PORTC_Msk                     0x0000FFFF  /*!< Enable Pull-up of each PIN for Port C */
-#define COMMON_REG_GPIOPUCTL1_PORTD_Msk                     0xFFFF0000  /*!< Enable Pull-up of each PIN for Port D */
+#define COMMON_REG_GPIOPUCTL1_PORTC_Msk                     0x0000FFFF  /*!< Port C pull-up enable */
+#define COMMON_REG_GPIOPUCTL1_PORTD_Msk                     0xFFFF0000  /*!< Port D pull-up enable */
 
-/*-- GPIOPUCTL2: Control register circuit 'Pull-up' ports E, F ---------------*/
+/*-- GPIOPUCTL2: Port E,F pull-up enable register ---------------*/
 
 typedef struct {
-  uint32_t PORTE                                  :16;                  /*!< Enable Pull-up of each PIN for Port E */
-  uint32_t PORTF                                  :16;                  /*!< Enable Pull-up of each PIN for Port F */
+  uint32_t PORTE                                  :16;                  /*!< Port E pull-up enable */
+  uint32_t PORTF                                  :16;                  /*!< Port F pull-up enable */
 } _COMMON_REG_GPIOPUCTL2_bits;
 
 /* Bit field positions: */
-#define COMMON_REG_GPIOPUCTL2_PORTE_Pos                     0           /*!< Enable Pull-up of each PIN for Port E */
-#define COMMON_REG_GPIOPUCTL2_PORTF_Pos                     16          /*!< Enable Pull-up of each PIN for Port F */
+#define COMMON_REG_GPIOPUCTL2_PORTE_Pos                     0           /*!< Port E pull-up enable */
+#define COMMON_REG_GPIOPUCTL2_PORTF_Pos                     16          /*!< Port F pull-up enable */
 
 /* Bit field masks: */
-#define COMMON_REG_GPIOPUCTL2_PORTE_Msk                     0x0000FFFF  /*!< Enable Pull-up of each PIN for Port E */
-#define COMMON_REG_GPIOPUCTL2_PORTF_Msk                     0xFFFF0000  /*!< Enable Pull-up of each PIN for Port F */
+#define COMMON_REG_GPIOPUCTL2_PORTE_Msk                     0x0000FFFF  /*!< Port E pull-up enable */
+#define COMMON_REG_GPIOPUCTL2_PORTF_Msk                     0xFFFF0000  /*!< Port F pull-up enable */
 
-/*-- GPIOPUCTL3: Control register circuit 'Pull-up' ports G, H ---------------*/
+/*-- GPIOPUCTL3: Port G,H pull-up enable register ---------------*/
 
 typedef struct {
-  uint32_t PORTG                                  :16;                  /*!< Enable Pull-up of each PIN for Port G */
-  uint32_t PORTH                                  :16;                  /*!< Enable Pull-up of each PIN for Port H */
+  uint32_t PORTG                                  :16;                  /*!< Port G pull-up enable */
+  uint32_t PORTH                                  :16;                  /*!< Port H pull-up enable */
 } _COMMON_REG_GPIOPUCTL3_bits;
 
 /* Bit field positions: */
-#define COMMON_REG_GPIOPUCTL3_PORTG_Pos                     0           /*!< Enable Pull-up of each PIN for Port G */
-#define COMMON_REG_GPIOPUCTL3_PORTH_Pos                     16          /*!< Enable Pull-up of each PIN for Port H */
+#define COMMON_REG_GPIOPUCTL3_PORTG_Pos                     0           /*!< Port G pull-up enable */
+#define COMMON_REG_GPIOPUCTL3_PORTH_Pos                     16          /*!< Port H pull-up enable */
 
 /* Bit field masks: */
-#define COMMON_REG_GPIOPUCTL3_PORTG_Msk                     0x0000FFFF  /*!< Enable Pull-up of each PIN for Port G */
-#define COMMON_REG_GPIOPUCTL3_PORTH_Msk                     0xFFFF0000  /*!< Enable Pull-up of each PIN for Port H */
+#define COMMON_REG_GPIOPUCTL3_PORTG_Msk                     0x0000FFFF  /*!< Port G pull-up enable */
+#define COMMON_REG_GPIOPUCTL3_PORTH_Msk                     0xFFFF0000  /*!< Port H pull-up enable */
 
-/*-- PLL_CTRL: PLL control register settings ---------------------------------*/
+/*-- PLL_CTRL: PLL control register ---------------------------------*/
 
 typedef struct {
-  uint32_t REFSEL                                 :2;                   /*!< Reference source PLL */
+  uint32_t REFSEL                                 :2;                   /*!< PLL reference clk selection */
   uint32_t Reserved0                              :6;                   /*!< Reserved */
-  uint32_t PLL_DIV                                :8;                   /*!< Devider clk PLL */
+  uint32_t PLL_DIV                                :8;                   /*!< External divider for PLL output */
   uint32_t Reserved1                              :15;                  /*!< Reserved */
-  uint32_t PD                                     :1;                   /*!< Enable mode PowerDown */
+  uint32_t PD                                     :1;                   /*!< PLL PowerDown mode enable */
 } _COMMON_REG_PLL_CTRL_bits;
 
 /* Bit field positions: */
-#define COMMON_REG_PLL_CTRL_REFSEL_Pos                      0           /*!< Reference source PLL */
-#define COMMON_REG_PLL_CTRL_PLL_DIV_Pos                     8           /*!< Devider clk PLL */
-#define COMMON_REG_PLL_CTRL_PD_Pos                          31          /*!< Enable mode PowerDown */
+#define COMMON_REG_PLL_CTRL_REFSEL_Pos                      0           /*!< PLL reference clk selection */
+#define COMMON_REG_PLL_CTRL_PLL_DIV_Pos                     8           /*!< External divider for PLL output */
+#define COMMON_REG_PLL_CTRL_PD_Pos                          31          /*!< PLL PowerDown mode enable */
 
 /* Bit field masks: */
-#define COMMON_REG_PLL_CTRL_REFSEL_Msk                      0x00000003  /*!< Reference source PLL */
-#define COMMON_REG_PLL_CTRL_PLL_DIV_Msk                     0x0000FF00  /*!< Devider clk PLL */
-#define COMMON_REG_PLL_CTRL_PD_Msk                          0x80000000  /*!< Enable mode PowerDown */
+#define COMMON_REG_PLL_CTRL_REFSEL_Msk                      0x00000003  /*!< PLL reference clk selection */
+#define COMMON_REG_PLL_CTRL_PLL_DIV_Msk                     0x0000FF00  /*!< External divider for PLL output */
+#define COMMON_REG_PLL_CTRL_PD_Msk                          0x80000000  /*!< PLL PowerDown mode enable */
 
-/*-- PLL_OD: Select output divider PLL ---------------------------------------*/
+/*-- PLL_OD: PLL output divider register ---------------------------------------*/
 
 typedef struct {
-  uint32_t PLL_OD                                 :2;                   /*!< Output divider */
+  uint32_t PLL_OD                                 :2;                   /*!< PLL output divider "NO" control */
   uint32_t Reserved0                              :30;                  /*!< Reserved */
 } _COMMON_REG_PLL_OD_bits;
 
 /* Bit field positions: */
-#define COMMON_REG_PLL_OD_PLL_OD_Pos                        0           /*!< Output divider */
+#define COMMON_REG_PLL_OD_PLL_OD_Pos                        0           /*!< PLL output divider "NO" control */
 
 /* Bit field masks: */
-#define COMMON_REG_PLL_OD_PLL_OD_Msk                        0x00000003  /*!< Output divider */
+#define COMMON_REG_PLL_OD_PLL_OD_Msk                        0x00000003  /*!< PLL output divider "NO" control */
 
-/*-- PLL_NR: Setting the reference divider PLL -------------------------------*/
+/*-- PLL_NR: PLL reference divider register -------------------------------*/
 
 typedef struct {
-  uint32_t R_PLL                                  :5;                   /*!< Value of the reference divider */
+  uint32_t R_PLL                                  :5;                   /*!< PLL reference divider "NR = R_PLL+2" */
   uint32_t Reserved0                              :27;                  /*!< Reserved */
 } _COMMON_REG_PLL_NR_bits;
 
 /* Bit field positions: */
-#define COMMON_REG_PLL_NR_R_PLL_Pos                         0           /*!< Value of the reference divider */
+#define COMMON_REG_PLL_NR_R_PLL_Pos                         0           /*!< PLL reference divider "NR = R_PLL+2" */
 
 /* Bit field masks: */
-#define COMMON_REG_PLL_NR_R_PLL_Msk                         0x0000001F  /*!< Value of the reference divider */
+#define COMMON_REG_PLL_NR_R_PLL_Msk                         0x0000001F  /*!< PLL reference divider "NR = R_PLL+2" */
 
-/*-- PLL_NF: Setting the PLL feedback divider --------------------------------*/
+/*-- PLL_NF: PLL feedback divider register --------------------------------*/
 
 typedef struct {
-  uint32_t F_PLL                                  :9;                   /*!< Value of divider feedback */
+  uint32_t F_PLL                                  :9;                   /*!< PLL feedback divider "NF = F_PLL+2" */
   uint32_t Reserved0                              :23;                  /*!< Reserved */
 } _COMMON_REG_PLL_NF_bits;
 
 /* Bit field positions: */
-#define COMMON_REG_PLL_NF_F_PLL_Pos                         0           /*!< Value of divider feedback */
+#define COMMON_REG_PLL_NF_F_PLL_Pos                         0           /*!< PLL feedback divider "NF = F_PLL+2" */
 
 /* Bit field masks: */
-#define COMMON_REG_PLL_NF_F_PLL_Msk                         0x000001FF  /*!< Value of divider feedback */
+#define COMMON_REG_PLL_NF_F_PLL_Msk                         0x000001FF  /*!< PLL feedback divider "NF = F_PLL+2" */
 
-/*-- EXT_MEM_CFG: Setting up an external memory controller -------------------*/
+/*-- EXT_MEM_CFG: External memory configuration register -------------------*/
 
 typedef struct {
-  uint32_t ReadWS                                 :3;
-  uint32_t WriteWS                                :3;
-  uint32_t RWWS                                   :3;
-  uint32_t CE_MASK                                :9;                   /*!< Pause betwin writing and reading on bus in tristate */
+  uint32_t ReadWS                                 :3;                   /*!< Read wait state cycles value */
+  uint32_t WriteWS                                :3;                   /*!< Write wait state cycles value */
+  uint32_t RWWS                                   :3;                   /*!< Pause wait state cycles value */
+  uint32_t CE_MASK                                :9;                   /*!< CE1, OE1 address mask */
   uint32_t Reserved0                              :13;                  /*!< Reserved */
-  uint32_t BV                                     :1;                   /*!< Bit of Bus Width */
+  uint32_t BW                                     :1;                   /*!< External memory bus width (8/16bit) */
 } _COMMON_REG_EXT_MEM_CFG_bits;
 
 /* Bit field positions: */
-#define COMMON_REG_EXT_MEM_CFG_ReadWS_Pos                   0
-#define COMMON_REG_EXT_MEM_CFG_WriteWS_Pos                  3
-#define COMMON_REG_EXT_MEM_CFG_RWWS_Pos                     6
-#define COMMON_REG_EXT_MEM_CFG_CE_MASK_Pos                  9           /*!< Pause betwin writing and reading on bus in tristate */
-#define COMMON_REG_EXT_MEM_CFG_BV_Pos                       31          /*!< Bit of Bus Width */
+#define COMMON_REG_EXT_MEM_CFG_ReadWS_Pos                   0           /*!< Read wait state cycles value */
+#define COMMON_REG_EXT_MEM_CFG_WriteWS_Pos                  3           /*!< Write wait state cycles value */
+#define COMMON_REG_EXT_MEM_CFG_RWWS_Pos                     6           /*!< Pause wait state cycles value */
+#define COMMON_REG_EXT_MEM_CFG_CE_MASK_Pos                  9           /*!< CE1, OE1 address mask */
+#define COMMON_REG_EXT_MEM_CFG_BW_Pos                       31          /*!< External memory bus width (8/16bit) */
 
 /* Bit field masks: */
-#define COMMON_REG_EXT_MEM_CFG_ReadWS_Msk                   0x00000007
-#define COMMON_REG_EXT_MEM_CFG_WriteWS_Msk                  0x00000038
-#define COMMON_REG_EXT_MEM_CFG_RWWS_Msk                     0x000001C0
-#define COMMON_REG_EXT_MEM_CFG_CE_MASK_Msk                  0x0003FE00  /*!< Pause betwin writing and reading on bus in tristate */
-#define COMMON_REG_EXT_MEM_CFG_BV_Msk                       0x80000000  /*!< Bit of Bus Width */
+#define COMMON_REG_EXT_MEM_CFG_ReadWS_Msk                   0x00000007  /*!< Read wait state cycles value */
+#define COMMON_REG_EXT_MEM_CFG_WriteWS_Msk                  0x00000038  /*!< Write wait state cycles value */
+#define COMMON_REG_EXT_MEM_CFG_RWWS_Msk                     0x000001C0  /*!< Pause wait state cycles value */
+#define COMMON_REG_EXT_MEM_CFG_CE_MASK_Msk                  0x0003FE00  /*!< CE1, OE1 address mask */
+#define COMMON_REG_EXT_MEM_CFG_BW_Msk                       0x80000000  /*!< External memory bus width (8/16bit) */
 
-/*-- ADC_CTRL0: ADC control register 0 ---------------------------------------*/
+/*-- ADC_CTRL0: ADC 0-3 clock control register ---------------------------------------*/
 
 typedef struct {
-  uint32_t CLKEN_ADC0                             :1;                   /*!< Enable clk ADC0 */
-  uint32_t DIVEN_ADC0                             :1;                   /*!< Enable devider clk ADC0 */
-  uint32_t DIV_ADC0                               :6;                   /*!< Devider clk ADC0 */
-  uint32_t CLKEN_ADC1                             :1;                   /*!< Enable clk ADC1 */
-  uint32_t DIVEN_ADC1                             :1;                   /*!< Enable devider clk ADC1 */
-  uint32_t DIV_ADC1                               :6;                   /*!< Devider clk ADC1 */
-  uint32_t CLKEN_ADC2                             :1;                   /*!< Enable clk ADC2 */
-  uint32_t DIVEN_ADC2                             :1;                   /*!< Enable devider clk ADC2 */
-  uint32_t DIV_ADC2                               :6;                   /*!< Devider clk ADC2 */
-  uint32_t CLKEN_ADC3                             :1;                   /*!< Enable clk ADC3 */
-  uint32_t DIVEN_ADC3                             :1;                   /*!< Enable devider clk ADC3 */
-  uint32_t DIV_ADC3                               :6;                   /*!< Devider clk ADC3 */
+  uint32_t CLKEN_ADC0                             :1;                   /*!< ADC0 clk enable */
+  uint32_t DIVEN_ADC0                             :1;                   /*!< ADC0 clk divider enable */
+  uint32_t DIV_ADC0                               :6;                   /*!< ADC0 clk divider value */
+  uint32_t CLKEN_ADC1                             :1;                   /*!< ADC1 clk enable */
+  uint32_t DIVEN_ADC1                             :1;                   /*!< ADC1 clk divider enable */
+  uint32_t DIV_ADC1                               :6;                   /*!< ADC1 clk divider value */
+  uint32_t CLKEN_ADC2                             :1;                   /*!< ADC2 clk enable */
+  uint32_t DIVEN_ADC2                             :1;                   /*!< ADC2 clk divider enable */
+  uint32_t DIV_ADC2                               :6;                   /*!< ADC2 clk divider value */
+  uint32_t CLKEN_ADC3                             :1;                   /*!< ADC3 clk enable */
+  uint32_t DIVEN_ADC3                             :1;                   /*!< ADC3 clk divider enable */
+  uint32_t DIV_ADC3                               :6;                   /*!< ADC3 clk divider value */
 } _COMMON_REG_ADC_CTRL0_bits;
 
 /* Bit field positions: */
-#define COMMON_REG_ADC_CTRL0_CLKEN_ADC0_Pos                 0           /*!< Enable clk ADC0 */
-#define COMMON_REG_ADC_CTRL0_DIVEN_ADC0_Pos                 1           /*!< Enable devider clk ADC0 */
-#define COMMON_REG_ADC_CTRL0_DIV_ADC0_Pos                   2           /*!< Devider clk ADC0 */
-#define COMMON_REG_ADC_CTRL0_CLKEN_ADC1_Pos                 8           /*!< Enable clk ADC1 */
-#define COMMON_REG_ADC_CTRL0_DIVEN_ADC1_Pos                 9           /*!< Enable devider clk ADC1 */
-#define COMMON_REG_ADC_CTRL0_DIV_ADC1_Pos                   10          /*!< Devider clk ADC1 */
-#define COMMON_REG_ADC_CTRL0_CLKEN_ADC2_Pos                 16          /*!< Enable clk ADC2 */
-#define COMMON_REG_ADC_CTRL0_DIVEN_ADC2_Pos                 17          /*!< Enable devider clk ADC2 */
-#define COMMON_REG_ADC_CTRL0_DIV_ADC2_Pos                   18          /*!< Devider clk ADC2 */
-#define COMMON_REG_ADC_CTRL0_CLKEN_ADC3_Pos                 24          /*!< Enable clk ADC3 */
-#define COMMON_REG_ADC_CTRL0_DIVEN_ADC3_Pos                 25          /*!< Enable devider clk ADC3 */
-#define COMMON_REG_ADC_CTRL0_DIV_ADC3_Pos                   26          /*!< Devider clk ADC3 */
+#define COMMON_REG_ADC_CTRL0_CLKEN_ADC0_Pos                 0           /*!< ADC0 clk enable */
+#define COMMON_REG_ADC_CTRL0_DIVEN_ADC0_Pos                 1           /*!< ADC0 clk divider enable */
+#define COMMON_REG_ADC_CTRL0_DIV_ADC0_Pos                   2           /*!< ADC0 clk divider value */
+#define COMMON_REG_ADC_CTRL0_CLKEN_ADC1_Pos                 8           /*!< ADC1 clk enable */
+#define COMMON_REG_ADC_CTRL0_DIVEN_ADC1_Pos                 9           /*!< ADC1 clk divider enable */
+#define COMMON_REG_ADC_CTRL0_DIV_ADC1_Pos                   10          /*!< ADC1 clk divider value */
+#define COMMON_REG_ADC_CTRL0_CLKEN_ADC2_Pos                 16          /*!< ADC2 clk enable */
+#define COMMON_REG_ADC_CTRL0_DIVEN_ADC2_Pos                 17          /*!< ADC2 clk divider enable */
+#define COMMON_REG_ADC_CTRL0_DIV_ADC2_Pos                   18          /*!< ADC2 clk divider value */
+#define COMMON_REG_ADC_CTRL0_CLKEN_ADC3_Pos                 24          /*!< ADC3 clk enable */
+#define COMMON_REG_ADC_CTRL0_DIVEN_ADC3_Pos                 25          /*!< ADC3 clk divider enable */
+#define COMMON_REG_ADC_CTRL0_DIV_ADC3_Pos                   26          /*!< ADC3 clk divider value */
 
 /* Bit field masks: */
-#define COMMON_REG_ADC_CTRL0_CLKEN_ADC0_Msk                 0x00000001  /*!< Enable clk ADC0 */
-#define COMMON_REG_ADC_CTRL0_DIVEN_ADC0_Msk                 0x00000002  /*!< Enable devider clk ADC0 */
-#define COMMON_REG_ADC_CTRL0_DIV_ADC0_Msk                   0x000000FC  /*!< Devider clk ADC0 */
-#define COMMON_REG_ADC_CTRL0_CLKEN_ADC1_Msk                 0x00000100  /*!< Enable clk ADC1 */
-#define COMMON_REG_ADC_CTRL0_DIVEN_ADC1_Msk                 0x00000200  /*!< Enable devider clk ADC1 */
-#define COMMON_REG_ADC_CTRL0_DIV_ADC1_Msk                   0x0000FC00  /*!< Devider clk ADC1 */
-#define COMMON_REG_ADC_CTRL0_CLKEN_ADC2_Msk                 0x00010000  /*!< Enable clk ADC2 */
-#define COMMON_REG_ADC_CTRL0_DIVEN_ADC2_Msk                 0x00020000  /*!< Enable devider clk ADC2 */
-#define COMMON_REG_ADC_CTRL0_DIV_ADC2_Msk                   0x00FC0000  /*!< Devider clk ADC2 */
-#define COMMON_REG_ADC_CTRL0_CLKEN_ADC3_Msk                 0x01000000  /*!< Enable clk ADC3 */
-#define COMMON_REG_ADC_CTRL0_DIVEN_ADC3_Msk                 0x02000000  /*!< Enable devider clk ADC3 */
-#define COMMON_REG_ADC_CTRL0_DIV_ADC3_Msk                   0xFC000000  /*!< Devider clk ADC3 */
+#define COMMON_REG_ADC_CTRL0_CLKEN_ADC0_Msk                 0x00000001  /*!< ADC0 clk enable */
+#define COMMON_REG_ADC_CTRL0_DIVEN_ADC0_Msk                 0x00000002  /*!< ADC0 clk divider enable */
+#define COMMON_REG_ADC_CTRL0_DIV_ADC0_Msk                   0x000000FC  /*!< ADC0 clk divider value */
+#define COMMON_REG_ADC_CTRL0_CLKEN_ADC1_Msk                 0x00000100  /*!< ADC1 clk enable */
+#define COMMON_REG_ADC_CTRL0_DIVEN_ADC1_Msk                 0x00000200  /*!< ADC1 clk divider enable */
+#define COMMON_REG_ADC_CTRL0_DIV_ADC1_Msk                   0x0000FC00  /*!< ADC1 clk divider value */
+#define COMMON_REG_ADC_CTRL0_CLKEN_ADC2_Msk                 0x00010000  /*!< ADC2 clk enable */
+#define COMMON_REG_ADC_CTRL0_DIVEN_ADC2_Msk                 0x00020000  /*!< ADC2 clk divider enable */
+#define COMMON_REG_ADC_CTRL0_DIV_ADC2_Msk                   0x00FC0000  /*!< ADC2 clk divider value */
+#define COMMON_REG_ADC_CTRL0_CLKEN_ADC3_Msk                 0x01000000  /*!< ADC3 clk enable */
+#define COMMON_REG_ADC_CTRL0_DIVEN_ADC3_Msk                 0x02000000  /*!< ADC3 clk divider enable */
+#define COMMON_REG_ADC_CTRL0_DIV_ADC3_Msk                   0xFC000000  /*!< ADC3 clk divider value */
 
-/*-- ADC_CTRL1: ADC control register 1 ---------------------------------------*/
+/*-- ADC_CTRL1: ADC 4-7 clock control register ---------------------------------------*/
 
 typedef struct {
-  uint32_t CLKEN_ADC4                             :1;                   /*!< Enable clk ADC4 */
-  uint32_t DIVEN_ADC4                             :1;                   /*!< Enable devider clk ADC4 */
-  uint32_t DIV_ADC4                               :6;                   /*!< Devider clk ADC4 */
-  uint32_t CLKEN_ADC5                             :1;                   /*!< Enable clk ADC5 */
-  uint32_t DIVEN_ADC5                             :1;                   /*!< Enable devider clk ADC5 */
-  uint32_t DIV_ADC5                               :6;                   /*!< Devider clk ADC5 */
-  uint32_t CLKEN_ADC6                             :1;                   /*!< Enable clk ADC6 */
-  uint32_t DIVEN_ADC6                             :1;                   /*!< Enable devider clk ADC6 */
-  uint32_t DIV_ADC6                               :6;                   /*!< Devider clk ADC6 */
-  uint32_t CLKEN_ADC7                             :1;                   /*!< Enable clk ADC7 */
-  uint32_t DIVEN_ADC7                             :1;                   /*!< Enable devider clk ADC7 */
-  uint32_t DIV_ADC7                               :6;                   /*!< Devider clk ADC7 */
+  uint32_t CLKEN_ADC4                             :1;                   /*!< ADC4 clk enable */
+  uint32_t DIVEN_ADC4                             :1;                   /*!< ADC4 clk divider enable */
+  uint32_t DIV_ADC4                               :6;                   /*!< ADC4 clk divider value */
+  uint32_t CLKEN_ADC5                             :1;                   /*!< ADC5 clk enable */
+  uint32_t DIVEN_ADC5                             :1;                   /*!< ADC5 clk divider enable */
+  uint32_t DIV_ADC5                               :6;                   /*!< ADC5 clk divider value */
+  uint32_t CLKEN_ADC6                             :1;                   /*!< ADC6 clk enable */
+  uint32_t DIVEN_ADC6                             :1;                   /*!< ADC6 clk divider enable */
+  uint32_t DIV_ADC6                               :6;                   /*!< ADC6 clk divider value */
+  uint32_t CLKEN_ADC7                             :1;                   /*!< ADC7 clk enable */
+  uint32_t DIVEN_ADC7                             :1;                   /*!< ADC7 clk divider enable */
+  uint32_t DIV_ADC7                               :6;                   /*!< ADC7 clk divider value */
 } _COMMON_REG_ADC_CTRL1_bits;
 
 /* Bit field positions: */
-#define COMMON_REG_ADC_CTRL1_CLKEN_ADC4_Pos                 0           /*!< Enable clk ADC4 */
-#define COMMON_REG_ADC_CTRL1_DIVEN_ADC4_Pos                 1           /*!< Enable devider clk ADC4 */
-#define COMMON_REG_ADC_CTRL1_DIV_ADC4_Pos                   2           /*!< Devider clk ADC4 */
-#define COMMON_REG_ADC_CTRL1_CLKEN_ADC5_Pos                 8           /*!< Enable clk ADC5 */
-#define COMMON_REG_ADC_CTRL1_DIVEN_ADC5_Pos                 9           /*!< Enable devider clk ADC5 */
-#define COMMON_REG_ADC_CTRL1_DIV_ADC5_Pos                   10          /*!< Devider clk ADC5 */
-#define COMMON_REG_ADC_CTRL1_CLKEN_ADC6_Pos                 16          /*!< Enable clk ADC6 */
-#define COMMON_REG_ADC_CTRL1_DIVEN_ADC6_Pos                 17          /*!< Enable devider clk ADC6 */
-#define COMMON_REG_ADC_CTRL1_DIV_ADC6_Pos                   18          /*!< Devider clk ADC6 */
-#define COMMON_REG_ADC_CTRL1_CLKEN_ADC7_Pos                 24          /*!< Enable clk ADC7 */
-#define COMMON_REG_ADC_CTRL1_DIVEN_ADC7_Pos                 25          /*!< Enable devider clk ADC7 */
-#define COMMON_REG_ADC_CTRL1_DIV_ADC7_Pos                   26          /*!< Devider clk ADC7 */
+#define COMMON_REG_ADC_CTRL1_CLKEN_ADC4_Pos                 0           /*!< ADC4 clk enable */
+#define COMMON_REG_ADC_CTRL1_DIVEN_ADC4_Pos                 1           /*!< ADC4 clk divider enable */
+#define COMMON_REG_ADC_CTRL1_DIV_ADC4_Pos                   2           /*!< ADC4 clk divider value */
+#define COMMON_REG_ADC_CTRL1_CLKEN_ADC5_Pos                 8           /*!< ADC5 clk enable */
+#define COMMON_REG_ADC_CTRL1_DIVEN_ADC5_Pos                 9           /*!< ADC5 clk divider enable */
+#define COMMON_REG_ADC_CTRL1_DIV_ADC5_Pos                   10          /*!< ADC5 clk divider value */
+#define COMMON_REG_ADC_CTRL1_CLKEN_ADC6_Pos                 16          /*!< ADC6 clk enable */
+#define COMMON_REG_ADC_CTRL1_DIVEN_ADC6_Pos                 17          /*!< ADC6 clk divider enable */
+#define COMMON_REG_ADC_CTRL1_DIV_ADC6_Pos                   18          /*!< ADC6 clk divider value */
+#define COMMON_REG_ADC_CTRL1_CLKEN_ADC7_Pos                 24          /*!< ADC7 clk enable */
+#define COMMON_REG_ADC_CTRL1_DIVEN_ADC7_Pos                 25          /*!< ADC7 clk divider enable */
+#define COMMON_REG_ADC_CTRL1_DIV_ADC7_Pos                   26          /*!< ADC7 clk divider value */
 
 /* Bit field masks: */
-#define COMMON_REG_ADC_CTRL1_CLKEN_ADC4_Msk                 0x00000001  /*!< Enable clk ADC4 */
-#define COMMON_REG_ADC_CTRL1_DIVEN_ADC4_Msk                 0x00000002  /*!< Enable devider clk ADC4 */
-#define COMMON_REG_ADC_CTRL1_DIV_ADC4_Msk                   0x000000FC  /*!< Devider clk ADC4 */
-#define COMMON_REG_ADC_CTRL1_CLKEN_ADC5_Msk                 0x00000100  /*!< Enable clk ADC5 */
-#define COMMON_REG_ADC_CTRL1_DIVEN_ADC5_Msk                 0x00000200  /*!< Enable devider clk ADC5 */
-#define COMMON_REG_ADC_CTRL1_DIV_ADC5_Msk                   0x0000FC00  /*!< Devider clk ADC5 */
-#define COMMON_REG_ADC_CTRL1_CLKEN_ADC6_Msk                 0x00010000  /*!< Enable clk ADC6 */
-#define COMMON_REG_ADC_CTRL1_DIVEN_ADC6_Msk                 0x00020000  /*!< Enable devider clk ADC6 */
-#define COMMON_REG_ADC_CTRL1_DIV_ADC6_Msk                   0x00FC0000  /*!< Devider clk ADC6 */
-#define COMMON_REG_ADC_CTRL1_CLKEN_ADC7_Msk                 0x01000000  /*!< Enable clk ADC7 */
-#define COMMON_REG_ADC_CTRL1_DIVEN_ADC7_Msk                 0x02000000  /*!< Enable devider clk ADC7 */
-#define COMMON_REG_ADC_CTRL1_DIV_ADC7_Msk                   0xFC000000  /*!< Devider clk ADC7 */
+#define COMMON_REG_ADC_CTRL1_CLKEN_ADC4_Msk                 0x00000001  /*!< ADC4 clk enable */
+#define COMMON_REG_ADC_CTRL1_DIVEN_ADC4_Msk                 0x00000002  /*!< ADC4 clk divider enable */
+#define COMMON_REG_ADC_CTRL1_DIV_ADC4_Msk                   0x000000FC  /*!< ADC4 clk divider value */
+#define COMMON_REG_ADC_CTRL1_CLKEN_ADC5_Msk                 0x00000100  /*!< ADC5 clk enable */
+#define COMMON_REG_ADC_CTRL1_DIVEN_ADC5_Msk                 0x00000200  /*!< ADC5 clk divider enable */
+#define COMMON_REG_ADC_CTRL1_DIV_ADC5_Msk                   0x0000FC00  /*!< ADC5 clk divider value */
+#define COMMON_REG_ADC_CTRL1_CLKEN_ADC6_Msk                 0x00010000  /*!< ADC6 clk enable */
+#define COMMON_REG_ADC_CTRL1_DIVEN_ADC6_Msk                 0x00020000  /*!< ADC6 clk divider enable */
+#define COMMON_REG_ADC_CTRL1_DIV_ADC6_Msk                   0x00FC0000  /*!< ADC6 clk divider value */
+#define COMMON_REG_ADC_CTRL1_CLKEN_ADC7_Msk                 0x01000000  /*!< ADC7 clk enable */
+#define COMMON_REG_ADC_CTRL1_DIVEN_ADC7_Msk                 0x02000000  /*!< ADC7 clk divider enable */
+#define COMMON_REG_ADC_CTRL1_DIV_ADC7_Msk                   0xFC000000  /*!< ADC7 clk divider value */
 
-/*-- PWM_SYNC: Syncronize register PWM blocks --------------------------------*/
+/*-- PWM_SYNC: PWM prescalers sync register --------------------------------*/
 
 typedef struct {
-  uint32_t TBCLKSYNC                              :9;                   /*!< Enable mode counter PWM0 */
+  uint32_t TBCLKSYNC                              :9;                   /*!< PWM prescalers enable */
   uint32_t Reserved0                              :23;                  /*!< Reserved */
 } _COMMON_REG_PWM_SYNC_bits;
 
 /* Bit field positions: */
-#define COMMON_REG_PWM_SYNC_TBCLKSYNC_Pos                   0           /*!< Enable mode counter PWM0 */
+#define COMMON_REG_PWM_SYNC_TBCLKSYNC_Pos                   0           /*!< PWM prescalers enable */
 
 /* Bit field masks: */
-#define COMMON_REG_PWM_SYNC_TBCLKSYNC_Msk                   0x000001FF  /*!< Enable mode counter PWM0 */
+#define COMMON_REG_PWM_SYNC_TBCLKSYNC_Msk                   0x000001FF  /*!< PWM prescalers enable */
 
-/*-- PWM_CTRL: Register control of synchronization blocks of PWM -------------*/
+/*-- PWM_CTRL: PWM sync control register -------------*/
 
 typedef struct {
-  uint32_t SYNCSELECT                             :2;                   /*!< Select PWM synchronization mode */
-  uint32_t CAPSYNCSEL                             :1;                   /*!< Select synchronization of block PWM, 0 - synchronization from CAP3; 1 - synchronization from PWM0. */
-  uint32_t SYNCREG                                :1;                   /*!< Enable output pulse synchronization SYNCI on input of PWM0 */
+  uint32_t SYNCSELECT                             :2;                   /*!< PWM sync mode selection */
+  uint32_t CAPSYNCSEL                             :1;                   /*!< CAP3 sync mode selection (from CAP2 or PWM0) */
+  uint32_t SYNCREG                                :1;                   /*!< SYNCI pulse generation on PWM0 input */
   uint32_t Reserved0                              :28;                  /*!< Reserved */
 } _COMMON_REG_PWM_CTRL_bits;
 
 /* Bit field positions: */
-#define COMMON_REG_PWM_CTRL_SYNCSELECT_Pos                  0           /*!< Select PWM synchronization mode */
-#define COMMON_REG_PWM_CTRL_CAPSYNCSEL_Pos                  2           /*!< Select synchronization of block PWM, 0 - synchronization from CAP3; 1 - synchronization from PWM0. */
-#define COMMON_REG_PWM_CTRL_SYNCREG_Pos                     3           /*!< Enable output pulse synchronization SYNCI on input of PWM0 */
+#define COMMON_REG_PWM_CTRL_SYNCSELECT_Pos                  0           /*!< PWM sync mode selection */
+#define COMMON_REG_PWM_CTRL_CAPSYNCSEL_Pos                  2           /*!< CAP3 sync mode selection (from CAP2 or PWM0) */
+#define COMMON_REG_PWM_CTRL_SYNCREG_Pos                     3           /*!< SYNCI pulse generation on PWM0 input */
 
 /* Bit field masks: */
-#define COMMON_REG_PWM_CTRL_SYNCSELECT_Msk                  0x00000003  /*!< Select PWM synchronization mode */
-#define COMMON_REG_PWM_CTRL_CAPSYNCSEL_Msk                  0x00000004  /*!< Select synchronization of block PWM, 0 - synchronization from CAP3; 1 - synchronization from PWM0. */
-#define COMMON_REG_PWM_CTRL_SYNCREG_Msk                     0x00000008  /*!< Enable output pulse synchronization SYNCI on input of PWM0 */
+#define COMMON_REG_PWM_CTRL_SYNCSELECT_Msk                  0x00000003  /*!< PWM sync mode selection */
+#define COMMON_REG_PWM_CTRL_CAPSYNCSEL_Msk                  0x00000004  /*!< CAP3 sync mode selection (from CAP2 or PWM0) */
+#define COMMON_REG_PWM_CTRL_SYNCREG_Msk                     0x00000008  /*!< SYNCI pulse generation on PWM0 input */
 
-/*-- SYS_CLK: Setting the system clock controller ----------------------------*/
+/*-- SYS_CLK: System clock control register ----------------------------*/
 
 typedef struct {
-  uint32_t SEL_SRC                                :3;                   /*!< Select source clk */
+  uint32_t SEL_SRC                                :3;                   /*!< System clk source selection */
   uint32_t Reserved0                              :5;                   /*!< Reserved */
-  uint32_t CURR_SRC                               :3;                   /*!< Indicate chanched source clk */
+  uint32_t CURR_SRC                               :3;                   /*!< Current system clk source */
   uint32_t Reserved1                              :21;                  /*!< Reserved */
 } _COMMON_REG_SYS_CLK_bits;
 
 /* Bit field positions: */
-#define COMMON_REG_SYS_CLK_SEL_SRC_Pos                      0           /*!< Select source clk */
-#define COMMON_REG_SYS_CLK_CURR_SRC_Pos                     8           /*!< Indicate chanched source clk */
+#define COMMON_REG_SYS_CLK_SEL_SRC_Pos                      0           /*!< System clk source selection */
+#define COMMON_REG_SYS_CLK_CURR_SRC_Pos                     8           /*!< Current system clk source */
 
 /* Bit field masks: */
-#define COMMON_REG_SYS_CLK_SEL_SRC_Msk                      0x00000007  /*!< Select source clk */
-#define COMMON_REG_SYS_CLK_CURR_SRC_Msk                     0x00000700  /*!< Indicate chanched source clk */
+#define COMMON_REG_SYS_CLK_SEL_SRC_Msk                      0x00000007  /*!< System clk source selection */
+#define COMMON_REG_SYS_CLK_CURR_SRC_Msk                     0x00000700  /*!< Current system clk source */
 
-/*-- APB_CLK: Setting the resolution peripheral clocks -----------------------*/
+/*-- APB_CLK: Peripheral clock control register -----------------------*/
 
 typedef struct {
   uint32_t Reserved0                              :1;                   /*!< Reserved */
-  uint32_t QEPEN0                                 :1;                   /*!< Enable clocking QEP0 */
-  uint32_t QEPEN1                                 :1;                   /*!< Enable clocking QEP1 */
+  uint32_t QEPEN0                                 :1;                   /*!< QEP0 clk enable */
+  uint32_t QEPEN1                                 :1;                   /*!< QEP1 clk enable */
   uint32_t Reserved1                              :6;                   /*!< Reserved */
-  uint32_t CMPEN                                  :1;                   /*!< Enable clocking analog comparator */
-  uint32_t PWMEN0                                 :1;                   /*!< Enable clocking PWM0 */
-  uint32_t PWMEN1                                 :1;                   /*!< Enable clocking PWM1 */
-  uint32_t PWMEN2                                 :1;                   /*!< Enable clocking PWM2 */
-  uint32_t PWMEN3                                 :1;                   /*!< Enable clocking PWM3 */
-  uint32_t PWMEN4                                 :1;                   /*!< Enable clocking PWM4 */
-  uint32_t PWMEN5                                 :1;                   /*!< Enable clocking PWM5 */
-  uint32_t PWMEN6                                 :1;                   /*!< Enable clocking PWM6 */
-  uint32_t PWMEN7                                 :1;                   /*!< Enable clocking PWM7 */
-  uint32_t PWMEN8                                 :1;                   /*!< Enable clocking PWM8 */
-  uint32_t WDEN                                   :1;                   /*!< Enable clocking WDT */
-  uint32_t I2CEN0                                 :1;                   /*!< Enable clocking I2C0 */
-  uint32_t I2CEN1                                 :1;                   /*!< Enable clocking I2C1 */
+  uint32_t CMPEN                                  :1;                   /*!< Analog comparator clk enable */
+  uint32_t PWMEN0                                 :1;                   /*!< PWM0 clk enable */
+  uint32_t PWMEN1                                 :1;                   /*!< PWM1 clk enable */
+  uint32_t PWMEN2                                 :1;                   /*!< PWM2 clk enable */
+  uint32_t PWMEN3                                 :1;                   /*!< PWM3 clk enable */
+  uint32_t PWMEN4                                 :1;                   /*!< PWM4 clk enable */
+  uint32_t PWMEN5                                 :1;                   /*!< PWM5 clk enable */
+  uint32_t PWMEN6                                 :1;                   /*!< PWM6 clk enable */
+  uint32_t PWMEN7                                 :1;                   /*!< PWM7 clk enable */
+  uint32_t PWMEN8                                 :1;                   /*!< PWM8 clk enable */
+  uint32_t WDEN                                   :1;                   /*!< WDT clk enable */
+  uint32_t I2CEN0                                 :1;                   /*!< I2C0 clk enable */
+  uint32_t I2CEN1                                 :1;                   /*!< I2C1 clk enable */
   uint32_t Reserved2                              :2;                   /*!< Reserved */
-  uint32_t ADCEN                                  :1;                   /*!< Enable clk ADC */
+  uint32_t ADCEN                                  :1;                   /*!< ADC clk enable */
   uint32_t Reserved3                              :7;                   /*!< Reserved */
 } _COMMON_REG_APB_CLK_bits;
 
 /* Bit field positions: */
-#define COMMON_REG_APB_CLK_QEPEN0_Pos                       1           /*!< Enable clocking QEP0 */
-#define COMMON_REG_APB_CLK_QEPEN1_Pos                       2           /*!< Enable clocking QEP1 */
-#define COMMON_REG_APB_CLK_CMPEN_Pos                        9           /*!< Enable clocking analog comparator */
-#define COMMON_REG_APB_CLK_PWMEN0_Pos                       10          /*!< Enable clocking PWM0 */
-#define COMMON_REG_APB_CLK_PWMEN1_Pos                       11          /*!< Enable clocking PWM1 */
-#define COMMON_REG_APB_CLK_PWMEN2_Pos                       12          /*!< Enable clocking PWM2 */
-#define COMMON_REG_APB_CLK_PWMEN3_Pos                       13          /*!< Enable clocking PWM3 */
-#define COMMON_REG_APB_CLK_PWMEN4_Pos                       14          /*!< Enable clocking PWM4 */
-#define COMMON_REG_APB_CLK_PWMEN5_Pos                       15          /*!< Enable clocking PWM5 */
-#define COMMON_REG_APB_CLK_PWMEN6_Pos                       16          /*!< Enable clocking PWM6 */
-#define COMMON_REG_APB_CLK_PWMEN7_Pos                       17          /*!< Enable clocking PWM7 */
-#define COMMON_REG_APB_CLK_PWMEN8_Pos                       18          /*!< Enable clocking PWM8 */
-#define COMMON_REG_APB_CLK_WDEN_Pos                         19          /*!< Enable clocking WDT */
-#define COMMON_REG_APB_CLK_I2CEN0_Pos                       20          /*!< Enable clocking I2C0 */
-#define COMMON_REG_APB_CLK_I2CEN1_Pos                       21          /*!< Enable clocking I2C1 */
-#define COMMON_REG_APB_CLK_ADCEN_Pos                        24          /*!< Enable clk ADC */
+#define COMMON_REG_APB_CLK_QEPEN0_Pos                       1           /*!< QEP0 clk enable */
+#define COMMON_REG_APB_CLK_QEPEN1_Pos                       2           /*!< QEP1 clk enable */
+#define COMMON_REG_APB_CLK_CMPEN_Pos                        9           /*!< Analog comparator clk enable */
+#define COMMON_REG_APB_CLK_PWMEN0_Pos                       10          /*!< PWM0 clk enable */
+#define COMMON_REG_APB_CLK_PWMEN1_Pos                       11          /*!< PWM1 clk enable */
+#define COMMON_REG_APB_CLK_PWMEN2_Pos                       12          /*!< PWM2 clk enable */
+#define COMMON_REG_APB_CLK_PWMEN3_Pos                       13          /*!< PWM3 clk enable */
+#define COMMON_REG_APB_CLK_PWMEN4_Pos                       14          /*!< PWM4 clk enable */
+#define COMMON_REG_APB_CLK_PWMEN5_Pos                       15          /*!< PWM5 clk enable */
+#define COMMON_REG_APB_CLK_PWMEN6_Pos                       16          /*!< PWM6 clk enable */
+#define COMMON_REG_APB_CLK_PWMEN7_Pos                       17          /*!< PWM7 clk enable */
+#define COMMON_REG_APB_CLK_PWMEN8_Pos                       18          /*!< PWM8 clk enable */
+#define COMMON_REG_APB_CLK_WDEN_Pos                         19          /*!< WDT clk enable */
+#define COMMON_REG_APB_CLK_I2CEN0_Pos                       20          /*!< I2C0 clk enable */
+#define COMMON_REG_APB_CLK_I2CEN1_Pos                       21          /*!< I2C1 clk enable */
+#define COMMON_REG_APB_CLK_ADCEN_Pos                        24          /*!< ADC clk enable */
 
 /* Bit field masks: */
-#define COMMON_REG_APB_CLK_QEPEN0_Msk                       0x00000002  /*!< Enable clocking QEP0 */
-#define COMMON_REG_APB_CLK_QEPEN1_Msk                       0x00000004  /*!< Enable clocking QEP1 */
-#define COMMON_REG_APB_CLK_CMPEN_Msk                        0x00000200  /*!< Enable clocking analog comparator */
-#define COMMON_REG_APB_CLK_PWMEN0_Msk                       0x00000400  /*!< Enable clocking PWM0 */
-#define COMMON_REG_APB_CLK_PWMEN1_Msk                       0x00000800  /*!< Enable clocking PWM1 */
-#define COMMON_REG_APB_CLK_PWMEN2_Msk                       0x00001000  /*!< Enable clocking PWM2 */
-#define COMMON_REG_APB_CLK_PWMEN3_Msk                       0x00002000  /*!< Enable clocking PWM3 */
-#define COMMON_REG_APB_CLK_PWMEN4_Msk                       0x00004000  /*!< Enable clocking PWM4 */
-#define COMMON_REG_APB_CLK_PWMEN5_Msk                       0x00008000  /*!< Enable clocking PWM5 */
-#define COMMON_REG_APB_CLK_PWMEN6_Msk                       0x00010000  /*!< Enable clocking PWM6 */
-#define COMMON_REG_APB_CLK_PWMEN7_Msk                       0x00020000  /*!< Enable clocking PWM7 */
-#define COMMON_REG_APB_CLK_PWMEN8_Msk                       0x00040000  /*!< Enable clocking PWM8 */
-#define COMMON_REG_APB_CLK_WDEN_Msk                         0x00080000  /*!< Enable clocking WDT */
-#define COMMON_REG_APB_CLK_I2CEN0_Msk                       0x00100000  /*!< Enable clocking I2C0 */
-#define COMMON_REG_APB_CLK_I2CEN1_Msk                       0x00200000  /*!< Enable clocking I2C1 */
-#define COMMON_REG_APB_CLK_ADCEN_Msk                        0x01000000  /*!< Enable clk ADC */
+#define COMMON_REG_APB_CLK_QEPEN0_Msk                       0x00000002  /*!< QEP0 clk enable */
+#define COMMON_REG_APB_CLK_QEPEN1_Msk                       0x00000004  /*!< QEP1 clk enable */
+#define COMMON_REG_APB_CLK_CMPEN_Msk                        0x00000200  /*!< Analog comparator clk enable */
+#define COMMON_REG_APB_CLK_PWMEN0_Msk                       0x00000400  /*!< PWM0 clk enable */
+#define COMMON_REG_APB_CLK_PWMEN1_Msk                       0x00000800  /*!< PWM1 clk enable */
+#define COMMON_REG_APB_CLK_PWMEN2_Msk                       0x00001000  /*!< PWM2 clk enable */
+#define COMMON_REG_APB_CLK_PWMEN3_Msk                       0x00002000  /*!< PWM3 clk enable */
+#define COMMON_REG_APB_CLK_PWMEN4_Msk                       0x00004000  /*!< PWM4 clk enable */
+#define COMMON_REG_APB_CLK_PWMEN5_Msk                       0x00008000  /*!< PWM5 clk enable */
+#define COMMON_REG_APB_CLK_PWMEN6_Msk                       0x00010000  /*!< PWM6 clk enable */
+#define COMMON_REG_APB_CLK_PWMEN7_Msk                       0x00020000  /*!< PWM7 clk enable */
+#define COMMON_REG_APB_CLK_PWMEN8_Msk                       0x00040000  /*!< PWM8 clk enable */
+#define COMMON_REG_APB_CLK_WDEN_Msk                         0x00080000  /*!< WDT clk enable */
+#define COMMON_REG_APB_CLK_I2CEN0_Msk                       0x00100000  /*!< I2C0 clk enable */
+#define COMMON_REG_APB_CLK_I2CEN1_Msk                       0x00200000  /*!< I2C1 clk enable */
+#define COMMON_REG_APB_CLK_ADCEN_Msk                        0x01000000  /*!< ADC clk enable */
 
-/*-- UART_CLK: Setting the clock UART blocks ---------------------------------*/
+/*-- UART_CLK: UART clock control register ---------------------------------*/
 
 typedef struct {
-  uint32_t CLKEN_UART0                            :1;                   /*!< Enable clk UART0 */
-  uint32_t DIVEN_UART0                            :1;                   /*!< Enable devider clk UART0 */
-  uint32_t DIV_UART0                              :6;                   /*!< Devider clk UART0 */
-  uint32_t CLKEN_UART1                            :1;                   /*!< Enable clk UART1 */
-  uint32_t DIVEN_UART1                            :1;                   /*!< Enable devider clk UART1 */
-  uint32_t DIV_UART1                              :6;                   /*!< Devider clk UART1 */
-  uint32_t CLKEN_UART2                            :1;                   /*!< Enable clk UART2 */
-  uint32_t DIVEN_UART2                            :1;                   /*!< Enable devider clk UART2 */
-  uint32_t DIV_UART2                              :6;                   /*!< Devider clk UART2 */
-  uint32_t CLKEN_UART3                            :1;                   /*!< Enable clk UART3 */
-  uint32_t DIVEN_UART3                            :1;                   /*!< Enable devider clk UART3 */
-  uint32_t DIV_UART3                              :6;                   /*!< Devider clk UART3 */
+  uint32_t CLKEN_UART0                            :1;                   /*!< UART0 clk enable */
+  uint32_t DIVEN_UART0                            :1;                   /*!< UART0 clk divider enable */
+  uint32_t DIV_UART0                              :6;                   /*!< UART0 clk divider value */
+  uint32_t CLKEN_UART1                            :1;                   /*!< UART1 clk enable */
+  uint32_t DIVEN_UART1                            :1;                   /*!< UART1 clk divider enable */
+  uint32_t DIV_UART1                              :6;                   /*!< UART1 clk divider value */
+  uint32_t CLKEN_UART2                            :1;                   /*!< UART2 clk enable */
+  uint32_t DIVEN_UART2                            :1;                   /*!< UART2 clk divider enable */
+  uint32_t DIV_UART2                              :6;                   /*!< UART2 clk divider value */
+  uint32_t CLKEN_UART3                            :1;                   /*!< UART3 clk enable */
+  uint32_t DIVEN_UART3                            :1;                   /*!< UART3 clk divider enable */
+  uint32_t DIV_UART3                              :6;                   /*!< UART3 clk divider value */
 } _COMMON_REG_UART_CLK_bits;
 
 /* Bit field positions: */
-#define COMMON_REG_UART_CLK_CLKEN_UART0_Pos                 0           /*!< Enable clk UART0 */
-#define COMMON_REG_UART_CLK_DIVEN_UART0_Pos                 1           /*!< Enable devider clk UART0 */
-#define COMMON_REG_UART_CLK_DIV_UART0_Pos                   2           /*!< Devider clk UART0 */
-#define COMMON_REG_UART_CLK_CLKEN_UART1_Pos                 8           /*!< Enable clk UART1 */
-#define COMMON_REG_UART_CLK_DIVEN_UART1_Pos                 9           /*!< Enable devider clk UART1 */
-#define COMMON_REG_UART_CLK_DIV_UART1_Pos                   10          /*!< Devider clk UART1 */
-#define COMMON_REG_UART_CLK_CLKEN_UART2_Pos                 16          /*!< Enable clk UART2 */
-#define COMMON_REG_UART_CLK_DIVEN_UART2_Pos                 17          /*!< Enable devider clk UART2 */
-#define COMMON_REG_UART_CLK_DIV_UART2_Pos                   18          /*!< Devider clk UART2 */
-#define COMMON_REG_UART_CLK_CLKEN_UART3_Pos                 24          /*!< Enable clk UART3 */
-#define COMMON_REG_UART_CLK_DIVEN_UART3_Pos                 25          /*!< Enable devider clk UART3 */
-#define COMMON_REG_UART_CLK_DIV_UART3_Pos                   26          /*!< Devider clk UART3 */
+#define COMMON_REG_UART_CLK_CLKEN_UART0_Pos                 0           /*!< UART0 clk enable */
+#define COMMON_REG_UART_CLK_DIVEN_UART0_Pos                 1           /*!< UART0 clk divider enable */
+#define COMMON_REG_UART_CLK_DIV_UART0_Pos                   2           /*!< UART0 clk divider value */
+#define COMMON_REG_UART_CLK_CLKEN_UART1_Pos                 8           /*!< UART1 clk enable */
+#define COMMON_REG_UART_CLK_DIVEN_UART1_Pos                 9           /*!< UART1 clk divider enable */
+#define COMMON_REG_UART_CLK_DIV_UART1_Pos                   10          /*!< UART1 clk divider value */
+#define COMMON_REG_UART_CLK_CLKEN_UART2_Pos                 16          /*!< UART2 clk enable */
+#define COMMON_REG_UART_CLK_DIVEN_UART2_Pos                 17          /*!< UART2 clk divider enable */
+#define COMMON_REG_UART_CLK_DIV_UART2_Pos                   18          /*!< UART2 clk divider value */
+#define COMMON_REG_UART_CLK_CLKEN_UART3_Pos                 24          /*!< UART3 clk enable */
+#define COMMON_REG_UART_CLK_DIVEN_UART3_Pos                 25          /*!< UART3 clk divider enable */
+#define COMMON_REG_UART_CLK_DIV_UART3_Pos                   26          /*!< UART3 clk divider value */
 
 /* Bit field masks: */
-#define COMMON_REG_UART_CLK_CLKEN_UART0_Msk                 0x00000001  /*!< Enable clk UART0 */
-#define COMMON_REG_UART_CLK_DIVEN_UART0_Msk                 0x00000002  /*!< Enable devider clk UART0 */
-#define COMMON_REG_UART_CLK_DIV_UART0_Msk                   0x000000FC  /*!< Devider clk UART0 */
-#define COMMON_REG_UART_CLK_CLKEN_UART1_Msk                 0x00000100  /*!< Enable clk UART1 */
-#define COMMON_REG_UART_CLK_DIVEN_UART1_Msk                 0x00000200  /*!< Enable devider clk UART1 */
-#define COMMON_REG_UART_CLK_DIV_UART1_Msk                   0x0000FC00  /*!< Devider clk UART1 */
-#define COMMON_REG_UART_CLK_CLKEN_UART2_Msk                 0x00010000  /*!< Enable clk UART2 */
-#define COMMON_REG_UART_CLK_DIVEN_UART2_Msk                 0x00020000  /*!< Enable devider clk UART2 */
-#define COMMON_REG_UART_CLK_DIV_UART2_Msk                   0x00FC0000  /*!< Devider clk UART2 */
-#define COMMON_REG_UART_CLK_CLKEN_UART3_Msk                 0x01000000  /*!< Enable clk UART3 */
-#define COMMON_REG_UART_CLK_DIVEN_UART3_Msk                 0x02000000  /*!< Enable devider clk UART3 */
-#define COMMON_REG_UART_CLK_DIV_UART3_Msk                   0xFC000000  /*!< Devider clk UART3 */
+#define COMMON_REG_UART_CLK_CLKEN_UART0_Msk                 0x00000001  /*!< UART0 clk enable */
+#define COMMON_REG_UART_CLK_DIVEN_UART0_Msk                 0x00000002  /*!< UART0 clk divider enable */
+#define COMMON_REG_UART_CLK_DIV_UART0_Msk                   0x000000FC  /*!< UART0 clk divider value */
+#define COMMON_REG_UART_CLK_CLKEN_UART1_Msk                 0x00000100  /*!< UART1 clk enable */
+#define COMMON_REG_UART_CLK_DIVEN_UART1_Msk                 0x00000200  /*!< UART1 clk divider enable */
+#define COMMON_REG_UART_CLK_DIV_UART1_Msk                   0x0000FC00  /*!< UART1 clk divider value */
+#define COMMON_REG_UART_CLK_CLKEN_UART2_Msk                 0x00010000  /*!< UART2 clk enable */
+#define COMMON_REG_UART_CLK_DIVEN_UART2_Msk                 0x00020000  /*!< UART2 clk divider enable */
+#define COMMON_REG_UART_CLK_DIV_UART2_Msk                   0x00FC0000  /*!< UART2 clk divider value */
+#define COMMON_REG_UART_CLK_CLKEN_UART3_Msk                 0x01000000  /*!< UART3 clk enable */
+#define COMMON_REG_UART_CLK_DIVEN_UART3_Msk                 0x02000000  /*!< UART3 clk divider enable */
+#define COMMON_REG_UART_CLK_DIV_UART3_Msk                   0xFC000000  /*!< UART3 clk divider value */
 
-/*-- SPI_CLK: Setting the clock blocks SPI -----------------------------------*/
+/*-- SPI_CLK: SPI clock control register -----------------------------------*/
 
 typedef struct {
-  uint32_t CLKEN_SPI0                             :1;                   /*!< Enable clk SPI0 */
-  uint32_t DIVEN_SPI0                             :1;                   /*!< Enable devider clk SPI0 */
-  uint32_t DIV_SPI0                               :6;                   /*!< Devider clk SPI0 */
-  uint32_t CLKEN_SPI1                             :1;                   /*!< Enable clk SPI1 */
-  uint32_t DIVEN_SPI1                             :1;                   /*!< Enable devider clk SPI1 */
-  uint32_t DIV_SPI1                               :6;                   /*!< Devider clk SPI1 */
-  uint32_t CLKEN_SPI2                             :1;                   /*!< Enable clk SPI2 */
-  uint32_t DIVEN_SPI2                             :1;                   /*!< Enable devider clk SPI2 */
-  uint32_t DIV_SPI2                               :6;                   /*!< Devider clk SPI2 */
-  uint32_t CLKEN_SPI3                             :1;                   /*!< Enable clk SPI3 */
-  uint32_t DIVEN_SPI3                             :1;                   /*!< Enable devider clk SPI3 */
-  uint32_t DIV_SPI3                               :6;                   /*!< Devider clk SPI3 */
+  uint32_t CLKEN_SPI0                             :1;                   /*!< SPI0 clk enable */
+  uint32_t DIVEN_SPI0                             :1;                   /*!< SPI0 clk divider enable */
+  uint32_t DIV_SPI0                               :6;                   /*!< SPI0 clk divider value */
+  uint32_t CLKEN_SPI1                             :1;                   /*!< SPI1 clk enable */
+  uint32_t DIVEN_SPI1                             :1;                   /*!< SPI1 clk divider enable */
+  uint32_t DIV_SPI1                               :6;                   /*!< SPI1 clk divider value */
+  uint32_t CLKEN_SPI2                             :1;                   /*!< SPI2 clk enable */
+  uint32_t DIVEN_SPI2                             :1;                   /*!< SPI2 clk divider enable */
+  uint32_t DIV_SPI2                               :6;                   /*!< SPI2 clk divider value */
+  uint32_t CLKEN_SPI3                             :1;                   /*!< SPI3 clk enable */
+  uint32_t DIVEN_SPI3                             :1;                   /*!< SPI3 clk divider enable */
+  uint32_t DIV_SPI3                               :6;                   /*!< SPI3 clk divider value */
 } _COMMON_REG_SPI_CLK_bits;
 
 /* Bit field positions: */
-#define COMMON_REG_SPI_CLK_CLKEN_SPI0_Pos                   0           /*!< Enable clk SPI0 */
-#define COMMON_REG_SPI_CLK_DIVEN_SPI0_Pos                   1           /*!< Enable devider clk SPI0 */
-#define COMMON_REG_SPI_CLK_DIV_SPI0_Pos                     2           /*!< Devider clk SPI0 */
-#define COMMON_REG_SPI_CLK_CLKEN_SPI1_Pos                   8           /*!< Enable clk SPI1 */
-#define COMMON_REG_SPI_CLK_DIVEN_SPI1_Pos                   9           /*!< Enable devider clk SPI1 */
-#define COMMON_REG_SPI_CLK_DIV_SPI1_Pos                     10          /*!< Devider clk SPI1 */
-#define COMMON_REG_SPI_CLK_CLKEN_SPI2_Pos                   16          /*!< Enable clk SPI2 */
-#define COMMON_REG_SPI_CLK_DIVEN_SPI2_Pos                   17          /*!< Enable devider clk SPI2 */
-#define COMMON_REG_SPI_CLK_DIV_SPI2_Pos                     18          /*!< Devider clk SPI2 */
-#define COMMON_REG_SPI_CLK_CLKEN_SPI3_Pos                   24          /*!< Enable clk SPI3 */
-#define COMMON_REG_SPI_CLK_DIVEN_SPI3_Pos                   25          /*!< Enable devider clk SPI3 */
-#define COMMON_REG_SPI_CLK_DIV_SPI3_Pos                     26          /*!< Devider clk SPI3 */
+#define COMMON_REG_SPI_CLK_CLKEN_SPI0_Pos                   0           /*!< SPI0 clk enable */
+#define COMMON_REG_SPI_CLK_DIVEN_SPI0_Pos                   1           /*!< SPI0 clk divider enable */
+#define COMMON_REG_SPI_CLK_DIV_SPI0_Pos                     2           /*!< SPI0 clk divider value */
+#define COMMON_REG_SPI_CLK_CLKEN_SPI1_Pos                   8           /*!< SPI1 clk enable */
+#define COMMON_REG_SPI_CLK_DIVEN_SPI1_Pos                   9           /*!< SPI1 clk divider enable */
+#define COMMON_REG_SPI_CLK_DIV_SPI1_Pos                     10          /*!< SPI1 clk divider value */
+#define COMMON_REG_SPI_CLK_CLKEN_SPI2_Pos                   16          /*!< SPI2 clk enable */
+#define COMMON_REG_SPI_CLK_DIVEN_SPI2_Pos                   17          /*!< SPI2 clk divider enable */
+#define COMMON_REG_SPI_CLK_DIV_SPI2_Pos                     18          /*!< SPI2 clk divider value */
+#define COMMON_REG_SPI_CLK_CLKEN_SPI3_Pos                   24          /*!< SPI3 clk enable */
+#define COMMON_REG_SPI_CLK_DIVEN_SPI3_Pos                   25          /*!< SPI3 clk divider enable */
+#define COMMON_REG_SPI_CLK_DIV_SPI3_Pos                     26          /*!< SPI3 clk divider value */
 
 /* Bit field masks: */
-#define COMMON_REG_SPI_CLK_CLKEN_SPI0_Msk                   0x00000001  /*!< Enable clk SPI0 */
-#define COMMON_REG_SPI_CLK_DIVEN_SPI0_Msk                   0x00000002  /*!< Enable devider clk SPI0 */
-#define COMMON_REG_SPI_CLK_DIV_SPI0_Msk                     0x000000FC  /*!< Devider clk SPI0 */
-#define COMMON_REG_SPI_CLK_CLKEN_SPI1_Msk                   0x00000100  /*!< Enable clk SPI1 */
-#define COMMON_REG_SPI_CLK_DIVEN_SPI1_Msk                   0x00000200  /*!< Enable devider clk SPI1 */
-#define COMMON_REG_SPI_CLK_DIV_SPI1_Msk                     0x0000FC00  /*!< Devider clk SPI1 */
-#define COMMON_REG_SPI_CLK_CLKEN_SPI2_Msk                   0x00010000  /*!< Enable clk SPI2 */
-#define COMMON_REG_SPI_CLK_DIVEN_SPI2_Msk                   0x00020000  /*!< Enable devider clk SPI2 */
-#define COMMON_REG_SPI_CLK_DIV_SPI2_Msk                     0x00FC0000  /*!< Devider clk SPI2 */
-#define COMMON_REG_SPI_CLK_CLKEN_SPI3_Msk                   0x01000000  /*!< Enable clk SPI3 */
-#define COMMON_REG_SPI_CLK_DIVEN_SPI3_Msk                   0x02000000  /*!< Enable devider clk SPI3 */
-#define COMMON_REG_SPI_CLK_DIV_SPI3_Msk                     0xFC000000  /*!< Devider clk SPI3 */
+#define COMMON_REG_SPI_CLK_CLKEN_SPI0_Msk                   0x00000001  /*!< SPI0 clk enable */
+#define COMMON_REG_SPI_CLK_DIVEN_SPI0_Msk                   0x00000002  /*!< SPI0 clk divider enable */
+#define COMMON_REG_SPI_CLK_DIV_SPI0_Msk                     0x000000FC  /*!< SPI0 clk divider value */
+#define COMMON_REG_SPI_CLK_CLKEN_SPI1_Msk                   0x00000100  /*!< SPI1 clk enable */
+#define COMMON_REG_SPI_CLK_DIVEN_SPI1_Msk                   0x00000200  /*!< SPI1 clk divider enable */
+#define COMMON_REG_SPI_CLK_DIV_SPI1_Msk                     0x0000FC00  /*!< SPI1 clk divider value */
+#define COMMON_REG_SPI_CLK_CLKEN_SPI2_Msk                   0x00010000  /*!< SPI2 clk enable */
+#define COMMON_REG_SPI_CLK_DIVEN_SPI2_Msk                   0x00020000  /*!< SPI2 clk divider enable */
+#define COMMON_REG_SPI_CLK_DIV_SPI2_Msk                     0x00FC0000  /*!< SPI2 clk divider value */
+#define COMMON_REG_SPI_CLK_CLKEN_SPI3_Msk                   0x01000000  /*!< SPI3 clk enable */
+#define COMMON_REG_SPI_CLK_DIVEN_SPI3_Msk                   0x02000000  /*!< SPI3 clk divider enable */
+#define COMMON_REG_SPI_CLK_DIV_SPI3_Msk                     0xFC000000  /*!< SPI3 clk divider value */
 
 /*-- PER_RST0: Peripheral reset register 0 -----------------------------------*/
 
@@ -3178,46 +3187,46 @@ typedef struct {
 
 typedef struct {
   uint32_t CLKEN_ADC8                             :1;                   /*!< Enable clk ADC8 */
-  uint32_t DIVEN_ADC8                             :1;                   /*!< Enable devider clk ADC8 */
-  uint32_t DIV_ADC8                               :6;                   /*!< Devider clk ADC8 */
+  uint32_t DIVEN_ADC8                             :1;                   /*!< Enable divider clk ADC8 */
+  uint32_t DIV_ADC8                               :6;                   /*!< Divider clk ADC8 */
   uint32_t CLKEN_ADC9                             :1;                   /*!< Enable clk ADC9 */
-  uint32_t DIVEN_ADC9                             :1;                   /*!< Enable devider clk ADC9 */
-  uint32_t DIV_ADC9                               :6;                   /*!< Devider clk ADC9 */
+  uint32_t DIVEN_ADC9                             :1;                   /*!< Enable divider clk ADC9 */
+  uint32_t DIV_ADC9                               :6;                   /*!< Divider clk ADC9 */
   uint32_t CLKEN_ADC10                            :1;                   /*!< Enable clk ADC10 */
-  uint32_t DIVEN_ADC10                            :1;                   /*!< Enable devider clk ADC10 */
-  uint32_t DIV_ADC10                              :6;                   /*!< Devider clk ADC10 */
+  uint32_t DIVEN_ADC10                            :1;                   /*!< Enable divider clk ADC10 */
+  uint32_t DIV_ADC10                              :6;                   /*!< Divider clk ADC10 */
   uint32_t CLKEN_ADC11                            :1;                   /*!< Enable clk ADC11 */
-  uint32_t DIVEN_ADC11                            :1;                   /*!< Enable devider clk ADC11 */
-  uint32_t DIV_ADC11                              :6;                   /*!< Devider clk ADC11 */
+  uint32_t DIVEN_ADC11                            :1;                   /*!< Enable divider clk ADC11 */
+  uint32_t DIV_ADC11                              :6;                   /*!< Divider clk ADC11 */
 } _COMMON_REG_ADC_CTRL2_bits;
 
 /* Bit field positions: */
 #define COMMON_REG_ADC_CTRL2_CLKEN_ADC8_Pos                 0           /*!< Enable clk ADC8 */
-#define COMMON_REG_ADC_CTRL2_DIVEN_ADC8_Pos                 1           /*!< Enable devider clk ADC8 */
-#define COMMON_REG_ADC_CTRL2_DIV_ADC8_Pos                   2           /*!< Devider clk ADC8 */
+#define COMMON_REG_ADC_CTRL2_DIVEN_ADC8_Pos                 1           /*!< Enable divider clk ADC8 */
+#define COMMON_REG_ADC_CTRL2_DIV_ADC8_Pos                   2           /*!< Divider clk ADC8 */
 #define COMMON_REG_ADC_CTRL2_CLKEN_ADC9_Pos                 8           /*!< Enable clk ADC9 */
-#define COMMON_REG_ADC_CTRL2_DIVEN_ADC9_Pos                 9           /*!< Enable devider clk ADC9 */
-#define COMMON_REG_ADC_CTRL2_DIV_ADC9_Pos                   10          /*!< Devider clk ADC9 */
+#define COMMON_REG_ADC_CTRL2_DIVEN_ADC9_Pos                 9           /*!< Enable divider clk ADC9 */
+#define COMMON_REG_ADC_CTRL2_DIV_ADC9_Pos                   10          /*!< Divider clk ADC9 */
 #define COMMON_REG_ADC_CTRL2_CLKEN_ADC10_Pos                16          /*!< Enable clk ADC10 */
-#define COMMON_REG_ADC_CTRL2_DIVEN_ADC10_Pos                17          /*!< Enable devider clk ADC10 */
-#define COMMON_REG_ADC_CTRL2_DIV_ADC10_Pos                  18          /*!< Devider clk ADC10 */
+#define COMMON_REG_ADC_CTRL2_DIVEN_ADC10_Pos                17          /*!< Enable divider clk ADC10 */
+#define COMMON_REG_ADC_CTRL2_DIV_ADC10_Pos                  18          /*!< Divider clk ADC10 */
 #define COMMON_REG_ADC_CTRL2_CLKEN_ADC11_Pos                24          /*!< Enable clk ADC11 */
-#define COMMON_REG_ADC_CTRL2_DIVEN_ADC11_Pos                25          /*!< Enable devider clk ADC11 */
-#define COMMON_REG_ADC_CTRL2_DIV_ADC11_Pos                  26          /*!< Devider clk ADC11 */
+#define COMMON_REG_ADC_CTRL2_DIVEN_ADC11_Pos                25          /*!< Enable divider clk ADC11 */
+#define COMMON_REG_ADC_CTRL2_DIV_ADC11_Pos                  26          /*!< Divider clk ADC11 */
 
 /* Bit field masks: */
 #define COMMON_REG_ADC_CTRL2_CLKEN_ADC8_Msk                 0x00000001  /*!< Enable clk ADC8 */
-#define COMMON_REG_ADC_CTRL2_DIVEN_ADC8_Msk                 0x00000002  /*!< Enable devider clk ADC8 */
-#define COMMON_REG_ADC_CTRL2_DIV_ADC8_Msk                   0x000000FC  /*!< Devider clk ADC8 */
+#define COMMON_REG_ADC_CTRL2_DIVEN_ADC8_Msk                 0x00000002  /*!< Enable divider clk ADC8 */
+#define COMMON_REG_ADC_CTRL2_DIV_ADC8_Msk                   0x000000FC  /*!< Divider clk ADC8 */
 #define COMMON_REG_ADC_CTRL2_CLKEN_ADC9_Msk                 0x00000100  /*!< Enable clk ADC9 */
-#define COMMON_REG_ADC_CTRL2_DIVEN_ADC9_Msk                 0x00000200  /*!< Enable devider clk ADC9 */
-#define COMMON_REG_ADC_CTRL2_DIV_ADC9_Msk                   0x0000FC00  /*!< Devider clk ADC9 */
+#define COMMON_REG_ADC_CTRL2_DIVEN_ADC9_Msk                 0x00000200  /*!< Enable divider clk ADC9 */
+#define COMMON_REG_ADC_CTRL2_DIV_ADC9_Msk                   0x0000FC00  /*!< Divider clk ADC9 */
 #define COMMON_REG_ADC_CTRL2_CLKEN_ADC10_Msk                0x00010000  /*!< Enable clk ADC10 */
-#define COMMON_REG_ADC_CTRL2_DIVEN_ADC10_Msk                0x00020000  /*!< Enable devider clk ADC10 */
-#define COMMON_REG_ADC_CTRL2_DIV_ADC10_Msk                  0x00FC0000  /*!< Devider clk ADC10 */
+#define COMMON_REG_ADC_CTRL2_DIVEN_ADC10_Msk                0x00020000  /*!< Enable divider clk ADC10 */
+#define COMMON_REG_ADC_CTRL2_DIV_ADC10_Msk                  0x00FC0000  /*!< Divider clk ADC10 */
 #define COMMON_REG_ADC_CTRL2_CLKEN_ADC11_Msk                0x01000000  /*!< Enable clk ADC11 */
-#define COMMON_REG_ADC_CTRL2_DIVEN_ADC11_Msk                0x02000000  /*!< Enable devider clk ADC11 */
-#define COMMON_REG_ADC_CTRL2_DIV_ADC11_Msk                  0xFC000000  /*!< Devider clk ADC11 */
+#define COMMON_REG_ADC_CTRL2_DIVEN_ADC11_Msk                0x02000000  /*!< Enable divider clk ADC11 */
+#define COMMON_REG_ADC_CTRL2_DIV_ADC11_Msk                  0xFC000000  /*!< Divider clk ADC11 */
 
 /*-- FLASH_FULL_ERASE: Full erase flash (user and boot) register -------------*/
 
@@ -3235,220 +3244,220 @@ typedef struct {
 /*-- Register map for COMMON_REG peripheral ----------------------------------*/
 
 typedef struct {
-  union {                                                               /*!< Enable output PORT A,B register */
+  union {                                                               /*!< Port A,B digital enable register */
     __IO uint32_t GPIODEN0;                                             /*!< GPIODEN0    : type used for word access */
     __IO _COMMON_REG_GPIODEN0_bits GPIODEN0_bit;                        /*!< GPIODEN0_bit: structure used for bit access */
     struct {
-      __IO uint16_t GPIODENA;                                           /*!< Enable output PORT A register */
-      __IO uint16_t GPIODENB;                                           /*!< Enable output PORT B register */
+      __IO uint16_t GPIODENA;                                           /*!< Port A digital enable register */
+      __IO uint16_t GPIODENB;                                           /*!< Port B digital enable register */
     };
   };
-  union {                                                               /*!< Enable output PORT C,D register */
+  union {                                                               /*!< Port C,D digital enable register */
     __IO uint32_t GPIODEN1;                                             /*!< GPIODEN1    : type used for word access */
     __IO _COMMON_REG_GPIODEN1_bits GPIODEN1_bit;                        /*!< GPIODEN1_bit: structure used for bit access */
     struct {
-      __IO uint16_t GPIODENC;                                           /*!< Enable output PORT C register */
-      __IO uint16_t GPIODEND;                                           /*!< Enable output PORT D register */
+      __IO uint16_t GPIODENC;                                           /*!< Port C digital enable register */
+      __IO uint16_t GPIODEND;                                           /*!< Port D digital enable register */
     };
   };
-  union {                                                               /*!< Enable output PORT E,F register */
+  union {                                                               /*!< Port E,F digital enable register */
     __IO uint32_t GPIODEN2;                                             /*!< GPIODEN2    : type used for word access */
     __IO _COMMON_REG_GPIODEN2_bits GPIODEN2_bit;                        /*!< GPIODEN2_bit: structure used for bit access */
     struct {
-      __IO uint16_t GPIODENE;                                           /*!< Enable output PORT E register */
-      __IO uint16_t GPIODENF;                                           /*!< Enable output PORT F register */
+      __IO uint16_t GPIODENE;                                           /*!< Port E digital enable register */
+      __IO uint16_t GPIODENF;                                           /*!< Port F digital enable register */
     };
   };
-  union {                                                               /*!< Enable output PORT G,H register */
+  union {                                                               /*!< Port G,H digital enable register */
     __IO uint32_t GPIODEN3;                                             /*!< GPIODEN3    : type used for word access */
     __IO _COMMON_REG_GPIODEN3_bits GPIODEN3_bit;                        /*!< GPIODEN3_bit: structure used for bit access */
     struct {
-      __IO uint16_t GPIODENG;                                           /*!< Enable output PORT G register */
-      __IO uint16_t GPIODENH;                                           /*!< Enable output PORT H register */
+      __IO uint16_t GPIODENG;                                           /*!< Port G digital enable register */
+      __IO uint16_t GPIODENH;                                           /*!< Port H digital enable register */
     };
   };
   uint32_t Reserved0[2];                                                /*!< Reserved */
-  union {                                                               /*!< Alternate function PORTA register */
+  union {                                                               /*!< Port A alternative function selection register */
     __IO uint32_t GPIOPCTLA;                                            /*!< GPIOPCTLA    : type used for word access */
     __IO _COMMON_REG_GPIOPCTLA_bits GPIOPCTLA_bit;                      /*!< GPIOPCTLA_bit: structure used for bit access */
   };
-  union {                                                               /*!< Alternate function PORTB register */
+  union {                                                               /*!< Port B alternative function selection register */
     __IO uint32_t GPIOPCTLB;                                            /*!< GPIOPCTLB    : type used for word access */
     __IO _COMMON_REG_GPIOPCTLB_bits GPIOPCTLB_bit;                      /*!< GPIOPCTLB_bit: structure used for bit access */
   };
-  union {                                                               /*!< Alternate function PORTC register */
+  union {                                                               /*!< Port C alternative function selection register */
     __IO uint32_t GPIOPCTLC;                                            /*!< GPIOPCTLC    : type used for word access */
     __IO _COMMON_REG_GPIOPCTLC_bits GPIOPCTLC_bit;                      /*!< GPIOPCTLC_bit: structure used for bit access */
   };
-  union {                                                               /*!< Alternate function PORTD register */
+  union {                                                               /*!< Port D alternative function selection register */
     __IO uint32_t GPIOPCTLD;                                            /*!< GPIOPCTLD    : type used for word access */
     __IO _COMMON_REG_GPIOPCTLD_bits GPIOPCTLD_bit;                      /*!< GPIOPCTLD_bit: structure used for bit access */
   };
-  union {                                                               /*!< Alternate function PORTE register */
+  union {                                                               /*!< Port E alternative function selection register */
     __IO uint32_t GPIOPCTLE;                                            /*!< GPIOPCTLE    : type used for word access */
     __IO _COMMON_REG_GPIOPCTLE_bits GPIOPCTLE_bit;                      /*!< GPIOPCTLE_bit: structure used for bit access */
   };
-  union {                                                               /*!< Alternate function PORTF register */
+  union {                                                               /*!< Port F alternative function selection register */
     __IO uint32_t GPIOPCTLF;                                            /*!< GPIOPCTLF    : type used for word access */
     __IO _COMMON_REG_GPIOPCTLF_bits GPIOPCTLF_bit;                      /*!< GPIOPCTLF_bit: structure used for bit access */
   };
-  union {                                                               /*!< Alternate function PORTG register */
+  union {                                                               /*!< Port G alternative function selection register */
     __IO uint32_t GPIOPCTLG;                                            /*!< GPIOPCTLG    : type used for word access */
     __IO _COMMON_REG_GPIOPCTLG_bits GPIOPCTLG_bit;                      /*!< GPIOPCTLG_bit: structure used for bit access */
   };
-  union {                                                               /*!< Alternate function PORTH register */
+  union {                                                               /*!< Port H alternative function selection register */
     __IO uint32_t GPIOPCTLH;                                            /*!< GPIOPCTLH    : type used for word access */
     __IO _COMMON_REG_GPIOPCTLH_bits GPIOPCTLH_bit;                      /*!< GPIOPCTLH_bit: structure used for bit access */
   };
   uint32_t Reserved1[4];                                                /*!< Reserved */
-  union {                                                               /*!< Control register circuit 'Pull-up' ports A, B */
+  union {                                                               /*!< Port A,B open-drain enable register */
     __IO uint32_t GPIOODCTL0;                                           /*!< GPIOODCTL0    : type used for word access */
     __IO _COMMON_REG_GPIOODCTL0_bits GPIOODCTL0_bit;                    /*!< GPIOODCTL0_bit: structure used for bit access */
     struct {
-      __IO uint16_t GPIOODCTLA;                                         /*!< Control register circuit 'Pull-up' Port A */
-      __IO uint16_t GPIOODCTLB;                                         /*!< Control register circuit 'Pull-up' Port B */
+      __IO uint16_t GPIOODCTLA;                                         /*!< Port A open-drain enable register */
+      __IO uint16_t GPIOODCTLB;                                         /*!< Port B open-drain enable register */
     };
   };
-  union {                                                               /*!< Control register circuit 'Pull-up' ports C, D */
+  union {                                                               /*!< Port C,D open-drain enable register */
     __IO uint32_t GPIOODCTL1;                                           /*!< GPIOODCTL1    : type used for word access */
     __IO _COMMON_REG_GPIOODCTL1_bits GPIOODCTL1_bit;                    /*!< GPIOODCTL1_bit: structure used for bit access */
     struct {
-      __IO uint16_t GPIOODCTLC;                                         /*!< Control register circuit 'Pull-up' Port C */
-      __IO uint16_t GPIOODCTLD;                                         /*!< Control register circuit 'Pull-up' Port D */
+      __IO uint16_t GPIOODCTLC;                                         /*!< Port C open-drain enable register */
+      __IO uint16_t GPIOODCTLD;                                         /*!< Port D open-drain enable register */
     };
   };
-  union {                                                               /*!< Control register circuit 'Pull-up' ports E, F */
+  union {                                                               /*!< Port E,F open-drain enable register */
     __IO uint32_t GPIOODCTL2;                                           /*!< GPIOODCTL2    : type used for word access */
     __IO _COMMON_REG_GPIOODCTL2_bits GPIOODCTL2_bit;                    /*!< GPIOODCTL2_bit: structure used for bit access */
     struct {
-      __IO uint16_t GPIOODCTLE;                                         /*!< Control register circuit 'Pull-up' Port E */
-      __IO uint16_t GPIOODCTLF;                                         /*!< Control register circuit 'Pull-up' Port F */
+      __IO uint16_t GPIOODCTLE;                                         /*!< Port E open-drain enable register */
+      __IO uint16_t GPIOODCTLF;                                         /*!< Port F open-drain enable register */
     };
   };
-  union {                                                               /*!< Control register circuit 'Pull-up' ports G, H */
+  union {                                                               /*!< Port G,H open-drain enable register */
     __IO uint32_t GPIOODCTL3;                                           /*!< GPIOODCTL3    : type used for word access */
     __IO _COMMON_REG_GPIOODCTL3_bits GPIOODCTL3_bit;                    /*!< GPIOODCTL3_bit: structure used for bit access */
     struct {
-      __IO uint16_t GPIOODCTLG;                                         /*!< Control register circuit 'Pull-up' Port G */
-      __IO uint16_t GPIOODCTLH;                                         /*!< Control register circuit 'Pull-up' Ports H */
+      __IO uint16_t GPIOODCTLG;                                         /*!< Port G open-drain enable register */
+      __IO uint16_t GPIOODCTLH;                                         /*!< Port H open-drain enable register */
     };
   };
   uint32_t Reserved2[2];                                                /*!< Reserved */
-  union {                                                               /*!< Control register output capability ports A,B */
-    __IO uint32_t GPIOODSCTL0;                                          /*!< GPIOODSCTL0    : type used for word access */
-    __IO _COMMON_REG_GPIOODSCTL0_bits GPIOODSCTL0_bit;                  /*!< GPIOODSCTL0_bit: structure used for bit access */
+  union {                                                               /*!< Port A,B strength control register */
+    __IO uint32_t GPIODSCTL0;                                           /*!< GPIODSCTL0    : type used for word access */
+    __IO _COMMON_REG_GPIODSCTL0_bits GPIODSCTL0_bit;                    /*!< GPIODSCTL0_bit: structure used for bit access */
     struct {
-      __IO uint16_t GPIOODSCTLA;                                        /*!< Control register output capability Port A */
-      __IO uint16_t GPIOODSCTLB;                                        /*!< Control register output capability Port B */
+      __IO uint16_t GPIODSCTLA;                                        /*!< Port A strength control register */
+      __IO uint16_t GPIODSCTLB;                                        /*!< Port B strength control register */
     };
   };
-  union {                                                               /*!< Control register output capability ports C,D */
-    __IO uint32_t GPIOODSCTL1;                                          /*!< GPIOODSCTL1    : type used for word access */
-    __IO _COMMON_REG_GPIOODSCTL1_bits GPIOODSCTL1_bit;                  /*!< GPIOODSCTL1_bit: structure used for bit access */
+  union {                                                               /*!< Port C,D strength control register */
+    __IO uint32_t GPIODSCTL1;                                           /*!< GPIODSCTL1    : type used for word access */
+    __IO _COMMON_REG_GPIODSCTL1_bits GPIODSCTL1_bit;                    /*!< GPIODSCTL1_bit: structure used for bit access */
     struct {
-      __IO uint16_t GPIOODSCTLC;                                        /*!< Control register output capability Port C */
-      __IO uint16_t GPIOODSCTLD;                                        /*!< Control register output capability Port D */
+      __IO uint16_t GPIODSCTLC;                                        /*!< Port C strength control register */
+      __IO uint16_t GPIODSCTLD;                                        /*!< Port D strength control register */
     };
   };
-  union {                                                               /*!< Control register output capability ports E,F */
-    __IO uint32_t GPIOODSCTL2;                                          /*!< GPIOODSCTL2    : type used for word access */
-    __IO _COMMON_REG_GPIOODSCTL2_bits GPIOODSCTL2_bit;                  /*!< GPIOODSCTL2_bit: structure used for bit access */
+  union {                                                               /*!< Port E,F strength control register */
+    __IO uint32_t GPIODSCTL2;                                           /*!< GPIODSCTL2    : type used for word access */
+    __IO _COMMON_REG_GPIODSCTL2_bits GPIODSCTL2_bit;                    /*!< GPIODSCTL2_bit: structure used for bit access */
     struct {
-      __IO uint16_t GPIOODSCTLE;                                        /*!< Control register output capability Port E */
-      __IO uint16_t GPIOODSCTLF;                                        /*!< Control register output capability Port F */
+      __IO uint16_t GPIODSCTLE;                                        /*!< Port E strength control register */
+      __IO uint16_t GPIODSCTLF;                                        /*!< Port F strength control register */
     };
   };
-  union {                                                               /*!< Control register output capability ports G,H */
-    __IO uint32_t GPIOODSCTL3;                                          /*!< GPIOODSCTL3    : type used for word access */
-    __IO _COMMON_REG_GPIOODSCTL3_bits GPIOODSCTL3_bit;                  /*!< GPIOODSCTL3_bit: structure used for bit access */
+  union {                                                               /*!< Port G,H strength control register */
+    __IO uint32_t GPIODSCTL3;                                           /*!< GPIODSCTL3    : type used for word access */
+    __IO _COMMON_REG_GPIODSCTL3_bits GPIODSCTL3_bit;                    /*!< GPIODSCTL3_bit: structure used for bit access */
     struct {
-      __IO uint16_t GPIOODSCTLG;                                        /*!< Control register output capability Port G */
-      __IO uint16_t GPIOODSCTLH;                                        /*!< Control register output capability Port H */
+      __IO uint16_t GPIODSCTLG;                                        /*!< Port G strength control register */
+      __IO uint16_t GPIODSCTLH;                                        /*!< Port H strength control register */
     };
   };
-  uint32_t Reserved3[2];                                                /*!< Reserved */
-  union {                                                               /*!< Control register circuit 'Pull-up' ports A, B */
+  uint32_t Reserved3[2];                                                /*!< Reserved */                                               /*!< Reserved */
+  union {                                                               /*!< Port A,B pull-up enable register */
     __IO uint32_t GPIOPUCTL0;                                           /*!< GPIOPUCTL0    : type used for word access */
     __IO _COMMON_REG_GPIOPUCTL0_bits GPIOPUCTL0_bit;                    /*!< GPIOPUCTL0_bit: structure used for bit access */
     struct {
-      __IO uint16_t GPIOPUCTLA;                                         /*!< Control register circuit 'Pull-up' Port A */
-      __IO uint16_t GPIOPUCTLB;                                         /*!< Control register circuit 'Pull-up' Port B */
+      __IO uint16_t GPIOPUCTLA;                                         /*!< Port A pull-up enable register */
+      __IO uint16_t GPIOPUCTLB;                                         /*!< Port B pull-up enable register */
     };
   };
-  union {                                                               /*!< Control register circuit 'Pull-up' ports C, D */
+  union {                                                               /*!< Port C,D pull-up enable register */
     __IO uint32_t GPIOPUCTL1;                                           /*!< GPIOPUCTL1    : type used for word access */
     __IO _COMMON_REG_GPIOPUCTL1_bits GPIOPUCTL1_bit;                    /*!< GPIOPUCTL1_bit: structure used for bit access */
     struct {
-      __IO uint16_t GPIOPUCTLC;                                         /*!< Control register circuit 'Pull-up' Port C */
-      __IO uint16_t GPIOPUCTLD;                                         /*!< Control register circuit 'Pull-up' Port D */
+      __IO uint16_t GPIOPUCTLC;                                         /*!< Port C pull-up enable register */
+      __IO uint16_t GPIOPUCTLD;                                         /*!< Port D pull-up enable register */
     };
   };
-  union {                                                               /*!< Control register circuit 'Pull-up' ports E, F */
+  union {                                                               /*!< Port E,F pull-up enable register*/
     __IO uint32_t GPIOPUCTL2;                                           /*!< GPIOPUCTL2    : type used for word access */
     __IO _COMMON_REG_GPIOPUCTL2_bits GPIOPUCTL2_bit;                    /*!< GPIOPUCTL2_bit: structure used for bit access */
     struct {
-      __IO uint16_t GPIOPUCTLE;                                         /*!< Control register circuit 'Pull-up' Port E */
-      __IO uint16_t GPIOPUCTLF;                                         /*!< Control register circuit 'Pull-up' Port F */
+      __IO uint16_t GPIOPUCTLE;                                         /*!< Port E pull-up enable register */
+      __IO uint16_t GPIOPUCTLF;                                         /*!< Port F pull-up enable register */
     };
   };
-  union {                                                               /*!< Control register circuit 'Pull-up' ports G, H */
+  union {                                                               /*!< Port G,H pull-up enable register */
     __IO uint32_t GPIOPUCTL3;                                           /*!< GPIOPUCTL3    : type used for word access */
     __IO _COMMON_REG_GPIOPUCTL3_bits GPIOPUCTL3_bit;                    /*!< GPIOPUCTL3_bit: structure used for bit access */
     struct {
-      __IO uint16_t GPIOPUCTLG;                                         /*!< Control register circuit 'Pull-up' Port G */
-      __IO uint16_t GPIOPUCTLH;                                         /*!< Control register circuit 'Pull-up' Port H */
+      __IO uint16_t GPIOPUCTLG;                                         /*!< Port G pull-up enable register */
+      __IO uint16_t GPIOPUCTLH;                                         /*!< Port H pull-up enable register */
     };
   };
   uint32_t Reserved4[3];                                                /*!< Reserved */
-  union {                                                               /*!< PLL control register settings */
+  union {                                                               /*!< PLL control register */
     __IO uint32_t PLL_CTRL;                                             /*!< PLL_CTRL    : type used for word access */
     __IO _COMMON_REG_PLL_CTRL_bits PLL_CTRL_bit;                        /*!< PLL_CTRL_bit: structure used for bit access */
   };
-  union {                                                               /*!< Select output divider PLL */
+  union {                                                               /*!< PLL output divider selection register */
     __IO uint32_t PLL_OD;                                               /*!< PLL_OD    : type used for word access */
     __IO _COMMON_REG_PLL_OD_bits PLL_OD_bit;                            /*!< PLL_OD_bit: structure used for bit access */
   };
-  union {                                                               /*!< Setting the reference divider PLL */
+  union {                                                               /*!< PLL reference divider register */
     __IO uint32_t PLL_NR;                                               /*!< PLL_NR    : type used for word access */
     __IO _COMMON_REG_PLL_NR_bits PLL_NR_bit;                            /*!< PLL_NR_bit: structure used for bit access */
   };
-  union {                                                               /*!< Setting the PLL feedback divider */
+  union {                                                               /*!< PLL feedback divider register */
     __IO uint32_t PLL_NF;                                               /*!< PLL_NF    : type used for word access */
     __IO _COMMON_REG_PLL_NF_bits PLL_NF_bit;                            /*!< PLL_NF_bit: structure used for bit access */
   };
-  union {                                                               /*!< Setting up an external memory controller */
+  union {                                                               /*!< External memory configuration register */
     __IO uint32_t EXT_MEM_CFG;                                          /*!< EXT_MEM_CFG    : type used for word access */
     __IO _COMMON_REG_EXT_MEM_CFG_bits EXT_MEM_CFG_bit;                  /*!< EXT_MEM_CFG_bit: structure used for bit access */
   };
-  union {                                                               /*!< ADC control register 0 */
+  union {                                                               /*!< ADC 0-3 clock control register */
     __IO uint32_t ADC_CTRL0;                                            /*!< ADC_CTRL0    : type used for word access */
     __IO _COMMON_REG_ADC_CTRL0_bits ADC_CTRL0_bit;                      /*!< ADC_CTRL0_bit: structure used for bit access */
   };
-  union {                                                               /*!< ADC control register 1 */
+  union {                                                               /*!< ADC 4-7 clock control register */
     __IO uint32_t ADC_CTRL1;                                            /*!< ADC_CTRL1    : type used for word access */
     __IO _COMMON_REG_ADC_CTRL1_bits ADC_CTRL1_bit;                      /*!< ADC_CTRL1_bit: structure used for bit access */
   };
-  union {                                                               /*!< Syncronize register PWM blocks */
+  union {                                                               /*!< PWM prescalers sync register */
     __IO uint32_t PWM_SYNC;                                             /*!< PWM_SYNC    : type used for word access */
     __IO _COMMON_REG_PWM_SYNC_bits PWM_SYNC_bit;                        /*!< PWM_SYNC_bit: structure used for bit access */
   };
-  union {                                                               /*!< Register control of synchronization blocks of PWM */
+  union {                                                               /*!< PWM sync control register */
     __IO uint32_t PWM_CTRL;                                             /*!< PWM_CTRL    : type used for word access */
     __IO _COMMON_REG_PWM_CTRL_bits PWM_CTRL_bit;                        /*!< PWM_CTRL_bit: structure used for bit access */
   };
-  union {                                                               /*!< Setting the system clock controller */
+  union {                                                               /*!< System clock control register */
     __IO uint32_t SYS_CLK;                                              /*!< SYS_CLK    : type used for word access */
     __IO _COMMON_REG_SYS_CLK_bits SYS_CLK_bit;                          /*!< SYS_CLK_bit: structure used for bit access */
   };
-  union {                                                               /*!< Setting the resolution peripheral clocks */
+  union {                                                               /*!< Peripheral clock control register */
     __IO uint32_t APB_CLK;                                              /*!< APB_CLK    : type used for word access */
     __IO _COMMON_REG_APB_CLK_bits APB_CLK_bit;                          /*!< APB_CLK_bit: structure used for bit access */
   };
-  union {                                                               /*!< Setting the clock UART blocks */
+  union {                                                               /*!< UART clock control register */
     __IO uint32_t UART_CLK;                                             /*!< UART_CLK    : type used for word access */
     __IO _COMMON_REG_UART_CLK_bits UART_CLK_bit;                        /*!< UART_CLK_bit: structure used for bit access */
   };
-  union {                                                               /*!< Setting the clock blocks SPI */
+  union {                                                               /*!< SPI clock control register */
     __IO uint32_t SPI_CLK;                                              /*!< SPI_CLK    : type used for word access */
     __IO _COMMON_REG_SPI_CLK_bits SPI_CLK_bit;                          /*!< SPI_CLK_bit: structure used for bit access */
   };
@@ -3589,7 +3598,7 @@ typedef struct {
 /*-- FDR: Register divider ---------------------------------------------------*/
 
 typedef struct {
-  uint32_t STEP                                   :10;                  /*!< Step devider */
+  uint32_t STEP                                   :10;                  /*!< Step divider */
   uint32_t Reserved0                              :1;                   /*!< Reserved */
   uint32_t SM                                     :1;                   /*!< Select the transition mode Suspend */
   uint32_t SC                                     :2;                   /*!< Configuration of the frequency divider in mode Suspend */
@@ -3603,7 +3612,7 @@ typedef struct {
 } _CAN_FDR_bits;
 
 /* Bit field positions: */
-#define CAN_FDR_STEP_Pos                                    0           /*!< Step devider */
+#define CAN_FDR_STEP_Pos                                    0           /*!< Step divider */
 #define CAN_FDR_SM_Pos                                      11          /*!< Select the transition mode Suspend */
 #define CAN_FDR_SC_Pos                                      12          /*!< Configuration of the frequency divider in mode Suspend */
 #define CAN_FDR_DM_Pos                                      14          /*!< Mode setting of the frequency divider */
@@ -3614,7 +3623,7 @@ typedef struct {
 #define CAN_FDR_DISCLK_Pos                                  31          /*!< Disable bit internal clock */
 
 /* Bit field masks: */
-#define CAN_FDR_STEP_Msk                                    0x000003FF  /*!< Step devider */
+#define CAN_FDR_STEP_Msk                                    0x000003FF  /*!< Step divider */
 #define CAN_FDR_SM_Msk                                      0x00000800  /*!< Select the transition mode Suspend */
 #define CAN_FDR_SC_Msk                                      0x00003000  /*!< Configuration of the frequency divider in mode Suspend */
 #define CAN_FDR_DM_Msk                                      0x0000C000  /*!< Mode setting of the frequency divider */
@@ -4729,15 +4738,160 @@ typedef struct {
 /*-- DMATxCtrl: Reception control register -----------------------------------*/
 
 typedef struct {
-  uint32_t RXENABLE                               :1;
+  uint32_t TXENABLE                               :1;
   uint32_t Reserved0                              :31;                  /*!< Reserved */
 } _ETHERNET_DMATxCtrl_bits;
 
 /* Bit field positions: */
-#define ETHERNET_DMATxCtrl_RXENABLE_Pos                     0
+#define ETHERNET_DMATxCtrl_TXENABLE_Pos                     0
 
 /* Bit field masks: */
-#define ETHERNET_DMATxCtrl_RXENABLE_Msk                     0x00000001
+#define ETHERNET_DMATxCtrl_TXENABLE_Msk                     0x00000001
+
+/*-- DMATxDescriptor: Reception control register -----------------------------------*/
+
+typedef struct {
+  uint32_t DADDR                              :32;
+} _ETHERNET_DMATxDescriptor_bits;
+
+/* Bit field positions: */
+#define ETHERNET_DMATxDescriptor_DADDR_Pos                     0
+
+/* Bit field masks: */
+#define ETHERNET_DMATxDescriptor_DADDR_Msk                     0xFFFFFFFF
+
+/*-- DMATxStatus: Reception control register -----------------------------------*/
+
+typedef struct {
+  uint32_t TXPKTREC                              :1;
+  uint32_t Reserved0                             :1;
+  uint32_t TXOVERFLOW                            :1;
+  uint32_t BUSERROR                              :1;
+  uint32_t Reserved1                             :12;
+  uint32_t TX_PKT_COUNT                          :8;
+  uint32_t Reserved2                             :8;
+} _ETHERNET_DMATxStatus_bits;
+
+/* Bit field positions: */
+#define ETHERNET_DMATxStatus_TXPKTREC_Pos                     0
+#define ETHERNET_DMATxStatus_TXOVERFLOW_Pos                   2
+#define ETHERNET_DMATxStatus_BUSERROR_Pos                     3
+#define ETHERNET_DMATxStatus_TX_PKT_COUNT_Pos                 16
+
+/* Bit field masks: */
+#define ETHERNET_DMATxStatus_TXPKTREC_Msk                     0x00000001
+#define ETHERNET_DMATxStatus_TXOVERFLOW_Msk                   0x00000002
+#define ETHERNET_DMATxStatus_BUSERROR_Msk                     0x00000004
+#define ETHERNET_DMATxStatus_TX_PKT_COUNT_Msk                 0x00FF0000
+
+/*-- DMARxCtrl: Reception control register -----------------------------------*/
+
+typedef struct {
+  uint32_t RXENABLE                               :1;
+  uint32_t Reserved0                              :31;                  /*!< Reserved */
+} _ETHERNET_DMARxCtrl_bits;
+
+/* Bit field positions: */
+#define ETHERNET_DMARxCtrl_RXENABLE_Pos                     0
+
+/* Bit field masks: */
+#define ETHERNET_DMARxCtrl_RXENABLE_Msk                     0x00000001
+
+/*-- DMARxDescriptor: Reception control register -----------------------------------*/
+
+typedef struct {
+  uint32_t DADDR                              :32;
+} _ETHERNET_DMARxDescriptor_bits;
+
+/* Bit field positions: */
+#define ETHERNET_DMARxDescriptor_DADDR_Pos                     0
+
+/* Bit field masks: */
+#define ETHERNET_DMARxDescriptor_DADDR_Msk                     0xFFFFFFFF
+
+/*-- DMARxStatus: Reception control register -----------------------------------*/
+
+typedef struct {
+  uint32_t RXPKTREC                              :1;
+  uint32_t Reserved0                             :1;
+  uint32_t RXOVERFLOW                            :1;
+  uint32_t BUSERROR                              :1;
+  uint32_t Reserved1                             :12;
+  uint32_t RX_PKT_COUNT                          :8;
+  uint32_t Reserved2                             :8;
+} _ETHERNET_DMARxStatus_bits;
+
+/* Bit field positions: */
+#define ETHERNET_DMARxStatus_RXPKTREC_Pos                     0
+#define ETHERNET_DMARxStatus_RXOVERFLOW_Pos                   2
+#define ETHERNET_DMARxStatus_BUSERROR_Pos                     3
+#define ETHERNET_DMARxStatus_RX_PKT_COUNT_Pos                 16
+
+/* Bit field masks: */
+#define ETHERNET_DMARxStatus_RXPKTREC_Msk                     0x00000001
+#define ETHERNET_DMARxStatus_RXOVERFLOW_Msk                   0x00000002
+#define ETHERNET_DMARxStatus_BUSERROR_Msk                     0x00000004
+#define ETHERNET_DMARxStatus_RX_PKT_COUNT_Msk                 0x00FF0000
+
+/*-- DMAINTMASK: Reception control register -----------------------------------*/
+
+typedef struct {
+  uint32_t TXPKTSENT                             :1;
+  uint32_t TXUNDERRRUN                           :1;
+  uint32_t Reserved0                             :1;
+  uint32_t BUSERR_TX                             :1;
+  uint32_t RXPKTREC                              :1;
+  uint32_t Reserved1                             :1;
+  uint32_t RXOVER                                :1;
+  uint32_t BUSERR_RX                             :1;
+  uint32_t Reserved2                             :24;
+} _ETHERNET_DMAINTMASK_bits;
+
+/* Bit field positions: */
+#define ETHERNET_DMAINTMASK_TXPKTSENT_Pos                     0
+#define ETHERNET_DMAINTMASK_TXUNDERRRUN_Pos                   1
+#define ETHERNET_DMAINTMASK_BUSERR_TX_Pos                     3
+#define ETHERNET_DMAINTMASK_RXPKTREC_Pos                      4
+#define ETHERNET_DMAINTMASK_RXOVER_Pos                        6
+#define ETHERNET_DMAINTMASK_BUSERR_RX_Pos                     7
+
+/* Bit field masks: */
+#define ETHERNET_DMAINTMASK_TXPKTSENT_Msk                     0x00000001
+#define ETHERNET_DMAINTMASK_TXUNDERRRUN_Msk                   0x00000002
+#define ETHERNET_DMAINTMASK_BUSERR_TX_Msk                     0x00000008
+#define ETHERNET_DMAINTMASK_RXPKTREC_Msk                      0x00000010
+#define ETHERNET_DMAINTMASK_RXOVER_Msk                        0x00000040
+#define ETHERNET_DMAINTMASK_BUSERR_RX_Msk                     0x00000080
+
+/*-- DMAINT: Reception control register -----------------------------------*/
+
+typedef struct {
+  uint32_t TXPKTSENT                             :1;
+  uint32_t TXUNDERRRUN                           :1;
+  uint32_t Reserved0                             :1;
+  uint32_t BUSERR_TX                             :1;
+  uint32_t RXPKTREC                              :1;
+  uint32_t Reserved1                             :1;
+  uint32_t RXOVER                                :1;
+  uint32_t BUSERR_RX                             :1;
+  uint32_t Reserved2                             :24;
+} _ETHERNET_DMAINT_bits;
+
+/* Bit field positions: */
+#define ETHERNET_DMAINT_TXPKTSENT_Pos                     0
+#define ETHERNET_DMAINT_TXUNDERRRUN_Pos                   1
+#define ETHERNET_DMAINT_BUSERR_TX_Pos                     3
+#define ETHERNET_DMAINT_RXPKTREC_Pos                      4
+#define ETHERNET_DMAINT_RXOVER_Pos                        6
+#define ETHERNET_DMAINT_BUSERR_RX_Pos                     7
+
+/* Bit field masks: */
+#define ETHERNET_DMAINT_TXPKTSENT_Msk                     0x00000001
+#define ETHERNET_DMAINT_TXUNDERRRUN_Msk                   0x00000002
+#define ETHERNET_DMAINT_BUSERR_TX_Msk                     0x00000008
+#define ETHERNET_DMAINT_RXPKTREC_Msk                      0x00000010
+#define ETHERNET_DMAINT_RXOVER_Msk                        0x00000040
+#define ETHERNET_DMAINT_BUSERR_RX_Msk                     0x00000080
 
 /*-- Register map for ETHERNET peripheral ------------------------------------*/
 
@@ -4819,6 +4973,34 @@ typedef struct {
   union {                                                               /*!< Reception control register */
     __IO uint32_t DMATxCtrl;                                            /*!< DMATxCtrl    : type used for word access */
     __IO _ETHERNET_DMATxCtrl_bits DMATxCtrl_bit;                        /*!< DMATxCtrl_bit: structure used for bit access */
+  };
+  union {                                                               /*!< Reception control register */
+    __IO uint32_t DMATxDescriptor;                                      /*!< DMATxCtrl    : type used for word access */
+    __IO _ETHERNET_DMATxDescriptor_bits DMATxDescriptor_bit;            /*!< DMATxCtrl_bit: structure used for bit access */
+  };
+  union {                                                               /*!< Reception control register */
+    __IO uint32_t DMATxStatus;                                      /*!< DMATxCtrl    : type used for word access */
+    __IO _ETHERNET_DMATxStatus_bits DMATxStatus_bit;            /*!< DMATxCtrl_bit: structure used for bit access */
+  };
+  union {                                                               /*!< Reception control register */
+    __IO uint32_t DMARxCtrl;                                            /*!< DMATxCtrl    : type used for word access */
+    __IO _ETHERNET_DMARxCtrl_bits DMARxCtrl_bit;                        /*!< DMATxCtrl_bit: structure used for bit access */
+  };
+  union {                                                               /*!< Reception control register */
+    __IO uint32_t DMARxDescriptor;                                      /*!< DMATxCtrl    : type used for word access */
+    __IO _ETHERNET_DMARxDescriptor_bits DMARxDescriptor_bit;            /*!< DMATxCtrl_bit: structure used for bit access */
+  };
+  union {                                                               /*!< Reception control register */
+    __IO uint32_t DMARxStatus;                                      /*!< DMATxCtrl    : type used for word access */
+    __IO _ETHERNET_DMARxStatus_bits DMARxStatus_bit;            /*!< DMATxCtrl_bit: structure used for bit access */
+  };
+  union {                                                               /*!< Reception control register */
+    __IO uint32_t DMAINTMASK;                                      /*!< DMATxCtrl    : type used for word access */
+    __IO _ETHERNET_DMAINTMASK_bits DMAINTMASK_bit;            /*!< DMATxCtrl_bit: structure used for bit access */
+  };
+  union {                                                               /*!< Reception control register */
+    __IO uint32_t DMAINT;                                      /*!< DMATxCtrl    : type used for word access */
+    __IO _ETHERNET_DMAINT_bits DMAINT_bit;            /*!< DMATxCtrl_bit: structure used for bit access */
   };
 } NT_ETHERNET_TypeDef;
 
@@ -6176,15 +6358,15 @@ typedef struct {
 /*-- LOCK: Watchdog Lock Register --------------------------------------------*/
 
 typedef struct {
-  uint32_t REG_WR_DIS                             :1;                   /*!< Disable write to all registers Watchdog */
+  uint32_t REG_WR_DIS                             :1;                   /*!< Disable write access to all registers */
   uint32_t Reserved0                              :31;                  /*!< Reserved */
 } _WDT_LOCK_bits;
 
 /* Bit field positions: */
-#define WDT_LOCK_REG_WR_DIS_Pos                             0           /*!< Disable write to all registers Watchdog */
+#define WDT_LOCK_REG_WR_DIS_Pos                             0           /*!< Disable write access to all registers */
 
 /* Bit field masks: */
-#define WDT_LOCK_REG_WR_DIS_Msk                             0x00000001  /*!< Disable write to all registers Watchdog */
+#define WDT_LOCK_REG_WR_DIS_Msk                             0x00000001  /*!< Disable write access to all registers */
 
 /*-- Register map for WDT peripheral -----------------------------------------*/
 
@@ -8510,7 +8692,7 @@ typedef struct {
   uint32_t Reserved0                              :4;                   /*!< Reserved */
   uint32_t SOCAPRD                                :2;                   /*!< number of events specified in a register ETSEL[SOCASEL] */
   uint32_t SOCACNT                                :2;                   /*!< count of events forming EPWMxSOCA */
-  uint32_t SOCPRD                                 :2;                   /*!< Number of events specified in ETSEL [SOCBSEL] */
+  uint32_t SOCBPRD                                :2;                   /*!< Number of events specified in ETSEL [SOCBSEL] */
   uint32_t SOCBCNT                                :2;                   /*!< count of events forming EPWMxSOCB */
   uint32_t Reserved1                              :16;                  /*!< Reserved */
 } _PWM_ETPS_bits;
@@ -8654,16 +8836,23 @@ typedef struct {
 typedef struct {
   uint32_t DCMP                                   :24;                  /*!< Mask of the ADC digital comparator */
   uint32_t ACMP                                   :3;                   /*!< Mask Analog Comparator */
-  uint32_t Reserved0                              :5;                   /*!< Reserved */
+  uint32_t Reserved0                              :1;                   /*!< Reserved */
+  uint32_t CBC                                    :1;                   /*!< Enable source ACMP/DCMP in cycle mode */
+  uint32_t Reserved1                              :2;                   /*!< Reserved */
+  uint32_t OSHT                                   :1;                   /*!< Enable source ACMP/DCMP in one-shot mode */
 } _PWM_HDSEL_bits;
 
 /* Bit field positions: */
 #define PWM_HDSEL_DCMP_Pos                                  0           /*!< Mask of the ADC digital comparator */
 #define PWM_HDSEL_ACMP_Pos                                  24          /*!< Mask Analog Comparator */
+#define PWM_HDSEL_CBC_Pos                                   28          /*!< Enable source ACMP/DCMP in cycle mode */
+#define PWM_HDSEL_OSHT_Pos                                  31          /*!< Enable source ACMP/DCMP in one-shot mode */
 
 /* Bit field masks: */
 #define PWM_HDSEL_DCMP_Msk                                  0x00FFFFFF  /*!< Mask of the ADC digital comparator */
 #define PWM_HDSEL_ACMP_Msk                                  0x07000000  /*!< Mask Analog Comparator */
+#define PWM_HDSEL_CBC_Msk                                   0x10000000  /*!< Enable source ACMP/DCMP in cycle mode */
+#define PWM_HDSEL_OSHT_Msk                                  0x80000000  /*!< Enable source ACMP/DCMP in one-shot mode */
 
 /*-- HDCTL: Control Register detector hold events ----------------------------*/
 
@@ -8794,8 +8983,8 @@ typedef struct {
     __IO _PWM_TBCTL_bits TBCTL_bit;                                     /*!< TBCTL_bit: structure used for bit access */
   };
   union {                                                               /*!< Timer status register */
-    __I  uint32_t TBSTS;                                                /*!< TBSTS    : type used for word access */
-    __I  _PWM_TBSTS_bits TBSTS_bit;                                     /*!< TBSTS_bit: structure used for bit access */
+    __IO  uint32_t TBSTS;                                               /*!< TBSTS    : type used for word access */
+    __IO  _PWM_TBSTS_bits TBSTS_bit;                                    /*!< TBSTS_bit: structure used for bit access */
   };
   union {                                                               /*!< register Phases */
     __IO uint32_t TBPHS;                                                /*!< TBPHS    : type used for word access */
@@ -8890,8 +9079,8 @@ typedef struct {
     __IO _PWM_ETCLR_bits ETCLR_bit;                                     /*!< ETCLR_bit: structure used for bit access */
   };
   union {                                                               /*!< Register software emulation events */
-    __I  uint32_t ETFRC;                                                /*!< ETFRC    : type used for word access */
-    __I  _PWM_ETFRC_bits ETFRC_bit;                                     /*!< ETFRC_bit: structure used for bit access */
+    __IO  uint32_t ETFRC;                                                /*!< ETFRC    : type used for word access */
+    __IO  _PWM_ETFRC_bits ETFRC_bit;                                     /*!< ETFRC_bit: structure used for bit access */
   };
   union {                                                               /*!< Control Register modulator */
     __IO uint32_t PCCTL;                                                /*!< PCCTL    : type used for word access */
@@ -10185,8 +10374,8 @@ typedef struct {
 typedef struct {
   uint32_t TFE                                    :1;                   /*!< FIFO buffer empty flag transmitter */
   uint32_t TNF                                    :1;                   /*!< Indicator the transmitter FIFO buffer is not full */
-  uint32_t RNE                                    :1;                   /*!< Indicate not empty reseive buffer */
-  uint32_t RFF                                    :1;                   /*!< Indicate empty receive buffer */
+  uint32_t RNE                                    :1;                   /*!< Indicate not empty receive buffer */
+  uint32_t RFF                                    :1;                   /*!< Indicate full receive buffer */
   uint32_t BSY                                    :1;                   /*!< Activity flag */
   uint32_t Reserved0                              :27;                  /*!< Reserved */
 } _SPI_SPI_SR_bits;
@@ -10194,15 +10383,15 @@ typedef struct {
 /* Bit field positions: */
 #define SPI_SPI_SR_TFE_Pos                                  0           /*!< FIFO buffer empty flag transmitter */
 #define SPI_SPI_SR_TNF_Pos                                  1           /*!< Indicator the transmitter FIFO buffer is not full */
-#define SPI_SPI_SR_RNE_Pos                                  2           /*!< Indicate not empty reseive buffer */
-#define SPI_SPI_SR_RFF_Pos                                  3           /*!< Indicate empty receive buffer */
+#define SPI_SPI_SR_RNE_Pos                                  2           /*!< Indicate not empty receive buffer */
+#define SPI_SPI_SR_RFF_Pos                                  3           /*!< Indicate full receive buffer */
 #define SPI_SPI_SR_BSY_Pos                                  4           /*!< Activity flag */
 
 /* Bit field masks: */
 #define SPI_SPI_SR_TFE_Msk                                  0x00000001  /*!< FIFO buffer empty flag transmitter */
 #define SPI_SPI_SR_TNF_Msk                                  0x00000002  /*!< Indicator the transmitter FIFO buffer is not full */
-#define SPI_SPI_SR_RNE_Msk                                  0x00000004  /*!< Indicate not empty reseive buffer */
-#define SPI_SPI_SR_RFF_Msk                                  0x00000008  /*!< Indicate empty receive buffer */
+#define SPI_SPI_SR_RNE_Msk                                  0x00000004  /*!< Indicate not empty receive buffer */
+#define SPI_SPI_SR_RFF_Msk                                  0x00000008  /*!< Indicate full receive buffer */
 #define SPI_SPI_SR_BSY_Msk                                  0x00000010  /*!< Activity flag */
 
 /*-- SPI_CPSR: Clock division factor register --------------------------------*/
@@ -10702,888 +10891,10 @@ typedef struct {
   };
 } NT_RTC_TypeDef;
 
-/******************************************************************************/
-/*                              SYS registers                                 */
-/******************************************************************************/
-
-/*-- ICTR: Interrupt Controller Type Register --------------------------------*/
-
-typedef struct {
-  uint32_t INTLINESNUM                            :4;                   /*!< The total number of interrupt lines supported by an implementation */
-  uint32_t Reserved0                              :28;                  /*!< Reserved */
-} _SYSTEM_ICTR_bits;
-
-/* Bit field positions: */
-#define SYSTEM_ICTR_INTLINESNUM_Pos                         0           /*!< The total number of interrupt lines supported by an implementation */
-
-/* Bit field masks: */
-#define SYSTEM_ICTR_INTLINESNUM_Msk                         0x0000000F  /*!< The total number of interrupt lines supported by an implementation */
-
-/*-- ACTLR: Auxiliary Control Register ---------------------------------------*/
-
-typedef struct {
-  uint32_t DYSMCYCINT                             :1;                   /*!< Disables interruption of multi-cycle instructions */
-  uint32_t DISDEFWBUF                             :1;                   /*!< Disables write buffer use during default memory map accesses */
-  uint32_t DISFOLD                                :1;                   /*!< Disables folding of IT instructions */
-  uint32_t Reserved0                              :5;                   /*!< Reserved */
-  uint32_t DISFPCA                                :1;                   /*!< Disable automatic update of CONTROL.FPCA */
-  uint32_t DISOOFP                                :1;                   /*!< Disables floating point instructions completing out of order with respect to integer Instructions. */
-  uint32_t Reserved1                              :22;                  /*!< Reserved */
-} _SYSTEM_ACTLR_bits;
-
-/* Bit field positions: */
-#define SYSTEM_ACTLR_DYSMCYCINT_Pos                         0           /*!< Disables interruption of multi-cycle instructions */
-#define SYSTEM_ACTLR_DISDEFWBUF_Pos                         1           /*!< Disables write buffer use during default memory map accesses */
-#define SYSTEM_ACTLR_DISFOLD_Pos                            2           /*!< Disables folding of IT instructions */
-#define SYSTEM_ACTLR_DISFPCA_Pos                            8           /*!< Disable automatic update of CONTROL.FPCA */
-#define SYSTEM_ACTLR_DISOOFP_Pos                            9           /*!< Disables floating point instructions completing out of order with respect to integer Instructions. */
-
-/* Bit field masks: */
-#define SYSTEM_ACTLR_DYSMCYCINT_Msk                         0x00000001  /*!< Disables interruption of multi-cycle instructions */
-#define SYSTEM_ACTLR_DISDEFWBUF_Msk                         0x00000002  /*!< Disables write buffer use during default memory map accesses */
-#define SYSTEM_ACTLR_DISFOLD_Msk                            0x00000004  /*!< Disables folding of IT instructions */
-#define SYSTEM_ACTLR_DISFPCA_Msk                            0x00000100  /*!< Disable automatic update of CONTROL.FPCA */
-#define SYSTEM_ACTLR_DISOOFP_Msk                            0x00000200  /*!< Disables floating point instructions completing out of order with respect to integer Instructions. */
-
-/*-- SysTick_STCSR: SysTick Control and Status Register ----------------------*/
-
-typedef struct {
-  uint32_t EN                                     :1;                   /*!< Indicates the enabled status of the SysTick counter */
-  uint32_t TICINIT                                :1;                   /*!< Indicate Count to 0 changes the SysTick exception status to pending */
-  uint32_t CLKSOURCE                              :1;                   /*!< Indicates the SysTick clock source: 0 = SysTick uses the IMPLEMENTATION DEFINED external reference clock 1 = SysTick uses the processor clock */
-  uint32_t Reserved0                              :13;                  /*!< Reserved */
-  uint32_t COUNTFLAG                              :1;                   /*!< Indicate Timer has counted to 0 */
-  uint32_t Reserved1                              :15;                  /*!< Reserved */
-} _SYSTEM_SysTick_STCSR_bits;
-
-/* Bit field positions: */
-#define SYSTEM_SysTick_STCSR_EN_Pos                         0           /*!< Indicates the enabled status of the SysTick counter */
-#define SYSTEM_SysTick_STCSR_TICINIT_Pos                    1           /*!< Indicate Count to 0 changes the SysTick exception status to pending */
-#define SYSTEM_SysTick_STCSR_CLKSOURCE_Pos                  2           /*!< Indicates the SysTick clock source: 0 = SysTick uses the IMPLEMENTATION DEFINED external reference clock 1 = SysTick uses the processor clock */
-#define SYSTEM_SysTick_STCSR_COUNTFLAG_Pos                  16          /*!< Indicate Timer has counted to 0 */
-
-/* Bit field masks: */
-#define SYSTEM_SysTick_STCSR_EN_Msk                         0x00000001  /*!< Indicates the enabled status of the SysTick counter */
-#define SYSTEM_SysTick_STCSR_TICINIT_Msk                    0x00000002  /*!< Indicate Count to 0 changes the SysTick exception status to pending */
-#define SYSTEM_SysTick_STCSR_CLKSOURCE_Msk                  0x00000004  /*!< Indicates the SysTick clock source: 0 = SysTick uses the IMPLEMENTATION DEFINED external reference clock 1 = SysTick uses the processor clock */
-#define SYSTEM_SysTick_STCSR_COUNTFLAG_Msk                  0x00010000  /*!< Indicate Timer has counted to 0 */
-
-/*-- SysTick_STRVR: SysTick Reload Value Register ----------------------------*/
-
-typedef struct {
-  uint32_t RELOAD                                 :24;                  /*!< The value to load into the SYST_CVR when the counter reaches 0 */
-  uint32_t Reserved0                              :8;                   /*!< Reserved */
-} _SYSTEM_SysTick_STRVR_bits;
-
-/* Bit field positions: */
-#define SYSTEM_SysTick_STRVR_RELOAD_Pos                     0           /*!< The value to load into the SYST_CVR when the counter reaches 0 */
-
-/* Bit field masks: */
-#define SYSTEM_SysTick_STRVR_RELOAD_Msk                     0x00FFFFFF  /*!< The value to load into the SYST_CVR when the counter reaches 0 */
-
-/*-- SysTick_STCR: SysTick Calibration Value Register ------------------------*/
-
-typedef struct {
-  uint32_t TENMS                                  :24;                  /*!< Optionally, holds a reload value to be used for 10ms (100Hz) timing, subject to system clock skew errors. If this field is zero, the calibration value is not known */
-  uint32_t Reserved0                              :6;                   /*!< Reserved */
-  uint32_t SKEW                                   :1;                   /*!< Indicate 10ms calibration value is inexact, because of the clock frequency */
-  uint32_t NOREF                                  :1;                   /*!< Indicate the reference clock is not implemented */
-} _SYSTEM_SysTick_STCR_bits;
-
-/* Bit field positions: */
-#define SYSTEM_SysTick_STCR_TENMS_Pos                       0           /*!< Optionally, holds a reload value to be used for 10ms (100Hz) timing, subject to system clock skew errors. If this field is zero, the calibration value is not known */
-#define SYSTEM_SysTick_STCR_SKEW_Pos                        30          /*!< Indicate 10ms calibration value is inexact, because of the clock frequency */
-#define SYSTEM_SysTick_STCR_NOREF_Pos                       31          /*!< Indicate the reference clock is not implemented */
-
-/* Bit field masks: */
-#define SYSTEM_SysTick_STCR_TENMS_Msk                       0x00FFFFFF  /*!< Optionally, holds a reload value to be used for 10ms (100Hz) timing, subject to system clock skew errors. If this field is zero, the calibration value is not known */
-#define SYSTEM_SysTick_STCR_SKEW_Msk                        0x40000000  /*!< Indicate 10ms calibration value is inexact, because of the clock frequency */
-#define SYSTEM_SysTick_STCR_NOREF_Msk                       0x80000000  /*!< Indicate the reference clock is not implemented */
-
-/*-- CPUID: CPUID Base Register ----------------------------------------------*/
-
-typedef struct {
-  uint32_t REVISION                               :4;                   /*!< Indicates patch release: 0x1= Patch 1. */
-  uint32_t PARTNO                                 :12;                  /*!< Indicates part number: 0xC24 = Cortex-M4 */
-  uint32_t Reserved0                              :4;                   /*!< Reserved */
-  uint32_t VARIANT                                :4;                   /*!< Indicates processor revision: 0x0 = Revision 0 */
-  uint32_t IMPLEMENTER                            :8;                   /*!< Indicates implementer: 0x41 = ARM */
-} _SYSTEM_CPUID_bits;
-
-/* Bit field positions: */
-#define SYSTEM_CPUID_REVISION_Pos                           0           /*!< Indicates patch release: 0x1= Patch 1. */
-#define SYSTEM_CPUID_PARTNO_Pos                             4           /*!< Indicates part number: 0xC24 = Cortex-M4 */
-#define SYSTEM_CPUID_VARIANT_Pos                            20          /*!< Indicates processor revision: 0x0 = Revision 0 */
-#define SYSTEM_CPUID_IMPLEMENTER_Pos                        24          /*!< Indicates implementer: 0x41 = ARM */
-
-/* Bit field masks: */
-#define SYSTEM_CPUID_REVISION_Msk                           0x0000000F  /*!< Indicates patch release: 0x1= Patch 1. */
-#define SYSTEM_CPUID_PARTNO_Msk                             0x0000FFF0  /*!< Indicates part number: 0xC24 = Cortex-M4 */
-#define SYSTEM_CPUID_VARIANT_Msk                            0x00F00000  /*!< Indicates processor revision: 0x0 = Revision 0 */
-#define SYSTEM_CPUID_IMPLEMENTER_Msk                        0xFF000000  /*!< Indicates implementer: 0x41 = ARM */
-
-/*-- ICSR: Interrupt Control and State Register ------------------------------*/
-
-typedef struct {
-  uint32_t VECTACTIVE                             :9;                   /*!< The exception number of the current executing exception */
-  uint32_t Reserved0                              :2;                   /*!< Reserved */
-  uint32_t RETTOBASE                              :1;                   /*!< Indicate active exception other than the exception shown by IPSR */
-  uint32_t VECTPENDING                            :9;                   /*!< The exception number of the highest priority pending exception */
-  uint32_t Reserved1                              :1;                   /*!< Reserved */
-  uint32_t ISRPENDING                             :1;                   /*!< Indicate external interrupt pending */
-  uint32_t ISRPREEMPT                             :1;                   /*!< Indicate service a pending exception */
-  uint32_t Reserved2                              :1;                   /*!< Reserved */
-  uint32_t PENDSTCLR                              :1;                   /*!< Remove pending status */
-  uint32_t PENDSTSET                              :1;                   /*!< Enable SysTick is pending */
-  uint32_t PENDSVCLR                              :1;                   /*!< Remove pending status */
-  uint32_t PENDSVSET                              :1;                   /*!< Enable PendSV is pending */
-  uint32_t Reserved3                              :2;                   /*!< Reserved */
-  uint32_t NMIPENDSET                             :1;                   /*!< Enable NMI active */
-} _SYSTEM_ICSR_bits;
-
-/* Bit field positions: */
-#define SYSTEM_ICSR_VECTACTIVE_Pos                          0           /*!< The exception number of the current executing exception */
-#define SYSTEM_ICSR_RETTOBASE_Pos                           11          /*!< Indicate active exception other than the exception shown by IPSR */
-#define SYSTEM_ICSR_VECTPENDING_Pos                         12          /*!< The exception number of the highest priority pending exception */
-#define SYSTEM_ICSR_ISRPENDING_Pos                          22          /*!< Indicate external interrupt pending */
-#define SYSTEM_ICSR_ISRPREEMPT_Pos                          23          /*!< Indicate service a pending exception */
-#define SYSTEM_ICSR_PENDSTCLR_Pos                           25          /*!< Remove pending status */
-#define SYSTEM_ICSR_PENDSTSET_Pos                           26          /*!< Enable SysTick is pending */
-#define SYSTEM_ICSR_PENDSVCLR_Pos                           27          /*!< Remove pending status */
-#define SYSTEM_ICSR_PENDSVSET_Pos                           28          /*!< Enable PendSV is pending */
-#define SYSTEM_ICSR_NMIPENDSET_Pos                          31          /*!< Enable NMI active */
-
-/* Bit field masks: */
-#define SYSTEM_ICSR_VECTACTIVE_Msk                          0x000001FF  /*!< The exception number of the current executing exception */
-#define SYSTEM_ICSR_RETTOBASE_Msk                           0x00000800  /*!< Indicate active exception other than the exception shown by IPSR */
-#define SYSTEM_ICSR_VECTPENDING_Msk                         0x001FF000  /*!< The exception number of the highest priority pending exception */
-#define SYSTEM_ICSR_ISRPENDING_Msk                          0x00400000  /*!< Indicate external interrupt pending */
-#define SYSTEM_ICSR_ISRPREEMPT_Msk                          0x00800000  /*!< Indicate service a pending exception */
-#define SYSTEM_ICSR_PENDSTCLR_Msk                           0x02000000  /*!< Remove pending status */
-#define SYSTEM_ICSR_PENDSTSET_Msk                           0x04000000  /*!< Enable SysTick is pending */
-#define SYSTEM_ICSR_PENDSVCLR_Msk                           0x08000000  /*!< Remove pending status */
-#define SYSTEM_ICSR_PENDSVSET_Msk                           0x10000000  /*!< Enable PendSV is pending */
-#define SYSTEM_ICSR_NMIPENDSET_Msk                          0x80000000  /*!< Enable NMI active */
-
-/*-- VTOR: Vector Table Offset Register --------------------------------------*/
-
-typedef struct {
-  uint32_t Reserved0                              :7;                   /*!< Reserved */
-  uint32_t TBLOFF                                 :25;                  /*!< Vector table address */
-} _SYSTEM_VTOR_bits;
-
-/* Bit field positions: */
-#define SYSTEM_VTOR_TBLOFF_Pos                              7           /*!< Vector table address */
-
-/* Bit field masks: */
-#define SYSTEM_VTOR_TBLOFF_Msk                              0xFFFFFF80  /*!< Vector table address */
-
-/*-- AIRCR: Application Interrupt and Reset Control Register -----------------*/
-
-typedef struct {
-  uint32_t VECTRESET                              :1;                   /*!< Writing 1 to this bit causes a local system reset */
-  uint32_t VECTCLRACTIVE                          :1;                   /*!< Writing 1 to this bit clears all active state information for fixed and configurable exceptions */
-  uint32_t SYSRESETREQ                            :1;                   /*!< System Reset Request */
-  uint32_t Reserved0                              :5;                   /*!< Reserved */
-  uint32_t PRIGROUP                               :3;                   /*!< Priority grouping */
-  uint32_t Reserved1                              :4;                   /*!< Reserved */
-  uint32_t ENDIANNESS                             :1;                   /*!< Indicates the memory system big endianness */
-  uint32_t VECTKEY                                :16;                  /*!< Vector Key */
-} _SYSTEM_AIRCR_bits;
-
-/* Bit field positions: */
-#define SYSTEM_AIRCR_VECTRESET_Pos                          0           /*!< Writing 1 to this bit causes a local system reset */
-#define SYSTEM_AIRCR_VECTCLRACTIVE_Pos                      1           /*!< Writing 1 to this bit clears all active state information for fixed and configurable exceptions */
-#define SYSTEM_AIRCR_SYSRESETREQ_Pos                        2           /*!< System Reset Request */
-#define SYSTEM_AIRCR_PRIGROUP_Pos                           8           /*!< Priority grouping */
-#define SYSTEM_AIRCR_ENDIANNESS_Pos                         15          /*!< Indicates the memory system big endianness */
-#define SYSTEM_AIRCR_VECTKEY_Pos                            16          /*!< Vector Key */
-
-/* Bit field masks: */
-#define SYSTEM_AIRCR_VECTRESET_Msk                          0x00000001  /*!< Writing 1 to this bit causes a local system reset */
-#define SYSTEM_AIRCR_VECTCLRACTIVE_Msk                      0x00000002  /*!< Writing 1 to this bit clears all active state information for fixed and configurable exceptions */
-#define SYSTEM_AIRCR_SYSRESETREQ_Msk                        0x00000004  /*!< System Reset Request */
-#define SYSTEM_AIRCR_PRIGROUP_Msk                           0x00000700  /*!< Priority grouping */
-#define SYSTEM_AIRCR_ENDIANNESS_Msk                         0x00008000  /*!< Indicates the memory system big endianness */
-#define SYSTEM_AIRCR_VECTKEY_Msk                            0xFFFF0000  /*!< Vector Key */
-
-/*-- SCR: System Control Register --------------------------------------------*/
-
-typedef struct {
-  uint32_t Reserved0                              :1;                   /*!< Reserved */
-  uint32_t SLEEPONEXIT                            :1;                   /*!< Enable the processor Enter sleep state */
-  uint32_t SLEEPDEEP                              :1;                   /*!< Enable sleep state is deep sleep */
-  uint32_t Reserved1                              :1;                   /*!< Reserved */
-  uint32_t SEVONPEND                              :1;                   /*!< Enable interrupt transitions from inactive to pending are wakeup events */
-  uint32_t Reserved2                              :27;                  /*!< Reserved */
-} _SYSTEM_SCR_bits;
-
-/* Bit field positions: */
-#define SYSTEM_SCR_SLEEPONEXIT_Pos                          1           /*!< Enable the processor Enter sleep state */
-#define SYSTEM_SCR_SLEEPDEEP_Pos                            2           /*!< Enable sleep state is deep sleep */
-#define SYSTEM_SCR_SEVONPEND_Pos                            4           /*!< Enable interrupt transitions from inactive to pending are wakeup events */
-
-/* Bit field masks: */
-#define SYSTEM_SCR_SLEEPONEXIT_Msk                          0x00000002  /*!< Enable the processor Enter sleep state */
-#define SYSTEM_SCR_SLEEPDEEP_Msk                            0x00000004  /*!< Enable sleep state is deep sleep */
-#define SYSTEM_SCR_SEVONPEND_Msk                            0x00000010  /*!< Enable interrupt transitions from inactive to pending are wakeup events */
-
-/*-- CCR: Configuration and Control Register ---------------------------------*/
-
-typedef struct {
-  uint32_t NONBASETHRDENA                         :1;                   /*!< Controls whether the processor can enter Thread mode at an execution */
-  uint32_t USERSETMPEND                           :1;                   /*!< Enable unprivileged software can access the STIR */
-  uint32_t Reserved0                              :1;                   /*!< Reserved */
-  uint32_t UNALIGN_TRP                            :1;                   /*!< Enable trapping of unaligned word or halfword accesses */
-  uint32_t DIV_0_TRP                              :1;                   /*!< Enable the trap on divide by 0 */
-  uint32_t Reserved1                              :3;                   /*!< Reserved */
-  uint32_t BFHFNMIGN                              :1;
-  uint32_t STKALIGN                               :1;                   /*!< SP alignment */
-  uint32_t Reserved2                              :22;                  /*!< Reserved */
-} _SYSTEM_CCR_bits;
-
-/* Bit field positions: */
-#define SYSTEM_CCR_NONBASETHRDENA_Pos                       0           /*!< Controls whether the processor can enter Thread mode at an execution */
-#define SYSTEM_CCR_USERSETMPEND_Pos                         1           /*!< Enable unprivileged software can access the STIR */
-#define SYSTEM_CCR_UNALIGN_TRP_Pos                          3           /*!< Enable trapping of unaligned word or halfword accesses */
-#define SYSTEM_CCR_DIV_0_TRP_Pos                            4           /*!< Enable the trap on divide by 0 */
-#define SYSTEM_CCR_BFHFNMIGN_Pos                            8
-#define SYSTEM_CCR_STKALIGN_Pos                             9           /*!< SP alignment */
-
-/* Bit field masks: */
-#define SYSTEM_CCR_NONBASETHRDENA_Msk                       0x00000001  /*!< Controls whether the processor can enter Thread mode at an execution */
-#define SYSTEM_CCR_USERSETMPEND_Msk                         0x00000002  /*!< Enable unprivileged software can access the STIR */
-#define SYSTEM_CCR_UNALIGN_TRP_Msk                          0x00000008  /*!< Enable trapping of unaligned word or halfword accesses */
-#define SYSTEM_CCR_DIV_0_TRP_Msk                            0x00000010  /*!< Enable the trap on divide by 0 */
-#define SYSTEM_CCR_BFHFNMIGN_Msk                            0x00000100
-#define SYSTEM_CCR_STKALIGN_Msk                             0x00000200  /*!< SP alignment */
-
-/*-- SHPR1: System Handler Priority Register 1 -------------------------------*/
-
-typedef struct {
-  uint32_t PRI_4                                  :8;                   /*!< Priority of system handler 4, MemManage */
-  uint32_t PRI_5                                  :8;                   /*!< Priority of system handler 5, BusFault */
-  uint32_t PRI_6                                  :8;                   /*!< Priority of system handler 6, UsageFault */
-  uint32_t PRI_7                                  :8;                   /*!< Reserved for priority of system handler 7 */
-} _SYSTEM_SHPR1_bits;
-
-/* Bit field positions: */
-#define SYSTEM_SHPR1_PRI_4_Pos                              0           /*!< Priority of system handler 4, MemManage */
-#define SYSTEM_SHPR1_PRI_5_Pos                              8           /*!< Priority of system handler 5, BusFault */
-#define SYSTEM_SHPR1_PRI_6_Pos                              16          /*!< Priority of system handler 6, UsageFault */
-#define SYSTEM_SHPR1_PRI_7_Pos                              24          /*!< Reserved for priority of system handler 7 */
-
-/* Bit field masks: */
-#define SYSTEM_SHPR1_PRI_4_Msk                              0x000000FF  /*!< Priority of system handler 4, MemManage */
-#define SYSTEM_SHPR1_PRI_5_Msk                              0x0000FF00  /*!< Priority of system handler 5, BusFault */
-#define SYSTEM_SHPR1_PRI_6_Msk                              0x00FF0000  /*!< Priority of system handler 6, UsageFault */
-#define SYSTEM_SHPR1_PRI_7_Msk                              0xFF000000  /*!< Reserved for priority of system handler 7 */
-
-/*-- SHPR2: System Handler Priority Register 2 -------------------------------*/
-
-typedef struct {
-  uint32_t PRI_8                                  :8;                   /*!< Reserved for priority of system handler 8 */
-  uint32_t PRI_9                                  :8;                   /*!< Reserved for priority of system handler 9 */
-  uint32_t PRI_10                                 :8;                   /*!< Reserved for priority of system handler 10 */
-  uint32_t PRI_11                                 :8;                   /*!< Priority of system handler 11, SVCall */
-} _SYSTEM_SHPR2_bits;
-
-/* Bit field positions: */
-#define SYSTEM_SHPR2_PRI_8_Pos                              0           /*!< Reserved for priority of system handler 8 */
-#define SYSTEM_SHPR2_PRI_9_Pos                              8           /*!< Reserved for priority of system handler 9 */
-#define SYSTEM_SHPR2_PRI_10_Pos                             16          /*!< Reserved for priority of system handler 10 */
-#define SYSTEM_SHPR2_PRI_11_Pos                             24          /*!< Priority of system handler 11, SVCall */
-
-/* Bit field masks: */
-#define SYSTEM_SHPR2_PRI_8_Msk                              0x000000FF  /*!< Reserved for priority of system handler 8 */
-#define SYSTEM_SHPR2_PRI_9_Msk                              0x0000FF00  /*!< Reserved for priority of system handler 9 */
-#define SYSTEM_SHPR2_PRI_10_Msk                             0x00FF0000  /*!< Reserved for priority of system handler 10 */
-#define SYSTEM_SHPR2_PRI_11_Msk                             0xFF000000  /*!< Priority of system handler 11, SVCall */
-
-/*-- SHPR3: System Handler Priority Register 3 -------------------------------*/
-
-typedef struct {
-  uint32_t PRI_12                                 :8;                   /*!< Priority of system handler 12, DebugMonitor */
-  uint32_t PRI_13                                 :8;                   /*!< Reserved for priority of system handler 13 */
-  uint32_t PRI_14                                 :8;                   /*!< Priority of system handler 14, PendSV */
-  uint32_t PRI_15                                 :8;                   /*!< Priority of system handler 15, SysTick */
-} _SYSTEM_SHPR3_bits;
-
-/* Bit field positions: */
-#define SYSTEM_SHPR3_PRI_12_Pos                             0           /*!< Priority of system handler 12, DebugMonitor */
-#define SYSTEM_SHPR3_PRI_13_Pos                             8           /*!< Reserved for priority of system handler 13 */
-#define SYSTEM_SHPR3_PRI_14_Pos                             16          /*!< Priority of system handler 14, PendSV */
-#define SYSTEM_SHPR3_PRI_15_Pos                             24          /*!< Priority of system handler 15, SysTick */
-
-/* Bit field masks: */
-#define SYSTEM_SHPR3_PRI_12_Msk                             0x000000FF  /*!< Priority of system handler 12, DebugMonitor */
-#define SYSTEM_SHPR3_PRI_13_Msk                             0x0000FF00  /*!< Reserved for priority of system handler 13 */
-#define SYSTEM_SHPR3_PRI_14_Msk                             0x00FF0000  /*!< Priority of system handler 14, PendSV */
-#define SYSTEM_SHPR3_PRI_15_Msk                             0xFF000000  /*!< Priority of system handler 15, SysTick */
-
-/*-- SHCSR: System Handler Control and State Register ------------------------*/
-
-typedef struct {
-  uint32_t MEMFAULTACT                            :1;                   /*!< Enable MemManage is active */
-  uint32_t BUSFAULTACT                            :1;                   /*!< Enable BusFault is active */
-  uint32_t Reserved0                              :1;                   /*!< Reserved */
-  uint32_t USGFAULTACT                            :1;                   /*!< Enable UsageFault is active */
-  uint32_t Reserved1                              :3;                   /*!< Reserved */
-  uint32_t SVCALLACT                              :1;                   /*!< Enable SVCall is active */
-  uint32_t MONITORACT                             :1;                   /*!< Enable Monitor is active */
-  uint32_t Reserved2                              :1;                   /*!< Reserved */
-  uint32_t PENDSACT                               :1;                   /*!< Enable PendSV is active */
-  uint32_t SYSTICKACT                             :1;                   /*!< Enable SysTick is active */
-  uint32_t USGFAULTPENDED                         :1;                   /*!< Enable UsageFault is pending */
-  uint32_t MEMFAULTPENDED                         :1;                   /*!< Enable MemManage is pending */
-  uint32_t BUSFALTPENDED                          :1;                   /*!< Enable BusFault is pending */
-  uint32_t SVCALLPENDED                           :1;                   /*!< Enable SVCall is pending */
-  uint32_t MEMFAULTENA                            :1;                   /*!< Enable MemManage fault */
-  uint32_t BUSFAULTENA                            :1;                   /*!< Enable BusFault */
-  uint32_t USGFAULTENA                            :1;                   /*!< Enable UsageFault */
-  uint32_t Reserved3                              :13;                  /*!< Reserved */
-} _SYSTEM_SHCSR_bits;
-
-/* Bit field positions: */
-#define SYSTEM_SHCSR_MEMFAULTACT_Pos                        0           /*!< Enable MemManage is active */
-#define SYSTEM_SHCSR_BUSFAULTACT_Pos                        1           /*!< Enable BusFault is active */
-#define SYSTEM_SHCSR_USGFAULTACT_Pos                        3           /*!< Enable UsageFault is active */
-#define SYSTEM_SHCSR_SVCALLACT_Pos                          7           /*!< Enable SVCall is active */
-#define SYSTEM_SHCSR_MONITORACT_Pos                         8           /*!< Enable Monitor is active */
-#define SYSTEM_SHCSR_PENDSACT_Pos                           10          /*!< Enable PendSV is active */
-#define SYSTEM_SHCSR_SYSTICKACT_Pos                         11          /*!< Enable SysTick is active */
-#define SYSTEM_SHCSR_USGFAULTPENDED_Pos                     12          /*!< Enable UsageFault is pending */
-#define SYSTEM_SHCSR_MEMFAULTPENDED_Pos                     13          /*!< Enable MemManage is pending */
-#define SYSTEM_SHCSR_BUSFALTPENDED_Pos                      14          /*!< Enable BusFault is pending */
-#define SYSTEM_SHCSR_SVCALLPENDED_Pos                       15          /*!< Enable SVCall is pending */
-#define SYSTEM_SHCSR_MEMFAULTENA_Pos                        16          /*!< Enable MemManage fault */
-#define SYSTEM_SHCSR_BUSFAULTENA_Pos                        17          /*!< Enable BusFault */
-#define SYSTEM_SHCSR_USGFAULTENA_Pos                        18          /*!< Enable UsageFault */
-
-/* Bit field masks: */
-#define SYSTEM_SHCSR_MEMFAULTACT_Msk                        0x00000001  /*!< Enable MemManage is active */
-#define SYSTEM_SHCSR_BUSFAULTACT_Msk                        0x00000002  /*!< Enable BusFault is active */
-#define SYSTEM_SHCSR_USGFAULTACT_Msk                        0x00000008  /*!< Enable UsageFault is active */
-#define SYSTEM_SHCSR_SVCALLACT_Msk                          0x00000080  /*!< Enable SVCall is active */
-#define SYSTEM_SHCSR_MONITORACT_Msk                         0x00000100  /*!< Enable Monitor is active */
-#define SYSTEM_SHCSR_PENDSACT_Msk                           0x00000400  /*!< Enable PendSV is active */
-#define SYSTEM_SHCSR_SYSTICKACT_Msk                         0x00000800  /*!< Enable SysTick is active */
-#define SYSTEM_SHCSR_USGFAULTPENDED_Msk                     0x00001000  /*!< Enable UsageFault is pending */
-#define SYSTEM_SHCSR_MEMFAULTPENDED_Msk                     0x00002000  /*!< Enable MemManage is pending */
-#define SYSTEM_SHCSR_BUSFALTPENDED_Msk                      0x00004000  /*!< Enable BusFault is pending */
-#define SYSTEM_SHCSR_SVCALLPENDED_Msk                       0x00008000  /*!< Enable SVCall is pending */
-#define SYSTEM_SHCSR_MEMFAULTENA_Msk                        0x00010000  /*!< Enable MemManage fault */
-#define SYSTEM_SHCSR_BUSFAULTENA_Msk                        0x00020000  /*!< Enable BusFault */
-#define SYSTEM_SHCSR_USGFAULTENA_Msk                        0x00040000  /*!< Enable UsageFault */
-
-/*-- CFSR: Configurable Fault Status Registers -------------------------------*/
-
-typedef struct {
-  uint32_t MEMMANAGE                              :8;                   /*!< Provides information on MemManage exceptions */
-  uint32_t BUSFAULT                               :8;                   /*!< Provides information on BusFault exceptions */
-  uint32_t USAGEFAULT                             :16;                  /*!< Provides information on UsageFault exceptions */
-} _SYSTEM_CFSR_bits;
-
-/* Bit field positions: */
-#define SYSTEM_CFSR_MEMMANAGE_Pos                           0           /*!< Provides information on MemManage exceptions */
-#define SYSTEM_CFSR_BUSFAULT_Pos                            8           /*!< Provides information on BusFault exceptions */
-#define SYSTEM_CFSR_USAGEFAULT_Pos                          16          /*!< Provides information on UsageFault exceptions */
-
-/* Bit field masks: */
-#define SYSTEM_CFSR_MEMMANAGE_Msk                           0x000000FF  /*!< Provides information on MemManage exceptions */
-#define SYSTEM_CFSR_BUSFAULT_Msk                            0x0000FF00  /*!< Provides information on BusFault exceptions */
-#define SYSTEM_CFSR_USAGEFAULT_Msk                          0xFFFF0000  /*!< Provides information on UsageFault exceptions */
-
-/*-- HFSR: HardFault Status Register -----------------------------------------*/
-
-typedef struct {
-  uint32_t Reserved0                              :1;                   /*!< Reserved */
-  uint32_t VECTTBL                                :1;                   /*!< Enable Vector table read fault has occurred */
-  uint32_t Reserved1                              :28;                  /*!< Reserved */
-  uint32_t FORCED                                 :1;                   /*!< Enable Processor has escalated a configurable-priority exception to HardFault */
-  uint32_t DEBUGEVT                               :1;                   /*!< Enable Debug event has occurred */
-} _SYSTEM_HFSR_bits;
-
-/* Bit field positions: */
-#define SYSTEM_HFSR_VECTTBL_Pos                             1           /*!< Enable Vector table read fault has occurred */
-#define SYSTEM_HFSR_FORCED_Pos                              30          /*!< Enable Processor has escalated a configurable-priority exception to HardFault */
-#define SYSTEM_HFSR_DEBUGEVT_Pos                            31          /*!< Enable Debug event has occurred */
-
-/* Bit field masks: */
-#define SYSTEM_HFSR_VECTTBL_Msk                             0x00000002  /*!< Enable Vector table read fault has occurred */
-#define SYSTEM_HFSR_FORCED_Msk                              0x40000000  /*!< Enable Processor has escalated a configurable-priority exception to HardFault */
-#define SYSTEM_HFSR_DEBUGEVT_Msk                            0x80000000  /*!< Enable Debug event has occurred */
-
-/*-- CPACR: Coprocessor Access Control Register ------------------------------*/
-
-typedef struct {
-  uint32_t Reserved0                              :20;                  /*!< Reserved */
-  uint32_t CP10                                   :2;                   /*!< Access privileges for coprocessor FPU. 0b00 = Access denied. Any attempted access generates a NOCP UsageFault. 0b01 = Privileged access only. An unprivileged access generates a NOCP UsageFault. 0b10 = Reserved.0b11 = Full access */
-  uint32_t CP11                                   :2;
-  uint32_t Reserved1                              :8;                   /*!< Reserved */
-} _SYSTEM_CPACR_bits;
-
-/* Bit field positions: */
-#define SYSTEM_CPACR_CP10_Pos                               20          /*!< Access privileges for coprocessor FPU. 0b00 = Access denied. Any attempted access generates a NOCP UsageFault. 0b01 = Privileged access only. An unprivileged access generates a NOCP UsageFault. 0b10 = Reserved.0b11 = Full access */
-#define SYSTEM_CPACR_CP11_Pos                               22
-
-/* Bit field masks: */
-#define SYSTEM_CPACR_CP10_Msk                               0x00300000  /*!< Access privileges for coprocessor FPU. 0b00 = Access denied. Any attempted access generates a NOCP UsageFault. 0b01 = Privileged access only. An unprivileged access generates a NOCP UsageFault. 0b10 = Reserved.0b11 = Full access */
-#define SYSTEM_CPACR_CP11_Msk                               0x00C00000
-
-/*-- STIR: Software Triggered Interrupt Register -----------------------------*/
-
-typedef struct {
-  uint32_t INTID                                  :9;                   /*!< Indicates the interrupt to be triggered */
-  uint32_t Reserved0                              :23;                  /*!< Reserved */
-} _SYSTEM_STIR_bits;
-
-/* Bit field positions: */
-#define SYSTEM_STIR_INTID_Pos                               0           /*!< Indicates the interrupt to be triggered */
-
-/* Bit field masks: */
-#define SYSTEM_STIR_INTID_Msk                               0x000001FF  /*!< Indicates the interrupt to be triggered */
-
-/*-- Register map for SYSTEM peripheral --------------------------------------*/
-
-typedef struct {
-  uint32_t Reserved0;                                                   /*!< Reserved */
-  union {                                                               /*!< Interrupt Controller Type Register */
-    __I  uint32_t ICTR;                                                 /*!< ICTR    : type used for word access */
-    __I  _SYSTEM_ICTR_bits ICTR_bit;                                    /*!< ICTR_bit: structure used for bit access */
-  };
-  union {                                                               /*!< Auxiliary Control Register */
-    __IO uint32_t ACTLR;                                                /*!< ACTLR    : type used for word access */
-    __IO _SYSTEM_ACTLR_bits ACTLR_bit;                                  /*!< ACTLR_bit: structure used for bit access */
-  };
-  uint32_t Reserved1;                                                   /*!< Reserved */
-  union {                                                               /*!< SysTick Control and Status Register */
-    __IO uint32_t SysTick_STCSR;                                        /*!< SysTick_STCSR    : type used for word access */
-    __IO _SYSTEM_SysTick_STCSR_bits SysTick_STCSR_bit;                  /*!< SysTick_STCSR_bit: structure used for bit access */
-  };
-  union {                                                               /*!< SysTick Reload Value Register */
-    __IO uint32_t SysTick_STRVR;                                        /*!< SysTick_STRVR    : type used for word access */
-    __IO _SYSTEM_SysTick_STRVR_bits SysTick_STRVR_bit;                  /*!< SysTick_STRVR_bit: structure used for bit access */
-  };
-  __IO uint32_t SysTick_STCVR;                                          /*!< SysTick Current Value Register */
-  union {                                                               /*!< SysTick Calibration Value Register */
-    __I  uint32_t SysTick_STCR;                                         /*!< SysTick_STCR    : type used for word access */
-    __I  _SYSTEM_SysTick_STCR_bits SysTick_STCR_bit;                    /*!< SysTick_STCR_bit: structure used for bit access */
-  };
-  uint32_t Reserved2[824];                                              /*!< Reserved */
-  union {                                                               /*!< CPUID Base Register */
-    __I  uint32_t CPUID;                                                /*!< CPUID    : type used for word access */
-    __I  _SYSTEM_CPUID_bits CPUID_bit;                                  /*!< CPUID_bit: structure used for bit access */
-  };
-  union {                                                               /*!< Interrupt Control and State Register */
-    __IO uint32_t ICSR;                                                 /*!< ICSR    : type used for word access */
-    __IO _SYSTEM_ICSR_bits ICSR_bit;                                    /*!< ICSR_bit: structure used for bit access */
-  };
-  union {                                                               /*!< Vector Table Offset Register */
-    __IO uint32_t VTOR;                                                 /*!< VTOR    : type used for word access */
-    __IO _SYSTEM_VTOR_bits VTOR_bit;                                    /*!< VTOR_bit: structure used for bit access */
-  };
-  union {                                                               /*!< Application Interrupt and Reset Control Register */
-    __IO uint32_t AIRCR;                                                /*!< AIRCR    : type used for word access */
-    __IO _SYSTEM_AIRCR_bits AIRCR_bit;                                  /*!< AIRCR_bit: structure used for bit access */
-  };
-  union {                                                               /*!< System Control Register */
-    __IO uint32_t SCR;                                                  /*!< SCR    : type used for word access */
-    __IO _SYSTEM_SCR_bits SCR_bit;                                      /*!< SCR_bit: structure used for bit access */
-  };
-  union {                                                               /*!< Configuration and Control Register */
-    __IO uint32_t CCR;                                                  /*!< CCR    : type used for word access */
-    __IO _SYSTEM_CCR_bits CCR_bit;                                      /*!< CCR_bit: structure used for bit access */
-  };
-  union {                                                               /*!< System Handler Priority Register 1 */
-    __IO uint32_t SHPR1;                                                /*!< SHPR1    : type used for word access */
-    __IO _SYSTEM_SHPR1_bits SHPR1_bit;                                  /*!< SHPR1_bit: structure used for bit access */
-  };
-  union {                                                               /*!< System Handler Priority Register 2 */
-    __IO uint32_t SHPR2;                                                /*!< SHPR2    : type used for word access */
-    __IO _SYSTEM_SHPR2_bits SHPR2_bit;                                  /*!< SHPR2_bit: structure used for bit access */
-  };
-  union {                                                               /*!< System Handler Priority Register 3 */
-    __IO uint32_t SHPR3;                                                /*!< SHPR3    : type used for word access */
-    __IO _SYSTEM_SHPR3_bits SHPR3_bit;                                  /*!< SHPR3_bit: structure used for bit access */
-  };
-  union {                                                               /*!< System Handler Control and State Register */
-    __IO uint32_t SHCSR;                                                /*!< SHCSR    : type used for word access */
-    __IO _SYSTEM_SHCSR_bits SHCSR_bit;                                  /*!< SHCSR_bit: structure used for bit access */
-  };
-  union {                                                               /*!< Configurable Fault Status Registers */
-    __IO uint32_t CFSR;                                                 /*!< CFSR    : type used for word access */
-    __IO _SYSTEM_CFSR_bits CFSR_bit;                                    /*!< CFSR_bit: structure used for bit access */
-  };
-  union {                                                               /*!< HardFault Status Register */
-    __IO uint32_t HFSR;                                                 /*!< HFSR    : type used for word access */
-    __IO _SYSTEM_HFSR_bits HFSR_bit;                                    /*!< HFSR_bit: structure used for bit access */
-  };
-  __IO uint32_t DFSR;                                                   /*!< Debug Fault Status Register */
-  __IO uint32_t MMFAR;                                                  /*!< MemManage Fault Address Register */
-  __IO uint32_t BFAR;                                                   /*!< BusFault Address Register */
-  __IO uint32_t AFSR;                                                   /*!< Auxiliary Fault Status Register */
-  uint32_t Reserved3[18];                                               /*!< Reserved */
-  union {                                                               /*!< Coprocessor Access Control Register */
-    __IO uint32_t CPACR;                                                /*!< CPACR    : type used for word access */
-    __IO _SYSTEM_CPACR_bits CPACR_bit;                                  /*!< CPACR_bit: structure used for bit access */
-  };
-  uint32_t Reserved4[93];                                               /*!< Reserved */
-  union {                                                               /*!< Software Triggered Interrupt Register */
-    __O  uint32_t STIR;                                                 /*!< STIR    : type used for word access */
-    __O  _SYSTEM_STIR_bits STIR_bit;                                    /*!< STIR_bit: structure used for bit access */
-  };
-} NT_SYSTEM_TypeDef;
-
-/******************************************************************************/
-/*                              NVIC registers                                */
-/******************************************************************************/
-
-/*-- IPR: Interrupt Priority Registers ---------------------------------------*/
-
-typedef struct {
-  uint32_t PRI_N0                                 :8;
-  uint32_t PRI_N1                                 :7;
-  uint32_t PRI_N2                                 :9;
-  uint32_t PRI_N3                                 :8;
-} _NVIC_IPR_bits;
-
-/* Bit field positions: */
-#define NVIC_IPR_PRI_N0_Pos                                 0
-#define NVIC_IPR_PRI_N1_Pos                                 8
-#define NVIC_IPR_PRI_N2_Pos                                 15
-#define NVIC_IPR_PRI_N3_Pos                                 24
-
-/* Bit field masks: */
-#define NVIC_IPR_PRI_N0_Msk                                 0x000000FF
-#define NVIC_IPR_PRI_N1_Msk                                 0x00007F00
-#define NVIC_IPR_PRI_N2_Msk                                 0x00FF8000
-#define NVIC_IPR_PRI_N3_Msk                                 0xFF000000
-
-/*-- Register map for NVIC peripheral ----------------------------------------*/
-
-typedef struct {
-  uint32_t Reserved0[64];                                               /*!< Reserved */
-  __IO uint32_t ISER[5];                                                /*!< Interrupt Set-Enable Registers */
-  uint32_t Reserved1[27];                                               /*!< Reserved */
-  __IO uint32_t ICER[5];                                                /*!< Interrupt Clear-Enable Registers */
-  uint32_t Reserved2[27];                                               /*!< Reserved */
-  __IO uint32_t ISPR[5];                                                /*!< Interrupt Set-Pending Registers */
-  uint32_t Reserved3[27];                                               /*!< Reserved */
-  __IO uint32_t ICPR[5];                                                /*!< Interrupt Clear-Pending Registers */
-  uint32_t Reserved4[27];                                               /*!< Reserved */
-  __I  uint32_t IABR[5];                                                /*!< Interrupt Active Bit Registers */
-  uint32_t Reserved5[59];                                               /*!< Reserved */
-  union {                                                               /*!< Interrupt Priority Registers */
-    __IO uint32_t IPR[34];                                              /*!< IPR    : type used for word access */
-    __IO _NVIC_IPR_bits IPR_bit[34];                                    /*!< IPR_bit: structure used for bit access */
-  };
-} NT_NVIC_TypeDef;
-
-/******************************************************************************/
-/*                              MPU registers                                 */
-/******************************************************************************/
-
-/*-- TYPE: MPU Type Register -------------------------------------------------*/
-
-typedef struct {
-  uint32_t SEPARATE                               :1;                   /*!< Indicates support for separate instruction and data address maps. RAZ. ARMv7-M only supports a unified MPU */
-  uint32_t Reserved0                              :7;                   /*!< Reserved */
-  uint32_t DREGION                                :8;                   /*!< Number of regions supported by the MPU. If this field reads-as-zero the processor does not implement an MPU */
-  uint32_t IREGION                                :8;                   /*!< Instruction region */
-  uint32_t Reserved1                              :8;                   /*!< Reserved */
-} _MPU_TYPE_bits;
-
-/* Bit field positions: */
-#define MPU_TYPE_SEPARATE_Pos                               0           /*!< Indicates support for separate instruction and data address maps. RAZ. ARMv7-M only supports a unified MPU */
-#define MPU_TYPE_DREGION_Pos                                8           /*!< Number of regions supported by the MPU. If this field reads-as-zero the processor does not implement an MPU */
-#define MPU_TYPE_IREGION_Pos                                16          /*!< Instruction region */
-
-/* Bit field masks: */
-#define MPU_TYPE_SEPARATE_Msk                               0x00000001  /*!< Indicates support for separate instruction and data address maps. RAZ. ARMv7-M only supports a unified MPU */
-#define MPU_TYPE_DREGION_Msk                                0x0000FF00  /*!< Number of regions supported by the MPU. If this field reads-as-zero the processor does not implement an MPU */
-#define MPU_TYPE_IREGION_Msk                                0x00FF0000  /*!< Instruction region */
-
-/*-- CTRL: MPU Control Register ----------------------------------------------*/
-
-typedef struct {
-  uint32_t ENABLE                                 :1;                   /*!< Enables the MPU */
-  uint32_t HFNMIENA                               :1;                   /*!< Use the MPU for memory accesses by these handlers */
-  uint32_t PRIVDEFENA                             :1;                   /*!< Enables the default memory map as a background region for privileged access */
-  uint32_t Reserved0                              :29;                  /*!< Reserved */
-} _MPU_CTRL_bits;
-
-/* Bit field positions: */
-#define MPU_CTRL_ENABLE_Pos                                 0           /*!< Enables the MPU */
-#define MPU_CTRL_HFNMIENA_Pos                               1           /*!< Use the MPU for memory accesses by these handlers */
-#define MPU_CTRL_PRIVDEFENA_Pos                             2           /*!< Enables the default memory map as a background region for privileged access */
-
-/* Bit field masks: */
-#define MPU_CTRL_ENABLE_Msk                                 0x00000001  /*!< Enables the MPU */
-#define MPU_CTRL_HFNMIENA_Msk                               0x00000002  /*!< Use the MPU for memory accesses by these handlers */
-#define MPU_CTRL_PRIVDEFENA_Msk                             0x00000004  /*!< Enables the default memory map as a background region for privileged access */
-
-/*-- RNR: MPU Region Number Register -----------------------------------------*/
-
-typedef struct {
-  uint32_t REGION                                 :8;                   /*!< Indicates the memory region accessed by MPU_RBAR and MPU_RSAR */
-  uint32_t Reserved0                              :24;                  /*!< Reserved */
-} _MPU_RNR_bits;
-
-/* Bit field positions: */
-#define MPU_RNR_REGION_Pos                                  0           /*!< Indicates the memory region accessed by MPU_RBAR and MPU_RSAR */
-
-/* Bit field masks: */
-#define MPU_RNR_REGION_Msk                                  0x000000FF  /*!< Indicates the memory region accessed by MPU_RBAR and MPU_RSAR */
-
-/*-- RBAR: MPU Region Base Address Register ----------------------------------*/
-
-typedef struct {
-  uint32_t REGION                                 :4;                   /*!< On writes, can specify the number of the region to update, see VALID field description. On reads, returns bits [3:0] of MPU_RNR. */
-  uint32_t VALID                                  :1;                   /*!< 0 = Update the base address of the region indicated by MPU_RNR, ignoring the value of the REGION field */
-  uint32_t ADDR                                   :27;                  /*!< Base address of the region */
-} _MPU_RBAR_bits;
-
-/* Bit field positions: */
-#define MPU_RBAR_REGION_Pos                                 0           /*!< On writes, can specify the number of the region to update, see VALID field description. On reads, returns bits [3:0] of MPU_RNR. */
-#define MPU_RBAR_VALID_Pos                                  4           /*!< 0 = Update the base address of the region indicated by MPU_RNR, ignoring the value of the REGION field */
-#define MPU_RBAR_ADDR_Pos                                   5           /*!< Base address of the region */
-
-/* Bit field masks: */
-#define MPU_RBAR_REGION_Msk                                 0x0000000F  /*!< On writes, can specify the number of the region to update, see VALID field description. On reads, returns bits [3:0] of MPU_RNR. */
-#define MPU_RBAR_VALID_Msk                                  0x00000010  /*!< 0 = Update the base address of the region indicated by MPU_RNR, ignoring the value of the REGION field */
-#define MPU_RBAR_ADDR_Msk                                   0xFFFFFFE0  /*!< Base address of the region */
-
-/*-- RASR: MPU Region Attribute and Size Register ----------------------------*/
-
-typedef struct {
-  uint32_t ENABLE                                 :1;                   /*!< Enables this region */
-  uint32_t SIZE                                   :5;                   /*!< Indicates the region size. The region size, in bytes, is 2(SIZE+1) */
-  uint32_t Reserved0                              :2;                   /*!< Reserved */
-  uint32_t SRD                                    :8;                   /*!< Subregion Disable. For regions of 256 bytes or larger, each bit of this field controls whether one of the eight equal subregions is enabled */
-  uint32_t B                                      :1;                   /*!< The MPU Region Attribute field */
-  uint32_t C                                      :1;                   /*!< The MPU Region Attribute field */
-  uint32_t S                                      :1;                   /*!< The MPU Region Attribute field */
-  uint32_t TEX                                    :3;                   /*!< The MPU Region Attribute field */
-  uint32_t Reserved1                              :2;                   /*!< Reserved */
-  uint32_t AP                                     :3;                   /*!< The MPU Region Attribute field */
-  uint32_t Reserved2                              :1;                   /*!< Reserved */
-  uint32_t XN                                     :1;                   /*!< The MPU Region Attribute field */
-  uint32_t Reserved3                              :3;                   /*!< Reserved */
-} _MPU_RASR_bits;
-
-/* Bit field positions: */
-#define MPU_RASR_ENABLE_Pos                                 0           /*!< Enables this region */
-#define MPU_RASR_SIZE_Pos                                   1           /*!< Indicates the region size. The region size, in bytes, is 2(SIZE+1) */
-#define MPU_RASR_SRD_Pos                                    8           /*!< Subregion Disable. For regions of 256 bytes or larger, each bit of this field controls whether one of the eight equal subregions is enabled */
-#define MPU_RASR_B_Pos                                      16          /*!< The MPU Region Attribute field */
-#define MPU_RASR_C_Pos                                      17          /*!< The MPU Region Attribute field */
-#define MPU_RASR_S_Pos                                      18          /*!< The MPU Region Attribute field */
-#define MPU_RASR_TEX_Pos                                    19          /*!< The MPU Region Attribute field */
-#define MPU_RASR_AP_Pos                                     24          /*!< The MPU Region Attribute field */
-#define MPU_RASR_XN_Pos                                     28          /*!< The MPU Region Attribute field */
-
-/* Bit field masks: */
-#define MPU_RASR_ENABLE_Msk                                 0x00000001  /*!< Enables this region */
-#define MPU_RASR_SIZE_Msk                                   0x0000003E  /*!< Indicates the region size. The region size, in bytes, is 2(SIZE+1) */
-#define MPU_RASR_SRD_Msk                                    0x0000FF00  /*!< Subregion Disable. For regions of 256 bytes or larger, each bit of this field controls whether one of the eight equal subregions is enabled */
-#define MPU_RASR_B_Msk                                      0x00010000  /*!< The MPU Region Attribute field */
-#define MPU_RASR_C_Msk                                      0x00020000  /*!< The MPU Region Attribute field */
-#define MPU_RASR_S_Msk                                      0x00040000  /*!< The MPU Region Attribute field */
-#define MPU_RASR_TEX_Msk                                    0x00380000  /*!< The MPU Region Attribute field */
-#define MPU_RASR_AP_Msk                                     0x07000000  /*!< The MPU Region Attribute field */
-#define MPU_RASR_XN_Msk                                     0x10000000  /*!< The MPU Region Attribute field */
-
-/*-- Register map for MPU peripheral -----------------------------------------*/
-
-typedef struct {
-  uint32_t Reserved0[868];                                              /*!< Reserved */
-  union {                                                               /*!< MPU Type Register */
-    __I  uint32_t TYPE;                                                 /*!< TYPE    : type used for word access */
-    __I  _MPU_TYPE_bits TYPE_bit;                                       /*!< TYPE_bit: structure used for bit access */
-  };
-  union {                                                               /*!< MPU Control Register */
-    __IO uint32_t CTRL;                                                 /*!< CTRL    : type used for word access */
-    __IO _MPU_CTRL_bits CTRL_bit;                                       /*!< CTRL_bit: structure used for bit access */
-  };
-  union {                                                               /*!< MPU Region Number Register */
-    __IO uint32_t RNR;                                                  /*!< RNR    : type used for word access */
-    __IO _MPU_RNR_bits RNR_bit;                                         /*!< RNR_bit: structure used for bit access */
-  };
-  union {                                                               /*!< MPU Region Base Address Register */
-    __IO uint32_t RBAR;                                                 /*!< RBAR    : type used for word access */
-    __IO _MPU_RBAR_bits RBAR_bit;                                       /*!< RBAR_bit: structure used for bit access */
-  };
-  union {                                                               /*!< MPU Region Attribute and Size Register */
-    __IO uint32_t RASR;                                                 /*!< RASR    : type used for word access */
-    __IO _MPU_RASR_bits RASR_bit;                                       /*!< RASR_bit: structure used for bit access */
-  };
-  __IO uint32_t RBAR_A1;                                                /*!< Alias 1 of MPU_RBAR register */
-  __IO uint32_t RASR_A1;                                                /*!< Alias 1 of MPU_RASR register */
-  __IO uint32_t RBAR_A2;                                                /*!< Alias 2 of MPU_RBAR register */
-  __IO uint32_t RASR_A2;                                                /*!< Alias 2 of MPU_RASR register */
-  __IO uint32_t RBAR_A3;                                                /*!< Alias 3 of MPU_RBAR register */
-  __IO uint32_t RASR_A3;                                                /*!< Alias 3 of MPU_RASR register */
-} NT_MPU_TypeDef;
-
-/******************************************************************************/
-/*                              FPU registers                                 */
-/******************************************************************************/
-
-/*-- FPCCR: Floating-Point Context Control Register --------------------------*/
-
-typedef struct {
-  uint32_t LSPACT                                 :1;                   /*!< Indicates Lazy state preservation is active */
-  uint32_t USER                                   :1;                   /*!< Indicates the privilege level of the software executing when the processor allocated the FP stack frame */
-  uint32_t Reserved0                              :1;                   /*!< Reserved */
-  uint32_t THREAD                                 :1;                   /*!< Indicates the processor Thread mode when it allocated the FP stack frame */
-  uint32_t HFRDY                                  :1;                   /*!< Indicates whether the software executing when the processor allocated the FP stack frame was ablea to set the HardFault exception to pending */
-  uint32_t MMRDY                                  :1;                   /*!< Indicate Able to set the MemManage exception to pending */
-  uint32_t BFRDY                                  :1;                   /*!< Indicate Able to set the BusFault exception to pending */
-  uint32_t Reserved1                              :1;                   /*!< Reserved */
-  uint32_t MONRDY                                 :1;                   /*!< Indicate Able to set the DebugMonitor exception to pending */
-  uint32_t Reserved2                              :21;                  /*!< Reserved */
-  uint32_t LSPEN                                  :1;                   /*!< Enable automatic lazy context save */
-  uint32_t ASPEN                                  :1;                   /*!< Execution of a floating-point instruction sets the CONTROL.FPCA bit to 1 */
-} _FPU_FPCCR_bits;
-
-/* Bit field positions: */
-#define FPU_FPCCR_LSPACT_Pos                                0           /*!< Indicates Lazy state preservation is active */
-#define FPU_FPCCR_USER_Pos                                  1           /*!< Indicates the privilege level of the software executing when the processor allocated the FP stack frame */
-#define FPU_FPCCR_THREAD_Pos                                3           /*!< Indicates the processor Thread mode when it allocated the FP stack frame */
-#define FPU_FPCCR_HFRDY_Pos                                 4           /*!< Indicates whether the software executing when the processor allocated the FP stack frame was ablea to set the HardFault exception to pending */
-#define FPU_FPCCR_MMRDY_Pos                                 5           /*!< Indicate Able to set the MemManage exception to pending */
-#define FPU_FPCCR_BFRDY_Pos                                 6           /*!< Indicate Able to set the BusFault exception to pending */
-#define FPU_FPCCR_MONRDY_Pos                                8           /*!< Indicate Able to set the DebugMonitor exception to pending */
-#define FPU_FPCCR_LSPEN_Pos                                 30          /*!< Enable automatic lazy context save */
-#define FPU_FPCCR_ASPEN_Pos                                 31          /*!< Execution of a floating-point instruction sets the CONTROL.FPCA bit to 1 */
-
-/* Bit field masks: */
-#define FPU_FPCCR_LSPACT_Msk                                0x00000001  /*!< Indicates Lazy state preservation is active */
-#define FPU_FPCCR_USER_Msk                                  0x00000002  /*!< Indicates the privilege level of the software executing when the processor allocated the FP stack frame */
-#define FPU_FPCCR_THREAD_Msk                                0x00000008  /*!< Indicates the processor Thread mode when it allocated the FP stack frame */
-#define FPU_FPCCR_HFRDY_Msk                                 0x00000010  /*!< Indicates whether the software executing when the processor allocated the FP stack frame was ablea to set the HardFault exception to pending */
-#define FPU_FPCCR_MMRDY_Msk                                 0x00000020  /*!< Indicate Able to set the MemManage exception to pending */
-#define FPU_FPCCR_BFRDY_Msk                                 0x00000040  /*!< Indicate Able to set the BusFault exception to pending */
-#define FPU_FPCCR_MONRDY_Msk                                0x00000100  /*!< Indicate Able to set the DebugMonitor exception to pending */
-#define FPU_FPCCR_LSPEN_Msk                                 0x40000000  /*!< Enable automatic lazy context save */
-#define FPU_FPCCR_ASPEN_Msk                                 0x80000000  /*!< Execution of a floating-point instruction sets the CONTROL.FPCA bit to 1 */
-
-/*-- FPCAR: Floating-Point Context Address Register --------------------------*/
-
-typedef struct {
-  uint32_t Reserved0                              :3;                   /*!< Reserved */
-  uint32_t ADDRESS                                :29;                  /*!< The location of the unpopulated floating-point register space allocated on an exception stack frame */
-} _FPU_FPCAR_bits;
-
-/* Bit field positions: */
-#define FPU_FPCAR_ADDRESS_Pos                               3           /*!< The location of the unpopulated floating-point register space allocated on an exception stack frame */
-
-/* Bit field masks: */
-#define FPU_FPCAR_ADDRESS_Msk                               0xFFFFFFF8  /*!< The location of the unpopulated floating-point register space allocated on an exception stack frame */
-
-/*-- FPDSCR: Floating-Point Default Status Control Register ------------------*/
-
-typedef struct {
-  uint32_t Reserved0                              :22;                  /*!< Reserved */
-  uint32_t RMODE                                  :2;                   /*!< Default value for FPSCR.Rmode */
-  uint32_t FZ                                     :1;                   /*!< Default value for FPSCR.FZ */
-  uint32_t DN                                     :1;                   /*!< Default value for FPSCR.DN */
-  uint32_t AHP                                    :1;                   /*!< Default value for FPSCR.AHP */
-  uint32_t Reserved1                              :5;                   /*!< Reserved */
-} _FPU_FPDSCR_bits;
-
-/* Bit field positions: */
-#define FPU_FPDSCR_RMODE_Pos                                22          /*!< Default value for FPSCR.Rmode */
-#define FPU_FPDSCR_FZ_Pos                                   24          /*!< Default value for FPSCR.FZ */
-#define FPU_FPDSCR_DN_Pos                                   25          /*!< Default value for FPSCR.DN */
-#define FPU_FPDSCR_AHP_Pos                                  26          /*!< Default value for FPSCR.AHP */
-
-/* Bit field masks: */
-#define FPU_FPDSCR_RMODE_Msk                                0x00C00000  /*!< Default value for FPSCR.Rmode */
-#define FPU_FPDSCR_FZ_Msk                                   0x01000000  /*!< Default value for FPSCR.FZ */
-#define FPU_FPDSCR_DN_Msk                                   0x02000000  /*!< Default value for FPSCR.DN */
-#define FPU_FPDSCR_AHP_Msk                                  0x04000000  /*!< Default value for FPSCR.AHP */
-
-/*-- MVFR0: Media and FP Feature Register 0 ----------------------------------*/
-
-typedef struct {
-  uint32_t A_SIMD                                 :4;                   /*!< Indicates the size of the FP register bank */
-  uint32_t SINGLEPREC                             :4;                   /*!< Indicates the hardware support for FP single-precision operations */
-  uint32_t DOUBLEPREC                             :4;                   /*!< Indicates the hardware support for FP double-precision operations */
-  uint32_t FPEXCEPT                               :4;                   /*!< Indicates whether the FP hardware implementation supports exception trapping */
-  uint32_t DIVIDE                                 :4;                   /*!< Indicates the hardware support for FP divide operations */
-  uint32_t SQUAREROOT                             :4;                   /*!< Indicates the hardware support for FP square root operations */
-  uint32_t SHORTVEC                               :4;                   /*!< Indicates the hardware support for FP short vectors */
-  uint32_t FPRMODE                                :4;                   /*!< Indicates the rounding modes supported by the FP floating-point hardware */
-} _FPU_MVFR0_bits;
-
-/* Bit field positions: */
-#define FPU_MVFR0_A_SIMD_Pos                                0           /*!< Indicates the size of the FP register bank */
-#define FPU_MVFR0_SINGLEPREC_Pos                            4           /*!< Indicates the hardware support for FP single-precision operations */
-#define FPU_MVFR0_DOUBLEPREC_Pos                            8           /*!< Indicates the hardware support for FP double-precision operations */
-#define FPU_MVFR0_FPEXCEPT_Pos                              12          /*!< Indicates whether the FP hardware implementation supports exception trapping */
-#define FPU_MVFR0_DIVIDE_Pos                                16          /*!< Indicates the hardware support for FP divide operations */
-#define FPU_MVFR0_SQUAREROOT_Pos                            20          /*!< Indicates the hardware support for FP square root operations */
-#define FPU_MVFR0_SHORTVEC_Pos                              24          /*!< Indicates the hardware support for FP short vectors */
-#define FPU_MVFR0_FPRMODE_Pos                               28          /*!< Indicates the rounding modes supported by the FP floating-point hardware */
-
-/* Bit field masks: */
-#define FPU_MVFR0_A_SIMD_Msk                                0x0000000F  /*!< Indicates the size of the FP register bank */
-#define FPU_MVFR0_SINGLEPREC_Msk                            0x000000F0  /*!< Indicates the hardware support for FP single-precision operations */
-#define FPU_MVFR0_DOUBLEPREC_Msk                            0x00000F00  /*!< Indicates the hardware support for FP double-precision operations */
-#define FPU_MVFR0_FPEXCEPT_Msk                              0x0000F000  /*!< Indicates whether the FP hardware implementation supports exception trapping */
-#define FPU_MVFR0_DIVIDE_Msk                                0x000F0000  /*!< Indicates the hardware support for FP divide operations */
-#define FPU_MVFR0_SQUAREROOT_Msk                            0x00F00000  /*!< Indicates the hardware support for FP square root operations */
-#define FPU_MVFR0_SHORTVEC_Msk                              0x0F000000  /*!< Indicates the hardware support for FP short vectors */
-#define FPU_MVFR0_FPRMODE_Msk                               0xF0000000  /*!< Indicates the rounding modes supported by the FP floating-point hardware */
-
-/*-- MVFR1: Media and FP Feature Register 1 ----------------------------------*/
-
-typedef struct {
-  uint32_t FTZMODE                                :4;                   /*!< Indicates whether the FP hardware implementation supports only the Flush-to-Zero mode of operation */
-  uint32_t DNANMODE                               :4;                   /*!< Indicates whether the FP hardware implementation supports only the Default NaN mode */
-  uint32_t Reserved0                              :16;                  /*!< Reserved */
-  uint32_t FPHPFP                                 :4;                   /*!< Indicates whether the FP supports half-precision floating-point conversion operations */
-  uint32_t FPFUSEMAC                              :4;                   /*!< Indicates whether the FP supports fused multiply accumulate operations */
-} _FPU_MVFR1_bits;
-
-/* Bit field positions: */
-#define FPU_MVFR1_FTZMODE_Pos                               0           /*!< Indicates whether the FP hardware implementation supports only the Flush-to-Zero mode of operation */
-#define FPU_MVFR1_DNANMODE_Pos                              4           /*!< Indicates whether the FP hardware implementation supports only the Default NaN mode */
-#define FPU_MVFR1_FPHPFP_Pos                                24          /*!< Indicates whether the FP supports half-precision floating-point conversion operations */
-#define FPU_MVFR1_FPFUSEMAC_Pos                             28          /*!< Indicates whether the FP supports fused multiply accumulate operations */
-
-/* Bit field masks: */
-#define FPU_MVFR1_FTZMODE_Msk                               0x0000000F  /*!< Indicates whether the FP hardware implementation supports only the Flush-to-Zero mode of operation */
-#define FPU_MVFR1_DNANMODE_Msk                              0x000000F0  /*!< Indicates whether the FP hardware implementation supports only the Default NaN mode */
-#define FPU_MVFR1_FPHPFP_Msk                                0x0F000000  /*!< Indicates whether the FP supports half-precision floating-point conversion operations */
-#define FPU_MVFR1_FPFUSEMAC_Msk                             0xF0000000  /*!< Indicates whether the FP supports fused multiply accumulate operations */
-
-/*-- Register map for FPU peripheral -----------------------------------------*/
-
-typedef struct {
-  union {                                                               /*!< Floating-Point Context Control Register */
-    __IO uint32_t FPCCR;                                                /*!< FPCCR    : type used for word access */
-    __IO _FPU_FPCCR_bits FPCCR_bit;                                     /*!< FPCCR_bit: structure used for bit access */
-  };
-  union {                                                               /*!< Floating-Point Context Address Register */
-    __IO uint32_t FPCAR;                                                /*!< FPCAR    : type used for word access */
-    __IO _FPU_FPCAR_bits FPCAR_bit;                                     /*!< FPCAR_bit: structure used for bit access */
-  };
-  union {                                                               /*!< Floating-Point Default Status Control Register */
-    __IO uint32_t FPDSCR;                                               /*!< FPDSCR    : type used for word access */
-    __IO _FPU_FPDSCR_bits FPDSCR_bit;                                   /*!< FPDSCR_bit: structure used for bit access */
-  };
-  union {                                                               /*!< Media and FP Feature Register 0 */
-    __I  uint32_t MVFR0;                                                /*!< MVFR0    : type used for word access */
-    __I  _FPU_MVFR0_bits MVFR0_bit;                                     /*!< MVFR0_bit: structure used for bit access */
-  };
-  union {                                                               /*!< Media and FP Feature Register 1 */
-    __I  uint32_t MVFR1;                                                /*!< MVFR1    : type used for word access */
-    __I  _FPU_MVFR1_bits MVFR1_bit;                                     /*!< MVFR1_bit: structure used for bit access */
-  };
-} NT_FPU_TypeDef;
+/* --------------------  End of section using anonymous unions  ------------------- */
+#if defined(__CC_ARM)
+  #pragma pop
+#endif
 
 /******************************************************************************/
 /*                          Peripheral memory map                             */
@@ -11640,10 +10951,6 @@ typedef struct {
 #define NT_SPI3_BASE             (0xA0021000UL)
 #define NT_USERFLASH_BASE        (0xA0022000UL)
 #define NT_RTC_BASE              (0xA0023000UL)
-#define NT_SYSTEM_BASE           (0xE000E000UL)
-#define NT_NVIC_BASE             (0xE000E000UL)
-#define NT_MPU_BASE              (0xE000E000UL)
-#define NT_FPU_BASE              (0xE000EF34UL)
 
 /******************************************************************************/
 /*                          Peripheral declaration                            */
@@ -11700,17 +11007,13 @@ typedef struct {
 #define NT_SPI3                  ((NT_SPI_TypeDef                       *) NT_SPI3_BASE)
 #define NT_USERFLASH             ((NT_USERFLASH_TypeDef                 *) NT_USERFLASH_BASE)
 #define NT_RTC                   ((NT_RTC_TypeDef                       *) NT_RTC_BASE)
-#define NT_SYSTEM                ((NT_SYSTEM_TypeDef                    *) NT_SYSTEM_BASE)
-#define NT_NVIC                  ((NT_NVIC_TypeDef                      *) NT_NVIC_BASE)
-#define NT_MPU                   ((NT_MPU_TypeDef                       *) NT_MPU_BASE)
-#define NT_FPU                   ((NT_FPU_TypeDef                       *) NT_FPU_BASE)
 
 #ifdef __cplusplus
 }
 #endif
 
-#endif /* __K1921BK01T_H */
+#endif /* __K1921VK01T_H */
 
 /******************* (C) COPYRIGHT 2015 Angioscan Electronics ******************
 *
-* END OF FILE K1921BK01T.h */
+* END OF FILE K1921VK01T.h */

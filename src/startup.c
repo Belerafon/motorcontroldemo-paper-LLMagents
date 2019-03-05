@@ -66,8 +66,10 @@ void Reset_Handler (void) {
     }
 
     // Теперь нужно включить плавающую точку
-    NT_SYSTEM->CPACR_bit.CP10 = 0b11;
-    NT_SYSTEM->CPACR_bit.CP11 = 0b11;
+    SCB->CPACR |= 0b11 << 20;
+    SCB->CPACR |= 0b11 << 22;
+    __DSB();
+    __ISB();
 
     // Теперь правильно расположить стек (если программа выполняется из RAM)
     __set_MSP((Uint32)&_estack);
