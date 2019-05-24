@@ -139,8 +139,10 @@ void SM_CmdLogicms_Calc(TSM_CmdLogic *p) {
 		break;
 	}
 
-	default:
-		break;
+	default: {      //на всякий случай делаем режим по-умолчанию "выключен"
+        p->state = CMD_LOGIC_TURNED_OFF;
+        break;
+    }
 
 	} // конец switch(p->state)
 }

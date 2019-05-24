@@ -805,12 +805,9 @@ void PWM_Module_On(TPWM_Module *p) {
 	p->Enabled = 1;	//флаг "включено"
 
 	// Снимаем принудительную установку выходов
-	NT_PWM0->AQCSFRC_bit.CSFA = AQ_NO_ACTION;
-	NT_PWM0->AQCSFRC_bit.CSFB = AQ_NO_ACTION;
-	NT_PWM1->AQCSFRC_bit.CSFA = AQ_NO_ACTION;
-	NT_PWM1->AQCSFRC_bit.CSFB = AQ_NO_ACTION;
-	NT_PWM2->AQCSFRC_bit.CSFA = AQ_NO_ACTION;
-	NT_PWM2->AQCSFRC_bit.CSFB = AQ_NO_ACTION;
+    NT_PWM0->AQCSFRC = 0;
+    NT_PWM1->AQCSFRC = 0;
+    NT_PWM2->AQCSFRC = 0;
 	GPIO_INV_ON;
 
 }
@@ -823,12 +820,9 @@ void PWM_Module_Off(TPWM_Module *p) {
 	p->Enabled = 0;	//флаг "выключено"
 	// Принудительно обнулим все ножки
 
-	NT_PWM0->AQCSFRC_bit.CSFA = AQ_CLEAR;
-	NT_PWM0->AQCSFRC_bit.CSFB = AQ_SET;    //так как в модуле МВ инверсия
-	NT_PWM1->AQCSFRC_bit.CSFA = AQ_CLEAR;
-	NT_PWM1->AQCSFRC_bit.CSFB = AQ_SET;    //так как в модуле МВ инверсия
-	NT_PWM2->AQCSFRC_bit.CSFA = AQ_CLEAR;
-	NT_PWM2->AQCSFRC_bit.CSFB = AQ_SET;    //так как в модуле МВ инверсия
+	NT_PWM0->AQCSFRC = 9;  // 0x1 - 0 на выходе PWMxA, 0x8 - 1 на выходе PWMxB
+    NT_PWM1->AQCSFRC = 9;  // 0x1 - 0 на выходе PWMxA, 0x8 - 1 на выходе PWMxB
+    NT_PWM2->AQCSFRC = 9;  // 0x1 - 0 на выходе PWMxA, 0x8 - 1 на выходе PWMxB
 	GPIO_INV_OFF;
 
 }
