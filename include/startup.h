@@ -42,7 +42,7 @@ void defaultISRhandler (void) {
 
 // Функции прерываний, объявленные как "weak"
 //void _estack(void) __attribute__ ((weak, alias("defaultISRhandler")));
-void Reset_Handler(void);
+void Reset_Handler(void) __attribute__ ((naked));
 void NMI_Handler(void) __attribute__ ((weak, alias("defaultISRhandler")));
 void HardFault_Handler(void) __attribute__ ((weak, alias("defaultISRhandler")));
 void MemManage_Handler(void) __attribute__ ((weak, alias("defaultISRhandler")));
@@ -189,6 +189,8 @@ void CAN12_IRQHandler(void) __attribute__ ((weak, alias("defaultISRhandler")));
 void CAN13_IRQHandler(void) __attribute__ ((weak, alias("defaultISRhandler")));
 void CAN14_IRQHandler(void) __attribute__ ((weak, alias("defaultISRhandler")));
 void CAN15_IRQHandler(void) __attribute__ ((weak, alias("defaultISRhandler")));
+void RTC_IRQHandler(void) __attribute__ ((weak, alias("defaultISRhandler")));
+void USBOTG_IRQHandler(void) __attribute__ ((weak, alias("defaultISRhandler")));
 
 struct SisrVectors;
 typedef volatile struct SisrVectors TisrVectors;
@@ -342,6 +344,8 @@ struct SisrVectors {
 	void (*CAN13_IRQHandler)(void);
 	void (*CAN14_IRQHandler)(void);
 	void (*CAN15_IRQHandler)(void);
+	void (*RTC_IRQHandler)(void);
+	void (*USBOTG_IRQHandler)(void);
 };
 
 // Заполнитель массива векторов
@@ -494,6 +498,8 @@ struct SisrVectors {
    CAN13_IRQHandler,\
    CAN14_IRQHandler,\
    CAN15_IRQHandler,\
+   RTC_IRQHandler,\
+   USBOTG_IRQHandler,\
 }
 
 #endif

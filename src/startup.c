@@ -43,6 +43,9 @@ void Reset_Handler (void) {
     Uint8   *from, *to;
     Uint32 size;
 
+    // Теперь правильно расположить стек (если программа выполняется из RAM)
+    __set_MSP((Uint32)&_estack);
+
     // Определяем, откуда-куда-сколько
     from = (Uint8*)&_sidata;
     to = (Uint8*)&_sdata;
@@ -71,8 +74,7 @@ void Reset_Handler (void) {
     __DSB();
     __ISB();
 
-    // Теперь правильно расположить стек (если программа выполняется из RAM)
-    __set_MSP((Uint32)&_estack);
+
 
     // А теперь переходим к main()
     Uint16 mainRet = main();
