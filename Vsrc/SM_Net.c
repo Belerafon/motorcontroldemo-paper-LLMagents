@@ -37,13 +37,17 @@ void SM_Net_Init(TSM_Net *p) {
 	p->state_prev = 0xff;
 
 	//Настройка драйвера CANOpen
-	co2_vars.settings.LoadParamsFromUserMemory_ena = 1;//Разрешить загружать значения параметров из ЭНОЗУ
-	co2_vars.settings.CAN_ISR_priority = IRQ_PRIORITY_CAN;//Присвоение приоритета перывания CAN (обработчик внутри библиотеки)
-	co2_vars.settings.MultiPDO_ena = 0;//Отключение обработки PDO без учета номера узла (спец. функция)
-	co2_vars.settings.RX_PDO_Callback_ena = 0; //Не вызывать функции обратного вызова при приеме PDO
-	co2_vars.settings.AutoBusON_ena = 1; //Автоматически перезапускать CAN при ошибках на линии
-	co2_vars.settings.BlockTransfer_ena = 1;//Разрешить блочную передачу (нужна для осциллографа)
-	co2_Init(&co2_vars); //Инициализация драйвера CANOpen
+    co2_vars.settings.LoadParamsFromUserMemory_ena = 1;//Разрешить загружать значения параметров из ЭНОЗУ
+    co2_vars.CAN_REGS = (NT_CAN_TypeDef *)NT_CAN_BASE;//Передаем драйверу адрес структуры регистров CAN
+    co2_vars.settings.CAN_ISR_priority = IRQ_PRIORITY_CAN;//Присвоение приоритета перывания CAN (обработчик внутри библиотеки)
+    co2_vars.settings.CAN_IRQn = CAN2_IRQn;//Передаем номер прерывания CAN2 из таблицы прерываний в драйвер CANOpen
+    co2_vars.settings.MultiPDO_ena = 0;//Отключение обработки PDO без учета номера узла (спец. функция)
+    co2_vars.settings.RX_PDO_Callback_ena = 0; //Не вызывать функции обратного вызова при приеме PDO
+    co2_vars.settings.AutoBusON_ena = 1; //Автоматически перезапускать CAN при ошибках на линии
+    co2_vars.settings.BlockTransfer_ena = 1;//Разрешить блочную передачу (нужна для осциллографа)
+    co2_vars.settings.speedCANTablePointer = &canSpeedTable;//Передаем драйверу параметры для настройки скорости CAN
+    co2_vars.settings.resetCPU = propReset;//Передаем драйверу адрес функции ресета микроконтроллера
+    co2_Init(&co2_vars); //Инициализация драйвера CANOpen
 
 	//логгер событий:
 	//	размер буфера: 50

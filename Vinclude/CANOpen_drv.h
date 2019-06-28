@@ -1,5 +1,5 @@
 /*!
-     Copyright 2017 	АО "НИИЭТ" и ООО "НПФ ВЕКТОР"
+     Copyright 2017     АО "НИИЭТ" и ООО "НПФ ВЕКТОР"
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -16,7 +16,7 @@
  \file      CANOpen_drv.h
  \brief     Драйвер CANOpen
  \author    ООО "НПФ Вектор". http://motorcontrol.ru
- \version   v 3.14 2017_01_25
+ \version   v 3.19 2019_03_06
 
  \defgroup  CANOpen_drv Драйвер CANOpen
  @{
@@ -33,7 +33,7 @@ extern "C" {
 //
 
 //!Включатель CAN 1
-//#define CAN_1_ENABLE
+#define CAN_1_ENABLE
 //********************************************************************************************
 //!Включатель CAN 2
 #define CAN_2_ENABLE
@@ -77,33 +77,33 @@ extern void co_background_calc(TCo_OdVars*);
 /*!
 Результатом работы функции является восстановление параметров указанного
 типа и диапазона
-type - 	1 rw-параметры
-		2 rwp-параметры
-		3 rwps-параметры
+type -  1 rw-параметры
+        2 rwp-параметры
+        3 rwps-параметры
 range - 1 восстановление индексов 1000h-1FFFh
-		2,3,4,5
+        2,3,4,5
 Функция по времени выполнения относится к длиным (вызывать следует в фоне) */
 extern void co_ODexpositor_instaurationDefault(TCo_OdVars* ppc, Uint16 type, Uint16 range);
 
 //!Функция сохранения значений параметров словаря объектов в ЭнОЗУ
 /*!Результатом работы функции является сохранение параметров указанного
 типа и диапазона
-type - 	1 rw-параметры
-		2 rwp-параметры
-		3 rwps-параметры
+type -  1 rw-параметры
+        2 rwp-параметры
+        3 rwps-параметры
 range - 1 восстановление индексов 1000h-1FFFh
-		2,3,4,5
+        2,3,4,5
 Функция по времени выполнения относится к длиным (вызывать следует в фоне).*/
 extern void co_ODexpositor_paramConservation(TCo_OdVars* ppc, Uint16 type, Uint16 range);
 
 //!Функция восстановления значений параметров словаря объектов из ЭнОЗУ
 /*! Результатом работы функции является восстановление параметров указанного
 типа и диапазона
-type - 	1 rw-параметры
-		2 rwp-параметры
-		3 rwps-параметры
+type -  1 rw-параметры
+        2 rwp-параметры
+        3 rwps-параметры
 range - 1 восстановление индексов 1000h-1FFFh
-		2,3,4,5
+        2,3,4,5
 Внимание!!!Восстановление параметров 2-го и 3-го типов возможно если
 переменная co_protectBit = 0. Если co_protectBit = 1 , то функция ничего
 не "делает".
@@ -137,9 +137,9 @@ extern Uint16 * co_getAddr(TCo_OdVars* ppc, Uint32 ind_subind);
 // Функция получения информации об объекте с заданным адресом.
 // Возвращает 0, если объект не найден.
 extern Uint16 co_getObjectInfo(
- TCo_OdVars* ppc,   		// указатель на структуру используемого модуля CANopen
- Uint32 ind_subind,   		// биты 16-31 - индекс, биты 0-7 - подындекс объекта
- TObjectInfo* pObjectInfo 	// указатель на структуру, куда будет помещена информация об объекте
+ TCo_OdVars* ppc,           // указатель на структуру используемого модуля CANopen
+ Uint32 ind_subind,         // биты 16-31 - индекс, биты 0-7 - подындекс объекта
+ TObjectInfo* pObjectInfo   // указатель на структуру, куда будет помещена информация об объекте
  );
 
 extern void co_RPDO1_Callback(Uint16 nodeID, Uint16 tag_CANnum);

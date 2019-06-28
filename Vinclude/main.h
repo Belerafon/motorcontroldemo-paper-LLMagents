@@ -167,6 +167,7 @@ extern Tled leds;
 extern Tdrv8301interface drv8301;
 extern TCanBTInterface  Can1BTInterface;
 extern TCanBTInterface  Can2BTInterface;
+extern TCANSpeedTableOptions canSpeedTable;
 
 void callback_dlog(Uint16 par, Uint16 tag_CANnum);
 void callback_RTC(Uint16 par, Uint16 tag_CANnum);
