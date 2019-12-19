@@ -36,7 +36,23 @@ void SM_Net_Init(TSM_Net *p) {
 	p->state = 0;
 	p->state_prev = 0xff;
 
-	//Настройка драйвера CANOpen
+#ifdef CAN_1_ENABLE
+	//Настройка драйвера CANOpen_1
+    co1_vars.settings.LoadParamsFromUserMemory_ena = 1;//Разрешить загружать значения параметров из ЭНОЗУ
+    co1_vars.CAN_REGS = (NT_CAN_TypeDef *)NT_CAN_BASE;//Передаем драйверу адрес структуры регистров CAN
+    co1_vars.settings.CAN_ISR_priority = IRQ_PRIORITY_CAN;//Присвоение приоритета перывания CAN (обработчик внутри библиотеки)
+    co1_vars.settings.CAN_IRQn = CAN1_IRQn;//Передаем номер прерывания CAN2 из таблицы прерываний в драйвер CANOpen
+    co1_vars.settings.MultiPDO_ena = 0;//Отключение обработки PDO без учета номера узла (спец. функция)
+    co1_vars.settings.RX_PDO_Callback_ena = 0; //Не вызывать функции обратного вызова при приеме PDO
+    co1_vars.settings.AutoBusON_ena = 1; //Автоматически перезапускать CAN при ошибках на линии
+    co1_vars.settings.BlockTransfer_ena = 1;//Разрешить блочную передачу (нужна для осциллографа)
+    co1_vars.settings.speedCANTablePointer = &canSpeedTable;//Передаем драйверу параметры для настройки скорости CAN
+    co1_vars.settings.resetCPU = propReset;//Передаем драйверу адрес функции ресета микроконтроллера
+    co1_Init(&co1_vars); //Инициализация драйвера CANOpen
+#endif
+
+#ifdef CAN_2_ENABLE
+    //Настройка драйвера CANOpen_2
     co2_vars.settings.LoadParamsFromUserMemory_ena = 1;//Разрешить загружать значения параметров из ЭНОЗУ
     co2_vars.CAN_REGS = (NT_CAN_TypeDef *)NT_CAN_BASE;//Передаем драйверу адрес структуры регистров CAN
     co2_vars.settings.CAN_ISR_priority = IRQ_PRIORITY_CAN;//Присвоение приоритета перывания CAN (обработчик внутри библиотеки)
@@ -48,13 +64,12 @@ void SM_Net_Init(TSM_Net *p) {
     co2_vars.settings.speedCANTablePointer = &canSpeedTable;//Передаем драйверу параметры для настройки скорости CAN
     co2_vars.settings.resetCPU = propReset;//Передаем драйверу адрес функции ресета микроконтроллера
     co2_Init(&co2_vars); //Инициализация драйвера CANOpen
+#endif
 
 	//логгер событий:
 	//	размер буфера: 50
 	//	стартовый адрес в SPI: 3000
 	FaultLog.init((TLogger*)&FaultLog, 50, 3000,(Uint32*) &RTCclock.packed_time);//ниже указатель на время может быть переопределен в зависимости от работы часов
-
-
 
 #if (defined(CANTORS_ENA)) || (defined(CANTOUSB_ENA))
 //Работа с CANopen через UART (параллельно с CAN, нет конфликта)
@@ -77,6 +92,46 @@ void SM_Net_Init(TSM_Net *p) {
 //! \memberof TSM_Net
 void SM_Net_Slow_Calc(TSM_Net *p) {
 
+
+#ifdef CAN_1_ENABLE
+	co1_vars.co_scaleNum0 = 1; //без масштабирования
+	co1_vars.co_scaleNum1 = 100;	// %
+	co1_vars.co_scaleNum2 = drv_params.freq_nom;	//Гц
+	co1_vars.co_scaleNum3 = drv_params.U_nom;//напряжение фазное номинальное амплитудное
+	co1_vars.co_scaleNum4 = drv_params.I_nom; //Ток фазный базовый
+	co1_vars.co_scaleNum5 = 1;
+	co1_vars.co_scaleNum6 = 1;
+	co1_vars.co_scaleNum7 = drv_params.Udc_nom; //напряжение ЗПТ базовое
+	co1_vars.co_scaleNum8 = drv_params.power; //18 в формате 9.6 //Мощность
+	co1_vars.co_scaleNum9 = 1;
+	co1_vars.co_scaleNumA = 20; //температура
+	co1_vars.co_scaleNumB = 1;
+	co1_vars.co_scaleNumC = 1;
+	co1_vars.co_scaleNumD = 1;
+	co1_vars.co_scaleNumE = 1;
+	co1_vars.co_scaleNumF = 1;
+	co1_vars.co_scaleNum10 = 1; //
+	co1_vars.co_scaleNum11 = 1; //
+	co1_vars.co_scaleNum12 = drv_params.power; //18 в формате 10.6 //Мощность
+	co1_vars.co_scaleNum13 = 360; //
+	co1_vars.co_scaleNum14 = drv_params.speed_nom; //номинальная частота вращения
+	co1_vars.co_scaleNum15 = 1; //
+	co1_vars.co_scaleNum16 = 1; //
+	co1_vars.co_scaleNum17 = ((((long) drv_params.Udc_nom) << 6) / (long) drv_params.I_nom); //Rбаз 10.6
+	co1_vars.co_scaleNum18 = 1000;
+	co1_vars.co_scaleNum19 = 1;
+	co1_vars.co_scaleNum1A = 1;
+	co1_vars.co_scaleNum1B = 1;
+	co1_vars.co_scaleNum1C = 1;
+	co1_vars.co_scaleNum1D = 1;
+	co1_vars.co_scaleNum1E = 1;
+	co1_vars.co_scaleNum1F = 1;
+
+	co_background_calc(&co1_vars); //Расчет драйвера CANOpen_1 фоновый
+#endif
+
+
+#ifdef CAN_2_ENABLE
 	co2_vars.co_scaleNum0 = 1; //без масштабирования
 	co2_vars.co_scaleNum1 = 100;	// %
 	co2_vars.co_scaleNum2 = drv_params.freq_nom;	//Гц
@@ -100,8 +155,7 @@ void SM_Net_Slow_Calc(TSM_Net *p) {
 	co2_vars.co_scaleNum14 = drv_params.speed_nom; //номинальная частота вращения
 	co2_vars.co_scaleNum15 = 1; //
 	co2_vars.co_scaleNum16 = 1; //
-	co2_vars.co_scaleNum17 = ((((long) drv_params.Udc_nom) << 6)
-			/ (long) drv_params.I_nom); //Rбаз 10.6
+	co2_vars.co_scaleNum17 = ((((long) drv_params.Udc_nom) << 6) / (long) drv_params.I_nom); //Rбаз 10.6
 	co2_vars.co_scaleNum18 = 1000;
 	co2_vars.co_scaleNum19 = 1;
 	co2_vars.co_scaleNum1A = 1;
@@ -111,13 +165,15 @@ void SM_Net_Slow_Calc(TSM_Net *p) {
 	co2_vars.co_scaleNum1E = 1;
 	co2_vars.co_scaleNum1F = 1;
 
+	co_background_calc(&co2_vars); //Расчет драйвера CANOpen_2 фоновый
+#endif
+
 	drv_params.U_nom = 0.5759 * drv_params.Udc_nom;//номинальное фазное напряжение
 	drv_params.power = ((long) 300) << 6; //приведем к формату 10.6
 	drv_params.freq_nom = ((float) drv_params.speed_nom * drv_params.p) / 60 + 0.5; //номин частота
-
-	co_background_calc(&co2_vars); //Расчет драйвера CANOpen фоновый
 	drv_interface.calc(&drv_interface);
 	FaultLog.background_calc(&FaultLog);
+
 #ifdef MODBUS_ENA
 	MBVarsConv.slow_calc(&MBVarsConv);
 #endif
@@ -155,7 +211,15 @@ void SM_Net_ms_Calc(TSM_Net *p) {
 	pult_faults_lister.calc(&pult_faults_lister);
 	sm_prot.Main_ErrorCode = 0xFF & pult_faults_lister.output;
 
-	co_1ms_calc(&co2_vars);    //Расчет драйвера CANOpen
+
+#ifdef CAN_1_ENABLE
+	co_1ms_calc(&co1_vars);    //Расчет драйвера CANOpen_1
+#endif
+
+#ifdef CAN_2_ENABLE
+	co_1ms_calc(&co2_vars);    //Расчет драйвера CANOpen_2
+#endif
+
 #if (defined(CANTORS_ENA)) || (defined(CANTOUSB_ENA))
 	CANtoRS.calc(&CANtoRS);
 #endif

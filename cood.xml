@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="windows-1251"?>
-<root>
-	<dictionary_settings group_set="15" proc_series="28" prefix="2" AddrComm1="" AddrUser1="" AddrComm2="" AddrUser2="" BigYA="false" M3Includes="false" Use6000Range="false" FormatType="1" old_groups="false"/>
+<root COODEdit4="v.7.3.8">
+	<dictionary_settings group_set="15" proc_series="28" prefix="1" AddrComm1="CO1_SPI_START_ADDR" AddrUser1="CO1_SPI_START_ADDR" AddrComm2="CO2_SPI_START_ADDR" AddrUser2="CO1_SPI_START_ADDR" BigYA="false" M3Includes="false" Use6000Range="false" FormatType="1" GenCoodCToFolder="false" CoodCFolder="" GenPUTextsToFolder="false" PUCodeType="0" PUTextsType="2" PUEnumsType="2" PUUseOtherEnumIfNoGiven="false" PUTextsHPath="" PUTextsHInc="&quot;DSP.h&quot;" PUTextsCPath="" PUTextsCInc="&quot;PU_Texts.h&quot;" old_groups="false" CurrSubProfile="0"/>
 	<eds_header header_text=""/>
 	<scale_numbers>
 		<scale_00 units="0" prefix="0" scaleQ="0" num_of_float="1" possible_value="1" name=""/>
@@ -36,7 +36,7 @@
 		<scale_30 units="0" prefix="" scaleQ="0" num_of_float="0" possible_value="" name=""/>
 		<scale_31 units="" prefix="" scaleQ="" num_of_float="" possible_value="1" name=""/>
 	</scale_numbers>
-	<Indexes>
+	<Indexes name="Базовый профиль">
 		<obj_1000h.00h DataType="Viewable" name="Тип устройства" addr="co_deviceType" group="6" groupName="CAN" fullgroup="6" callback="">
 			<format Type="StandartNum" Size="32" Signed="false"/>
 			<text text="Device Type" textID="1"/>
@@ -5476,4 +5476,5 @@
 "/>
 		</obj_5B06h.04h>
 	</Indexes>
+	<SubProfiles/>
 </root>
