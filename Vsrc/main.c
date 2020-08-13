@@ -140,8 +140,8 @@ int main(void) {
 	}
 }
 
-unsigned long CpuTimerIsr1 = 0;
-Uint16 TIsr1 = 0;
+Uint32 CpuTimerIsr1 = 0;
+Uint32 TIsr1 = 0;
 Uint16 msCounter = 0;
 
 //! ѕрервыние, вызываемое по таймеру с частотой 1к√ц
@@ -161,8 +161,8 @@ void TIM1_IRQHandler(void) {
 }
 
 Uint16 FastCounter = 0;
-unsigned long CpuTimerIsr10 = 0;
-Uint16 TIsr10 = 0;
+Uint32 CpuTimerIsr10 = 0;
+Uint32 TIsr10 = 0;
 
 //! ѕрервыние, вызываемое по таймеру с частотой 10к√ц
 //! \memberof MAIN_C

@@ -135,8 +135,8 @@ extern TFanControl FanControl;
 extern Uint16 msCounter;
 extern Uint16 FastCounter;
 extern Uint16 LoopCounter;
-extern Uint16 TIsr10;
-extern Uint16 TIsr1;
+extern Uint32 TIsr10;
+extern Uint32 TIsr1;
 extern int drv_status_code;
 extern Uint32 VendorToken;
 
@@ -159,7 +159,7 @@ extern Uint16 cap0_counter;
 extern Uint16 cap1_counter;
 extern Uint16 cap2_counter;
 
-extern unsigned long CpuTimerIsr1;
+extern Uint32 CpuTimerIsr1;
 extern TSysSwitches   sw;
 
 extern TUserMemory 		UserMem;

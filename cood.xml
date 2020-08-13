@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="windows-1251"?>
-<root COODEdit4="v.7.3.8">
-	<dictionary_settings group_set="15" proc_series="28" prefix="1" AddrComm1="CO1_SPI_START_ADDR" AddrUser1="CO1_SPI_START_ADDR" AddrComm2="CO2_SPI_START_ADDR" AddrUser2="CO1_SPI_START_ADDR" BigYA="false" M3Includes="false" Use6000Range="false" FormatType="1" GenCoodCToFolder="false" CoodCFolder="" GenPUTextsToFolder="false" PUCodeType="0" PUTextsType="2" PUEnumsType="2" PUUseOtherEnumIfNoGiven="false" PUTextsHPath="" PUTextsHInc="&quot;DSP.h&quot;" PUTextsCPath="" PUTextsCInc="&quot;PU_Texts.h&quot;" old_groups="false" CurrSubProfile="0"/>
+<root COODEdit4="v.7.3.9">
+	<dictionary_settings group_set="15" proc_series="28" prefix="1" AddrComm1="CO1_SPI_START_ADDR" AddrUser1="CO1_SPI_START_ADDR" AddrComm2="CO2_SPI_START_ADDR" AddrUser2="CO1_SPI_START_ADDR" BigYA="false" M3Includes="false" Use6000Range="false" FormatType="1" GenCoodCToFolder="true" CoodCFolder=".\Vsrc" GenPUTextsToFolder="false" PUCodeType="0" PUTextsType="2" PUEnumsType="2" PUUseOtherEnumIfNoGiven="false" PUTextsHPath="" PUTextsHInc="&quot;DSP.h&quot;" PUTextsCPath="" PUTextsCInc="&quot;PU_Texts.h&quot;" old_groups="false" CurrSubProfile="0"/>
 	<eds_header header_text=""/>
 	<scale_numbers>
 		<scale_00 units="0" prefix="0" scaleQ="0" num_of_float="1" possible_value="1" name=""/>
@@ -3033,31 +3033,31 @@
 		<obj_3100h.01h DataType="Editable" name="Счётчик прерываний 1 кГц" addr="msCounter" group="42" groupName="Счетчики" fullgroup="6" callback="">
 			<format Type="StandartNum" Size="16" Signed="false"/>
 			<text text="Сч.прерыв.1 кГц" textID="318"/>
-			<defaults default="58002" min="" max=""/>
+			<defaults default="0" min="" max=""/>
 			<description description="Счетчик вызовов прерывания 1кГц"/>
 		</obj_3100h.01h>
 		<obj_3100h.02h DataType="Editable" name="Счётчик прерываний 10 кГц" addr="FastCounter" group="42" groupName="Счетчики" fullgroup="6" callback="">
 			<format Type="StandartNum" Size="16" Signed="false"/>
 			<text text="Сч.прерыв.10 кГц" textID="319"/>
-			<defaults default="14349" min="" max=""/>
+			<defaults default="0" min="" max=""/>
 			<description description="Счетчик вызовов прерывания 10кГц"/>
 		</obj_3100h.02h>
 		<obj_3100h.03h DataType="Editable" name="BackgroundCounter" addr="LoopCounter" group="42" groupName="Счетчики" fullgroup="6" callback="">
 			<format Type="StandartNum" Size="16" Signed="false"/>
 			<text text="BackgroundCounter" textID="320"/>
-			<defaults default="64364" min="" max=""/>
+			<defaults default="0" min="" max=""/>
 			<description description="Счетчик итераций фонового цикла"/>
 		</obj_3100h.03h>
 		<obj_3100h.04h DataType="Editable" name="T_10кГц" addr="TIsr10" group="42" groupName="Счетчики" fullgroup="6" callback="">
-			<format Type="StandartNum" Size="16" Signed="false"/>
+			<format Type="StandartNum" Size="32" Signed="false"/>
 			<text text="T_10кГц" textID="321"/>
-			<defaults default="3745" min="" max=""/>
+			<defaults default="0" min="" max=""/>
 			<description description="Время выполнения кода прерывания"/>
 		</obj_3100h.04h>
 		<obj_3100h.05h DataType="Editable" name="T_1кГц" addr="TIsr1" group="42" groupName="Счетчики" fullgroup="6" callback="">
-			<format Type="StandartNum" Size="16" Signed="false"/>
+			<format Type="StandartNum" Size="32" Signed="false"/>
 			<text text="T_1кГц" textID="322"/>
-			<defaults default="1832" min="" max=""/>
+			<defaults default="0" min="" max=""/>
 			<description description="Время выполнения кода прерывания"/>
 		</obj_3100h.05h>
 		<obj_5000h.00h DataType="Viewable" name="Задатчик интенсивности" addr="" group="19" groupName="ЗИ" fullgroup="27" callback="">
