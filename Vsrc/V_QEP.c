@@ -116,7 +116,7 @@ void TposspeedEqep_init(TposspeedEqep *p) {
 void TposspeedEqep_Calc(TposspeedEqep *p) {
     long temp;
 	//Текущее значение GPIO для отладки. Можно смотреть в осцах
-	p->GPIOsValue = (NT_GPIOG->DATA >> 10) & 3;
+	p->GPIOsValue = (NT_GPIOG->DATA >> 10) & 7;
 
 	//если скорость высокая, а делитель  UPEVNT не высокий
 	if ((labs(p->speed_elec) > _IQ(2)) && (NT_QEP1->QCAPCTL_bit.UPPS != 5)) {
