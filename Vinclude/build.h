@@ -95,7 +95,7 @@
 #define F_MODEL_FAULT 	        	0x8
 #define F_FLASH_PROGRAM         	0x10
 #define F_CTRL_HI_TEMP  		    0x20
-//#define F_RESERVED	       		0x40
+#define F_CAN_RESTORATION_ERROR		0x40
 //#define F_RESERVED       		    0x80
 #define F_PROGRAM_1K	          	0x100
 #define F_PROGRAM_10K        		0x200

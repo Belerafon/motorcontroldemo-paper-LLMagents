@@ -1,9 +1,9 @@
 // Файл: cood2.c
-// Профиль: D:\Eclipse_GCC_ARM_wks\motorcontroldemo\cood.xml
+// Профиль: W:\ProjectsGit\BitBucketNiiet\motorcontroldemo\cood.xml
 // Конфигурация: Базовый профиль
-// Дата создания: 13.08.2020 12:00:57
+// Дата создания: 17.11.2020 15:48:54
 // Пользователь: default
-// COODEdit Basic v.7.3.9
+// COODEdit Basic v.7.3.8
 #include "DSP.h"
 #include "main.h"
 #include "cood2.h"
