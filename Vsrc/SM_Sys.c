@@ -46,6 +46,7 @@ void SM_Sys_Init(TSM_Sys *p) {
 #elif defined (HW_MOTORCONTROLBOARD)
 	sw.HardwareType = 3;
 #endif
+	UserMem.init(&UserMem);
 	cmd.all = 0;
 	drv_status.all = 0;
 	adc.init(&adc); //Инициализация АЦП
