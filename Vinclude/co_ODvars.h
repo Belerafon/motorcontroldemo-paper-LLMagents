@@ -34,7 +34,7 @@ extern "C" {
 //! Начальный адрес для сохранения в SPI памяти словаря 1-го CAN
 #define CO1_SPI_START_ADDR 0
 //! Начальный адрес для сохранения в SPI памяти словаря 2-го CAN
-#define CO2_SPI_START_ADDR 3500
+#define CO2_SPI_START_ADDR 0
 
 
 // количество "замеппированных" объектов для каждого PDO
