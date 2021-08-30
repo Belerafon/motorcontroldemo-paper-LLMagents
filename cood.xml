@@ -4183,6 +4183,12 @@
 			<defaults default="6710886" min="" max=""/>
 			<description description=""/>
 		</obj_5150h.0Ah>
+		<obj_5150h.0Bh DataType="Viewable" name="Частота даталогера" addr="dlog.sampling_rate" group="30" groupName="dlog" fullgroup="30" callback="">
+			<format Type="StandartNum" Size="32" Signed="false"/>
+			<text text="dlogFreq" textID="644"/>
+			<defaults default="0" min="" max=""/>
+			<description description="Частота выборки данных (вызова функции &apos;update&apos;), Гц"/>
+		</obj_5150h.0Bh>
 		<obj_5151h.00h DataType="Editable" name="dlog.next_value_var" addr="dlog.next_value_var" group="2" groupName="ВНЕ ГРУПП" fullgroup="2" callback="callback_dlog">
 			<format Type="StandartNum" Size="32" Signed="true"/>
 			<text text="dlnval" textID="454"/>
@@ -5440,7 +5446,7 @@
 		<obj_5B05h.06h DataType="Editable" name="Уставка по производной ЗПТ" addr="udControl.deriv_const" group="48" groupName="Плавный заряд ЗПТ" fullgroup="" callback="">
 			<format Type="IQ" Size="32" Signed="true" QValue="24" ScaleNum="15"/>
 			<text text="derivative_const" textID="632"/>
-			<defaults default="0" min="" max=""/>
+			<defaults default="8388608" min="" max=""/>
 			<description description=""/>
 		</obj_5B05h.06h>
 		<obj_5B06h.00h DataType="Viewable" name="Система охлаждения" addr="" group="47" groupName="Система охлаждения" fullgroup="" callback="">

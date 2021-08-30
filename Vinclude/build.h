@@ -133,6 +133,7 @@
 #define POS_SENSOR_TYPE_SENSORLESS 5
 
 //!¬рем€ дискретизации быстрого расчета (прерывание, которое обычно 10к√ц)
+#define FAST_CALC_FREQ 10000
 #define FAST_CALC_TS _IQ(0.0001)
 
 

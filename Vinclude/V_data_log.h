@@ -129,6 +129,7 @@ typedef int32 type_data;
     int ResetAfterStart; 		//!<флаг обнуления счетчика записи при запуске
     Uint16 OneShotOperation;	//!<флаг синхронизации осциллографа только по первому событию (переход в 1 возможен только из 2)
     TCo_OdVars *pco_vars;       //!<адрес структуры драйвера CANopen
+    Uint32 sampling_rate;		// частота выборки данных (вызова функции 'update'), √ц
 #if DLOG_DATA_SIZE == 32
     int highPartOfValue;		//!<флаг выдачи старшей части
     TObjectInfo object1Info;	//!<информаци€ о записываемом объекте є1
@@ -174,6 +175,7 @@ typedef volatile struct SDataLog TDataLog;
 	1,\
     0,\
 	&COX_VARS,\
+	FAST_CALC_FREQ,\
     data_log_update,\
     dlog_set_mode,\
     dlog_background_analizer }
@@ -197,6 +199,7 @@ typedef volatile struct SDataLog TDataLog;
 	1,\
     0,\
 	&COX_VARS,\
+	FAST_CALC_FREQ,\
 	0,\
 	{ 0 }, { 0 }, { 0 }, { 0 },\
     data_log_update,\
