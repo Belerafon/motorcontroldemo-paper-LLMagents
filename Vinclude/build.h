@@ -102,7 +102,7 @@
 #define F_PROGRAM_40K	        	0x400
 //#define F_RESERVED	        	0x800
 #define F_PDPINT		       		0x1000
-//#define F_RESERVED			    0x2000
+#define F_RELAY_START			    0x2000
 //#define F_RESERVED	       		0x4000
 //#define F_RESERVED				0x8000
 

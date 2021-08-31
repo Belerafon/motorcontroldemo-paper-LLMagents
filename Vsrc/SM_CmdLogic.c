@@ -106,8 +106,14 @@ void SM_CmdLogicms_Calc(TSM_CmdLogic *p) {
 				if (udControl.Enabled == 0) {	//Если цепь плавного заряда ЗПТ отключена, то переходим к пуску
 					p->state = CMD_LOGIC_TURNED_ON;	//поехали
 				}
-				else if (udControl.StateOn == 1) { //Если цепь плавного заряда ЗПТ включена, ждем срабатывания реле, а потом запускаем
-					p->state = CMD_LOGIC_TURNED_ON;	//поехали
+				else {//надо контролировать цепь заряда
+				    if (udControl.StateOn == 1) { //Если ЗПТ заряжено и реле включено - запускаем
+				        p->state = CMD_LOGIC_TURNED_ON;	//поехали
+				    }
+				    else { //попытка пуска, а реле не включено
+				    	/*Защита от пуска при незашунтированном реле плавного заряда ЗПТ*/
+				    	sm_prot.bit_fault1 |= F_RELAY_START;
+				    }
 				}
 			}
 		}
