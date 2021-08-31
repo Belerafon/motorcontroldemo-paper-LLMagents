@@ -50,10 +50,6 @@ extern "C"
 //!ШИМ для управления SRM
 #define PWM_TYPE_SRD			5
 
-//! Ограничения величины "мёртвого времени", мкс, min
-#define DEAD_BAND_MIN	_IQ(0)
-//! Ограничения величины "мёртвого времени", мкс, max
-#define DEAD_BAND_MAX	_IQ(10)
 
 //! Ограничения величины "минимальной скважности", мкс, min
 #define GAMMA_LIMIT_MIN	_IQ(0)

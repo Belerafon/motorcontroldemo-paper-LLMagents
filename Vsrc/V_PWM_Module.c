@@ -54,6 +54,15 @@
 #define GPIO_INV_OFF
 #endif
 
+//! Ограничения величины "мёртвого времени"
+#if defined(HW_MOTORCONTROLBOARD)
+//! для одноплатного инвертора нельзя меньше 3мкс, чтобы не сжечь
+#define DEAD_BAND_MIN	_IQ(3)
+#define DEAD_BAND_MAX	_IQ(10)
+#else
+#define DEAD_BAND_MIN	_IQ(0)
+#define DEAD_BAND_MAX	_IQ(10)
+#endif
 
 //! Инициализация
 
