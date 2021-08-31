@@ -226,14 +226,100 @@ void K1921VK01T_GPIO_SafeInit()
 	NT_COMMON_REG->GPIOPCTLH_bit.PIN7 = 1;	//---
 }
 
-void InitCLK(void)
-{
-	volatile int i;
+// Настройка тактирования с использованием делителя после PLL
+// Частота Fvco настраивается на 400 МГц
+// Сброс вочдогом так не работает.
+void Init_Clk_Pll_Div_Fvco400 (void) {
+	// Настройка частоты тактирования
+	// выходная частота равна FOUT = (FIN * NF) / ( NR * NO) / N, где FIN - частота кварца
+	// FIN = 12 MHz
+	// Дополнительное условие по ТО: 0.8 MHz < Fref < 8 MHz
+	// Fref = FIN / (2 * NR)
+	// Дополнительное условие по ТО: 200 MHz < Fvco < 500 MHz
+	// Fvco = FIN * (NF / NR)
+	// На форуме рекомендовали Fvco < 250 MHz, поэтому чтобы
+	// получить 100 МГц на проце, можно взять только Fvco = 200 MHz
+	// Делители:
+	// N = 2 * (PLL_DIV + 1)
+	// NF = F_PLL + 2
+	// NR = R_PLL + 2
+	// NO = 1, 1/2, 1/2, 1/4 при PLL_OD = 0, 1, 2, 3 соотв.
+	volatile int i = 0;
 
 
-	NT_BOOTFLASH->T_ACC = 6;		//Задержка от установки адреса, до считывания данных из флеш-памяти (в транзакциях чтения)
-    NT_COMMON_REG->USB_CTRL = 0x00000006; //clk_en, 12MHz, xtal
-    NT_COMMON_REG->PER_RST1 |= (1<<3); //clear reset from usb phy
+
+	NT_COMMON_REG->PLL_OD = 0;		// Выходной делитель NO = 1
+	NT_COMMON_REG->PLL_NR = 1;		// Опорный делитель NR = PLL_NR + 2 = 3
+	NT_COMMON_REG->PLL_CTRL_bit.PLL_DIV = 1;	// N = 2 * (PLL_DIV + 1) = 4
+#ifdef QUARTZ_10MHZ
+	NT_COMMON_REG->PLL_NF = 118;		// Делитель обратной связи PLL NF=F_PLL+2=60
+#endif
+#ifdef QUARTZ_12MHZ
+	NT_COMMON_REG->PLL_NF = 98;		// Делитель обратной связи PLL NF=F_PLL+2=100
+#endif
+	// Для кварца 12 МГц:
+	// Fvco = 12 * (100 / 3) = 400 MHz
+	// Fref = 12 / (2 * 3) = 4 MHz
+	// FOUT = 12 * 100 / (3 * 1) / 4 = 100 МГц, вроде сходится
+	// Для 10 МГц тоже должно подойти с PLL_NF = 118
+	NT_COMMON_REG->SYS_CLK = SYSCLK_PLLDIVCLK;		//Блок PLL
+	do
+	{
+		// Выбор источника синхросигнала
+		for(i = 0; i < 250; i++);
+	}
+	while (NT_COMMON_REG->SYS_CLK_bit.CURR_SRC != SYSCLK_PLLDIVCLK);	// Текущий источник тактирования должен совпадать с выбранным
+
+}
+
+// Настройка тактирования с использованием делителя после PLL
+// Частота Fvco настраивается на 200 МГц
+void Init_Clk_Pll_Div_Fvco200 (void) {
+	// Настройка частоты тактирования
+	// выходная частота равна FOUT = (FIN * NF) / ( NR * NO) / N, где FIN - частота кварца
+	// FIN = 12 MHz
+	// Дополнительное условие по ТО: 0.8 MHz < Fref < 8 MHz
+	// Fref = FIN / (2 * NR)
+	// Дополнительное условие по ТО: 200 MHz < Fvco < 500 MHz
+	// Fvco = FIN * (NF / NR)
+	// На форуме рекомендовали Fvco < 250 MHz, поэтому чтобы
+	// получить 100 МГц на проце, можно взять только Fvco = 200 MHz
+	// Делители:
+	// N = 2 * (PLL_DIV + 1)
+	// NF = F_PLL + 2
+	// NR = R_PLL + 2
+	// NO = 1, 1/2, 1/2, 1/4 при PLL_OD = 0, 1, 2, 3 соотв.
+	volatile int i = 0;
+
+
+
+	NT_COMMON_REG->PLL_OD = 0;		// Выходной делитель NO = 1
+	NT_COMMON_REG->PLL_NR = 1;		// Опорный делитель NR = PLL_NR + 2 = 3
+	NT_COMMON_REG->PLL_CTRL_bit.PLL_DIV = 0;	// N = 2 * (PLL_DIV + 1) = 2
+#ifdef QUARTZ_10MHZ
+	NT_COMMON_REG->PLL_NF = 58;		// Делитель обратной связи PLL NF=F_PLL+2=60
+#endif
+#ifdef QUARTZ_12MHZ
+	NT_COMMON_REG->PLL_NF = 48;		// Делитель обратной связи PLL NF=F_PLL+2=50
+#endif
+	// Для кварца 12 МГц:
+	// Fvco = 12 * (50 / 3) = 200 MHz
+	// Fref = 12 / (2 * 3) = 2 MHz
+	// FOUT = 12 * 50 / (3 * 1) / 2 = 100 МГц, вроде сходится
+	// Для 10 МГц тоже должно подойти с PLL_NF = 58
+	NT_COMMON_REG->SYS_CLK = SYSCLK_PLLDIVCLK;		//Блок PLL
+	do
+	{
+		// Выбор источника синхросигнала
+		for(i = 0; i < 250; i++);
+	}
+	while (NT_COMMON_REG->SYS_CLK_bit.CURR_SRC != SYSCLK_PLLDIVCLK);	// Текущий источник тактирования должен совпадать с выбранным
+
+}
+
+// Настройка тактирования без использования делителя после PLL
+void Init_Clk_Pll (void) {
+	volatile int i = 0;
 	//Настройка частоты тактирования
 	//выходная частота равна FOUT = (FIN * NF) / ( NR * NO), где FIN - частота кварца
 	NT_COMMON_REG->PLL_OD = 2;		//Выходной делитель PLL NO=2
@@ -254,6 +340,24 @@ void InitCLK(void)
 	}
 	while (NT_COMMON_REG->SYS_CLK_bit.CURR_SRC != SYSCLK_PLLCLK);	//Текущий источник тактирования должен совпадать с выбранным
 
+}
+
+void InitCLK(void)
+{
+	volatile int i = 0;
+	NT_BOOTFLASH->T_ACC = 6;		//Задержка от установки адреса, до считывания данных из флеш-памяти (в транзакциях чтения)
+	NT_COMMON_REG->USB_CTRL = 0x00000006; //clk_en, 12MHz, xtal
+
+	//Переходим на тактирование от внутреннего кварца
+	do
+	{
+		NT_COMMON_REG->SYS_CLK = 0;
+		for(i = 0; i < 50; i++);
+	}
+	while (NT_COMMON_REG->SYS_CLK_bit.CURR_SRC != SYSCLK_REFCLK);
+
+	// Рабочая конфигурация для использования перезапуска вочдогом.
+	Init_Clk_Pll_Div_Fvco200();
 
 
 
