@@ -37,6 +37,10 @@ void SM_Net_Init(TSM_Net *p) {
 	p->state_prev = 0xff;
 
 #ifdef CAN_1_ENABLE
+	//тип и версия устройства для драйвера CANOpen
+	co1_vars.co_productCode = 51;
+	co1_vars.co_revisionNumber = 1;
+
 	//Настройка драйвера CANOpen_1
     co1_vars.settings.LoadParamsFromUserMemory_ena = 1;//Разрешить загружать значения параметров из ЭНОЗУ
     co1_vars.CAN_REGS = (NT_CAN_TypeDef *)NT_CAN_BASE;//Передаем драйверу адрес структуры регистров CAN
@@ -52,6 +56,10 @@ void SM_Net_Init(TSM_Net *p) {
 #endif
 
 #ifdef CAN_2_ENABLE
+	//тип и версия устройства для драйвера CANOpen
+	co2_vars.co_productCode = 51;
+	co2_vars.co_revisionNumber = 1;
+
     //Настройка драйвера CANOpen_2
     co2_vars.settings.LoadParamsFromUserMemory_ena = 1;//Разрешить загружать значения параметров из ЭНОЗУ
     co2_vars.CAN_REGS = (NT_CAN_TypeDef *)NT_CAN_BASE;//Передаем драйверу адрес структуры регистров CAN

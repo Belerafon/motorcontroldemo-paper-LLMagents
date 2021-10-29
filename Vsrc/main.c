@@ -130,10 +130,6 @@ int main(void) {
 	sm_sys.init(&sm_sys);
 	EINT;//разрешение прерываний
 
-	//тип и версия устройства для драйвера CANOpen
-	co2_vars.co_productCode = 51;
-	co2_vars.co_revisionNumber = 1;
-
 	while (1) { //Фоновый цикл
 		LoopCounter++;
 		sm_sys.slow_calc(&sm_sys); //Фоновый расчет
