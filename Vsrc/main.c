@@ -57,6 +57,7 @@ TCurPar cur_par = TCUR_PAR_DEFAULTS; //!< Модуль расчета и хранения текущих пока
 TUserMemory UserMem = USERMEMORY_DEFAULTS; //!< Модуль работы с энергонезависимой памятью.
 Tled leds = LED_DEFAULTS; //!< модуль для красивого мигания светодиодами
 Tdrv8301interface drv8301 = DRV8301_INTERFACE_DEFAULTS; //!< Модуль для настройки драйвера ключей drv8301
+TCanBTInterface Can1BTInterface = T_CANBT_INTERFACE_DEFAULTS;//!<Пакетная передача CANopen
 TCanBTInterface Can2BTInterface = T_CANBT_INTERFACE_DEFAULTS;//!<Пакетная передача CANopen
 TRTCClock RTCclock = RTC_CLOCK_DEFAULTS; //!< Модуль работы с часами реальноговремени. "spi" - по историческим причинам совместимости
 TAutoOffset AutoOffset = AUTO_OFFSET_DEFAULTS;	//!<Автоматическая подстройка смещения токов АЦП

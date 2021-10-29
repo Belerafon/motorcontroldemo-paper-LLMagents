@@ -136,6 +136,7 @@ void SM_Net_Slow_Calc(TSM_Net *p) {
 	co1_vars.co_scaleNum1F = 1;
 
 	co_background_calc(&co1_vars); //Расчет драйвера CANOpen_1 фоновый
+	Can1BTInterface.slow_calc(&Can1BTInterface);//интерфейс блочной передачи CANopen, медленный расчет
 #endif
 
 
@@ -174,6 +175,7 @@ void SM_Net_Slow_Calc(TSM_Net *p) {
 	co2_vars.co_scaleNum1F = 1;
 
 	co_background_calc(&co2_vars); //Расчет драйвера CANOpen_2 фоновый
+	Can2BTInterface.slow_calc(&Can2BTInterface);//интерфейс блочной передачи CANopen, медленный расчет
 #endif
 
 	drv_params.U_nom = 0.5759 * drv_params.Udc_nom;//номинальное фазное напряжение
@@ -222,10 +224,14 @@ void SM_Net_ms_Calc(TSM_Net *p) {
 
 #ifdef CAN_1_ENABLE
 	co_1ms_calc(&co1_vars);    //Расчет драйвера CANOpen_1
+	//блочная передача драйвера CANopen. Через неё, в частности, грузятся осциллограммы dlog
+	Can1BTInterface.ms_calc(&Can1BTInterface, NT_TIMER2->VALUE, &co1_vars);
 #endif
 
 #ifdef CAN_2_ENABLE
 	co_1ms_calc(&co2_vars);    //Расчет драйвера CANOpen_2
+	//блочная передача драйвера CANopen. Через неё, в частности, грузятся осциллограммы dlog
+	Can2BTInterface.ms_calc(&Can2BTInterface, NT_TIMER2->VALUE, &co2_vars);
 #endif
 
 #if (defined(CANTORS_ENA)) || (defined(CANTOUSB_ENA))
