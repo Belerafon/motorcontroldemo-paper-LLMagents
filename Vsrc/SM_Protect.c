@@ -235,8 +235,15 @@ void SM_Protect_ms_Calc(TSM_Protect *p) {
 		WriteCounter = 0;
 
 	// Проверка восстановления параметров CANopen из EEPROM
-	if( (co1_vars.ParamRestorationError) || (co2_vars.ParamRestorationError) )
+#ifdef CAN_1_ENABLE
+	if(co1_vars.ParamRestorationError)
 		p->bit_fault1 |= F_CAN_RESTORATION_ERROR;
+#endif
+
+#ifdef CAN_2_ENABLE
+	if(co2_vars.ParamRestorationError)
+		p->bit_fault1 |= F_CAN_RESTORATION_ERROR;
+#endif
 }
 
 //! Медленный расчет.
