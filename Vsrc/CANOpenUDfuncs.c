@@ -66,12 +66,22 @@ TCANSpeedTableOptions canSpeedTable = { {1,     1,      1,      0,      0,      
 #ifdef CAN_1_ENABLE
 void co_CAN1GpioInit()
 {
+#if defined HW_MOTORCONTROLBOARD
+	//выбираем альтернативную функцию ГПИО
+	NT_COMMON_REG->GPIOPCTLB_bit.PIN3 = 1; //CAN_TX[0]
+	NT_COMMON_REG->GPIOPCTLF_bit.PIN2 = 2; //CAN_RX[0]
+
+	//переводим ГПИО на выполнение функции CAN
+	NT_GPIOB->ALTFUNCSET = (1 << 3);   //CAN_TX[0]
+	NT_GPIOF->ALTFUNCSET = (1 << 2);   //CAN_RX[0]
+#else
 	//выбираем альтернативную функцию ГПИО
 	NT_COMMON_REG->GPIOPCTLB_bit.PIN14 = 1; //CAN_TX[0]
 	NT_COMMON_REG->GPIOPCTLB_bit.PIN15 = 1; //CAN_RX[0]
 
 	//переводим ГПИО на выполнение функции CAN
 	NT_GPIOB->ALTFUNCSET = (1 << 14) + (1 << 15); //CAN_TX[0], CAN_RX[0]
+#endif
 }
 #endif //CAN_1_ENABLE
 
