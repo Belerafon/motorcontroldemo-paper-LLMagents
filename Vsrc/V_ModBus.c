@@ -58,7 +58,7 @@
 #include "V_ModBus.h"
 #include "main.h"
 
-#if defined (HW_MOTORCONTROLBOARD)
+#if defined (HW_MOTORCONTROLBOARD) || defined (HW_MOTORCONTROLBOARD_SIMULATOR)
 //Макросы для переключения RS485 между приемом и передачей
 #define MODBUS_RX_RS485 NT_GPIOG->MASKHIGHBYTE_bit[1].MASKHB = 0	//G8
 #define MODBUS_TX_RS485 NT_GPIOG->MASKHIGHBYTE_bit[1].MASKHB = 1	//G8
@@ -74,7 +74,7 @@
 
 void  ModBus_RS_Init(TModBus *p){
 
-#if defined (HW_MOTORCONTROLBOARD)
+#if defined (HW_MOTORCONTROLBOARD) ||  defined (HW_MOTORCONTROLBOARD_SIMULATOR)
 
 	//Разрешить ножке G8 работать на выход
 	NT_GPIOG->OUTENSET = (1 << 8);

@@ -45,6 +45,8 @@ void SM_Sys_Init(TSM_Sys *p) {
 	sw.HardwareType = 2;
 #elif defined (HW_MOTORCONTROLBOARD)
 	sw.HardwareType = 3;
+#elif defined (HW_MOTORCONTROLBOARD_SIMULATOR)
+	sw.HardwareType = 4;
 #endif
 	UserMem.init(&UserMem);
 	cmd.all = 0;
@@ -102,7 +104,7 @@ void SM_Sys_Init(TSM_Sys *p) {
 	AutoOffset.FilterK = _IQ(0.00001);//постоянная времени фильтра для автосмещения АЦП
 	AutoOffset.init(&AutoOffset); //авто смещение некоторых каналов АЦП (токи)
 
-#if defined(HW_VECTORCARD_SIMULATOR) || defined(HW_NIIET_BOARD_SIMULATOR)
+#if defined(HW_VECTORCARD_SIMULATOR) || defined(HW_NIIET_BOARD_SIMULATOR) || defined (HW_MOTORCONTROLBOARD_SIMULATOR)
 	//model.motorInternals.udc = 540; //задается через словарь объектов
 	model.tpr = _IQ10div(_IQ10(CORE_CLK/1000.0), pwm.Frequency << 1) >> 10; //период частоты ШИМ
 	model.dt = _IQ4mpy(_IQ4(150 / 4), pwm.DeadBand >> 20) >> 4; //величина мертвого времени
@@ -219,7 +221,7 @@ void SM_Sys_Fast_Calc(TSM_Sys *p) {
 	sm_ctrl.fast_calc(&sm_ctrl); //Главный дискретный автомат системы управления
 	udControl.calc(&udControl);//Плавная зарядка ЗПТ через термисторы
 
-#if defined(HW_VECTORCARD_SIMULATOR) || defined(HW_NIIET_BOARD_SIMULATOR)
+#if defined(HW_VECTORCARD_SIMULATOR) || defined(HW_NIIET_BOARD_SIMULATOR) || defined (HW_MOTORCONTROLBOARD_SIMULATOR)
 	//Передача текущих скважностей таймеров ШИМ в модель
 	model.cmpr0=NT_PWM0->CMPA_bit.CMPA;
 	model.cmpr1=NT_PWM1->CMPA_bit.CMPA;

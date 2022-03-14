@@ -42,7 +42,7 @@ void excitation_calc(Texcitation *v)
 	GammaF = _IQ16mpy(GammaF, _IQ16(pwm.k_pwm)); // (IQ16) переводим скважность в величину для загрузки в регистр сравнения.
 	GammaF = pwm.k_pwm - (GammaF >> 16); // (IQ0) Загружем целую часть в регистр сравнения.
 
-#if defined(HW_VECTORCARD_SIMULATOR) || defined(HW_NIIET_BOARD_SIMULATOR)
+#if defined(HW_VECTORCARD_SIMULATOR) || defined(HW_NIIET_BOARD_SIMULATOR) || defined (HW_MOTORCONTROLBOARD_SIMULATOR)
 	model.cmpr3 = (Uint16) GammaF;
 #endif
 }

@@ -72,7 +72,7 @@
 
 #endif
 
-#if defined (HW_MOTORCONTROLBOARD)
+#if defined (HW_MOTORCONTROLBOARD) || defined (HW_MOTORCONTROLBOARD_SIMULATOR)
 
 #define VD1_ON NT_GPIOA->MASKLOWBYTE_bit[2].MASKLB = 0			//NT_GPIOA->DATA &= ~(1 << 1)	 расный светодиод	VD18
 #define VD1_OFF NT_GPIOA->MASKLOWBYTE_bit[2].MASKLB = 2			//NT_GPIOA->DATA |= (1 << 1)
@@ -120,7 +120,7 @@ void LED_init(Tled *p) {
 	NT_GPIOA->OUTENSET |= (1 << 11) | (1 << 12);
 #endif
 
-#if defined (HW_MOTORCONTROLBOARD)
+#if defined (HW_MOTORCONTROLBOARD) || defined (HW_MOTORCONTROLBOARD_SIMULATOR)
 	/* –азрешить ногам работать на выход */
 	NT_GPIOA->ALTFUNCCLR = (1 << 0) | (1 << 1);	//∆елтый и красный
 	NT_GPIOH->ALTFUNCCLR = (1 << 0) | (1 << 7);	//«еленый и зеленый
@@ -613,7 +613,7 @@ void LED_msCalc(Tled *p) {
 	}
 #endif
 
-#if defined (HW_MOTORCONTROLBOARD)
+#if defined (HW_MOTORCONTROLBOARD) || defined (HW_MOTORCONTROLBOARD_SIMULATOR)
 	//светодиодная интикация на плате контроллера
 	if (sm_prot.state == PROT_ON_OK)   //если нет аварии
 	{

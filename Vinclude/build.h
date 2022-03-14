@@ -43,6 +43,9 @@
 //Контроллер Motor Control Board
 #define HW_MOTORCONTROLBOARD
 
+//Контроллер Motor Control Board с имитационными моделями двигателей
+//#define HW_MOTORCONTROLBOARD_SIMULATOR
+
 //Для UART, выбирается чем его занять - MODBUS или CANtoRS драйвером
 //#define MODBUS_ENA
 #define CANTORS_ENA
@@ -139,7 +142,7 @@
 
 
 #if (!defined(HW_VECTORCARD_DRV8301_EVM)) && (!defined(HW_VECTORCARD_DRV8312_EVM)) && (!defined(HW_VECTORCARD_SIMULATOR))\
-	&& (!defined(HW_NIIET_BOARD_SIMULATOR)) 	&& (!defined(HW_VECTOR_MK_40_4)) && (!defined(HW_MOTORCONTROLBOARD))
+	&& (!defined(HW_NIIET_BOARD_SIMULATOR)) 	&& (!defined(HW_VECTOR_MK_40_4)) && (!defined(HW_MOTORCONTROLBOARD) && (!defined(HW_MOTORCONTROLBOARD_SIMULATOR)))
 #error необходимо определить хотя бы одну версию аппаратной части
 #endif
 

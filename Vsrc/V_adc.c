@@ -206,10 +206,10 @@ void AdcDrv_init(TAdcDrv *p) {
 //! Токи фаз для повышения точности усредняются за несколько измерений
 
 //! \memberof TAdcDrv
-#if (defined(HW_VECTORCARD_DRV8301_EVM)) || (defined(HW_VECTORCARD_DRV8312_EVM)) || (defined(HW_VECTORCARD_SIMULATOR)) || (defined(HW_NIIET_BOARD_SIMULATOR)) || (defined(HW_VECTOR_MK_40_4))
+#if (defined(HW_VECTORCARD_DRV8301_EVM)) || (defined(HW_VECTORCARD_DRV8312_EVM)) || (defined(HW_VECTORCARD_SIMULATOR)) || (defined(HW_NIIET_BOARD_SIMULATOR)) || (defined(HW_VECTOR_MK_40_4) || defined (HW_MOTORCONTROLBOARD_SIMULATOR))
 void AdcDrv_fast_calc(TAdcDrv *p) {
 
-#if (!defined(HW_VECTORCARD_SIMULATOR)) && (!defined(HW_NIIET_BOARD_SIMULATOR))
+#if (!defined(HW_VECTORCARD_SIMULATOR)) && (!defined(HW_NIIET_BOARD_SIMULATOR) && (!defined (HW_MOTORCONTROLBOARD_SIMULATOR)))
 	while (NT_ADC->SEQ[2].FSTAT_bit.FLOAD > 0)	//пока фифо не опустеет
 	{
 		//несколько точек из фифо измерений одного и того же
@@ -293,7 +293,7 @@ void AdcDrv_fast_calc(TAdcDrv *p) {
 
 
 
-#if (defined(HW_VECTORCARD_SIMULATOR)) || (defined(HW_NIIET_BOARD_SIMULATOR))
+#if (defined(HW_VECTORCARD_SIMULATOR)) || (defined(HW_NIIET_BOARD_SIMULATOR) || defined (HW_MOTORCONTROLBOARD_SIMULATOR))
 	//Симулятор формирует значения АЦП в диапазоне 0-4095
 	p->IA_temp=(int16) ((model.adc_code_iA<<4) ^ 0x8000);
 	p->IB_temp=(int16) ((model.adc_code_iB<<4) ^ 0x8000);

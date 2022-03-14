@@ -141,7 +141,7 @@ void TposspeedEqep_Calc(TposspeedEqep *p) {
 		p->Poscnt_res = 0;
 	}
 	p->Poscnt_resPrev=p->Poscnt_res;
-#if defined(HW_VECTORCARD_SIMULATOR) || defined(HW_NIIET_BOARD_SIMULATOR)
+#if defined(HW_VECTORCARD_SIMULATOR) || defined(HW_NIIET_BOARD_SIMULATOR) || defined (HW_MOTORCONTROLBOARD_SIMULATOR)
 	p->Poscnt_res = (unsigned long) model.qepCounter;    //захват положения
 #else
 	p->Poscnt_res = (unsigned long) NT_QEP1->QPOSCNT;    //захват положения
@@ -327,7 +327,7 @@ void TposspeedEqep_Calc(TposspeedEqep *p) {
 	}
 
 //В симуляторе доступен только один способ измерения скорости - по углу программно.
-#if (defined(HW_VECTORCARD_SIMULATOR)) || (defined(HW_NIIET_BOARD_SIMULATOR))
+#if (defined(HW_VECTORCARD_SIMULATOR)) || (defined(HW_NIIET_BOARD_SIMULATOR) || defined (HW_MOTORCONTROLBOARD_SIMULATOR))
 	p->SpeedCalcType=SPEED_CALC_TYPE_BY_SOFT;
 #endif
 

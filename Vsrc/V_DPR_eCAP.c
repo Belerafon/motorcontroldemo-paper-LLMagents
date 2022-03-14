@@ -124,7 +124,7 @@ void DPReCAP_Init(TDPReCAP* p) {
 	//60 - об/мин, 1000 мс в секунде, 6 меток на эл. оборот
 	p->TsNomMilsec = (60.0*1000 / (6*drv_params.speed_nom * drv_params.p));
 
-#if (!defined(HW_VECTORCARD_SIMULATOR)) && (!defined(HW_NIIET_BOARD_SIMULATOR))
+#if (!defined(HW_VECTORCARD_SIMULATOR)) && (!defined(HW_NIIET_BOARD_SIMULATOR)) && (!defined (HW_MOTORCONTROLBOARD_SIMULATOR))
 	//CAP0, CAP1, CAP2 - E4, E5, E6, соответственно
 	//На плате инвертора TI это разъем J10
 	NT_GPIOE->ALTFUNCSET=(1<<4)+(1<<5)+(1<<6);
@@ -158,7 +158,7 @@ void DPReCAP_Angle6Calc(TDPReCAP* p) {
 	// Формируем код по состоянию ножек.
 	p->HallCode = 0;
 
-#if defined(HW_VECTORCARD_SIMULATOR) || defined(HW_NIIET_BOARD_SIMULATOR)
+#if defined(HW_VECTORCARD_SIMULATOR) || defined(HW_NIIET_BOARD_SIMULATOR) || defined (HW_MOTORCONTROLBOARD_SIMULATOR)
 		p->HallCode = model.hallSensor;
 
 #else
@@ -249,7 +249,7 @@ void DPReCAP_AngleCalc(TDPReCAP* p) {
 	// Фиксируем значения переменных на момент начала расчёта
 	Angle6 = p->Angle6;
 
-#if (!defined(HW_VECTORCARD_SIMULATOR)) && (!defined(HW_NIIET_BOARD_SIMULATOR))
+#if (!defined(HW_VECTORCARD_SIMULATOR)) && (!defined(HW_NIIET_BOARD_SIMULATOR)) && (!defined (HW_MOTORCONTROLBOARD_SIMULATOR))
 
 	PrevTs = p->PrevTs;
 	// На момент расчёта, запрещаем прерывания по датчикам.
@@ -314,7 +314,7 @@ void DPReCAP_AngleCalc(TDPReCAP* p) {
 
 //! \memberof TDPReCAP
 void DPReCAP_SpeedCalc(TDPReCAP* p) {
-#if (!defined(HW_VECTORCARD_SIMULATOR)) && (!defined(HW_NIIET_BOARD_SIMULATOR))
+#if (!defined(HW_VECTORCARD_SIMULATOR)) && (!defined(HW_NIIET_BOARD_SIMULATOR) && (!defined (HW_MOTORCONTROLBOARD_SIMULATOR)))
 
 	_iq speed;
 

@@ -118,7 +118,7 @@ void SM_Protect_Fast_Calc(TSM_Protect *p) {
 		sm_prot.bit_fault1 |= F_CTRL_HI_TEMP; // максимальная температура
 	}
 
-#if defined(HW_VECTORCARD_SIMULATOR) || defined(HW_NIIET_BOARD_SIMULATOR)
+#if defined(HW_VECTORCARD_SIMULATOR) || defined(HW_NIIET_BOARD_SIMULATOR) || defined(HW_MOTORCONTROLBOARD_SIMULATOR)
 	if(model.fault){
 		sm_prot.bit_fault1 |= F_MODEL_FAULT;
 	}
@@ -192,7 +192,7 @@ void SM_Protect_Fast_Calc(TSM_Protect *p) {
 				NT_PWM2->TZCLR = 0x7;
 			}
 
-			#if defined(HW_VECTORCARD_SIMULATOR) || defined(HW_NIIET_BOARD_SIMULATOR)
+			#if defined(HW_VECTORCARD_SIMULATOR) || defined(HW_NIIET_BOARD_SIMULATOR) || defined(HW_MOTORCONTROLBOARD_SIMULATOR)
 				model.fault=0;
 			#endif
 

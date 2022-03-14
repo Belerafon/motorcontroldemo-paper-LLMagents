@@ -49,7 +49,7 @@ extern "C"
 #define RESET_FAULT_BUTTON	0 //кнопка сброса аварий не предусмотрена
 #endif
 
-#if defined (HW_VECTORCARD_SIMULATOR) || defined(HW_NIIET_BOARD_SIMULATOR)
+#if defined (HW_VECTORCARD_SIMULATOR) || defined(HW_NIIET_BOARD_SIMULATOR) || defined(HW_MOTORCONTROLBOARD_SIMULATOR)
 #define DRV_FAULT	1 //аварий ключа в симуляторе не предусмотрено
 #define RESET_FAULT_BUTTON	0 //кнопка сброса аварий не предусмотрена
 #endif
