@@ -81,7 +81,11 @@ void SM_Net_Init(TSM_Net *p) {
 
 #if (defined(CANTORS_ENA)) || (defined(CANTOUSB_ENA))
 //Работа с CANopen через UART (параллельно с CAN, нет конфликта)
+#ifdef CAN_1_ENABLE
+	CANtoRS.nodeID = (Uint16*)&co1_vars.co_nodeID; //Номер узла из CANopen
+#else
 	CANtoRS.nodeID = (Uint16*)&co2_vars.co_nodeID; //Номер узла из CANopen
+#endif
     CANtoRS.callback = Z_co_receiveSDOrequest;//Указатель на функцию обратного вызова из драйвера CANopen по приходу SDO сообщения
 	CANtoRS.init(&CANtoRS);
 #endif

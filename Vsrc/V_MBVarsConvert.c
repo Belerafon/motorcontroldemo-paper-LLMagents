@@ -70,14 +70,22 @@ void MBVarsConv_calc(TMBVarsConv *p) {
 					case  2001:  // текущая частота вращения
 						number = (float) p->Vars.speed_ref;
 						number = fabs(number);
-						scale = (float) co2_vars.co_scaleNum14;	// Частота вращения (об/мин) 16.0
+#ifdef CAN_1_ENABLE
+						scale = (float) co1_vars.co_scaleNum14;	//напряжение ЗПТ базовое
+#else
+						scale = (float) co2_vars.co_scaleNum14;	//напряжение ЗПТ базовое
+#endif
 						scaled = number / scale;
 						refs.speed_ref = _IQ(scaled);
 						break;
 
 					case 43116: //напряжение защиты в вольтах
 						number = (float) MBVarsConv.Vars.Umax_protect;
+#ifdef CAN_1_ENABLE
+						scale = (float) co1_vars.co_scaleNum7;	//напряжение ЗПТ базовое
+#else
 						scale = (float) co2_vars.co_scaleNum7;	//напряжение ЗПТ базовое
+#endif
 						scaled = number / scale;
 						sm_prot.Umax_protect = _IQ(scaled);
 						break;
@@ -91,13 +99,21 @@ void MBVarsConv_calc(TMBVarsConv *p) {
 	// Для наблюдаемых преобразование запускаем всегда
 // 40002
 	number = _IQtoF(cur_par.speed);
+#ifdef CAN_1_ENABLE
+	scale = (float) co1_vars.co_scaleNum14;	// Частота вращения (об/мин)
+#else
 	scale = (float) co2_vars.co_scaleNum14;	// Частота вращения (об/мин)
+#endif
 	scaled = scale * number;
 	p->Vars.CurSpeed = scaled;
 
 // 40007
 	number = _IQtoF(cur_par.Is);
-	scale = (float) co2_vars.co_scaleNum4;	//Ток фазный базовый
+#ifdef CAN_1_ENABLE
+	scale = (float) co1_vars.co_scaleNum4;	// Частота вращения (об/мин)
+#else
+	scale = (float) co2_vars.co_scaleNum4;	// Частота вращения (об/мин)
+#endif
 	scaled = scale * number;
 	p->Vars.CurIs = scaled;
 
@@ -112,6 +128,24 @@ void MBVarsConv_slow_calc(TMBVarsConv *p) {
 
 		//сохраняем посредством драйвера CANopen (все его параметры)
 		//вызывая функцию сохранения с разными диапазонами, перебирая их все.
+#ifdef CAN_1_ENABLE
+		co_ODexpositor_paramConservation(&co1_vars, 1, 1);
+		co_ODexpositor_paramConservation(&co1_vars, 2, 1);
+		co_ODexpositor_paramConservation(&co1_vars, 3, 1);
+		co_ODexpositor_paramConservation(&co1_vars, 1, 2);
+		co_ODexpositor_paramConservation(&co1_vars, 2, 2);
+		co_ODexpositor_paramConservation(&co1_vars, 3, 2);
+
+		co_ODexpositor_paramConservation(&co1_vars, 1, 3);
+		co_ODexpositor_paramConservation(&co1_vars, 2, 3);
+		co_ODexpositor_paramConservation(&co1_vars, 3, 3);
+		co_ODexpositor_paramConservation(&co1_vars, 1, 4);
+		co_ODexpositor_paramConservation(&co1_vars, 2, 4);
+		co_ODexpositor_paramConservation(&co1_vars, 3, 4);
+		co_ODexpositor_paramConservation(&co1_vars, 1, 5);
+		co_ODexpositor_paramConservation(&co1_vars, 2, 5);
+		co_ODexpositor_paramConservation(&co1_vars, 3, 5);
+#else
 		co_ODexpositor_paramConservation(&co2_vars, 1, 1);
 		co_ODexpositor_paramConservation(&co2_vars, 2, 1);
 		co_ODexpositor_paramConservation(&co2_vars, 3, 1);
@@ -128,6 +162,7 @@ void MBVarsConv_slow_calc(TMBVarsConv *p) {
 		co_ODexpositor_paramConservation(&co2_vars, 1, 5);
 		co_ODexpositor_paramConservation(&co2_vars, 2, 5);
 		co_ODexpositor_paramConservation(&co2_vars, 3, 5);
+#endif
 	}
 }
 

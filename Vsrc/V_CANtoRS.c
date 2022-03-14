@@ -206,7 +206,11 @@ void CANtoRS_CheckPacketValid(TCANtoRS *p) {
     if (p->callback_go) {
     	p->callback_go = 0;
     	p->CounterRes++;
+#ifdef CAN_1_ENABLE
+    	p->callback(&co1_vars, (TZCanMsg*)&(p->MSG));
+#else
     	p->callback(&co2_vars, (TZCanMsg*)&(p->MSG));
+#endif
     	return;
     }
     // Посмотрим, сколько байт начитали в буфер. Если меньше, чем нужно (13) - выходим и ждём следующего раза.
