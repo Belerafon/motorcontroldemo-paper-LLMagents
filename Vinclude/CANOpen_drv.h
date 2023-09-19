@@ -33,7 +33,9 @@ extern "C" {
 //
 
 //!¬ключатель CAN 1
+#if !defined (HW_VECTORCARD_DRV8301_EVM) && !defined (HW_VECTORCARD_DRV8312_EVM)
 #define CAN_1_ENABLE
+#endif
 //********************************************************************************************
 //!¬ключатель CAN 2
 #define CAN_2_ENABLE
