@@ -63,12 +63,10 @@ struct SEventFIFO
 
 typedef struct SEventFIFO TEventFIFO;
 
-#define EVENT_FIFO_DEFAULTS {0,\
-    LOG_FIFO_SIZE,\
-    0,0,0,\
-    {0},\
-    Event_FIFO_Read,\
-    Event_FIFO_Write,\
+#define EVENT_FIFO_DEFAULTS { .size = LOG_FIFO_SIZE,\
+    .msg_array = {0},\
+    .read = Event_FIFO_Read,\
+    .write = Event_FIFO_Write \
 }
 
 Uint16 Event_FIFO_Read(TEventFIFO*,TEvent*);
@@ -103,16 +101,16 @@ struct SLogger
 typedef volatile struct SLogger TLogger;
 
 //т.к. часов реального времени нет (ћ  30.1), в качестве временнќго маркера аварий используетс€ врем€ включенного состо€ни€
-#define LOGGER_DEFAULTS {0,0,0,1,0,\
-	(Uint32*)&RTCclock.packed_time,\
-	{0,0,0,0},0,0,0,0,0,\
-    EVENT_FIFO_DEFAULTS,\
-    Logger_Init,\
-    Logger_Background_Calc,\
-    Logger_ms_Calc,\
-    Logger_Clear,\
-    Logger_Event_Write,\
-    Logger_Event_Read,\
+#define LOGGER_DEFAULTS { .SPI_buf_size = 1,\
+    .time_ptr = (Uint32*)&RTCclock.packed_time,\
+    .bit_fault_written = {0,0,0,0},\
+    .FIFO = EVENT_FIFO_DEFAULTS,\
+    .init = Logger_Init,\
+    .background_calc = Logger_Background_Calc,\
+    .ms_calc = Logger_ms_Calc,\
+    .clear = Logger_Clear,\
+    .write = Logger_Event_Write,\
+    .read = Logger_Event_Read \
 }
 
 void Logger_Init(TLogger*,Uint16 BS,Uint16 SA,Uint32* tptr);

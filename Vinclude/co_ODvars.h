@@ -319,13 +319,15 @@ Uint16(*clear)(volatile struct S_BT_FIFO*);
 
 typedef volatile struct S_BT_FIFO T_BT_FIFO;
 
-#define T_BT_FIFO_DEFAULTS {0,\
-    BT_FIFO_SIZE,\
-    0,0,0,\
-    {0},\
-    BT_FIFO_Read,\
-    BT_FIFO_Write,\
-    BT_FIFO_Clear}
+#define T_BT_FIFO_DEFAULTS { .busy_flag = 0, \
+    .size = BT_FIFO_SIZE, \
+    .number_of_msgs = 0, \
+    .read_ptr = 0, \
+    .write_ptr = 0, \
+    .msg_array = {0}, \
+    .read = BT_FIFO_Read, \
+    .write = BT_FIFO_Write, \
+    .clear = BT_FIFO_Clear }
 
 Uint16 BT_FIFO_Read(T_BT_FIFO*,TMBOX_data*);
 Uint16 BT_FIFO_Write(T_BT_FIFO*,TMBOX_data*);
@@ -365,15 +367,31 @@ struct SBlockTransfer
 
 typedef volatile struct SBlockTransfer TBlockTransfer;
 
-#define TBLOCK_TRANSFER_DEFAULTS {CANBT_STATE_FREE,\
-                                  CANBT_STATE_FREE,0xff,1,\
-                                  0,\
-                                  0,0,0,0,0,0,0,\
-                                  T_BT_FIFO_DEFAULTS,T_BT_FIFO_DEFAULTS,\
-                                  0,\
-                                  CANBT_STATUS_IDLE,CANBT_STATUS_IDLE,\
-                                  ((Uint32)500)/*500мс*/,\
-                                  }
+#define TBLOCK_TRANSFER_DEFAULTS { .btmod_ID_slot_offset = 0, \
+    .active = 0, \
+    .size = 0, \
+    .index = 0, \
+    .subindex = 0, \
+    .tx_id = BT_TX_ID2, \
+    .rx_id = BT_RX_ID2, \
+    .data_ptr = 0, \
+    .data_ptr_cpy = 0, \
+    .size_transfered = 0, \
+    .block_size = 0, \
+    .block_number = 0, \
+    .blocks_to_send = 0, \
+    .blocks_to_recieve = 0, \
+    .err_val = 0, \
+    .last_block_size = 0, \
+    .timeout_counter = 0, \
+    .timeout_reload = 0, \
+    .CRC = {0}, \
+    .CRC_Calc = 0, \
+    .SDO_Abort_Code = 0, \
+    .blkupl_flag = 0, \
+    .blkdnl_flag = 0, \
+    .btr_slave = 0, \
+    .CANid_base = 0 }
 
 
 //****************************************************************************************************************************************

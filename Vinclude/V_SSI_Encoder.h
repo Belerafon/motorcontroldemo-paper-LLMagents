@@ -83,11 +83,11 @@ extern "C" {
     typedef  volatile struct S_SSI_Encoder TSSI_Encoder;
 
     //! Инициализатор по-умолчанию.
-    #define SSI_ENCODER_DEFAULTS {0,0,0,0, 0,0,0,0, 0,0,0,0,0,0, 0,0, 0,0,0,0,0,\
-                               SSI_Encoder_init,\
-                               SSI_Encoder_Calc,\
-							   SSI_Encoder_Read,\
-                              }
+    #define SSI_ENCODER_DEFAULTS { \
+        .init = SSI_Encoder_init, \
+        .calc = SSI_Encoder_Calc, \
+        .read = SSI_Encoder_Read \
+    }
 
 //! \memberof TSSI_Encoder
     void SSI_Encoder_init(TSSI_Encoder*);

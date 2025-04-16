@@ -49,12 +49,7 @@ struct SPark{  _iq  ds;  //!<  Input: stationary d-axis stator variable
 typedef struct SPark TPark;
 
 //! инициализатор по-умолчанию
-#define PARK_DEFAULTS {  0, \
-                          0, \
-                          0, \
-                          0, \
-                          0, \
-              			  park_calc }
+#define PARK_DEFAULTS { .calc = park_calc }
 
  //! \memberof TPark
 void park_calc(TPark*);

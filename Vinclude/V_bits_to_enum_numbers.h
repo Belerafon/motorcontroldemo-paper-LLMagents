@@ -59,9 +59,7 @@ extern "C"
 
 
 //!инициализатор по умолчанию
-#define BITS_TO_ENUM_NUMS_DEFAULTS {1000,0,4,0,0,{0},0,\
-    BitsToEnumNums,\
-  }
+#define BITS_TO_ENUM_NUMS_DEFAULTS { .out_refresh_devisor = 1000, .num_of_words = 4, .w_ptrs = {0}, .calc = BitsToEnumNums }
 //! \memberof TBitsToEnumNums
   void BitsToEnumNums(TBitsToEnumNums*);
 

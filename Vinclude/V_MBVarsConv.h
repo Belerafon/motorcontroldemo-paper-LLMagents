@@ -52,7 +52,15 @@ struct SMBVars{
 	int Umax_protect;
 	};
 //!см. TMBVarsConv	MBVars
-#define SMBVARS_DEFAULTS {0,0,0,0,0,0}
+#define SMBVARS_DEFAULTS { \
+    .Command = 0, \
+    .CommandPrev = 0, \
+    .speed_ref = 0, \
+    .CurIs = 0, \
+    .CurSpeed = 0, \
+    .Main_ErrorCode = 0, \
+    .Umax_protect = 0 \
+}
 
 
 struct SMBVarsConv{
@@ -66,12 +74,12 @@ struct SMBVarsConv{
 typedef volatile struct SMBVarsConv TMBVarsConv;
 
 //!Инициализатор по умолчанию
-#define MBVARSCONV_DEFAULTS { SMBVARS_DEFAULTS,\
-				0,\
-                MBVarsConv_init,\
-                MBVarsConv_calc,\
-                MBVarsConv_slow_calc\
-                }
+#define MBVARSCONV_DEFAULTS { \
+    .Vars = SMBVARS_DEFAULTS, \
+    .init = MBVarsConv_init, \
+    .calc = MBVarsConv_calc, \
+    .slow_calc = MBVarsConv_slow_calc \
+}
 
 //! \memberof TMBVarsConv
 void MBVarsConv_init(TMBVarsConv *p);

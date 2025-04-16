@@ -51,13 +51,14 @@ struct SRMPCtrl{ long  input;//!< ¬ход
 typedef struct SRMPCtrl TRMPCtrl;
 
 //!»нициализатор по-умолчанию
-#define V_RMP_CTRL_DEFAULTS {0, \
-                           	 0, \
-                          	_IQ(0.0001), \
-                          	_IQ(20), \
-                          	0,\
-                          	V_RMP_CTRL_calc,\
-                          	V_RMP_CTRL_slow_calc,\
+#define V_RMP_CTRL_DEFAULTS { \
+    .input = 0, \
+    .output = 0, \
+    .Ts = _IQ(0.0001), \
+    .T = _IQ(20), \
+    .step = 0, \
+    .calc = V_RMP_CTRL_calc, \
+    .slow_calc = V_RMP_CTRL_slow_calc \
 }
 
 //! \memberof TRMPCtrl

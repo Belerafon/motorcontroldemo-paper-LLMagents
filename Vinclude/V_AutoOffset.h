@@ -54,12 +54,11 @@ extern "C"
 
 
 #define AUTO_OFFSET_DEFAULTS {\
-    _IQ(0.0001),\
-    0,0,0,\
-	0,\
-    AutoOffset_init,\
-	AutoOffset_calc,\
-    AutoOffset_slow_calc}
+    .FilterK = _IQ(0.0001),\
+    .init = AutoOffset_init,\
+    .ms_calc = AutoOffset_calc,\
+    .slow_calc = AutoOffset_slow_calc \
+}
 
   void AutoOffset_init(TAutoOffset *);
   void AutoOffset_calc(TAutoOffset *);

@@ -114,19 +114,12 @@ extern "C"
   typedef struct SSM_Protect TSM_Protect;
 
  //!Инициализатор по умолчанию
-#define SM_PROTECT_DEFAULTS {0,0,\
-    0,0,\
-	0,0,\
-	0,0,\
-    0,0,\
-    0,0,\
-    0,0,0,0,0,\
-    0,0,0,0,\
-    SM_Protect_Init,\
-    SM_Protect_Slow_Calc,\
-    SM_Protect_Fast_Calc,\
-    SM_Protect_ms_Calc,\
-  }
+#define SM_PROTECT_DEFAULTS { \
+    .init = SM_Protect_Init, \
+    .slow_calc = SM_Protect_Slow_Calc, \
+    .fast_calc = SM_Protect_Fast_Calc, \
+    .ms_calc = SM_Protect_ms_Calc \
+}
 
 //! \memberof TSM_Protect
   void SM_Protect_Init(TSM_Protect*);

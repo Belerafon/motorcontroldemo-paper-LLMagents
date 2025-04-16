@@ -53,8 +53,7 @@ extern "C"
   typedef volatile struct SFilter TFilter;
 
   //! инициализатор по-умолчанию
-#define FILTER_DEFAULTS {0,0,_IQ(0.01), \
-	 TFilter_Calc}
+#define FILTER_DEFAULTS { .T = _IQ(0.01), .calc = TFilter_Calc }
 
  //! \memberof TFilter
 void TFilter_Calc(TFilter*);

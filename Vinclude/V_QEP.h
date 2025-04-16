@@ -211,14 +211,14 @@ Uint16 rsvd:
     typedef  volatile struct SposspeedEqep TposspeedEqep;
 
     //! Инициализатор по-умолчанию.
-    #define POSSPEED_DEFAULTS {0,0,0,0,0, 0,0,0,0,0,0,0, 0,0,0,0, 0,{0},{0},0,0,FILTER_DEFAULTS,0,\
-                               0,0x0790,0,0,0,0,0,0,0,0,0,0,0,\
-							   0,0,0,0,0,\
-							   TposspeedEqep_init,\
-							   TposspeedEqep_Calc,\
-							   TposspeedEqep_SlowCalc,\
-							   TposspeedEqep_IndexEvent,\
-                              }
+    #define POSSPEED_DEFAULTS { \
+        .speed_filter = FILTER_DEFAULTS, \
+        .Posspeed_CTL.all = 0x0790, \
+        .init = TposspeedEqep_init, \
+        .calc = TposspeedEqep_Calc, \
+        .slow_calc = TposspeedEqep_SlowCalc, \
+        .index = TposspeedEqep_IndexEvent \
+    }
 
 //! \memberof TposspeedEqep
     void TposspeedEqep_init(TposspeedEqep*);

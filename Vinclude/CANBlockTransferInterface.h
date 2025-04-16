@@ -50,10 +50,9 @@ struct SCanBTInterface{
 
 typedef volatile struct SCanBTInterface TCanBTInterface;
 
-#define T_CANBT_INTERFACE_DEFAULTS {0,CANBT_INTERFACE_FREE,0xFF,1,\
-									 0,0,0,\
-									 SMCanBTInterface_ms,\
-									SMCanBTInterface_slow}
+#define T_CANBT_INTERFACE_DEFAULTS { .state_shadow = CANBT_INTERFACE_FREE, .state_prev = 0xFF, .E = 1,\
+                                     .ms_calc = SMCanBTInterface_ms,\
+                                     .slow_calc = SMCanBTInterface_slow }
 
 void SMCanBTInterface_ms(volatile struct SCanBTInterface* p, Uint32 time, TCo_OdVars* co_ptr);
 void SMCanBTInterface_slow(volatile struct SCanBTInterface* p);

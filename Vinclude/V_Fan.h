@@ -71,11 +71,16 @@ void FanControl_init(TFanControl*);
 void FanControl_slow_calc(TFanControl*);	//расчет в фоновом режиме
 
 
-#define FAN_CONTROL_DEFAULTS {0,\
-						FAN_CONTROL_STATE_OFF,FAN_CONTROL_STATE_OFF,FAN_CONTROL_STATE_OFF,0,\
-						_IQ(2.5),_IQ(2), _IQ(4),\
-						FanControl_init,\
-						FanControl_slow_calc}
+#define FAN_CONTROL_DEFAULTS { \
+    .state = FAN_CONTROL_STATE_OFF, \
+    .state_shadow = FAN_CONTROL_STATE_OFF, \
+    .state_prev = FAN_CONTROL_STATE_OFF, \
+    .T_on = _IQ(2.5), \
+    .T_off = _IQ(2), \
+    .T_alarm = _IQ(4), \
+    .init = FanControl_init, \
+    .slow_calc = FanControl_slow_calc \
+}
 
 
 

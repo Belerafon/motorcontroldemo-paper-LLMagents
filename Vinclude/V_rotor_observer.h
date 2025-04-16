@@ -44,12 +44,9 @@ struct SRotorObserver{
 
 typedef struct SRotorObserver TRotorObserver;
 
-#define ROTOR_OBSERVER_DEFAULTS {\
-						0,0,\
-						0,0,0,0,\
-						0,0,0,\
-						RotorObserver_calc,\
-						RotorObserver_slow_calc,\
+#define ROTOR_OBSERVER_DEFAULTS { \
+    .calc = RotorObserver_calc, \
+    .slow_calc = RotorObserver_slow_calc \
 }
 						   
 void RotorObserver_calc(TRotorObserver *);

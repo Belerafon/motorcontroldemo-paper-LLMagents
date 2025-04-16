@@ -46,8 +46,7 @@ typedef struct Sexcitation{  long  ref; //!< Задание
 
 
 //! Инициализатор по-умолчанию
-#define excitation_DEFAULTS { 0, \
-		excitation_calc}
+#define excitation_DEFAULTS { .calc = excitation_calc }
 
 
 

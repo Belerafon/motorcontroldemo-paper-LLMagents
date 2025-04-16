@@ -92,13 +92,17 @@ void UdControl_init(TUdControl*);
 void UdControl_calc(TUdControl*);
 
 
-#define UD_CONTROL_DEFAULTS {0,UD_CONTROL_STATE_OFF,UD_CONTROL_STATE_OFF,UD_CONTROL_STATE_OFF,\
-						0,0,0,\
-						_IQ(0.8),_IQ(0.5),3000,0,\
-						0,0, FILTER_DEFAULTS,\
-						0,0,\
-						UdControl_init,\
-						UdControl_calc}
+#define UD_CONTROL_DEFAULTS { \
+    .state = UD_CONTROL_STATE_OFF, \
+    .state_shadow = UD_CONTROL_STATE_OFF, \
+    .state_prev = UD_CONTROL_STATE_OFF, \
+    .U_on = _IQ(0.8), \
+    .U_off = _IQ(0.5), \
+    .Timeout_on = 3000, \
+    .fUdc = FILTER_DEFAULTS, \
+    .init = UdControl_init, \
+    .calc = UdControl_calc \
+}
 
 
 #ifdef __cplusplus

@@ -90,10 +90,9 @@ extern "C"
   typedef volatile  struct SSM_CmdLogic TSM_CmdLogic;
   
 //! Инициализатр по умолчанию
-#define SM_CMD_LOGIC_DEFAULTS {0,0,0,{0},0,0,0,0,0,0,0,\
-    SM_CmdLogicInit,\
-    SM_CmdLogicSlow_Calc,\
-    SM_CmdLogicms_Calc}
+#define SM_CMD_LOGIC_DEFAULTS { .cmd_by_level_prev = {0}, .init = SM_CmdLogicInit,\
+    .slow_calc = SM_CmdLogicSlow_Calc,\
+    .ms_calc = SM_CmdLogicms_Calc }
 
 //! \memberof TSM_CmdLogic
   void SM_CmdLogicInit(TSM_CmdLogic*);

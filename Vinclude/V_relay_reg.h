@@ -48,8 +48,7 @@ typedef struct SRelayReg{  long  ref; //!< Задание
 
 
 //! Инициализатор по-умолчанию
-#define RELAY_REG_DEFAULTS { 0,0,0, \
-		relay_reg_calc}
+#define RELAY_REG_DEFAULTS { .calc = relay_reg_calc }
 
 
 

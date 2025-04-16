@@ -155,7 +155,10 @@ struct SMotorModel
 
 typedef volatile struct SMotorModel TMotorModel;
 
-#define MOTOR_MODEL_DEFAULTS {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,MotorModel_Init, MotorModel_Execute}
+#define MOTOR_MODEL_DEFAULTS { \
+    .Init = MotorModel_Init, \
+    .Execute = MotorModel_Execute \
+}
 
 void MotorModel_Init(TMotorModel*);
 void MotorModel_Execute(TMotorModel*);

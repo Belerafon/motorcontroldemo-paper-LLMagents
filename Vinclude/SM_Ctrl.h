@@ -63,11 +63,10 @@ extern "C"
   typedef struct SSM_Ctrl TSM_Ctrl;
 
 //!Инициализатор по умолчанию
-#define SM_CTRL_DEFAULTS {0,0,0,0,0,0,0,\
-    SM_Ctrl_Init,\
-    SM_Ctrl_Slow_Calc,\
-    SM_Ctrl_Fast_Calc,\
-	SM_Ctrl_ms_Calc,\
+#define SM_CTRL_DEFAULTS { .init = SM_Ctrl_Init,\
+    .slow_calc = SM_Ctrl_Slow_Calc,\
+    .fast_calc = SM_Ctrl_Fast_Calc,\
+    .ms_calc = SM_Ctrl_ms_Calc \
     }
 
   //! \memberof TSM_Ctrl

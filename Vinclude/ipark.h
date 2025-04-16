@@ -49,12 +49,7 @@ struct SIPark{  _iq  ds;//!< Output: stationary d-axis stator variable
 typedef struct SIPark TIPark;
 
   //! инициализатор по-умолчанию
-#define IPARK_DEFAULTS {  0, \
-                          0, \
-                          0, \
-                          0, \
-                          0, \
-              	          ipark_calc }
+#define IPARK_DEFAULTS { .calc = ipark_calc }
 
  //! \memberof TIPark
 void ipark_calc(TIPark*);

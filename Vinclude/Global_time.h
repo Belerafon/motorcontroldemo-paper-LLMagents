@@ -135,30 +135,41 @@ extern "C"
   typedef volatile struct SGlobalTime TGlobalTime;
 
 //!Иницализатор относительной даты.
-#define RELATIVE_DATE_DEFAULTS {0,0,0,0}
+#define RELATIVE_DATE_DEFAULTS { \
+    .millisecond = 0, \
+    .second = 0, \
+    .minute = 0, \
+    .hour = 0 \
+}
 
 //!Инициализатор относительного времени.
-#define RELATIVE_TIME_DEFAULTS {0,\
-    0,0,0,0,0,\
-    RELATIVE_DATE_DEFAULTS,\
+#define RELATIVE_TIME_DEFAULTS { \
+    .relative_date = RELATIVE_DATE_DEFAULTS \
   }
 //!Инициализатор абсолютного времени.
-#define ABSOLUTE_TIME_DEFAULTS {0,0,0,0,0}
+#define ABSOLUTE_TIME_DEFAULTS { \
+    .second = 0, \
+    .minute = 0, \
+    .hour = 0, \
+    .day = 0, \
+    .year = 0 \
+}
 
 //!Инициализатор TGlobalTime.
-#define GLOBAL_TIME_DEFAULTS { RELATIVE_TIME_DEFAULTS,\
-    RELATIVE_TIME_DEFAULTS,\
-    ABSOLUTE_TIME_DEFAULTS,\
-    1,0,0,0,0,0,0,\
-    GlobalTime_init,\
-    GlobalTime_calc,\
-    GlobalTime_ms_calc,\
-    GlobalTime_slow_calc,\
-	GlobalTime_read_PowerOn_time, \
-	GlobalTime_write_PowerOn_time, \
-	GlobalTime_read_oper_time, \
-	GlobalTime_write_oper_time,\
-  }
+#define GLOBAL_TIME_DEFAULTS { \
+    .relative_time1 = RELATIVE_TIME_DEFAULTS, \
+    .relative_time2 = RELATIVE_TIME_DEFAULTS, \
+    .absolute_time = ABSOLUTE_TIME_DEFAULTS, \
+    .time_type = 1, \
+    .init = GlobalTime_init, \
+    .calc = GlobalTime_calc, \
+    .ms_calc = GlobalTime_ms_calc, \
+    .slow_calc = GlobalTime_slow_calc, \
+    .read_PowerOn_time = GlobalTime_read_PowerOn_time, \
+    .write_PowerOn_time = GlobalTime_write_PowerOn_time, \
+    .read_oper_time = GlobalTime_read_oper_time, \
+    .write_oper_time = GlobalTime_write_oper_time \
+}
 
 //! \memberof TGlobalTime
   void GlobalTime_init(TGlobalTime*);

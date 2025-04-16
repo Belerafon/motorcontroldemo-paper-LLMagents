@@ -67,10 +67,7 @@ extern "C"
 
   typedef struct SDrvInterface TDrvInterface;
 
-#define DRV_INTERFACE_DEFAULTS {0,0,0,0,\
-    0,0,\
-    DRV_INTERFACE_Calc,\
-  }
+#define DRV_INTERFACE_DEFAULTS { .calc = DRV_INTERFACE_Calc }
 
   void DRV_INTERFACE_Calc(TDrvInterface*);
 

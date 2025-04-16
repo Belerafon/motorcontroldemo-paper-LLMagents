@@ -52,11 +52,7 @@ struct SClarke{  long  as;  //!< Input: phase-a stator variable
 typedef struct SClarke TClarke;
 
   //! инициализатор по-умолчанию
-#define CLARKE_DEFAULTS { 0, \
-                          0, \
-                          0, \
-                          0, \
-              	          clarke_calc }
+#define CLARKE_DEFAULTS { .calc = clarke_calc }
 
  //! \memberof TClarke
 void clarke_calc(TClarke*);

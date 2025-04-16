@@ -53,9 +53,7 @@ struct 	SVhzProf{ _iq  freq;//!< Input: Input frequency (pu)
 typedef struct 	SVhzProf TVhzProf;
 
 //! Инициализатор по-умолчанию
-#define VHZPROF_DEFAULTS { 0,0, \
-                           0,0,0,0,0, \
-                  		   vhz_prof_calc }
+#define VHZPROF_DEFAULTS { .calc = vhz_prof_calc }
 
 //! \memberof TVhzProf
 void vhz_prof_calc(TVhzProf *v);

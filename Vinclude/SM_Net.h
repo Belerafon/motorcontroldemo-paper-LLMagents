@@ -63,11 +63,11 @@ extern "C"
   typedef struct SSM_Net TSM_Net;
 
 //!инициализатор по умолчанию
-#define SM_NET_DEFAULTS {0,0,0,\
-    SM_Net_Init,\
-    SM_Net_Slow_Calc,\
-    SM_Net_ms_Calc,\
-    SM_Net_fast_Calc,\
+#define SM_NET_DEFAULTS { \
+    .init = SM_Net_Init, \
+    .slow_calc = SM_Net_Slow_Calc, \
+    .ms_calc = SM_Net_ms_Calc, \
+    .fast_calc = SM_Net_fast_Calc \
 }
 
   //! \memberof TSM_Net

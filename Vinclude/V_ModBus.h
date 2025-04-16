@@ -71,9 +71,13 @@
  				NT_UART_TypeDef *NT_UART;//!Указатель на используемый модуль UART
  				} MODBUS_INT;
 
- #define MODBUS_INT_DEFAULTS {{0},0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,\
- 				0xFFFF,0xFFFF, 0xA001,-1, 0,0,  \
- 				}
+ #define MODBUS_INT_DEFAULTS { \
+    .In = {0}, \
+    .RxCRC = 0xFFFF, \
+    .TxCRC = 0xFFFF, \
+    .MagicNumber = 0xA001, \
+    .TxState = -1 \
+}
 
 struct SModBus{Uint32 BaudRate;//!<Скорость работы по RS
 				Uint16 ExecutionFreq;//!< Частота тактирования модуля
@@ -100,12 +104,15 @@ struct SModBus{Uint32 BaudRate;//!<Скорость работы по RS
 typedef volatile struct SModBus TModBus;
 
 
-#define MODBUS_DEFAULTS {9600,10000, 0x01, 1, 0,\
-				0,0,0,0,0,0,0,0,0,0,0,\
-				MODBUS_INT_DEFAULTS,\
-                ModBus_Init, \
-                ModBus_Execute,\
-                }
+#define MODBUS_DEFAULTS { \
+    .BaudRate = 9600, \
+    .ExecutionFreq = 10000, \
+    .RSNodeID = 0x01, \
+    .Enabled = 1, \
+    .MBInternals = MODBUS_INT_DEFAULTS, \
+    .Init = ModBus_Init, \
+    .Execute = ModBus_Execute \
+}
 
 
 //! \memberof TModBus

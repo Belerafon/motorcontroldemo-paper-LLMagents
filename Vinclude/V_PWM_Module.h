@@ -128,21 +128,14 @@ struct SPWM_Module {
 typedef volatile struct SPWM_Module TPWM_Module;
 
 //! Инициализатор по-умолчанию.
-#define PWM_Module_DEFAULTS  {\
-	0,0,0, \
-	0,0,0, \
-    0, \
-    0, \
-    _IQ(0.866),0, \
-    0,0,\
-    0,0,\
-    0,\
-    0,0,0,0,0,0,0x1400,0,0,0,0,0,\
-    PWM_Module_Init,  \
-    PWM_Module_Update, \
-    PWM_Module_SlowCalc, \
-    PWM_Module_On, \
-    PWM_Module_Off, \
+#define PWM_Module_DEFAULTS  { \
+    .U_lim = _IQ(0.866), \
+    .Frequency = 0x1400, \
+    .init = PWM_Module_Init, \
+    .update = PWM_Module_Update, \
+    .slow_calc = PWM_Module_SlowCalc, \
+    .On = PWM_Module_On, \
+    .Off = PWM_Module_Off \
   }
 
 //! \memberof TPWM_Module

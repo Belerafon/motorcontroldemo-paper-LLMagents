@@ -121,10 +121,9 @@ typedef volatile struct Sdrv8301interface Tdrv8301interface;
 #define CNTRL_REG_1_ADDR	0x02
 #define CNTRL_REG_2_ADDR	0x03
 
-#define DRV8301_INTERFACE_DEFAULTS {0,0,0,0,0,\
-									DRV8301_Interface_Init,\
-									DRV8301_Interface_Write,\
-									DRV8301_Interface_Read}
+#define DRV8301_INTERFACE_DEFAULTS { .init = DRV8301_Interface_Init,\
+                                    .write = DRV8301_Interface_Write,\
+                                    .read = DRV8301_Interface_Read }
 
 /***************************************************************************************************/
 //function prototypes

@@ -67,12 +67,11 @@ struct SRTCClock{
 
 typedef volatile struct SRTCClock TRTCClock;
 
-#define RTC_CLOCK_DEFAULTS {0,0,0,0, 0,0,0, 0,0,0,0, 0,0, 0,0, 0,0,0,\
-							RTC_Clock_Init,\
-							RTC_Clock_Read_Time,\
-							RTC_Clock_Set_Time,\
-							RTC_Clock_Ms_Calc,\
-							RTC_Clock_Slow_Calc}
+#define RTC_CLOCK_DEFAULTS { .init = RTC_Clock_Init, \
+                            .read = RTC_Clock_Read_Time, \
+                            .set = RTC_Clock_Set_Time, \
+                            .msCalc = RTC_Clock_Ms_Calc, \
+                            .slowCalc = RTC_Clock_Slow_Calc }
 
 void RTC_Clock_Init (TRTCClock *);
 void RTC_Clock_Read_Time (TRTCClock *);

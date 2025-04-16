@@ -94,16 +94,16 @@ struct SUserMemory {Uint16 MemStartAddr;//!Адрес на flash
 typedef struct SUserMemory TUserMemory;
 
 //!Инициализатор по умолчанию
-#define USERMEMORY_DEFAULTS {0,0,0,0,0,0,0,0,0,0,  \
-				{0},\
-				USERMEMORY_Init, \
-				USERMEMORY_Write,\
-				USERMEMORY_Read,\
-				USERMEMORY_Full_Erase,\
-				USERMEMORY_Flush,\
-				USERMEMORY_ms_calc,\
-				USERMEMORY_slow_calc,\
-                }
+#define USERMEMORY_DEFAULTS { \
+    .cacheArr = {0}, \
+    .init = USERMEMORY_Init, \
+    .write = USERMEMORY_Write, \
+    .read = USERMEMORY_Read, \
+    .full_erase = USERMEMORY_Full_Erase, \
+    .flush = USERMEMORY_Flush, \
+    .ms_calc = USERMEMORY_ms_calc, \
+    .slow_calc = USERMEMORY_slow_calc \
+}
 
 
 //! \memberof TUserMemory

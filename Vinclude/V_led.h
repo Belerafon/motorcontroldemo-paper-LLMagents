@@ -54,7 +54,13 @@ struct Sled{
 
 
 
-#define LED_DEFAULTS {0,0,0,0,0,0,0,0,0,0,0, LED_init, LED_toggle, LED_on, LED_off, LED_msCalc}
+#define LED_DEFAULTS { \
+    .init = LED_init, \
+    .toggle = LED_toggle, \
+    .on = LED_on, \
+    .off = LED_off, \
+    .msCalc = LED_msCalc \
+}
 void LED_init (Tled*);
 void LED_toggle (Tled*, Uint16);
 void LED_on (Tled*, Uint16);

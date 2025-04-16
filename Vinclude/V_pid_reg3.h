@@ -72,24 +72,15 @@ typedef struct SPidReg3{  long  pid_ref_reg3; //!< Input: Reference input
 
 
 //! Инициализатор по-умолчанию
-#define PIDREG3_DEFAULTS { 0,0, \
-                           0, \
-                           0, \
-                           0, \
-                           0, \
-                           0, \
-                           0, \
-                           0,0, \
-                           _IQ(1), \
-                           _IQ(-1), \
-						   0, \
-                           0, \
-                           _IQ(0.05), \
-                           _IQ(0.5), \
-                           _IQ(0), \
-                           0,0,0,0,0,0,0,0,\
-              			  pid_reg3_calc,\
-						  pid_reg3_reset}
+#define PIDREG3_DEFAULTS { \
+    .pid_out_max = _IQ(1), \
+    .pid_out_min = _IQ(-1), \
+    .Ki_reg3 = _IQ(0.05), \
+    .Kc_reg3 = _IQ(0.5), \
+    .Kd_reg3 = _IQ(0), \
+    .calc = pid_reg3_calc, \
+    .reset = pid_reg3_reset \
+}
 
 
 

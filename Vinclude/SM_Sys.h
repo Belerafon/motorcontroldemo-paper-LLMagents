@@ -61,12 +61,12 @@ extern "C"
   typedef struct SSM_Sys TSM_Sys;
   
 //!Инициализатор по умолчанию
-#define SM_Sys_DEFAULTS {0,0,0,\
-    SM_Sys_Init,\
-    SM_Sys_Slow_Calc,\
-    SM_Sys_Fast_Calc,\
-    SM_Sys_ms_Calc,\
-  }
+#define SM_Sys_DEFAULTS { \
+    .init = SM_Sys_Init, \
+    .slow_calc = SM_Sys_Slow_Calc, \
+    .fast_calc = SM_Sys_Fast_Calc, \
+    .ms_calc = SM_Sys_ms_Calc \
+}
 
   //! \memberof TSM_Sys
   void SM_Sys_Init(TSM_Sys*);

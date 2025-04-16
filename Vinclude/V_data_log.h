@@ -154,57 +154,53 @@ typedef volatile struct SDataLog TDataLog;
 
 //! »нициализатор по-умолчанию для данного класса
 #if DLOG_DATA_SIZE == 16
-#define DATALOG_DEFAULTS {  {0},\
-    (type_data *)0x00000300, \
-    (type_data *)0x00000300, \
-    (type_data *)0x00000300, \
-    (type_data *)0x00000300, \
-    NUMBER_SAMPLES, \
-    0,0,\
-    ((type_data *)&dlog.buff), \
-    ((type_data *)&dlog.buff+NUMBER_SAMPLES), \
-    ((type_data *)&dlog.buff+NUMBER_SAMPLES*2), \
-    ((type_data *)&dlog.buff+NUMBER_SAMPLES*3), \
-    {0}, ((type_data *)&dlog.upload_buff), 0, 0, 0, 0, 0,\
-    2, 2, 0,\
-    0,\
-    0,0,\
-    0,0,0,0,\
-    0,0,\
-    0,\
-	1,\
-    0,\
-	&COX_VARS,\
-	FAST_CALC_FREQ,\
-    data_log_update,\
-    dlog_set_mode,\
-    dlog_background_analizer }
+#define DATALOG_DEFAULTS { \
+    .buff = {0}, \
+    .dlog_iptr1 = (type_data *)0x00000300, \
+    .dlog_iptr2 = (type_data *)0x00000300, \
+    .dlog_iptr3 = (type_data *)0x00000300, \
+    .dlog_iptr4 = (type_data *)0x00000300, \
+    .dlog_cntr_max = NUMBER_SAMPLES, \
+    .dl_buffer1_adr = ((type_data *)&dlog.buff), \
+    .dl_buffer2_adr = ((type_data *)&dlog.buff+NUMBER_SAMPLES), \
+    .dl_buffer3_adr = ((type_data *)&dlog.buff+NUMBER_SAMPLES*2), \
+    .dl_buffer4_adr = ((type_data *)&dlog.buff+NUMBER_SAMPLES*3), \
+    .upload_buff = {0}, \
+    .dl_upload_buffer_adr = ((type_data *)&dlog.upload_buff), \
+    .mode_reset = 2, \
+    .mode_reset_prev = 2, \
+    .OneShotOperation = 1, \
+    .pco_vars = &COX_VARS, \
+    .sampling_rate = FAST_CALC_FREQ, \
+    .update = data_log_update, \
+    .set_mode = dlog_set_mode, \
+    .background_analizer = dlog_background_analizer \
+}
 #endif
 
 #if DLOG_DATA_SIZE == 32
-#define DATALOG_DEFAULTS {  {0},\
-    NUMBER_SAMPLES, \
-    0,0,\
-    ((type_data *)&dlog.buff), \
-    ((type_data *)&dlog.buff+NUMBER_SAMPLES), \
-    ((type_data *)&dlog.buff+NUMBER_SAMPLES*2), \
-    ((type_data *)&dlog.buff+NUMBER_SAMPLES*3), \
-    {0}, ((type_data *)&dlog.upload_buff), 0, 0, 0, 0, 0,\
-    2, 2, 0,\
-    0,\
-    0,0,\
-    0,0,0,0,\
-    0,0,\
-    0,\
-	1,\
-    0,\
-	&COX_VARS,\
-	FAST_CALC_FREQ,\
-	0,\
-	{ 0 }, { 0 }, { 0 }, { 0 },\
-    data_log_update,\
-    dlog_set_mode,\
-    dlog_background_analizer }
+#define DATALOG_DEFAULTS { \
+    .buff = {0}, \
+    .dlog_cntr_max = NUMBER_SAMPLES, \
+    .dl_buffer1_adr = ((type_data *)&dlog.buff), \
+    .dl_buffer2_adr = ((type_data *)&dlog.buff+NUMBER_SAMPLES), \
+    .dl_buffer3_adr = ((type_data *)&dlog.buff+NUMBER_SAMPLES*2), \
+    .dl_buffer4_adr = ((type_data *)&dlog.buff+NUMBER_SAMPLES*3), \
+    .upload_buff = {0}, \
+    .dl_upload_buffer_adr = ((type_data *)&dlog.upload_buff), \
+    .mode_reset = 2, \
+    .mode_reset_prev = 2, \
+    .OneShotOperation = 1, \
+    .pco_vars = &COX_VARS, \
+    .sampling_rate = FAST_CALC_FREQ, \
+    .object1Info = {0}, \
+    .object2Info = {0}, \
+    .object3Info = {0}, \
+    .object4Info = {0}, \
+    .update = data_log_update, \
+    .set_mode = dlog_set_mode, \
+    .background_analizer = dlog_background_analizer \
+}
 #endif
 
 
