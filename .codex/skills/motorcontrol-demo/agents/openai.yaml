@@ -1,4 +1,4 @@
 interface:
-  display_name: "MotorControlDemo JTAG"
-  short_description: "Build, flash, and debug MotorControlDemo"
-  default_prompt: "Use $motorcontrol-demo to build, flash, or inspect the target through ST-Link JTAG."
+  display_name: "Прошивка MotorControlDemo"
+  short_description: "Сборка, отладка и сохранение параметров"
+  default_prompt: "Используй $motorcontrol-demo, чтобы безопасно собрать или отладить прошивку и проверить рабочие либо сохранённые в EEPROM параметры."

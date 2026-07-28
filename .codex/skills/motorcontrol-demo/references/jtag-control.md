@@ -1,16 +1,28 @@
-# JTAG and control reference
+# JTAG и управление приводом
 
-## Target and tools
+## Содержание
 
-- MCU: NIIET K1921VK01T, Cortex-M4F, hard-float ABI.
-- OpenOCD config: `C:\VectorIDEv1.3.3\openocd\scripts\k1921\k1921vk01t\connect_stlink.cfg`.
+- [Контроллер и инструменты](#контроллер-и-инструменты)
+- [Запуск постоянного сервера](#запуск-постоянного-сервера)
+- [Диагностика без остановки](#диагностика-без-остановки)
+- [Слова аварий](#слова-аварий)
+- [Команды управления](#команды-управления)
+
+## Контроллер и инструменты
+
+- МК: НИИЭТ К1921ВК01Т, Cortex-M4F, ABI hard-float.
+- Конфигурация OpenOCD:
+  `C:\VectorIDEv1.3.3\openocd\scripts\k1921\k1921vk01t\connect_stlink.cfg`.
 - GDB: `C:\VectorIDEv1.3.3\CodeBench\bin\arm-none-eabi-gdb.exe`.
 - ELF: `EclipseIDE\Debug\MotorControlDemo.elf`.
-- OpenOCD ports: GDB 3333, telnet 4444, Tcl 6666.
+- Порты OpenOCD: GDB 3333, telnet 4444, Tcl 6666.
 
-## Start a persistent server
+## Запуск постоянного сервера
 
-Start OpenOCD with `reset`, `halt`, and optionally `resume` in the same process. Do not probe and exit before a real operation: some target/probe combinations allow only the first connection after USB reconnection.
+Запускай OpenOCD с `reset`, `halt` и при необходимости `resume` в одном
+процессе. Не подключайся только для проверки с немедленным выходом перед
+реальной операцией: некоторые сочетания контроллера и адаптера допускают лишь
+первое соединение после переподключения USB.
 
 ```powershell
 & 'C:\VectorIDEv1.3.3\openocd\bin\openocd.exe' `
@@ -19,7 +31,7 @@ Start OpenOCD with `reset`, `halt`, and optionally `resume` in the same process.
   -c 'reset halt'
 ```
 
-Attach GDB:
+Подключай GDB:
 
 ```powershell
 & 'C:\VectorIDEv1.3.3\CodeBench\bin\arm-none-eabi-gdb.exe' `
@@ -27,7 +39,7 @@ Attach GDB:
   -ex 'target extended-remote localhost:3333'
 ```
 
-Useful GDB commands:
+Полезные команды GDB:
 
 ```text
 monitor reset halt
@@ -39,75 +51,86 @@ set mem inaccessible-by-default off
 detach
 ```
 
-Precompiled CANopen library debug paths may reference an unavailable `W:\...` source tree. This does not prevent symbol and RAM inspection.
+Отладочные пути предварительно собранной библиотеки CANopen могут ссылаться на
+недоступное дерево исходников `W:\...`. Это не мешает проверять символы и RAM.
 
-## Non-halting diagnostics
+## Диагностика без остановки
 
-Use OpenOCD `mdh`/`mdw` over telnet while the target runs. Resolve addresses from the current ELF rather than assuming fixed addresses:
+Во время работы контроллера используй команды OpenOCD `mdh` и `mdw` через
+telnet. Получай адреса из текущего ELF, а не считай их постоянными:
 
 ```text
 (gdb) p/x &msCounter
 (gdb) p/x &sm_prot.bit_fault1
 ```
 
-Important runtime symbols:
+Важные рабочие символы:
 
-| Expression | Width | Meaning |
+| Выражение | Разрядность | Значение |
 |---|---:|---|
-| `msCounter` | 16 | 1 kHz ISR counter |
-| `FastCounter` | 16 | 10 kHz ISR counter |
-| `TIsr1` | 32 | Latest 1 kHz ISR execution time |
-| `TIsr10` | 32 | Latest 10 kHz ISR execution time |
+| `msCounter` | 16 | Счётчик прерываний 1 кГц |
+| `FastCounter` | 16 | Счётчик прерываний 10 кГц |
+| `TIsr1` | 32 | Последнее время выполнения прерывания 1 кГц |
+| `TIsr10` | 32 | Последнее время выполнения прерывания 10 кГц |
 | `sm_sys.state` | 16 | `0=SYS_INIT`, `1=SYS_READY` |
 | `sm_prot.state` | 16 | `0=OFF`, `1=ON_OK`, `2=FAIL` |
-| `sm_ctrl.state` | 16 | Control state; `0=CTRL_STOP` |
-| `sm_ctrl.run_mode` | 16 | Selected control algorithm |
-| `sm_prot.bit_fault1/2` | 16 | Raw fault words |
-| `refs.*` | 32 | IQ-format control references |
+| `sm_ctrl.state` | 16 | Состояние управления; `0=CTRL_STOP` |
+| `sm_ctrl.run_mode` | 16 | Выбранный алгоритм управления |
+| `sm_prot.bit_fault1/2` | 16 | Необработанные слова аварий |
+| `refs.*` | 32 | Уставки управления в IQ-формате |
 
-Expected behavior is approximately 1,000 increments/s for `msCounter` and 10,000 increments/s for `FastCounter`.
+Ожидай примерно 1000 приращений в секунду для `msCounter` и 10 000 для
+`FastCounter`.
 
-Do not use repeated GDB halt/resume cycles to validate timing faults. A halted core can resume with a large timer delta and set `F_PROGRAM_1K` (`0x0100`) or `F_PROGRAM_10K` (`0x0200`) as an observation artifact.
+Не проверяй временные аварии повторными остановками и продолжениями через GDB.
+После остановки ядро может продолжить работу с большим приращением таймера и
+установить `F_PROGRAM_1K` (`0x0100`) или `F_PROGRAM_10K` (`0x0200`) как
+побочный эффект наблюдения.
 
-## Fault words
+## Слова аварий
 
-Relevant `bit_fault1` flags:
+Значимые флаги `bit_fault1`:
 
-- `0x0040`: `F_CAN_RESTORATION_ERROR`
-- `0x0100`: `F_PROGRAM_1K`
-- `0x0200`: `F_PROGRAM_10K`
-- `0x1000`: `F_PDPINT`
-- `0x2000`: `F_RELAY_START`
+- `0x0040`: `F_CAN_RESTORATION_ERROR`;
+- `0x0100`: `F_PROGRAM_1K`;
+- `0x0200`: `F_PROGRAM_10K`;
+- `0x1000`: `F_PDPINT`;
+- `0x2000`: `F_RELAY_START`.
 
-Relevant `bit_fault2` flags:
+Значимые флаги `bit_fault2`:
 
-- `0x0010`: `F_CTRL_MAX_I_PH_A`
-- `0x0020`: `F_CTRL_MAX_I_PH_B`
-- `0x0040`: `F_CTRL_MAX_I_PH_C`
-- `0x0200`: `F_CTRL_SPEED_MAX`
+- `0x0010`: `F_CTRL_MAX_I_PH_A`;
+- `0x0020`: `F_CTRL_MAX_I_PH_B`;
+- `0x0040`: `F_CTRL_MAX_I_PH_C`;
+- `0x0200`: `F_CTRL_SPEED_MAX`.
 
-Read masks and `sm_prot.state` before deciding whether a raw fault prevents operation.
+До вывода о блокировке работы сырым словом аварии прочитай маски и
+`sm_prot.state`.
 
-## Control commands
+## Команды управления
 
-`cmd` is a 32-bit union:
+`cmd` — 32-разрядное объединение:
 
-- bit 0 (`0x1`): `start`
-- bit 1 (`0x2`): `stop`
-- bit 2 (`0x4`): `trip_reset`
+- бит 0 (`0x1`): `start`;
+- бит 1 (`0x2`): `stop`;
+- бит 2 (`0x4`): `trip_reset`.
 
-The 1 kHz command logic consumes and clears these momentary bits. Use a word write to `&cmd.all` while the target is running.
+Логика команд с частотой 1 кГц обрабатывает и очищает эти кратковременные биты.
+Во время работы контроллера записывай полное слово по адресу `&cmd.all`.
 
-Before `start`, require:
+Перед `start` требуй:
 
-1. explicit user authorization to start the physical drive;
+1. явное разрешение пользователя на пуск физического привода;
 2. `sm_sys.state == SYS_READY`;
 3. `sm_prot.state == PROT_ON_OK`;
-4. reviewed fault words and masks;
-5. reviewed `sm_ctrl.run_mode`;
-6. reviewed relevant `refs` values and their IQ scaling;
-7. confirmation that the power stage and motor can move safely.
+4. проверенные слова и маски аварий;
+5. проверенный `sm_ctrl.run_mode`;
+6. проверенные применимые значения `refs` и их IQ-масштабы;
+7. подтверждение безопасного движения силовой части и двигателя.
 
-Never bypass `PROT_FAIL` by directly overwriting `sm_prot.state`. Use `trip_reset` only when the user authorizes clearing faults and the underlying fault condition is gone.
+Никогда не обходи `PROT_FAIL` прямой перезаписью `sm_prot.state`. Применяй
+`trip_reset` только с разрешения пользователя на сброс аварии и после
+устранения её причины.
 
-`stop` is the safe command. If uncertain, set `cmd.all` to `0x2` and verify `sm_ctrl.state == CTRL_STOP`.
+Безопасной командой считай `stop`. При сомнении установи `cmd.all` в `0x2` и
+проверь `sm_ctrl.state == CTRL_STOP`.

@@ -1,52 +1,59 @@
-# Python debug toolkit
+# Набор Python-инструментов для отладки
 
-`scripts/motor_debug.py` is the single CLI entry point. It uses JTAG/OpenOCD
-only; CANopen and UniCON are not runtime dependencies.
+`scripts/motor_debug.py` — единая точка входа CLI. Он использует только
+JTAG/OpenOCD; CANopen и UniCON не являются зависимостями транспорта реального
+времени.
 
-`scripts/basic_dlog_capture.py` is the smallest working capture example. It is
-the preferred starting point when exploring a new set of signals before the
-workflow deserves a registered scenario and task-specific analysis.
+`scripts/basic_dlog_capture.py` — минимальный рабочий пример сбора данных.
+Начинай с него исследование нового набора сигналов, прежде чем оформлять
+процесс как зарегистрированный сценарий со специализированным анализом.
 
-## Stable layers
+## Стабильные слои
 
-- `project.py`: clean/incremental builds and verified flashing.
-- `transport.py`: OpenOCD lifecycle and non-halting DAP memory operations.
-- `target.py`: ELF-based symbolic address resolution and typed memory access.
-- `object_dictionary.py`: Q format and engineering scale lookup from `cood.xml`.
-- `values.py`: reusable fixed-point, floating-point, and integer codecs.
-- `drive.py`: safety snapshots plus momentary `start` and `stop` commands.
-- `datalogger.py`: generic four-channel ring and event-triggered one-shot modes.
+- `project.py`: чистая и инкрементальная сборка, проверенная прошивка.
+- `transport.py`: жизненный цикл OpenOCD и операции DAP с памятью без остановки.
+- `target.py`: разрешение символьных адресов из ELF и типизированный доступ к
+  памяти.
+- `object_dictionary.py`: получение Q-формата и физического масштаба из
+  `cood.xml`.
+- `values.py`: повторно используемые кодеки fixed-point, float и целых чисел.
+- `drive.py`: снимки безопасности и кратковременные команды `start` и `stop`.
+- `datalogger.py`: универсальный четырёхканальный кольцевой и однократный
+  регистратор по событию.
 
-## Scenarios
+## Сценарии
 
-Task-specific behavior belongs under `scripts/motor_debug_core/scenarios/`.
-Each scenario:
+Специализированную логику размещай в
+`scripts/motor_debug_core/scenarios/`. Каждый сценарий должен:
 
-1. registers its CLI arguments;
-2. reads and reports a safety snapshot;
-3. selects four symbolic expressions and codecs;
-4. arms the generic data logger;
-5. starts only with explicit authorization;
-6. guarantees `stop` in `finally`;
-7. performs task-specific analysis and artifact generation.
+1. регистрировать свои аргументы CLI;
+2. читать и показывать снимок безопасности;
+3. выбирать четыре символьных выражения и кодеки;
+4. включать универсальный регистратор;
+5. запускать привод только после явного разрешения;
+6. гарантировать `stop` в `finally`;
+7. выполнять специализированный анализ и создавать артефакты.
 
-Before writing a scenario, use the basic script to prove the chosen symbols,
-codecs, trigger bit, divider, and window length. Keep the first capture raw;
-add automatic parameter changes only after observation is trustworthy.
+До написания сценария с помощью базового скрипта проверь выбранные символы,
+кодеки, триггерный бит, делитель и длину окна. Первый сбор оставляй исходным;
+автоматическое изменение параметров добавляй только после подтверждения
+надёжности наблюдения.
 
-Register a new scenario in `scenarios/__init__.py`. Speed-controller tuning,
-current-loop tuning, load steps, and braking tests should reuse the stable
-layers rather than implement their own OpenOCD, scaling, or logger code.
+Регистрируй новый сценарий в `scenarios/__init__.py`. Настройка регулятора
+скорости и токового контура, наброс нагрузки и проверка торможения должны
+использовать стабильные слои, а не собственную реализацию OpenOCD,
+масштабирования или регистратора.
 
-## Firmware oscilloscope notes
+## Особенности осциллографа прошивки
 
-The current source uses four 32-bit arrays of 256 points and updates at 10 kHz.
-The manuals describe an older 16-bit build; do not truncate the current data.
-For short events, prefer firmware-triggered one-shot capture and order the
-result from `dlog.first_point_written`. For long processes, use ring mode and
-drain the buffer faster than its wrap period:
+Текущий исходный код использует четыре 32-разрядных массива по 256 точек с
+частотой обновления 10 кГц. Руководства описывают старую 16-разрядную сборку;
+не обрезай текущие данные. Для коротких событий предпочитай однократную запись
+по триггеру прошивки и упорядочивай результат начиная с
+`dlog.first_point_written`. Для длинных процессов применяй кольцевой режим и
+вычитывай буфер быстрее периода его оборота:
 
 `wrap_period = 256 * WriteDelimiter / 10000`.
 
-The poll-and-read interval must be comfortably shorter than this period. A
-single modulo-256 write counter cannot reveal that a complete wrap was missed.
+Интервал опроса и чтения должен быть заметно короче этого периода. Один
+счётчик записи по модулю 256 не позволяет обнаружить пропуск полного оборота.

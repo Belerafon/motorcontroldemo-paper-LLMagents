@@ -1,0 +1,24 @@
+# Python tooling
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+
+# Local firmware builds and IDE output
+/EclipseIDE/Debug/
+/CodeMaster/Debug/
+
+# Motor-debug captures are generated locally. Already tracked reference
+# captures remain tracked; new CSV/PNG/JSON captures stay out of commits.
+/artifacts/*
+
+# Scratch and editor files
+/tmp/
+*.log
+*.tmp
+*.bak
+*.swp
+*~

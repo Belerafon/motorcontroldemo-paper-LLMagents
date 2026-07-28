@@ -1,156 +1,222 @@
 ---
 name: motorcontrol-demo
-description: Build, flash, and debug this MotorControlDemo firmware for the NIIET K1921VK01T through VectorIDE, ARM GCC, OpenOCD, and an ST-Link probe. Use for compilation, ELF/BIN generation, firmware programming and verification, OpenOCD/GDB sessions, live interrupt-counter checks, fault/state inspection, breakpoints, or carefully controlled runtime commands in this repository.
+description: Сборка, прошивка, настройка и отладка MotorControlDemo для НИИЭТ К1921ВК01Т через VectorIDE, ARM GCC, OpenOCD и ST-Link. Использовать в этом репозитории для компиляции и программирования, проверки состояния и аварий в реальном времени, управляемых команд во время работы, параметров словаря объектов CANopen, преобразования IQ в физические единицы, анализа перезаписи параметров при инициализации и сохранения в EEPROM.
 ---
 
 # MotorControlDemo
 
-Resolve all paths relative to the repository root. Assume the supported local VectorIDE installation is `C:\VectorIDEv1.3.3` unless the user gives another path.
+Все пути разрешай относительно корня репозитория. Если пользователь не указал
+другой путь, считай поддерживаемой локальной установкой VectorIDE
+`C:\VectorIDEv1.3.3`.
 
-## Build
+## Сборка
 
-Run:
+Запускай:
 
 ```powershell
 python .codex\skills\motorcontrol-demo\scripts\motor_debug.py build
 ```
 
-The build script calls the repository `Makefile` directly with the ARM GCC tools bundled in VectorIDE. It does not launch Eclipse. Use the `Debug` configuration; the repository's historical `Release` configuration is incomplete and targets Cortex-M3 defaults.
+Сценарий сборки напрямую вызывает репозиторный `Makefile` с инструментами
+ARM GCC из комплекта VectorIDE и не запускает Eclipse. Используй конфигурацию
+`Debug`: историческая конфигурация `Release` в репозитории неполна и содержит
+настройки по умолчанию для Cortex-M3.
 
-Expect:
+Ожидай:
 
-- `EclipseIDE\Debug\MotorControlDemo.elf`
-- `EclipseIDE\Debug\MotorControlDemo.bin`
-- `0 errors, 0 warnings`
+- `EclipseIDE\Debug\MotorControlDemo.elf`;
+- `EclipseIDE\Debug\MotorControlDemo.bin`;
+- `0 errors, 0 warnings`.
 
-The root `Makefile` can also be called directly:
+Корневой `Makefile` также можно вызвать напрямую:
 
 ```powershell
 & 'C:\VectorIDEv1.3.3\CodeBench\bin\cs-make.exe' -j8
 ```
 
-## Flash
+## Прошивка
 
-Run:
+Запускай:
 
 ```powershell
 python .codex\skills\motorcontrol-demo\scripts\motor_debug.py flash
 ```
 
-Never perform a separate probe-only OpenOCD invocation immediately before flashing. Connect, halt, program, verify, and reset in one OpenOCD process. Treat `** Verified OK **` and exit code 0 as success.
+Не запускай отдельный пробный сеанс OpenOCD непосредственно перед прошивкой.
+Подключайся, останавливай ядро, программируй, проверяй и сбрасывай в одном
+процессе OpenOCD. Считай операцию успешной только при сообщении
+`** Verified OK **` и коде завершения 0.
 
-If OpenOCD reports `init mode failed`, reconnect the ST-Link USB device and retry the single flash command. ST-Link V2 firmware JTAG v45 was reliable; an older JTAG v29 adapter repeatedly required physical USB reconnection. PnP restart/disable-enable did not reproduce a physical reconnect.
+Если OpenOCD сообщает `init mode failed`, переподключи USB-устройство ST-Link
+и повтори единственную команду прошивки. ST-Link V2 с прошивкой JTAG v45
+работал надёжно; старый адаптер JTAG v29 неоднократно требовал физического
+переподключения USB. Перезапуск или отключение-включение PnP не заменяли
+физическое переподключение.
 
-## Inspect a running target
+## Проверка работающего контроллера
 
-Run the read-only diagnostic:
+Запускай диагностику только для чтения:
 
 ```powershell
 python .codex\skills\motorcontrol-demo\scripts\motor_debug.py status
 ```
 
-This resets and resumes the target, then reads state, faults, mode, and
-references through the DAP without halting the CPU.
+Команда сбрасывает и запускает контроллер, затем без остановки ядра читает
+через DAP состояние, аварии, режим и уставки.
 
-Prefer non-halting DAP reads for timing counters. Halting and resuming with GDB can itself set `F_PROGRAM_1K` or `F_PROGRAM_10K`, invalidating fault observations.
+Для счётчиков реального времени предпочитай чтение DAP без остановки.
+Остановка и продолжение через GDB сами могут установить `F_PROGRAM_1K` или
+`F_PROGRAM_10K` и исказить картину аварий.
 
-Read [references/jtag-control.md](references/jtag-control.md) before setting breakpoints, changing variables, clearing faults, or issuing control commands.
+Перед установкой точек останова, изменением переменных, сбросом аварий или
+отправкой команд управления прочитай
+[references/jtag-control.md](references/jtag-control.md).
 
-Read [references/python-debug-toolkit.md](references/python-debug-toolkit.md) before adding a new automated measurement or tuning workflow.
+Перед добавлением нового автоматизированного измерения или алгоритма настройки
+прочитай
+[references/python-debug-toolkit.md](references/python-debug-toolkit.md).
 
-## General workflow for measurement and tuning tasks
+Перед изменением дефолтов параметров, диагностикой их перезаписи при
+инициализации, интерпретацией единиц CANopen/IQ или сохранением в EEPROM
+прочитай
+[references/parameters-and-nvm.md](references/parameters-and-nvm.md).
 
-Use the same sequence for acceleration tests, regulator tuning, load steps,
-braking, current-loop checks, and similar drive work:
+## Правила параметров и EEPROM
 
-1. Define the result before touching the target: signals, units, event,
-   required time resolution, duration, and acceptance metrics.
-2. Confirm whether the build controls a physical drive or a simulator. Obtain
-   explicit authorization for every start, reference change, fault reset, or
-   other control action needed by the experiment.
-3. Build and flash when the running image cannot be proven to match the ELF.
-   Resolve every RAM address from that ELF; never reuse numeric addresses from
-   an earlier build.
-4. Inspect the control code around the event. Identify the active
-   `sm_ctrl.run_mode`, the entry/exit state, the corresponding
-   `dlog.set_mode` trigger bit, and the exact meaning of each signal.
-5. Select four logger channels. Prefer existing object-dictionary variables so
-   `object_dictionary.py` can obtain Q format and engineering scale from
-   `cood.xml`. For internal-only variables, assign an explicit codec from
+- Разделяй скомпилированные значения по умолчанию, значения в рабочей RAM и
+  энергонезависимые значения. Не считай, что изменение одного слоя меняет
+  остальные.
+- `cood.xml` — профиль GUI-программы COODEdit, которая генерирует
+  `cood1.c`/`cood2.c`. Не правь эти C-файлы вручную: для изменения словаря
+  попроси пользователя изменить профиль и перегенерировать их в COODEdit.
+- Учитывай, что `co1_Init` и `co2_Init` восстанавливают параметры из EEPROM и
+  могут перезаписать ранние присваивания в RAM, когда включён
+  `LoadParamsFromUserMemory_ena`.
+- Выполняй явно запрошенную постоянную миграцию только после обеих
+  инициализаций CANopen. Защищай её сравнением значений, сохраняй только
+  правильные класс доступа и диапазон, вызывай flush для `UserMem`, проверяй
+  состояние, выполняй сброс и повторное чтение.
+- По умолчанию оставляй рабочие уставки и команды временными. Сценарии должны
+  останавливать привод и восстанавливать временные уставки; при последующем
+  ручном пуске необходимые уставки нужно задавать заново.
+- Не смешивай запрет CANopen как транспорта автоматизации со словарём CANopen
+  и API сохранения внутри прошивки: именно они задают семантику хранения
+  параметров.
+
+## Общий порядок измерений и настройки
+
+Применяй одну последовательность для разгона, настройки регуляторов, наброса
+нагрузки, торможения, проверки токовых контуров и похожих задач:
+
+1. До обращения к контроллеру определи результат: сигналы, единицы, событие,
+   требуемое временное разрешение, длительность и критерии приёмки.
+2. Установи, управляет ли сборка физическим приводом или симулятором. Получай
+   явное разрешение на каждый необходимый эксперименту пуск, смену уставки,
+   сброс аварии или другое управляющее действие.
+3. Собери и прошей, если нельзя доказать соответствие работающего образа ELF.
+   Получай все адреса RAM из этого ELF; никогда не используй числовые адреса
+   от предыдущей сборки.
+4. Классифицируй каждое изменяемое значение как скомпилированный дефолт,
+   временную уставку в RAM или постоянный параметр словаря. Учитывай порядок
+   инициализации CANopen.
+5. Изучи управляющий код вокруг события. Определи активный `sm_ctrl.run_mode`,
+   состояние входа и выхода, соответствующий триггерный бит `dlog.set_mode` и
+   точный смысл каждого сигнала.
+6. Выбери четыре канала регистратора. Предпочитай переменные из словаря
+   объектов, чтобы `object_dictionary.py` получил Q-формат и физический
+   масштаб из `cood.xml`. Для внутренних переменных явно задавай кодек из
    `values.py`.
-6. Choose the acquisition mode:
-   - use event-triggered one-shot for short transitions;
-   - use ring mode only for long processes and drain it faster than
-     `256 * WriteDelimiter / 10000` seconds;
-   - choose `WriteDelimiter` so the 256-point window covers the event while
-     retaining enough time resolution.
-7. Read and report the complete safety snapshot. Require `SYS_READY`,
-   `PROT_ON_OK`, clear faults, `CTRL_STOP`, reviewed mode, and reviewed
-   references. Arm the logger only after this review.
-8. Reuse the validated snapshot when issuing `start`; do not insert a slow
-   second JTAG inspection between arming and the event. Always issue `stop` in
-   `finally`.
-9. Read the logger through non-halting DAP accesses. For one-shot data, reorder
-   from `dlog.first_point_written`. Preserve both raw words and converted
-   engineering values.
-10. Validate the result before reporting it: check sample count and spacing,
-    trigger position, buffer-wrap continuity, units, plausible signal ranges,
-    protection state, and final `CTRL_STOP`. Save raw CSV plus task-specific
-    PNG and JSON metrics.
+7. Выбери режим сбора:
+   - для коротких переходов используй однократную запись по событию;
+   - кольцевой режим применяй только для длинных процессов и вычитывай его
+     быстрее чем за `256 * WriteDelimiter / 10000` секунд;
+   - выбирай `WriteDelimiter`, чтобы окно из 256 точек покрывало событие и
+     сохраняло достаточное временное разрешение.
+8. Прочитай и покажи полный снимок безопасности. Требуй `SYS_READY`,
+   `PROT_ON_OK`, отсутствие аварий, `CTRL_STOP`, проверенный режим и
+   проверенные уставки. Включай регистратор только после этой проверки.
+9. При отправке `start` используй уже проверенный снимок; не вставляй между
+   включением регистратора и событием вторую медленную проверку по JTAG.
+   Всегда отправляй `stop` в `finally`.
+10. Читай регистратор через DAP без остановки. Для однократной записи
+    переставляй данные начиная с `dlog.first_point_written`. Сохраняй и сырые
+    слова, и преобразованные физические значения.
+11. До отчёта проверь число и шаг отсчётов, положение триггера, непрерывность
+    после оборота буфера, единицы, правдоподобные диапазоны сигналов, состояние
+    защит и итоговый `CTRL_STOP`. Сохраняй исходный CSV, а также PNG и JSON с
+    метриками конкретной задачи.
 
-Do not use CANopen or UniCON as the runtime transport for these automated
-workflows. Do not halt the CPU with GDB while PWM is active.
+Не используй CANopen или UniCON как транспорт реального времени для этих
+автоматизированных процессов. Не останавливай ядро через GDB при активном ШИМ.
 
-Start a new simple measurement from:
+Новое простое измерение начинай с:
 
 ```powershell
 python .codex\skills\motorcontrol-demo\scripts\basic_dlog_capture.py --help
 ```
 
-`basic_dlog_capture.py` is deliberately limited to safe capture and raw CSV.
-Copy or adapt its channel list and trigger selection, then implement
-task-specific analysis as a scenario under `motor_debug_core/scenarios/`.
+`basic_dlog_capture.py` намеренно ограничен безопасным сбором и исходным CSV.
+Скопируй или адаптируй список каналов и выбор триггера, затем реализуй анализ
+задачи отдельным сценарием в `motor_debug_core/scenarios/`.
 
-## Capture the digital data logger
+## Сбор данных цифровым регистратором
 
-The firmware contains a four-channel, 32-bit digital oscilloscope (`TDataLog dlog`) with 256 samples per channel. Its update rate is 10 kHz and `WriteDelimiter` selects every Nth sample. For transitions longer than the 256-sample window, use ring mode and drain completed samples through non-halting DAP reads.
+В прошивке есть четырёхканальный 32-разрядный цифровой осциллограф
+(`TDataLog dlog`) на 256 отсчётов в каждом канале. Он обновляется с частотой
+10 кГц, а `WriteDelimiter` выбирает каждый N-й отсчёт. Для переходов длиннее
+окна в 256 отсчётов используй кольцевой режим и вычитывай завершённые отсчёты
+через DAP без остановки ядра.
 
-After obtaining explicit authorization to start the drive, run:
+Получив явное разрешение на пуск привода, запускай:
 
 ```powershell
 python .codex\skills\motorcontrol-demo\scripts\motor_debug.py acceleration --start-drive
 ```
 
-The script resolves every RAM address from the current ELF, verifies `SYS_READY`, `PROT_ON_OK`, clear fault words, `CTRL_STOP`, mode, and references, then records:
+Сценарий получает все адреса RAM из текущего ELF, проверяет `SYS_READY`,
+`PROT_ON_OK`, отсутствие аварий, `CTRL_STOP`, режим и уставки, затем записывает:
 
-- actual speed (`cur_par.speed`), scaled at 500 rpm/pu;
-- ramped speed reference (`rmp.output`), scaled at 500 rpm/pu;
-- actual q-axis current (`pid_iq.pid_fdb_reg3`), scaled at 5 A/pu;
-- q-axis current reference (`pid_iq.pid_ref_reg3`), scaled at 5 A/pu.
+- фактическую скорость (`cur_par.speed`) с масштабом 500 об/мин на о.е.;
+- выход задатчика интенсивности скорости (`rmp.output`) с масштабом
+  500 об/мин на о.е.;
+- фактический ток по оси q (`pid_iq.pid_fdb_reg3`) с масштабом 5 А на о.е.;
+- уставку тока по оси q (`pid_iq.pid_ref_reg3`) с масштабом 5 А на о.е.
 
-It always issues `stop` after the capture, writes CSV and PNG artifacts, and reports 10–90% rise time, time to 95%, overshoot, and acceleration-current metrics.
+После измерения сценарий всегда отправляет `stop`, сохраняет CSV и PNG и
+выводит время нарастания 10–90 %, время достижения 95 %, перерегулирование и
+метрики тока разгона.
 
-The Python toolkit is intentionally layered:
+Набор Python-инструментов намеренно разделён на слои:
 
-- `project.py` owns build and flash lifecycle;
-- `transport.py` owns OpenOCD startup and non-halting DAP access;
-- `target.py` resolves symbolic ELF expressions and exposes typed memory access;
-- `values.py` contains reusable fixed-point, integer, and float conversions;
-- `object_dictionary.py` derives Q formats and engineering scales from `cood.xml`;
-- `datalogger.py` owns the generic four-channel firmware oscilloscope;
-- `drive.py` owns safety snapshots and momentary start/stop commands;
-- `scenarios/` contains task-specific workflows such as acceleration measurement.
+- `project.py` управляет сборкой и прошивкой;
+- `transport.py` управляет OpenOCD и доступом DAP без остановки;
+- `target.py` разрешает символьные выражения ELF и предоставляет типизированный
+  доступ к памяти;
+- `values.py` содержит повторно используемые преобразования fixed-point,
+  целых чисел и чисел с плавающей точкой;
+- `object_dictionary.py` получает Q-форматы и физические масштабы из
+  `cood.xml`;
+- `datalogger.py` управляет универсальным четырёхканальным осциллографом
+  прошивки;
+- `drive.py` управляет снимками безопасности и кратковременными командами
+  пуска и останова;
+- `scenarios/` содержит специализированные процессы, например измерение
+  разгона.
 
-Add future workflows, including speed-regulator tuning, as new scenario modules registered in `scenarios/__init__.py`; do not duplicate transport, logger, conversion, or safety code.
+Добавляй будущие процессы, включая настройку регулятора скорости, как новые
+модули сценариев с регистрацией в `scenarios/__init__.py`. Не дублируй код
+транспорта, регистратора, преобразований и безопасности.
 
-## Safety
+## Безопасность
 
-Before a start command, read and report:
+Перед командой пуска прочитай и покажи:
 
-- `sm_sys.state` — require `SYS_READY`;
-- `sm_prot.state` — require `PROT_ON_OK`;
-- `sm_prot.bit_fault1` and `bit_fault2`;
-- `sm_ctrl.state`, `sm_ctrl.run_mode`;
-- all applicable `refs` values.
+- `sm_sys.state` — требуй `SYS_READY`;
+- `sm_prot.state` — требуй `PROT_ON_OK`;
+- `sm_prot.bit_fault1` и `bit_fault2`;
+- `sm_ctrl.state` и `sm_ctrl.run_mode`;
+- все применимые значения `refs`.
 
-Do not clear protections, enable PWM, change current/speed references, or issue `start` without explicit user authorization for the exact action. A `stop` command is the safe default.
+Не сбрасывай защиты, не включай ШИМ, не меняй уставки тока или скорости и не
+отправляй `start` без явного разрешения пользователя именно на это действие.
+Безопасной командой по умолчанию считай `stop`.
