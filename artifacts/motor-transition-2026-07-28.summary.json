@@ -1,0 +1,13 @@
+{
+  "target_speed_rpm": 500.0,
+  "steady_speed_rpm": 500.0674533843994,
+  "rise_time_10_90_s": 0.0031999999999999997,
+  "time_to_95_percent_s": 0.0045000000000000005,
+  "overshoot_percent": 18.203091621398926,
+  "settling_time_2_percent_s": 0.014100000000000001,
+  "peak_abs_iq_a_during_acceleration": 0.45317381620407104,
+  "rms_iq_a_during_acceleration": 0.19311106348538143,
+  "steady_iq_a": -0.0020924687385559084,
+  "samples": 256,
+  "sample_period_s": 9.99999999999994e-05
+}
