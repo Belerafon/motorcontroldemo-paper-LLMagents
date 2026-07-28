@@ -15,7 +15,7 @@ Run:
 powershell -ExecutionPolicy Bypass -File .codex\skills\motorcontrol-demo\scripts\build.ps1
 ```
 
-Use the `Debug` configuration. It is the complete Cortex-M4F configuration in `.cproject`; the repository's `Release` configuration is incomplete and targets Cortex-M3 defaults.
+The build script calls the repository `Makefile` directly with the ARM GCC tools bundled in VectorIDE. It does not launch Eclipse. Use the `Debug` configuration; the repository's historical `Release` configuration is incomplete and targets Cortex-M3 defaults.
 
 Expect:
 
@@ -23,7 +23,11 @@ Expect:
 - `EclipseIDE\Debug\MotorControlDemo.bin`
 - `0 errors, 0 warnings`
 
-The build script uses VectorIDE's Eclipse headless builder and restores `.settings\language.settings.xml` byte-for-byte so an environment hash refresh does not dirty the repository.
+The root `Makefile` can also be called directly:
+
+```powershell
+& 'C:\VectorIDEv1.3.3\CodeBench\bin\cs-make.exe' -j8
+```
 
 ## Flash
 

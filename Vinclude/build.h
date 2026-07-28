@@ -41,10 +41,10 @@
 //#define HW_VECTOR_MK_40_4
 
 //Контроллер Motor Control Board
-#define HW_MOTORCONTROLBOARD
+//#define HW_MOTORCONTROLBOARD
 
 //Контроллер Motor Control Board с имитационными моделями двигателей
-//#define HW_MOTORCONTROLBOARD_SIMULATOR
+#define HW_MOTORCONTROLBOARD_SIMULATOR
 
 //Для UART, выбирается чем его занять - MODBUS или CANtoRS драйвером
 //#define MODBUS_ENA
