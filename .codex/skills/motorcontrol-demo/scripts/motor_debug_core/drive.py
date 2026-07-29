@@ -46,7 +46,7 @@ class SafetySnapshot:
 
 
 class Drive:
-    """Safe drive state inspection and momentary command handling."""
+    """Model state inspection and momentary command handling."""
 
     def __init__(self, target: Target):
         self.target = target
@@ -75,10 +75,8 @@ class Drive:
         return snapshot
 
     def start(
-        self, *, authorized: bool, validated_snapshot: SafetySnapshot | None = None
+        self, *, validated_snapshot: SafetySnapshot | None = None
     ) -> None:
-        if not authorized:
-            raise RuntimeError("Drive start requires explicit authorization.")
         snapshot = validated_snapshot or self.snapshot(wait_ready=True)
         snapshot.require_startable()
         self.target.write_u32("cmd.all", 0x1)

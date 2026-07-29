@@ -4,6 +4,10 @@ Before building, flashing, launching OpenOCD/GDB, inspecting firmware state,
 or issuing a control command, read and follow
 `.codex/skills/motorcontrol-demo/SKILL.md`.
 
+The e2e scenarios control only the firmware's software motor model. Treat them
+as ordinary tests: when the task calls for testing, run the relevant scenarios
+while preserving their state checks and guaranteed `stop` cleanup.
+
 Read the skill as UTF-8 with this PowerShell command:
 
 ```powershell

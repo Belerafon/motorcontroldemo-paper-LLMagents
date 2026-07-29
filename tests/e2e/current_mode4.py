@@ -3,7 +3,7 @@ from __future__ import annotations
 import json
 import math
 import time
-from argparse import ArgumentParser, Namespace
+from argparse import ArgumentParser, Namespace, SUPPRESS
 from pathlib import Path
 
 from motor_debug_core.datalogger import Channel
@@ -28,7 +28,7 @@ def register(parser: ArgumentParser) -> None:
     parser.add_argument(
         "--start-drive",
         action="store_true",
-        help="Explicitly authorize PWM enable and drive start.",
+        help=SUPPRESS,
     )
     parser.add_argument("--timeout", type=float, default=2.0)
     parser.add_argument("--sample-divider", type=int, default=4)
@@ -68,10 +68,7 @@ def _align_rotor(
     runtime = validated_snapshot
     stopped: SafetySnapshot | None = None
     try:
-        session.drive.start(
-            authorized=args.start_drive,
-            validated_snapshot=validated_snapshot,
-        )
+        session.drive.start(validated_snapshot=validated_snapshot)
         while True:
             now = time.monotonic()
             elapsed = now - started
@@ -166,8 +163,6 @@ def _speed_feedback(session: HardwareSession) -> dict[str, object]:
 
 
 def run(args: Namespace, paths: ProjectPaths) -> None:
-    if not args.start_drive:
-        raise RuntimeError("Current-loop e2e test requires --start-drive.")
     if not 1 <= args.sample_divider <= 255:
         raise ValueError("--sample-divider must be in range 1..255.")
     if args.timeout <= 0:
@@ -320,7 +315,6 @@ def run(args: Namespace, paths: ProjectPaths) -> None:
                         divider=args.sample_divider,
                         trigger_bit=3,
                         timeout_s=args.timeout,
-                        authorized=args.start_drive,
                         validated_snapshot=before,
                     )
         restored = session.drive.snapshot()

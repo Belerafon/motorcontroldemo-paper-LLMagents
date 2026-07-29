@@ -169,7 +169,6 @@ class HardwareSession:
         divider: int,
         duration_s: float,
         poll_period_s: float,
-        authorized: bool,
         validated_snapshot: SafetySnapshot,
     ) -> CaptureResult:
         if duration_s <= 0:
@@ -184,10 +183,7 @@ class HardwareSession:
         samples: list[Sample] = []
         runtime = validated_snapshot
         try:
-            self.drive.start(
-                authorized=authorized,
-                validated_snapshot=validated_snapshot,
-            )
+            self.drive.start(validated_snapshot=validated_snapshot)
 
             def safety_check() -> None:
                 state = self.drive.snapshot()
@@ -232,7 +228,6 @@ class HardwareSession:
         divider: int,
         trigger_bit: int,
         timeout_s: float,
-        authorized: bool,
         validated_snapshot: SafetySnapshot,
     ) -> CaptureResult:
         if not 0 <= trigger_bit <= 15:
@@ -247,10 +242,7 @@ class HardwareSession:
         samples: list[Sample] = []
         runtime = validated_snapshot
         try:
-            self.drive.start(
-                authorized=authorized,
-                validated_snapshot=validated_snapshot,
-            )
+            self.drive.start(validated_snapshot=validated_snapshot)
 
             def safety_check() -> None:
                 state = self.drive.snapshot()

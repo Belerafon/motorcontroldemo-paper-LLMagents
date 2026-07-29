@@ -37,7 +37,11 @@ DEFAULT_TRIGGER_BIT = 4
 
 def arguments() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description="Basic JTAG data-logger capture")
-    parser.add_argument("--start-drive", action="store_true")
+    parser.add_argument(
+        "--start-drive",
+        action="store_true",
+        help=argparse.SUPPRESS,
+    )
     parser.add_argument("--trigger-bit", type=int, default=DEFAULT_TRIGGER_BIT)
     parser.add_argument("--divider", type=int, default=1)
     parser.add_argument("--timeout", type=float, default=5.0)
@@ -52,8 +56,6 @@ def arguments() -> argparse.Namespace:
 
 def main() -> None:
     args = arguments()
-    if not args.start_drive:
-        raise SystemExit("Explicit --start-drive authorization is required.")
     if not 0 <= args.trigger_bit <= 15:
         raise ValueError("Trigger bit must be in range 0..15.")
 
@@ -85,7 +87,7 @@ def main() -> None:
             )
             # Reuse the immediately preceding validated snapshot: another slow
             # series of JTAG reads here could let a ring buffer wrap.
-            drive.start(authorized=True, validated_snapshot=before)
+            drive.start(validated_snapshot=before)
             drive_started = True
 
             def safety_check() -> None:

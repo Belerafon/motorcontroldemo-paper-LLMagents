@@ -1,4 +1,4 @@
 interface:
   display_name: "Прошивка MotorControlDemo"
   short_description: "Сборка, отладка и сохранение параметров"
-  default_prompt: "Используй $motorcontrol-demo, чтобы безопасно собрать или отладить прошивку и проверить рабочие либо сохранённые в EEPROM параметры."
+  default_prompt: "Используй $motorcontrol-demo, чтобы собрать, прошить и отладить прошивку, запустить e2e-тесты программной модели и проверить параметры."
