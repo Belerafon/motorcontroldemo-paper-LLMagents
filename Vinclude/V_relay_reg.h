@@ -1,5 +1,5 @@
 /*!
-     Copyright 2017 	АО "НИИЭТ" и ООО "НПФ ВЕКТОР"
+     Copyright 2017 	РђРћ "РќРРР­Рў" Рё РћРћРћ "РќРџР¤ Р’Р•РљРўРћР "
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -14,8 +14,8 @@
    limitations under the License.
  
  \file      V_relay_reg.h
- \brief     Релейный регулятор
- \author    ООО "НПФ Вектор". http://motorcontrol.ru
+ \brief     Р РµР»РµР№РЅС‹Р№ СЂРµРіСѓР»СЏС‚РѕСЂ
+ \author    РћРћРћ "РќРџР¤ Р’РµРєС‚РѕСЂ". http://motorcontrol.ru
  \version   v 1.0 23/01/2016
 
 \defgroup  V_realy_reg
@@ -32,22 +32,22 @@ extern "C" {
 #endif
 
   /*! \class TRelayReg
-    \brief Модуль релейного регулятора
+    \brief РњРѕРґСѓР»СЊ СЂРµР»РµР№РЅРѕРіРѕ СЂРµРіСѓР»СЏС‚РѕСЂР°
 
-    Класс \a TRelayReg, основанный на структуре SRelayReg, представляет
-    собой релейный регулятор.
+    РљР»Р°СЃСЃ \a TRelayReg, РѕСЃРЅРѕРІР°РЅРЅС‹Р№ РЅР° СЃС‚СЂСѓРєС‚СѓСЂРµ SRelayReg, РїСЂРµРґСЃС‚Р°РІР»СЏРµС‚
+    СЃРѕР±РѕР№ СЂРµР»РµР№РЅС‹Р№ СЂРµРіСѓР»СЏС‚РѕСЂ.
   
   */
 
-//! см. TRelayReg
-typedef struct SRelayReg{  long  ref; //!< Задание
-				  long  fdb;//!< Обратная связь
-				  long  out;//!< Выход
+//! СЃРј. TRelayReg
+typedef struct SRelayReg{  long  ref; //!< Р—Р°РґР°РЅРёРµ
+				  long  fdb;//!< РћР±СЂР°С‚РЅР°СЏ СЃРІСЏР·СЊ
+				  long  out;//!< Р’С‹С…РѕРґ
 		 	 	  void  (*calc)(struct SRelayReg*);//!< Pointer to calculation function
 				 }TRelayReg;
 
 
-//! Инициализатор по-умолчанию
+//! РРЅРёС†РёР°Р»РёР·Р°С‚РѕСЂ РїРѕ-СѓРјРѕР»С‡Р°РЅРёСЋ
 #define RELAY_REG_DEFAULTS { .calc = relay_reg_calc }
 
 

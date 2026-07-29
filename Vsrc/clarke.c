@@ -1,5 +1,5 @@
 /*!
-    Copyright 2017 	Texas Instruments, ÀÎ "ÍÈÈİÒ" , ÎÎÎ "ÍÏÔ ÂÅÊÒÎĞ"
+    Copyright 2017 	Texas Instruments, ĞĞ "ĞĞ˜Ğ˜Ğ­Ğ¢" , ĞĞĞ "ĞĞŸĞ¤ Ğ’Ğ•ĞšĞ¢ĞĞ "
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -14,8 +14,8 @@
    limitations under the License.
 
  \file    clarke.c
- \brief   Ìîäóëü ôàçíûõ ïğåîáğàçîâàíèé (ñì. TClarke)
- \author    ÎÎÎ "ÍÏÔ Âåêòîğ". http://motorcontrol.ru
+ \brief   ĞœĞ¾Ğ´ÑƒĞ»ÑŒ Ñ„Ğ°Ğ·Ğ½Ñ‹Ñ… Ğ¿Ñ€ĞµĞ¾Ğ±Ñ€Ğ°Ğ·Ğ¾Ğ²Ğ°Ğ½Ğ¸Ğ¹ (ÑĞ¼. TClarke)
+ \author    ĞĞĞ "ĞĞŸĞ¤ Ğ’ĞµĞºÑ‚Ğ¾Ñ€". http://motorcontrol.ru
  \version   v 2.0 25/03/2016
  \addtogroup clarke
  @{
@@ -24,7 +24,7 @@
 #include "V_IQmath.h"         /* Include header for IQmath library */
 #include "clarke.h"
 
-//! Ôóíêöèÿ ôàçíûõ ïğåîáğàçîâàíèé 
+//! Ğ¤ÑƒĞ½ĞºÑ†Ğ¸Ñ Ñ„Ğ°Ğ·Ğ½Ñ‹Ñ… Ğ¿Ñ€ĞµĞ¾Ğ±Ñ€Ğ°Ğ·Ğ¾Ğ²Ğ°Ğ½Ğ¸Ğ¹ 
 //! \memberof TClarke
 void clarke_calc(TClarke *v) {
 	v->ds = v->as;

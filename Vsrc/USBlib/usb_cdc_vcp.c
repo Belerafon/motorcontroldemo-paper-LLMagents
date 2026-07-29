@@ -1,5 +1,5 @@
 /*!
-    Copyright 2017 	АО "НИИЭТ" и ООО "НПФ ВЕКТОР"
+    Copyright 2017 	РђРћ "РќРРР­Рў" Рё РћРћРћ "РќРџР¤ Р’Р•РљРўРћР "
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -14,12 +14,12 @@
    limitations under the License.
 
  \file      V_usblib.c
- \brief     Набор функций для инициализации драйвера USB. Основан на примере
- 			USB VCP" от НИИЭТ:
+ \brief     РќР°Р±РѕСЂ С„СѓРЅРєС†РёР№ РґР»СЏ РёРЅРёС†РёР°Р»РёР·Р°С†РёРё РґСЂР°Р№РІРµСЂР° USB. РћСЃРЅРѕРІР°РЅ РЅР° РїСЂРёРјРµСЂРµ
+ 			USB VCP" РѕС‚ РќРРР­Рў:
  			https://bitbucket.org/niietcm4/
  			---> / chip / K1921VK01T / GCC / USB / CDC_VCP /
 
- \author    ООО "НПФ Вектор" http://motorcontrol.ru, НИИЭТ http://niiet.ru
+ \author    РћРћРћ "РќРџР¤ Р’РµРєС‚РѕСЂ" http://motorcontrol.ru, РќРРР­Рў http://niiet.ru
  \version   v 1.0 08/08/2017
 
  \addtogroup usb_cdc_vcp
@@ -164,7 +164,7 @@ uint32_t rdptr_txbuf = 0;
 uint32_t fill_txbuf = 0;
 
 uint8_t cdc_tx_now = 0;
-uint8_t line_coding_struct[7]; //заглушка
+uint8_t line_coding_struct[7]; //Р·Р°РіР»СѓС€РєР°
 
 void (*VCP_CDC_DataTransmitted)(void) = NULL;
 void (*VCP_CDC_DataReceived)(void) = NULL;
@@ -226,14 +226,14 @@ uint32_t USBDev_CDC_Setup(USBDev_Setup_TypeDef *pUSB_SETUP_PACKET)
 {
     switch(pUSB_SETUP_PACKET->bmRequestType & 0x60)
     {
-    //обработка специфических для класа запросов
+    //РѕР±СЂР°Р±РѕС‚РєР° СЃРїРµС†РёС„РёС‡РµСЃРєРёС… РґР»СЏ РєР»Р°СЃР° Р·Р°РїСЂРѕСЃРѕРІ
     case 0x20: //CLASS_SPECIFIC_REQ
         switch (pUSB_SETUP_PACKET->bRequest)
         {
         case SET_LINE_CODING:
             if(pUSB_SETUP_PACKET->wLength == 7)
             {
-                // готовим буфер, куда складывать данные
+                // РіРѕС‚РѕРІРёРј Р±СѓС„РµСЂ, РєСѓРґР° СЃРєР»Р°РґС‹РІР°С‚СЊ РґР°РЅРЅС‹Рµ
                 USBDev_EPPrepareRx(&line_coding_struct[0], 7, 0);
 
                 /*pUSB_SETUP_PACKET->xfer_buff = (uint8_t*)&line_coding_struct[0];
@@ -267,8 +267,8 @@ uint32_t USBDev_CDC_Setup(USBDev_Setup_TypeDef *pUSB_SETUP_PACKET)
             break;
 
         case SET_CONTROL_LINE_STATE:
-            // этот запрос не требует данных
-            // сами данные лежат в wValue
+            // СЌС‚РѕС‚ Р·Р°РїСЂРѕСЃ РЅРµ С‚СЂРµР±СѓРµС‚ РґР°РЅРЅС‹С…
+            // СЃР°РјРё РґР°РЅРЅС‹Рµ Р»РµР¶Р°С‚ РІ wValue
             USBDev_CEPSendResponse(CEP_ZEROLEN);
             break;
 
@@ -340,20 +340,20 @@ uint8_t *USBDev_CDC_GetConfigDscr(USBDev_Speed_TypeDef dev_speed, uint32_t *len)
 uint32_t Handle_RX(uint8_t epnum)
 {
     uint32_t diff;
-    // смотрим количество байт, которые пришли в точку
+    // СЃРјРѕС‚СЂРёРј РєРѕР»РёС‡РµСЃС‚РІРѕ Р±Р°Р№С‚, РєРѕС‚РѕСЂС‹Рµ РїСЂРёС€Р»Рё РІ С‚РѕС‡РєСѓ
     uint32_t rx_bytes_cnt = USBDev_EP_AvailCnt(epnum);
-    //смотрим влезет ли в буфер количество пришедших данных
-    //если есть место и фифо не занят
+    //СЃРјРѕС‚СЂРёРј РІР»РµР·РµС‚ Р»Рё РІ Р±СѓС„РµСЂ РєРѕР»РёС‡РµСЃС‚РІРѕ РїСЂРёС€РµРґС€РёС… РґР°РЅРЅС‹С…
+    //РµСЃР»Рё РµСЃС‚СЊ РјРµСЃС‚Рѕ Рё С„РёС„Рѕ РЅРµ Р·Р°РЅСЏС‚
 
     if((usbRxBuf.availSpace(&usbRxBuf) >= rx_bytes_cnt) && (usbRxBuf.busy == 0))
     {
-    	// Сначала считываем в промежуточный usbRxBuf,
-    	// а потом кладём это в наш фифо
+    	// РЎРЅР°С‡Р°Р»Р° СЃС‡РёС‚С‹РІР°РµРј РІ РїСЂРѕРјРµР¶СѓС‚РѕС‡РЅС‹Р№ usbRxBuf,
+    	// Р° РїРѕС‚РѕРј РєР»Р°РґС‘Рј СЌС‚Рѕ РІ РЅР°С€ С„РёС„Рѕ
         USBDev_ReadPacket(tempUsbRxData, rx_bytes_cnt, epnum);
         usbRxBuf.put(&usbRxBuf, rx_bytes_cnt, tempUsbRxData);
         return 0;
     }
-    else // если места недостаточно, то считываем максимальное количество байт из точки
+    else // РµСЃР»Рё РјРµСЃС‚Р° РЅРµРґРѕСЃС‚Р°С‚РѕС‡РЅРѕ, С‚Рѕ СЃС‡РёС‚С‹РІР°РµРј РјР°РєСЃРёРјР°Р»СЊРЅРѕРµ РєРѕР»РёС‡РµСЃС‚РІРѕ Р±Р°Р№С‚ РёР· С‚РѕС‡РєРё
     {
         return 1;
     }
@@ -366,15 +366,15 @@ uint32_t Handle_TX(uint8_t epnum)
 
     if (usbTxBuf.busy == 1) return 0;
     data_len = usbTxBuf.filledSpace(&usbTxBuf);
-    //если есть данные в буфере
+    //РµСЃР»Рё РµСЃС‚СЊ РґР°РЅРЅС‹Рµ РІ Р±СѓС„РµСЂРµ
     if(data_len > 0)
     {
-        // Ставим флаг передачи, читаем из фифо в промежуточный буфер, и отправляем его
+        // РЎС‚Р°РІРёРј С„Р»Р°Рі РїРµСЂРµРґР°С‡Рё, С‡РёС‚Р°РµРј РёР· С„РёС„Рѕ РІ РїСЂРѕРјРµР¶СѓС‚РѕС‡РЅС‹Р№ Р±СѓС„РµСЂ, Рё РѕС‚РїСЂР°РІР»СЏРµРј РµРіРѕ
         cdc_tx_now = 1;
         usbTxBuf.get(&usbTxBuf, data_len, tempUsbTxData);
         USBDev_WritePacket(tempUsbTxData, data_len, epnum);
      }
-    //если все данные переданы, то сбросм флаг активности передачи
+    //РµСЃР»Рё РІСЃРµ РґР°РЅРЅС‹Рµ РїРµСЂРµРґР°РЅС‹, С‚Рѕ СЃР±СЂРѕСЃРј С„Р»Р°Рі Р°РєС‚РёРІРЅРѕСЃС‚Рё РїРµСЂРµРґР°С‡Рё
     else
     {
         if(cdc_tx_now)

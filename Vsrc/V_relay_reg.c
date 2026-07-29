@@ -1,5 +1,5 @@
 /*!
-     Copyright 2017 	АО "НИИЭТ" и ООО "НПФ ВЕКТОР"
+     Copyright 2017 	РђРћ "РќРРР­Рў" Рё РћРћРћ "РќРџР¤ Р’Р•РљРўРћР "
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -14,8 +14,8 @@
    limitations under the License.
  
  \file      V_relay_reg.c
- \brief     Релейный регулятор
- \author    ООО "НПФ Вектор". http://motorcontrol.ru
+ \brief     Р РµР»РµР№РЅС‹Р№ СЂРµРіСѓР»СЏС‚РѕСЂ
+ \author    РћРћРћ "РќРџР¤ Р’РµРєС‚РѕСЂ". http://motorcontrol.ru
  \version   v 1.0 23/01/2016
 
  \addtogroup V_realy_reg
@@ -23,7 +23,7 @@
 
 #include "V_IQmath.h"         // Include header for IQmath library
 #include "V_relay_reg.h"
-//! Функция расчета релейного регулятора
+//! Р¤СѓРЅРєС†РёСЏ СЂР°СЃС‡РµС‚Р° СЂРµР»РµР№РЅРѕРіРѕ СЂРµРіСѓР»СЏС‚РѕСЂР°
 
 //! \memberof TRelayReg
 void relay_reg_calc(TRelayReg *v)

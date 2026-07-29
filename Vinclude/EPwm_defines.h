@@ -1,5 +1,5 @@
 /******************************************************************************
-    Copyright 2017 	АО "НИИЭТ" и ООО "НПФ ВЕКТОР"
+    Copyright 2017 	РђРћ "РќРРР­Рў" Рё РћРћРћ "РќРџР¤ Р’Р•РљРўРћР "
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -14,10 +14,10 @@
    limitations under the License.
 
  * @file		EPwm_defines.h
- * @brief		Файл объявления системных констант для работы с ШИМ модулями
- * @author    	ООО "НПФ Вектор". http://motorcontrol.ru
+ * @brief		Р¤Р°Р№Р» РѕР±СЉСЏРІР»РµРЅРёСЏ СЃРёСЃС‚РµРјРЅС‹С… РєРѕРЅСЃС‚Р°РЅС‚ РґР»СЏ СЂР°Р±РѕС‚С‹ СЃ РЁРРњ РјРѕРґСѓР»СЏРјРё
+ * @author    	РћРћРћ "РќРџР¤ Р’РµРєС‚РѕСЂ". http://motorcontrol.ru
  * @version		v1.0
- * @date		11 декабря 2015
+ * @date		11 РґРµРєР°Р±СЂСЏ 2015
 
  ******************************************************************************/
 

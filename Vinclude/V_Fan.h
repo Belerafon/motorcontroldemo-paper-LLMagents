@@ -1,5 +1,5 @@
 /*!
-     Copyright 2017 	ÀÎ "ÍÈÈÝÒ" è ÎÎÎ "ÍÏÔ ÂÅÊÒÎÐ"
+     Copyright 2017 	ÐÐž "ÐÐ˜Ð˜Ð­Ð¢" Ð¸ ÐžÐžÐž "ÐÐŸÐ¤ Ð’Ð•ÐšÐ¢ÐžÐ "
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -14,8 +14,8 @@
    limitations under the License.
 
  \file      V_Fan.h
- \brief     Ìîäóëü ðàáîòû âåíòèëÿòîðà
- \author    ÎÎÎ "ÍÏÔ Âåêòîð". http://motorcontrol.ru
+ \brief     ÐœÐ¾Ð´ÑƒÐ»ÑŒ Ñ€Ð°Ð±Ð¾Ñ‚Ñ‹ Ð²ÐµÐ½Ñ‚Ð¸Ð»ÑÑ‚Ð¾Ñ€Ð°
+ \author    ÐžÐžÐž "ÐÐŸÐ¤ Ð’ÐµÐºÑ‚Ð¾Ñ€". http://motorcontrol.ru
  \version   v 1.0 25/08/2017
 
  \addtogroup
@@ -26,21 +26,21 @@
 #define V_FAN_H
 
 
-//! âåíòèëÿòîð âûêëþ÷åí
+//! Ð²ÐµÐ½Ñ‚Ð¸Ð»ÑÑ‚Ð¾Ñ€ Ð²Ñ‹ÐºÐ»ÑŽÑ‡ÐµÐ½
 #define FAN_CONTROL_STATE_OFF 		0
-//! âåíòèëÿòîð âêëþ÷åí
+//! Ð²ÐµÐ½Ñ‚Ð¸Ð»ÑÑ‚Ð¾Ñ€ Ð²ÐºÐ»ÑŽÑ‡ÐµÐ½
 #define FAN_CONTROL_STATE_ON 		1
-//! ñîñòîÿíèå ïåðåãðåâà
+//! ÑÐ¾ÑÑ‚Ð¾ÑÐ½Ð¸Ðµ Ð¿ÐµÑ€ÐµÐ³Ñ€ÐµÐ²Ð°
 #define FAN_CONTROL_STATE_OVERHEAT 	2
 
-/* Âêëþ÷åíèå è âûêëþ÷åíèå âåíòèëÿòîðà */
+/* Ð’ÐºÐ»ÑŽÑ‡ÐµÐ½Ð¸Ðµ Ð¸ Ð²Ñ‹ÐºÐ»ÑŽÑ‡ÐµÐ½Ð¸Ðµ Ð²ÐµÐ½Ñ‚Ð¸Ð»ÑÑ‚Ð¾Ñ€Ð° */
 #if defined (HW_MOTORCONTROLBOARD)
 #define FAN_ON			NT_GPIOA->MASKHIGHBYTE_bit[32].MASKHB = 32			//NT_GPIOA->DATA |= (1 << 13)
 #define FAN_OFF			NT_GPIOA->MASKHIGHBYTE_bit[32].MASKHB = 0			//NT_GPIOA->DATA &= ~(1 << 13)
 #endif
 
 #if !defined (HW_MOTORCONTROLBOARD)
-/* Äåôàéíû äëÿ äðóãèõ êîíòðîëëåðîâ */
+/* Ð”ÐµÑ„Ð°Ð¹Ð½Ñ‹ Ð´Ð»Ñ Ð´Ñ€ÑƒÐ³Ð¸Ñ… ÐºÐ¾Ð½Ñ‚Ñ€Ð¾Ð»Ð»ÐµÑ€Ð¾Ð² */
 #define FAN_ON
 #define FAN_OFF
 #endif
@@ -49,14 +49,14 @@
 struct SFanControl{
 	Uint16 Enabled;
 
-	int state; //!<ñîñòîÿíèå
-	int state_shadow;//!< ñîñòîÿíèå òåíåâîå
-	int state_prev;//!<ñîñòîÿíèå ïðåäûäóùåå
-	int StateOn;//!<äâîè÷íîå ñîñòîÿíèå: âêëþ÷åí/íå âêëþ÷åí
+	int state; //!<ÑÐ¾ÑÑ‚Ð¾ÑÐ½Ð¸Ðµ
+	int state_shadow;//!< ÑÐ¾ÑÑ‚Ð¾ÑÐ½Ð¸Ðµ Ñ‚ÐµÐ½ÐµÐ²Ð¾Ðµ
+	int state_prev;//!<ÑÐ¾ÑÑ‚Ð¾ÑÐ½Ð¸Ðµ Ð¿Ñ€ÐµÐ´Ñ‹Ð´ÑƒÑ‰ÐµÐµ
+	int StateOn;//!<Ð´Ð²Ð¾Ð¸Ñ‡Ð½Ð¾Ðµ ÑÐ¾ÑÑ‚Ð¾ÑÐ½Ð¸Ðµ: Ð²ÐºÐ»ÑŽÑ‡ÐµÐ½/Ð½Ðµ Ð²ÐºÐ»ÑŽÑ‡ÐµÐ½
 
-	long T_on;//!<òåìïåðàòóðà âêëþ÷åíèÿ
-	long T_off;//!<òåìïåðàòóðà âûêëþ÷åíèÿ
-	long T_alarm;//!òåìïåðàòóðà âûâîäà ïðåäóïðåæäåíèÿ
+	long T_on;//!<Ñ‚ÐµÐ¼Ð¿ÐµÑ€Ð°Ñ‚ÑƒÑ€Ð° Ð²ÐºÐ»ÑŽÑ‡ÐµÐ½Ð¸Ñ
+	long T_off;//!<Ñ‚ÐµÐ¼Ð¿ÐµÑ€Ð°Ñ‚ÑƒÑ€Ð° Ð²Ñ‹ÐºÐ»ÑŽÑ‡ÐµÐ½Ð¸Ñ
+	long T_alarm;//!Ñ‚ÐµÐ¼Ð¿ÐµÑ€Ð°Ñ‚ÑƒÑ€Ð° Ð²Ñ‹Ð²Ð¾Ð´Ð° Ð¿Ñ€ÐµÐ´ÑƒÐ¿Ñ€ÐµÐ¶Ð´ÐµÐ½Ð¸Ñ
 	void   (*init)(volatile struct SFanControl*);
 	void   (*slow_calc)(volatile struct SFanControl*);
 };
@@ -68,7 +68,7 @@ typedef volatile struct SFanControl TFanControl;
 //! \memberof TFanControl
 void FanControl_init(TFanControl*);
 //! \memberof TFanControl
-void FanControl_slow_calc(TFanControl*);	//ðàñ÷åò â ôîíîâîì ðåæèìå
+void FanControl_slow_calc(TFanControl*);	//Ñ€Ð°ÑÑ‡ÐµÑ‚ Ð² Ñ„Ð¾Ð½Ð¾Ð²Ð¾Ð¼ Ñ€ÐµÐ¶Ð¸Ð¼Ðµ
 
 
 #define FAN_CONTROL_DEFAULTS { \

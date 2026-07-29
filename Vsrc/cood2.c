@@ -1,809 +1,809 @@
-// ‘‡ÈÎ: cood2.c
-// œÓÙËÎ¸: D:\Eclipse_GCC_ARM_wks\motorcontroldemo\cood.xml
-//  ÓÌÙË„Û‡ˆËˇ: ¡‡ÁÓ‚˚È ÔÓÙËÎ¸
-// ƒ‡Ú‡ ÒÓÁ‰‡ÌËˇ: 30.08.2021 18:46:11
-// œÓÎ¸ÁÓ‚‡ÚÂÎ¸: default
+// –§–∞–π–ª: cood2.c
+// –ü—Ä–æ—Ñ–∏–ª—å: D:\Eclipse_GCC_ARM_wks\motorcontroldemo\cood.xml
+// –ö–æ–Ω—Ñ–∏–≥—É—Ä–∞—Ü–∏—è: –ë–∞–∑–æ–≤—ã–π –ø—Ä–æ—Ñ–∏–ª—å
+// –î–∞—Ç–∞ —Å–æ–∑–¥–∞–Ω–∏—è: 30.08.2021 18:46:11
+// –ü–æ–ª—å–∑–æ–≤–∞—Ç–µ–ª—å: default
 // COODEdit Basic v.7.3.8
 #include "DSP.h"
 #include "main.h"
 #include "cood2.h"
 #include "co_ODvars.h"
 
-// ‚ÒÂ„Ó 130 ËÌ‰ÂÍÒÓ‚ ‚ ÒÎÓ‚‡Â
-// ‚ÒÂ„Ó 897 ˝ÎÂÏÂÌÚÓ‚ ‚ ÒÎÓ‚‡Â
+// –≤—Å–µ–≥–æ 130 –∏–Ω–¥–µ–∫—Å–æ–≤ –≤ —Å–ª–æ–≤–∞—Ä–µ
+// –≤—Å–µ–≥–æ 897 —ç–ª–µ–º–µ–Ω—Ç–æ–≤ –≤ —Å–ª–æ–≤–∞—Ä–µ
 Uint16 const co2_numOfInd = 130;
-// ÕÓÏÂ ÔÂÂ˜ÂÒÎÂÌËˇ ‰Îˇ „ÛÔÔ
+// –ù–æ–º–µ—Ä –ø–µ—Ä–µ—á–µ—Å–ª–µ–Ω–∏—è –¥–ª—è –≥—Ä—É–ø–ø
 Uint16 const co2_groupEnum = 15;
-// ’˝¯-ÒÛÏÏ‡:
+// –•—ç—à-—Å—É–º–º–∞:
 Uint32 const co2_odHash[4] = {0xB9C45032, 0xCBA147EB, 0xC14657A4, 0x98DECC5B};
-// “‡·ÎËˆ‡ Ò ‡‰ÂÒ‡ÏË ÔÂÂÏÂÌÌ˚ı
+// –¢–∞–±–ª–∏—Ü–∞ —Å –∞–¥—Ä–µ—Å–∞–º–∏ –ø–µ—Ä–µ–º–µ–Ω–Ω—ã—Ö
 long const CO2_OD_TBL3[] = {
-(long)(&co2_vars.co_deviceType),	//[1000h.00h], Õ‡Á‚‡ÌËÂ: “ËÔ ÛÒÚÓÈÒÚ‚‡, “ÂÍÒÚœ”: Device Type, √ÛÔÔ‡: CAN
-(long)(&co2_vars.co_errorRegister),	//[1001h.00h], Õ‡Á‚‡ÌËÂ: –Â„ËÒÚ Ó¯Ë·ÓÍ, “ÂÍÒÚœ”: ErrReg, √ÛÔÔ‡: CAN
-(long)(&co2_vars.co_deviceState),	//[1002h.00h], Õ‡Á‚‡ÌËÂ: Manufacturer Status Register, “ÂÍÒÚœ”: DevSta, √ÛÔÔ‡: CAN
-(long)(&co2_vars.co_emcyCOBID),	//[1014h.00h], Õ‡Á‚‡ÌËÂ: COB-ID Emergency Object, “ÂÍÒÚœ”: eCOBID, √ÛÔÔ‡: CAN
-(long)(&co2_vars.co_CHBT),	//[1016h.01h], Õ‡Á‚‡ÌËÂ: ¬ÂÏˇ ÓÊË‰‡ÌËˇ ÒÓÓ·˘ÂÌËˇ Heartbeat, “ÂÍÒÚœ”: CHBT, √ÛÔÔ‡: CAN
-(long)(&co2_vars.co_PHBT),	//[1017h.00h], Õ‡Á‚‡ÌËÂ: œÂËÓ‰ „ÂÌÂ‡ˆËË ÒÓÓ·˘ÂÌËˇ Heartbeat, “ÂÍÒÚœ”: PHBT, √ÛÔÔ‡: CAN
-(long)(&co2_vars.co_vendorID),	//[1018h.01h], Õ‡Á‚‡ÌËÂ:  Ó‰ ÔÓËÁ‚Ó‰ËÚÂÎˇ, “ÂÍÒÚœ”: VendID, √ÛÔÔ‡: CAN
-(long)(&co2_vars.co_productCode),	//[1018h.02h], Õ‡Á‚‡ÌËÂ:  Ó‰ ÔÓ‰ÛÍÚ‡, “ÂÍÒÚœ”: PrCode, √ÛÔÔ‡: CAN
-(long)(&co2_vars.co_revisionNumber),	//[1018h.03h], Õ‡Á‚‡ÌËÂ: ÕÓÏÂ Â‚ËÁËË, “ÂÍÒÚœ”: RevNum, √ÛÔÔ‡: CAN
-(long)(&co2_vars.co_serialNumber),	//[1018h.04h], Õ‡Á‚‡ÌËÂ: —ÂËÈÌ˚È ÌÓÏÂ, “ÂÍÒÚœ”: SerNum, √ÛÔÔ‡: CAN
-(long)(&co2_vars.co_csrxCOBID),	//[1200h.01h], Õ‡Á‚‡ÌËÂ: COB-ID Client->Server(rx), “ÂÍÒÚœ”: CSRXID, √ÛÔÔ‡: CAN
-(long)(&co2_vars.co_sctxCOBID),	//[1200h.02h], Õ‡Á‚‡ÌËÂ: COB-ID Server->Client(tx), “ÂÍÒÚœ”: SCTXID, √ÛÔÔ‡: CAN
-(long)(&co2_vars.co_cstxCOBID),	//[1280h.01h], Õ‡Á‚‡ÌËÂ: COB-ID Client->Server(tx), “ÂÍÒÚœ”: CSTXID, √ÛÔÔ‡: CAN
-(long)(&co2_vars.co_scrxCOBID),	//[1280h.02h], Õ‡Á‚‡ÌËÂ: COB-ID Server->Client(rx), “ÂÍÒÚœ”: SCRXID, √ÛÔÔ‡: CAN
-(long)(&co2_vars.co_ssNODEID),	//[1280h.03h], Õ‡Á‚‡ÌËÂ: NODE-ID on SDO server, “ÂÍÒÚœ”: SDOSID, √ÛÔÔ‡: CAN
-(long)(&co2_vars.co_RPDO1COBID),	//[1400h.01h], Õ‡Á‚‡ÌËÂ: COB-ID for RPDO1, “ÂÍÒÚœ”: IRPDO1, √ÛÔÔ‡: CAN
-(long)(&co2_vars.co_transType),	//[1400h.02h], Õ‡Á‚‡ÌËÂ: “ËÔ ÔÂÂ‰‡˜Ë, “ÂÍÒÚœ”: TransT, √ÛÔÔ‡: CAN
-(long)(&co2_vars.co_RPDO2COBID),	//[1401h.01h], Õ‡Á‚‡ÌËÂ: COB-ID for RPDO2, “ÂÍÒÚœ”: IRPDO2, √ÛÔÔ‡: CAN
-(long)(&co2_vars.co_transType),	//[1401h.02h], Õ‡Á‚‡ÌËÂ: “ËÔ ÔÂÂ‰‡˜Ë, “ÂÍÒÚœ”: TransT, √ÛÔÔ‡: CAN
-(long)(&co2_vars.co_RPDO3COBID),	//[1402h.01h], Õ‡Á‚‡ÌËÂ: COB-ID for RPDO3, “ÂÍÒÚœ”: IRPDO3, √ÛÔÔ‡: CAN
-(long)(&co2_vars.co_transType),	//[1402h.02h], Õ‡Á‚‡ÌËÂ: “ËÔ ÔÂÂ‰‡˜Ë, “ÂÍÒÚœ”: TransT, √ÛÔÔ‡: CAN
-(long)(&co2_vars.co_RPDO4COBID),	//[1403h.01h], Õ‡Á‚‡ÌËÂ: COB-ID for RPDO4, “ÂÍÒÚœ”: IRPDO4, √ÛÔÔ‡: CAN
-(long)(&co2_vars.co_transType),	//[1403h.02h], Õ‡Á‚‡ÌËÂ: “ËÔ ÔÂÂ‰‡˜Ë, “ÂÍÒÚœ”: TransT, √ÛÔÔ‡: CAN
-(long)(&co2_vars.co_RPDO5COBID),	//[1404h.01h], Õ‡Á‚‡ÌËÂ: COB-ID for RPDO5, “ÂÍÒÚœ”: IRPDO5, √ÛÔÔ‡: CAN
-(long)(&co2_vars.co_transType),	//[1404h.02h], Õ‡Á‚‡ÌËÂ: “ËÔ ÔÂÂ‰‡˜Ë, “ÂÍÒÚœ”: TransT, √ÛÔÔ‡: CAN
-(long)(&co2_vars.co_RPDO6COBID),	//[1405h.01h], Õ‡Á‚‡ÌËÂ: COB-ID for RPDO6, “ÂÍÒÚœ”: IRPDO6, √ÛÔÔ‡: CAN
-(long)(&co2_vars.co_transType),	//[1405h.02h], Õ‡Á‚‡ÌËÂ: “ËÔ ÔÂÂ‰‡˜Ë, “ÂÍÒÚœ”: TransT, √ÛÔÔ‡: CAN
-(long)(&co2_vars.co_RPDO7COBID),	//[1406h.01h], Õ‡Á‚‡ÌËÂ: COB-ID for RPDO7, “ÂÍÒÚœ”: IRPDO7, √ÛÔÔ‡: CAN
-(long)(&co2_vars.co_transType),	//[1406h.02h], Õ‡Á‚‡ÌËÂ: “ËÔ ÔÂÂ‰‡˜Ë, “ÂÍÒÚœ”: TransT, √ÛÔÔ‡: CAN
-(long)(&co2_vars.co_RPDO8COBID),	//[1407h.01h], Õ‡Á‚‡ÌËÂ: COB-ID for RPDO8, “ÂÍÒÚœ”: IRPDO8, √ÛÔÔ‡: CAN
-(long)(&co2_vars.co_transType),	//[1407h.02h], Õ‡Á‚‡ÌËÂ: “ËÔ ÔÂÂ‰‡˜Ë, “ÂÍÒÚœ”: TransT, √ÛÔÔ‡: CAN
-(long)(&co2_vars.co_RPDO1_1Mapping),	//[1600h.01h], Õ‡Á‚‡ÌËÂ: RPDO1-1 Mapping, “ÂÍÒÚœ”: RPM11, √ÛÔÔ‡: CAN
-(long)(&co2_vars.co_RPDO1_2Mapping),	//[1600h.02h], Õ‡Á‚‡ÌËÂ: RPDO1-2 Mapping, “ÂÍÒÚœ”: RPM12, √ÛÔÔ‡: CAN
-(long)(&co2_vars.co_RPDO1_3Mapping),	//[1600h.03h], Õ‡Á‚‡ÌËÂ: RPDO1-3 Mapping, “ÂÍÒÚœ”: RPM13, √ÛÔÔ‡: CAN
-(long)(&co2_vars.co_RPDO1_4Mapping),	//[1600h.04h], Õ‡Á‚‡ÌËÂ: RPDO1-4 Mapping, “ÂÍÒÚœ”: RPM14, √ÛÔÔ‡: CAN
-(long)(&co2_vars.co_RPDO2_1Mapping),	//[1601h.01h], Õ‡Á‚‡ÌËÂ: RPDO2-1 Mapping, “ÂÍÒÚœ”: RPM21, √ÛÔÔ‡: CAN
-(long)(&co2_vars.co_RPDO2_2Mapping),	//[1601h.02h], Õ‡Á‚‡ÌËÂ: RPDO2-2 Mapping, “ÂÍÒÚœ”: RPM22, √ÛÔÔ‡: CAN
-(long)(&co2_vars.co_RPDO2_3Mapping),	//[1601h.03h], Õ‡Á‚‡ÌËÂ: RPDO2-3 Mapping, “ÂÍÒÚœ”: RPM23, √ÛÔÔ‡: CAN
-(long)(&co2_vars.co_RPDO2_4Mapping),	//[1601h.04h], Õ‡Á‚‡ÌËÂ: RPDO2-4 Mapping, “ÂÍÒÚœ”: RPM24, √ÛÔÔ‡: CAN
-(long)(&co2_vars.co_RPDO3_1Mapping),	//[1602h.01h], Õ‡Á‚‡ÌËÂ: RPDO3-1 Mapping, “ÂÍÒÚœ”: RPM31, √ÛÔÔ‡: CAN
-(long)(&co2_vars.co_RPDO3_2Mapping),	//[1602h.02h], Õ‡Á‚‡ÌËÂ: RPDO3-2 Mapping, “ÂÍÒÚœ”: RPM32, √ÛÔÔ‡: CAN
-(long)(&co2_vars.co_RPDO3_3Mapping),	//[1602h.03h], Õ‡Á‚‡ÌËÂ: RPDO3-3 Mapping, “ÂÍÒÚœ”: RPM33, √ÛÔÔ‡: CAN
-(long)(&co2_vars.co_RPDO3_4Mapping),	//[1602h.04h], Õ‡Á‚‡ÌËÂ: RPDO3-4 Mapping, “ÂÍÒÚœ”: RPM34, √ÛÔÔ‡: CAN
-(long)(&co2_vars.co_RPDO4_1Mapping),	//[1603h.01h], Õ‡Á‚‡ÌËÂ: RPDO4-1 Mapping, “ÂÍÒÚœ”: RPM41, √ÛÔÔ‡: CAN
-(long)(&co2_vars.co_RPDO4_2Mapping),	//[1603h.02h], Õ‡Á‚‡ÌËÂ: RPDO4-2 Mapping, “ÂÍÒÚœ”: RPM42, √ÛÔÔ‡: CAN
-(long)(&co2_vars.co_RPDO4_3Mapping),	//[1603h.03h], Õ‡Á‚‡ÌËÂ: RPDO4-3 Mapping, “ÂÍÒÚœ”: RPM43, √ÛÔÔ‡: CAN
-(long)(&co2_vars.co_RPDO4_4Mapping),	//[1603h.04h], Õ‡Á‚‡ÌËÂ: RPDO4-4 Mapping, “ÂÍÒÚœ”: RPM44, √ÛÔÔ‡: CAN
-(long)(&co2_vars.co_RPDO5_1Mapping),	//[1604h.01h], Õ‡Á‚‡ÌËÂ: RPDO5-1 Mapping, “ÂÍÒÚœ”: RPM51, √ÛÔÔ‡: CAN
-(long)(&co2_vars.co_RPDO5_2Mapping),	//[1604h.02h], Õ‡Á‚‡ÌËÂ: RPDO5-2 Mapping, “ÂÍÒÚœ”: RPM52, √ÛÔÔ‡: CAN
-(long)(&co2_vars.co_RPDO5_3Mapping),	//[1604h.03h], Õ‡Á‚‡ÌËÂ: RPDO5-3 Mapping, “ÂÍÒÚœ”: RPM53, √ÛÔÔ‡: CAN
-(long)(&co2_vars.co_RPDO5_4Mapping),	//[1604h.04h], Õ‡Á‚‡ÌËÂ: RPDO5-4 Mapping, “ÂÍÒÚœ”: RPM54, √ÛÔÔ‡: CAN
-(long)(&co2_vars.co_RPDO6_1Mapping),	//[1605h.01h], Õ‡Á‚‡ÌËÂ: RPDO6-1 Mapping, “ÂÍÒÚœ”: RPM61, √ÛÔÔ‡: CAN
-(long)(&co2_vars.co_RPDO6_2Mapping),	//[1605h.02h], Õ‡Á‚‡ÌËÂ: RPDO6-2 Mapping, “ÂÍÒÚœ”: RPM62, √ÛÔÔ‡: CAN
-(long)(&co2_vars.co_RPDO6_3Mapping),	//[1605h.03h], Õ‡Á‚‡ÌËÂ: RPDO6-3 Mapping, “ÂÍÒÚœ”: RPM63, √ÛÔÔ‡: CAN
-(long)(&co2_vars.co_RPDO6_4Mapping),	//[1605h.04h], Õ‡Á‚‡ÌËÂ: RPDO6-4 Mapping, “ÂÍÒÚœ”: RPM64, √ÛÔÔ‡: CAN
-(long)(&co2_vars.co_RPDO7_1Mapping),	//[1606h.01h], Õ‡Á‚‡ÌËÂ: RPDO7-1 Mapping, “ÂÍÒÚœ”: RPM71, √ÛÔÔ‡: CAN
-(long)(&co2_vars.co_RPDO7_2Mapping),	//[1606h.02h], Õ‡Á‚‡ÌËÂ: RPDO7-2 Mapping, “ÂÍÒÚœ”: RPM72, √ÛÔÔ‡: CAN
-(long)(&co2_vars.co_RPDO7_3Mapping),	//[1606h.03h], Õ‡Á‚‡ÌËÂ: RPDO7-3 Mapping, “ÂÍÒÚœ”: RPM73, √ÛÔÔ‡: CAN
-(long)(&co2_vars.co_RPDO7_4Mapping),	//[1606h.04h], Õ‡Á‚‡ÌËÂ: RPDO7-4 Mapping, “ÂÍÒÚœ”: RPM74, √ÛÔÔ‡: CAN
-(long)(&co2_vars.co_RPDO8_1Mapping),	//[1607h.01h], Õ‡Á‚‡ÌËÂ: RPDO8-1 Mapping, “ÂÍÒÚœ”: RPM81, √ÛÔÔ‡: CAN
-(long)(&co2_vars.co_RPDO8_2Mapping),	//[1607h.02h], Õ‡Á‚‡ÌËÂ: RPDO8-2 Mapping, “ÂÍÒÚœ”: RPM82, √ÛÔÔ‡: CAN
-(long)(&co2_vars.co_RPDO8_3Mapping),	//[1607h.03h], Õ‡Á‚‡ÌËÂ: RPDO8-3 Mapping, “ÂÍÒÚœ”: RPM83, √ÛÔÔ‡: CAN
-(long)(&co2_vars.co_RPDO8_4Mapping),	//[1607h.04h], Õ‡Á‚‡ÌËÂ: RPDO8-4 Mapping, “ÂÍÒÚœ”: RPM84, √ÛÔÔ‡: CAN
-(long)(&co2_vars.co_TPDO1COBID),	//[1800h.01h], Õ‡Á‚‡ÌËÂ: COB-ID for TPDO1, “ÂÍÒÚœ”: ITPDO1, √ÛÔÔ‡: CAN
-(long)(&co2_vars.co_transType),	//[1800h.02h], Õ‡Á‚‡ÌËÂ: “ËÔ ÔÂÂ‰‡˜Ë, “ÂÍÒÚœ”: TransT, √ÛÔÔ‡: CAN
-(long)(&co2_vars.co_TPDO1ITime),	//[1800h.03h], Õ‡Á‚‡ÌËÂ: Inhibit Time 1, “ÂÍÒÚœ”: ITime1, √ÛÔÔ‡: CAN
-(long)(&co2_vars.co_compatEntry),	//[1800h.04h], Õ‡Á‚‡ÌËÂ: Compatibility Entry, “ÂÍÒÚœ”: CompEn, √ÛÔÔ‡: CAN
-(long)(&co2_vars.co_TPDO1EventTimer),	//[1800h.05h], Õ‡Á‚‡ÌËÂ: Event Timer 1, “ÂÍÒÚœ”: EvTmr1, √ÛÔÔ‡: CAN
-(long)(&co2_vars.co_TPDO2COBID),	//[1801h.01h], Õ‡Á‚‡ÌËÂ: COB-ID for TPDO2, “ÂÍÒÚœ”: ITPDO2, √ÛÔÔ‡: CAN
-(long)(&co2_vars.co_transType),	//[1801h.02h], Õ‡Á‚‡ÌËÂ: “ËÔ ÔÂÂ‰‡˜Ë, “ÂÍÒÚœ”: TransT, √ÛÔÔ‡: CAN
-(long)(&co2_vars.co_TPDO2ITime),	//[1801h.03h], Õ‡Á‚‡ÌËÂ: Inhibit Time 2, “ÂÍÒÚœ”: ITime2, √ÛÔÔ‡: CAN
-(long)(&co2_vars.co_compatEntry),	//[1801h.04h], Õ‡Á‚‡ÌËÂ: Compatibility Entry, “ÂÍÒÚœ”: CompEn, √ÛÔÔ‡: CAN
-(long)(&co2_vars.co_TPDO2EventTimer),	//[1801h.05h], Õ‡Á‚‡ÌËÂ: Event Timer 2, “ÂÍÒÚœ”: EvTmr2, √ÛÔÔ‡: CAN
-(long)(&co2_vars.co_TPDO3COBID),	//[1802h.01h], Õ‡Á‚‡ÌËÂ: COB-ID for TPDO3, “ÂÍÒÚœ”: ITPDO3, √ÛÔÔ‡: CAN
-(long)(&co2_vars.co_transType),	//[1802h.02h], Õ‡Á‚‡ÌËÂ: “ËÔ ÔÂÂ‰‡˜Ë, “ÂÍÒÚœ”: TransT, √ÛÔÔ‡: CAN
-(long)(&co2_vars.co_TPDO3ITime),	//[1802h.03h], Õ‡Á‚‡ÌËÂ: Inhibit Time 3, “ÂÍÒÚœ”: ITime3, √ÛÔÔ‡: CAN
-(long)(&co2_vars.co_compatEntry),	//[1802h.04h], Õ‡Á‚‡ÌËÂ: Compatibility Entry, “ÂÍÒÚœ”: CompEn, √ÛÔÔ‡: CAN
-(long)(&co2_vars.co_TPDO3EventTimer),	//[1802h.05h], Õ‡Á‚‡ÌËÂ: Event Timer 3, “ÂÍÒÚœ”: EvTmr3, √ÛÔÔ‡: CAN
-(long)(&co2_vars.co_TPDO4COBID),	//[1803h.01h], Õ‡Á‚‡ÌËÂ: COB-ID for TPDO4, “ÂÍÒÚœ”: ITPDO4, √ÛÔÔ‡: CAN
-(long)(&co2_vars.co_transType),	//[1803h.02h], Õ‡Á‚‡ÌËÂ: “ËÔ ÔÂÂ‰‡˜Ë, “ÂÍÒÚœ”: TransT, √ÛÔÔ‡: CAN
-(long)(&co2_vars.co_TPDO4ITime),	//[1803h.03h], Õ‡Á‚‡ÌËÂ: Inhibit Time 4, “ÂÍÒÚœ”: ITime4, √ÛÔÔ‡: CAN
-(long)(&co2_vars.co_compatEntry),	//[1803h.04h], Õ‡Á‚‡ÌËÂ: Compatibility Entry, “ÂÍÒÚœ”: CompEn, √ÛÔÔ‡: CAN
-(long)(&co2_vars.co_TPDO4EventTimer),	//[1803h.05h], Õ‡Á‚‡ÌËÂ: Event Timer 4, “ÂÍÒÚœ”: EvTmr4, √ÛÔÔ‡: CAN
-(long)(&co2_vars.co_TPDO5COBID),	//[1804h.01h], Õ‡Á‚‡ÌËÂ: COB-ID for TPDO5, “ÂÍÒÚœ”: ITPDO5, √ÛÔÔ‡: CAN
-(long)(&co2_vars.co_transType),	//[1804h.02h], Õ‡Á‚‡ÌËÂ: “ËÔ ÔÂÂ‰‡˜Ë, “ÂÍÒÚœ”: TransT, √ÛÔÔ‡: CAN
-(long)(&co2_vars.co_TPDO5ITime),	//[1804h.03h], Õ‡Á‚‡ÌËÂ: Inhibit Time 5, “ÂÍÒÚœ”: ITime5, √ÛÔÔ‡: CAN
-(long)(&co2_vars.co_compatEntry),	//[1804h.04h], Õ‡Á‚‡ÌËÂ: Compatibility Entry, “ÂÍÒÚœ”: CompEn, √ÛÔÔ‡: CAN
-(long)(&co2_vars.co_TPDO5EventTimer),	//[1804h.05h], Õ‡Á‚‡ÌËÂ: Event Timer 5, “ÂÍÒÚœ”: EvTmr5, √ÛÔÔ‡: CAN
-(long)(&co2_vars.co_TPDO6COBID),	//[1805h.01h], Õ‡Á‚‡ÌËÂ: COB-ID for TPDO6, “ÂÍÒÚœ”: ITPDO6, √ÛÔÔ‡: CAN
-(long)(&co2_vars.co_transType),	//[1805h.02h], Õ‡Á‚‡ÌËÂ: “ËÔ ÔÂÂ‰‡˜Ë, “ÂÍÒÚœ”: TransT, √ÛÔÔ‡: CAN
-(long)(&co2_vars.co_TPDO6ITime),	//[1805h.03h], Õ‡Á‚‡ÌËÂ: Inhibit Time 6, “ÂÍÒÚœ”: ITime6, √ÛÔÔ‡: CAN
-(long)(&co2_vars.co_compatEntry),	//[1805h.04h], Õ‡Á‚‡ÌËÂ: Compatibility Entry, “ÂÍÒÚœ”: CompEn, √ÛÔÔ‡: CAN
-(long)(&co2_vars.co_TPDO6EventTimer),	//[1805h.05h], Õ‡Á‚‡ÌËÂ: Event Timer 6, “ÂÍÒÚœ”: EvTmr6, √ÛÔÔ‡: CAN
-(long)(&co2_vars.co_TPDO7COBID),	//[1806h.01h], Õ‡Á‚‡ÌËÂ: COB-ID for TPDO7, “ÂÍÒÚœ”: ITPDO7, √ÛÔÔ‡: CAN
-(long)(&co2_vars.co_transType),	//[1806h.02h], Õ‡Á‚‡ÌËÂ: “ËÔ ÔÂÂ‰‡˜Ë, “ÂÍÒÚœ”: TransT, √ÛÔÔ‡: CAN
-(long)(&co2_vars.co_TPDO7ITime),	//[1806h.03h], Õ‡Á‚‡ÌËÂ: Inhibit Time 7, “ÂÍÒÚœ”: ITime7, √ÛÔÔ‡: CAN
-(long)(&co2_vars.co_compatEntry),	//[1806h.04h], Õ‡Á‚‡ÌËÂ: Compatibility Entry, “ÂÍÒÚœ”: CompEn, √ÛÔÔ‡: CAN
-(long)(&co2_vars.co_TPDO7EventTimer),	//[1806h.05h], Õ‡Á‚‡ÌËÂ: Event Timer 7, “ÂÍÒÚœ”: EvTmr7, √ÛÔÔ‡: CAN
-(long)(&co2_vars.co_TPDO8COBID),	//[1807h.01h], Õ‡Á‚‡ÌËÂ: COB-ID for TPDO8, “ÂÍÒÚœ”: ITPDO8, √ÛÔÔ‡: CAN
-(long)(&co2_vars.co_transType),	//[1807h.02h], Õ‡Á‚‡ÌËÂ: “ËÔ ÔÂÂ‰‡˜Ë, “ÂÍÒÚœ”: TransT, √ÛÔÔ‡: CAN
-(long)(&co2_vars.co_TPDO8ITime),	//[1807h.03h], Õ‡Á‚‡ÌËÂ: Inhibit Time 8, “ÂÍÒÚœ”: ITime8, √ÛÔÔ‡: CAN
-(long)(&co2_vars.co_compatEntry),	//[1807h.04h], Õ‡Á‚‡ÌËÂ: Compatibility Entry, “ÂÍÒÚœ”: CompEn, √ÛÔÔ‡: CAN
-(long)(&co2_vars.co_TPDO8EventTimer),	//[1807h.05h], Õ‡Á‚‡ÌËÂ: Event Timer 8, “ÂÍÒÚœ”: EvTmr8, √ÛÔÔ‡: CAN
-(long)(&co2_vars.co_TPDO1_1Mapping),	//[1A00h.01h], Õ‡Á‚‡ÌËÂ: TPDO1-1 Mapping, “ÂÍÒÚœ”: TPM11, √ÛÔÔ‡: CAN
-(long)(&co2_vars.co_TPDO1_2Mapping),	//[1A00h.02h], Õ‡Á‚‡ÌËÂ: TPDO1-2 Mapping, “ÂÍÒÚœ”: TPM12, √ÛÔÔ‡: CAN
-(long)(&co2_vars.co_TPDO1_3Mapping),	//[1A00h.03h], Õ‡Á‚‡ÌËÂ: TPDO1-3 Mapping, “ÂÍÒÚœ”: TPM13, √ÛÔÔ‡: CAN
-(long)(&co2_vars.co_TPDO1_4Mapping),	//[1A00h.04h], Õ‡Á‚‡ÌËÂ: TPDO1-4 Mapping, “ÂÍÒÚœ”: TPM14, √ÛÔÔ‡: CAN
-(long)(&co2_vars.co_TPDO2_1Mapping),	//[1A01h.01h], Õ‡Á‚‡ÌËÂ: TPDO2-1 Mapping, “ÂÍÒÚœ”: TPM21, √ÛÔÔ‡: CAN
-(long)(&co2_vars.co_TPDO2_2Mapping),	//[1A01h.02h], Õ‡Á‚‡ÌËÂ: TPDO2-2 Mapping, “ÂÍÒÚœ”: TPM22, √ÛÔÔ‡: CAN
-(long)(&co2_vars.co_TPDO2_3Mapping),	//[1A01h.03h], Õ‡Á‚‡ÌËÂ: TPDO2-3 Mapping, “ÂÍÒÚœ”: TPM23, √ÛÔÔ‡: CAN
-(long)(&co2_vars.co_TPDO2_4Mapping),	//[1A01h.04h], Õ‡Á‚‡ÌËÂ: TPDO2-4 Mapping, “ÂÍÒÚœ”: TPM24, √ÛÔÔ‡: CAN
-(long)(&co2_vars.co_TPDO3_1Mapping),	//[1A02h.01h], Õ‡Á‚‡ÌËÂ: TPDO3-1 Mapping, “ÂÍÒÚœ”: TPM31, √ÛÔÔ‡: CAN
-(long)(&co2_vars.co_TPDO3_2Mapping),	//[1A02h.02h], Õ‡Á‚‡ÌËÂ: TPDO3-2 Mapping, “ÂÍÒÚœ”: TPM32, √ÛÔÔ‡: CAN
-(long)(&co2_vars.co_TPDO3_3Mapping),	//[1A02h.03h], Õ‡Á‚‡ÌËÂ: TPDO3-3 Mapping, “ÂÍÒÚœ”: TPM33, √ÛÔÔ‡: CAN
-(long)(&co2_vars.co_TPDO3_4Mapping),	//[1A02h.04h], Õ‡Á‚‡ÌËÂ: TPDO3-4 Mapping, “ÂÍÒÚœ”: TPM34, √ÛÔÔ‡: CAN
-(long)(&co2_vars.co_TPDO4_1Mapping),	//[1A03h.01h], Õ‡Á‚‡ÌËÂ: TPDO4-1 Mapping, “ÂÍÒÚœ”: TPM41, √ÛÔÔ‡: CAN
-(long)(&co2_vars.co_TPDO4_2Mapping),	//[1A03h.02h], Õ‡Á‚‡ÌËÂ: TPDO4-2 Mapping, “ÂÍÒÚœ”: TPM42, √ÛÔÔ‡: CAN
-(long)(&co2_vars.co_TPDO4_3Mapping),	//[1A03h.03h], Õ‡Á‚‡ÌËÂ: TPDO4-3 Mapping, “ÂÍÒÚœ”: TPM43, √ÛÔÔ‡: CAN
-(long)(&co2_vars.co_TPDO4_4Mapping),	//[1A03h.04h], Õ‡Á‚‡ÌËÂ: TPDO4-4 Mapping, “ÂÍÒÚœ”: TPM44, √ÛÔÔ‡: CAN
-(long)(&co2_vars.co_TPDO5_1Mapping),	//[1A04h.01h], Õ‡Á‚‡ÌËÂ: TPDO5-1 Mapping, “ÂÍÒÚœ”: TPM51, √ÛÔÔ‡: CAN
-(long)(&co2_vars.co_TPDO5_2Mapping),	//[1A04h.02h], Õ‡Á‚‡ÌËÂ: TPDO5-2 Mapping, “ÂÍÒÚœ”: TPM52, √ÛÔÔ‡: CAN
-(long)(&co2_vars.co_TPDO5_3Mapping),	//[1A04h.03h], Õ‡Á‚‡ÌËÂ: TPDO5-3 Mapping, “ÂÍÒÚœ”: TPM53, √ÛÔÔ‡: CAN
-(long)(&co2_vars.co_TPDO5_4Mapping),	//[1A04h.04h], Õ‡Á‚‡ÌËÂ: TPDO5-4 Mapping, “ÂÍÒÚœ”: TPM54, √ÛÔÔ‡: CAN
-(long)(&co2_vars.co_TPDO6_1Mapping),	//[1A05h.01h], Õ‡Á‚‡ÌËÂ: TPDO6-1 Mapping, “ÂÍÒÚœ”: TPM61, √ÛÔÔ‡: CAN
-(long)(&co2_vars.co_TPDO6_2Mapping),	//[1A05h.02h], Õ‡Á‚‡ÌËÂ: TPDO6-2 Mapping, “ÂÍÒÚœ”: TPM62, √ÛÔÔ‡: CAN
-(long)(&co2_vars.co_TPDO6_3Mapping),	//[1A05h.03h], Õ‡Á‚‡ÌËÂ: TPDO6-3 Mapping, “ÂÍÒÚœ”: TPM63, √ÛÔÔ‡: CAN
-(long)(&co2_vars.co_TPDO6_4Mapping),	//[1A05h.04h], Õ‡Á‚‡ÌËÂ: TPDO6-4 Mapping, “ÂÍÒÚœ”: TPM64, √ÛÔÔ‡: CAN
-(long)(&co2_vars.co_TPDO7_1Mapping),	//[1A06h.01h], Õ‡Á‚‡ÌËÂ: TPDO7-1 Mapping, “ÂÍÒÚœ”: TPM71, √ÛÔÔ‡: CAN
-(long)(&co2_vars.co_TPDO7_2Mapping),	//[1A06h.02h], Õ‡Á‚‡ÌËÂ: TPDO7-2 Mapping, “ÂÍÒÚœ”: TPM72, √ÛÔÔ‡: CAN
-(long)(&co2_vars.co_TPDO7_3Mapping),	//[1A06h.03h], Õ‡Á‚‡ÌËÂ: TPDO7-3 Mapping, “ÂÍÒÚœ”: TPM73, √ÛÔÔ‡: CAN
-(long)(&co2_vars.co_TPDO7_4Mapping),	//[1A06h.04h], Õ‡Á‚‡ÌËÂ: TPDO7-4 Mapping, “ÂÍÒÚœ”: TPM74, √ÛÔÔ‡: CAN
-(long)(&co2_vars.co_TPDO8_1Mapping),	//[1A07h.01h], Õ‡Á‚‡ÌËÂ: TPDO8-1 Mapping, “ÂÍÒÚœ”: TPM81, √ÛÔÔ‡: CAN
-(long)(&co2_vars.co_TPDO8_2Mapping),	//[1A07h.02h], Õ‡Á‚‡ÌËÂ: TPDO8-2 Mapping, “ÂÍÒÚœ”: TPM82, √ÛÔÔ‡: CAN
-(long)(&co2_vars.co_TPDO8_3Mapping),	//[1A07h.03h], Õ‡Á‚‡ÌËÂ: TPDO8-3 Mapping, “ÂÍÒÚœ”: TPM83, √ÛÔÔ‡: CAN
-(long)(&co2_vars.co_TPDO8_4Mapping),	//[1A07h.04h], Õ‡Á‚‡ÌËÂ: TPDO8-4 Mapping, “ÂÍÒÚœ”: TPM84, √ÛÔÔ‡: CAN
-(long)(&co2_vars.co_nodeID),	//[2000h.00h], Õ‡Á‚‡ÌËÂ: CAN NODE-ID, “ÂÍÒÚœ”: NodeID, √ÛÔÔ‡: CAN
-(long)(&co2_vars.co_bitRate),	//[2001h.00h], Õ‡Á‚‡ÌËÂ: CAN Bit Rate, “ÂÍÒÚœ”: CANBR, √ÛÔÔ‡: CAN, ·ËÚ˚ Ò 0 ÔÓ 2: 0000000000000111b
-(long)(&co2_vars.co_vendorID),	//[2002h.01h], Õ‡Á‚‡ÌËÂ:  Ó‰ ÔÓËÁ‚Ó‰ËÚÂÎˇ, “ÂÍÒÚœ”: VendID, √ÛÔÔ‡: CAN
-(long)(&co2_vars.co_productCode),	//[2002h.02h], Õ‡Á‚‡ÌËÂ:  Ó‰ ÔÓ‰ÛÍÚ‡, “ÂÍÒÚœ”: PrCode, √ÛÔÔ‡: CAN
-(long)(&co2_vars.co_revisionNumber),	//[2002h.03h], Õ‡Á‚‡ÌËÂ: ÕÓÏÂ Â‚ËÁËË, “ÂÍÒÚœ”: RevNum, √ÛÔÔ‡: CAN
-(long)(&co2_vars.co_serialNumber),	//[2002h.04h], Õ‡Á‚‡ÌËÂ: —ÂËÈÌ˚È ÌÓÏÂ, “ÂÍÒÚœ”: SerNum, √ÛÔÔ‡: CAN
-(long)(&co2_vars.co_specialData1),	//[2003h.01h], Õ‡Á‚‡ÌËÂ: Special Data 1, “ÂÍÒÚœ”: SpDat1, √ÛÔÔ‡: CAN
-(long)(&co2_vars.co_specialData2),	//[2003h.02h], Õ‡Á‚‡ÌËÂ: Special Data 2, “ÂÍÒÚœ”: SpDat2, √ÛÔÔ‡: CAN
-(long)(&co2_vars.co_specialData3),	//[2003h.03h], Õ‡Á‚‡ÌËÂ: Special Data 3, “ÂÍÒÚœ”: SpDat3, √ÛÔÔ‡: CAN
-(long)(&co2_vars.co_specialData4),	//[2003h.04h], Õ‡Á‚‡ÌËÂ: Special Data 4, “ÂÍÒÚœ”: SpDat4, √ÛÔÔ‡: CAN
-(long)(&co2_vars.co_secretCode),	//[2004h.00h], Õ‡Á‚‡ÌËÂ: Secret Code, “ÂÍÒÚœ”: Secret, √ÛÔÔ‡: CAN
-(long)(&co2_vars.co_protectBit),	//[2005h.00h], Õ‡Á‚‡ÌËÂ: Protect Bit, “ÂÍÒÚœ”: ProtBt, √ÛÔÔ‡: CAN, ·ËÚ˚ Ò 0 ÔÓ 0: 0000000000000001b
-(long)(&co2_odHash[0]),	//[2007h.01h], Õ‡Á‚‡ÌËÂ: md5_hash_0, “ÂÍÒÚœ”: md5_hash_0, √ÛÔÔ‡: CAN
-(long)(&co2_odHash[1]),	//[2007h.02h], Õ‡Á‚‡ÌËÂ: md5_hash_1, “ÂÍÒÚœ”: md5_hash_1, √ÛÔÔ‡: CAN
-(long)(&co2_odHash[2]),	//[2007h.03h], Õ‡Á‚‡ÌËÂ: md5_hash_2, “ÂÍÒÚœ”: md5_hash_2, √ÛÔÔ‡: CAN
-(long)(&co2_odHash[3]),	//[2007h.04h], Õ‡Á‚‡ÌËÂ: md5_hash_3, “ÂÍÒÚœ”: md5_hash_3, √ÛÔÔ‡: CAN
-(long)(&co2_vars.co_heartbeatFlag0),	//[2010h.01h], Õ‡Á‚‡ÌËÂ: Heartbeat Flag 0-31, “ÂÍÒÚœ”: HFlag0, √ÛÔÔ‡: CAN
-(long)(&co2_vars.co_heartbeatFlag1),	//[2010h.02h], Õ‡Á‚‡ÌËÂ: Heartbeat Flag 32-63, “ÂÍÒÚœ”: HFlag1, √ÛÔÔ‡: CAN
-(long)(&co2_vars.co_heartbeatFlag2),	//[2010h.03h], Õ‡Á‚‡ÌËÂ: Heartbeat Flag 64-95, “ÂÍÒÚœ”: HFlag2, √ÛÔÔ‡: CAN
-(long)(&co2_vars.co_heartbeatFlag3),	//[2010h.04h], Õ‡Á‚‡ÌËÂ: Heartbeat Flag 96-127, “ÂÍÒÚœ”: HFlag3, √ÛÔÔ‡: CAN
-(long)(&co2_vars.co_heartbeatMask0),	//[2011h.01h], Õ‡Á‚‡ÌËÂ: Heartbeat Mask 0-31, “ÂÍÒÚœ”: HMask0, √ÛÔÔ‡: CAN
-(long)(&co2_vars.co_heartbeatMask1),	//[2011h.02h], Õ‡Á‚‡ÌËÂ: Heartbeat Mask 32-63, “ÂÍÒÚœ”: HMask1, √ÛÔÔ‡: CAN
-(long)(&co2_vars.co_heartbeatMask2),	//[2011h.03h], Õ‡Á‚‡ÌËÂ: Heartbeat Mask 64-95, “ÂÍÒÚœ”: HMask2, √ÛÔÔ‡: CAN
-(long)(&co2_vars.co_heartbeatMask3),	//[2011h.04h], Õ‡Á‚‡ÌËÂ: Heartbeat Mask 96-127, “ÂÍÒÚœ”: HMask3, √ÛÔÔ‡: CAN
-(long)(&co2_vars.co_heartbeatAutoStart),	//[2012h.00h], Õ‡Á‚‡ÌËÂ: Heartbeat Autostart, “ÂÍÒÚœ”: HBASta, √ÛÔÔ‡: CAN, ·ËÚ˚ Ò 0 ÔÓ 0: 0000000000000001b
-(long)(&co2_vars.co_heartbeatAutoRecovery),	//[2014h.00h], Õ‡Á‚‡ÌËÂ: Heartbeat Autorecovery, “ÂÍÒÚœ”: HBARec, √ÛÔÔ‡: CAN, ·ËÚ˚ Ò 0 ÔÓ 0: 0000000000000001b
-(long)(&co2_vars.co_nodeState),	//[2015h.00h], Õ‡Á‚‡ÌËÂ: —ÓÒÚÓˇÌËÂ ‰‡È‚Â‡ CAN-Open, “ÂÍÒÚœ”: State, √ÛÔÔ‡: CAN
-(long)(&co2_vars.co_emergencyErrorCode),	//[2016h.00h], Õ‡Á‚‡ÌËÂ: Emergency Error Code, “ÂÍÒÚœ”: EmErCo, √ÛÔÔ‡: CAN
-(long)(&co2_vars.co_deviceErrorState),	//[2017h.00h], Õ‡Á‚‡ÌËÂ: Device Error State, “ÂÍÒÚœ”: DeErSt, √ÛÔÔ‡: CAN
-(long)(&co2_vars.co_ODCommand),	//[2080h.01h], Õ‡Á‚‡ÌËÂ: Object Dictionary Command, “ÂÍÒÚœ”: ODComm, √ÛÔÔ‡: CAN
-(long)(&co2_vars.co_currentODIndex),	//[2080h.02h], Õ‡Á‚‡ÌËÂ: Current OD Index, “ÂÍÒÚœ”: ODCInd, √ÛÔÔ‡: CAN
-(long)(&co2_vars.co_currentODSubIndex),	//[2080h.03h], Õ‡Á‚‡ÌËÂ: Current OD Sub-Index, “ÂÍÒÚœ”: ODCSub, √ÛÔÔ‡: CAN
-(long)(&co2_vars.co_currentODEText),	//[2080h.04h], Õ‡Á‚‡ÌËÂ: Current OD Element Text, “ÂÍÒÚœ”: ODCTxt, √ÛÔÔ‡: CAN
-(long)(&co2_vars.co_currentODEFormat),	//[2080h.05h], Õ‡Á‚‡ÌËÂ: Current OD Element Format, “ÂÍÒÚœ”: ODCFrm, √ÛÔÔ‡: CAN
-(long)(&co2_vars.co_currentODEMin),	//[2080h.06h], Õ‡Á‚‡ÌËÂ: Current OD Element Min, “ÂÍÒÚœ”: ODCMin, √ÛÔÔ‡: CAN
-(long)(&co2_vars.co_currentODEMax),	//[2080h.07h], Õ‡Á‚‡ÌËÂ: Current OD Element Max, “ÂÍÒÚœ”: ODCMax, √ÛÔÔ‡: CAN
-(long)(&co2_vars.co_currentODEDefault),	//[2080h.08h], Õ‡Á‚‡ÌËÂ: Current OD Element Default, “ÂÍÒÚœ”: ODCDef, √ÛÔÔ‡: CAN
-(long)(&co2_vars.co_currentODEMinLow),	//[2080h.09h], Õ‡Á‚‡ÌËÂ: Current OD Element MinLow, “ÂÍÒÚœ”: ODCMiL, √ÛÔÔ‡: CAN
-(long)(&co2_vars.co_currentODEMaxLow),	//[2080h.0Ah], Õ‡Á‚‡ÌËÂ: Current OD Element MaxLow, “ÂÍÒÚœ”: ODCMaL, √ÛÔÔ‡: CAN
-(long)(&co2_vars.co_currentODEDefaultLow),	//[2080h.0Bh], Õ‡Á‚‡ÌËÂ: Current OD Element Default Low, “ÂÍÒÚœ”: ODCDeL, √ÛÔÔ‡: CAN
-(long)(&co2_vars.co_currentODEAddrLow),	//[2080h.0Ch], Õ‡Á‚‡ÌËÂ: Current OD Element Address, “ÂÍÒÚœ”: ODCAdr, √ÛÔÔ‡: CAN
-(long)(&co2_vars.co_currentODEAddrLow),	//[2080h.0Dh], Õ‡Á‚‡ÌËÂ: Current OD Element Address, “ÂÍÒÚœ”: ODCAdr, √ÛÔÔ‡: CAN
-(long)(&co2_vars.co_currentODEType),	//[2080h.0Eh], Õ‡Á‚‡ÌËÂ: √ÛÔÔ‡ Ô‡‡ÏÂÚÓ‚, “ÂÍÒÚœ”: √ÛÔÔ‡, √ÛÔÔ‡: CAN
-(long)(&co2_vars.co_odIndexSize),	//[2081h.00h], Õ‡Á‚‡ÌËÂ:  ÓÎË˜ÂÒÚ‚Ó ËÌ‰ÂÍÒÓ‚, “ÂÍÒÚœ”:  ÓÎ»Ì‰, √ÛÔÔ‡: CAN
-(long)(&co2_vars.co_defaultIndex1),	//[2082h.01h], Õ‡Á‚‡ÌËÂ: Default Index 1, “ÂÍÒÚœ”: DfInd1, √ÛÔÔ‡: CAN
-(long)(&co2_vars.co_defaultIndex2),	//[2082h.02h], Õ‡Á‚‡ÌËÂ: Default Index 2, “ÂÍÒÚœ”: DfInd2, √ÛÔÔ‡: CAN
-(long)(&co2_vars.co_maskElement01),	//[2083h.01h], Õ‡Á‚‡ÌËÂ: Mask Element, “ÂÍÒÚœ”: MskEl0, √ÛÔÔ‡: CAN, ·ËÚ˚ Ò 0 ÔÓ 7: 0000000011111111b
-(long)(&co2_vars.co_maskElement01),	//[2083h.02h], Õ‡Á‚‡ÌËÂ: Mask Element, “ÂÍÒÚœ”: MskEl1, √ÛÔÔ‡: CAN, ·ËÚ˚ Ò 8 ÔÓ 15: 1111111100000000b
-(long)(&co2_vars.co_maskElement23),	//[2083h.03h], Õ‡Á‚‡ÌËÂ: Mask Element, “ÂÍÒÚœ”: MskEl2, √ÛÔÔ‡: CAN, ·ËÚ˚ Ò 0 ÔÓ 7: 0000000011111111b
-(long)(&co2_vars.co_maskElement23),	//[2083h.04h], Õ‡Á‚‡ÌËÂ: Mask Element, “ÂÍÒÚœ”: MskEl3, √ÛÔÔ‡: CAN, ·ËÚ˚ Ò 8 ÔÓ 15: 1111111100000000b
-(long)(&co2_vars.co_maskElement45),	//[2083h.05h], Õ‡Á‚‡ÌËÂ: Mask Element, “ÂÍÒÚœ”: MskEl4, √ÛÔÔ‡: CAN, ·ËÚ˚ Ò 0 ÔÓ 7: 0000000011111111b
-(long)(&co2_vars.co_maskElement45),	//[2083h.06h], Õ‡Á‚‡ÌËÂ: Mask Element, “ÂÍÒÚœ”: MskEl5, √ÛÔÔ‡: CAN, ·ËÚ˚ Ò 8 ÔÓ 15: 1111111100000000b
-(long)(&co2_vars.co_maskElement67),	//[2083h.07h], Õ‡Á‚‡ÌËÂ: Mask Element, “ÂÍÒÚœ”: MskEl6, √ÛÔÔ‡: CAN, ·ËÚ˚ Ò 0 ÔÓ 7: 0000000011111111b
-(long)(&co2_vars.co_maskElement67),	//[2083h.08h], Õ‡Á‚‡ÌËÂ: Mask Element, “ÂÍÒÚœ”: MskEl7, √ÛÔÔ‡: CAN, ·ËÚ˚ Ò 8 ÔÓ 15: 1111111100000000b
-(long)(&co2_vars.co_maskElement89),	//[2083h.09h], Õ‡Á‚‡ÌËÂ: Mask Element, “ÂÍÒÚœ”: MskEl8, √ÛÔÔ‡: CAN, ·ËÚ˚ Ò 0 ÔÓ 7: 0000000011111111b
-(long)(&co2_vars.co_maskElement89),	//[2083h.0Ah], Õ‡Á‚‡ÌËÂ: Mask Element, “ÂÍÒÚœ”: MskEl9, √ÛÔÔ‡: CAN, ·ËÚ˚ Ò 8 ÔÓ 15: 1111111100000000b
-(long)(&co2_vars.co_maskElementAB),	//[2083h.0Bh], Õ‡Á‚‡ÌËÂ: Mask Element, “ÂÍÒÚœ”: MskElA, √ÛÔÔ‡: CAN, ·ËÚ˚ Ò 0 ÔÓ 7: 0000000011111111b
-(long)(&co2_vars.co_maskElementAB),	//[2083h.0Ch], Õ‡Á‚‡ÌËÂ: Mask Element, “ÂÍÒÚœ”: MskElB, √ÛÔÔ‡: CAN, ·ËÚ˚ Ò 8 ÔÓ 15: 1111111100000000b
-(long)(&co2_vars.co_maskElementCD),	//[2083h.0Dh], Õ‡Á‚‡ÌËÂ: Mask Element, “ÂÍÒÚœ”: MskElC, √ÛÔÔ‡: CAN, ·ËÚ˚ Ò 0 ÔÓ 7: 0000000011111111b
-(long)(&co2_vars.co_maskElementCD),	//[2083h.0Eh], Õ‡Á‚‡ÌËÂ: Mask Element, “ÂÍÒÚœ”: MskElD, √ÛÔÔ‡: CAN, ·ËÚ˚ Ò 8 ÔÓ 15: 1111111100000000b
-(long)(&co2_vars.co_maskElementEF),	//[2083h.0Fh], Õ‡Á‚‡ÌËÂ: Mask Element, “ÂÍÒÚœ”: MskElE, √ÛÔÔ‡: CAN, ·ËÚ˚ Ò 0 ÔÓ 7: 0000000011111111b
-(long)(&co2_vars.co_maskElementEF),	//[2083h.10h], Õ‡Á‚‡ÌËÂ: Mask Element, “ÂÍÒÚœ”: MskElF, √ÛÔÔ‡: CAN, ·ËÚ˚ Ò 8 ÔÓ 15: 1111111100000000b
-(long)(&co2_vars.co_scaleNum0),	//[2100h.01h], Õ‡Á‚‡ÌËÂ: Scale Number 0, “ÂÍÒÚœ”: SN0, √ÛÔÔ‡: CAN
-(long)(&co2_vars.co_scaleNum0Format),	//[2100h.02h], Õ‡Á‚‡ÌËÂ: Scale Number 0 Format, “ÂÍÒÚœ”: S0Fmt, √ÛÔÔ‡: CAN
-(long)(&co2_vars.co_scaleNum0Format),	//[2100h.03h], Õ‡Á‚‡ÌËÂ: Scale Number Format Q, “ÂÍÒÚœ”: Q-type, √ÛÔÔ‡: CAN, ·ËÚ˚ Ò 0 ÔÓ 4: 0000000000011111b
-(long)(&co2_vars.co_scaleNum0Format),	//[2100h.04h], Õ‡Á‚‡ÌËÂ: Scale Number Format NumOfFloat, “ÂÍÒÚœ”: NFloat, √ÛÔÔ‡: CAN, ·ËÚ˚ Ò 5 ÔÓ 6: 0000000001100000b
-(long)(&co2_vars.co_scaleNum0Format),	//[2100h.05h], Õ‡Á‚‡ÌËÂ: Scale Number Format Prefix, “ÂÍÒÚœ”: Prefix, √ÛÔÔ‡: CAN, ·ËÚ˚ Ò 7 ÔÓ 9: 0000001110000000b
-(long)(&co2_vars.co_scaleNum0Format),	//[2100h.06h], Õ‡Á‚‡ÌËÂ: Scale Number Format Units, “ÂÍÒÚœ”: Units, √ÛÔÔ‡: CAN, ·ËÚ˚ Ò 10 ÔÓ 15: 1111110000000000b
-(long)(&co2_vars.co_scaleNum1),	//[2101h.01h], Õ‡Á‚‡ÌËÂ: Scale Number 1, “ÂÍÒÚœ”: SN1, √ÛÔÔ‡: CAN
-(long)(&co2_vars.co_scaleNum1Format),	//[2101h.02h], Õ‡Á‚‡ÌËÂ: Scale Number 1 Format, “ÂÍÒÚœ”: S1Fmt, √ÛÔÔ‡: CAN
-(long)(&co2_vars.co_scaleNum1Format),	//[2101h.03h], Õ‡Á‚‡ÌËÂ: Scale Number Format Q, “ÂÍÒÚœ”: Q-type, √ÛÔÔ‡: CAN, ·ËÚ˚ Ò 0 ÔÓ 4: 0000000000011111b
-(long)(&co2_vars.co_scaleNum1Format),	//[2101h.04h], Õ‡Á‚‡ÌËÂ: Scale Number Format NumOfFloat, “ÂÍÒÚœ”: NFloat, √ÛÔÔ‡: CAN, ·ËÚ˚ Ò 5 ÔÓ 6: 0000000001100000b
-(long)(&co2_vars.co_scaleNum1Format),	//[2101h.05h], Õ‡Á‚‡ÌËÂ: Scale Number Format Prefix, “ÂÍÒÚœ”: Prefix, √ÛÔÔ‡: CAN, ·ËÚ˚ Ò 7 ÔÓ 9: 0000001110000000b
-(long)(&co2_vars.co_scaleNum1Format),	//[2101h.06h], Õ‡Á‚‡ÌËÂ: Scale Number Format Units, “ÂÍÒÚœ”: Units, √ÛÔÔ‡: CAN, ·ËÚ˚ Ò 10 ÔÓ 15: 1111110000000000b
-(long)(&co2_vars.co_scaleNum2),	//[2102h.01h], Õ‡Á‚‡ÌËÂ: Scale Number 2, “ÂÍÒÚœ”: SN2, √ÛÔÔ‡: CAN
-(long)(&co2_vars.co_scaleNum2Format),	//[2102h.02h], Õ‡Á‚‡ÌËÂ: Scale Number 2 Format, “ÂÍÒÚœ”: S2Fmt, √ÛÔÔ‡: CAN
-(long)(&co2_vars.co_scaleNum2Format),	//[2102h.03h], Õ‡Á‚‡ÌËÂ: Scale Number Format Q, “ÂÍÒÚœ”: Q-type, √ÛÔÔ‡: CAN, ·ËÚ˚ Ò 0 ÔÓ 4: 0000000000011111b
-(long)(&co2_vars.co_scaleNum2Format),	//[2102h.04h], Õ‡Á‚‡ÌËÂ: Scale Number Format NumOfFloat, “ÂÍÒÚœ”: NFloat, √ÛÔÔ‡: CAN, ·ËÚ˚ Ò 5 ÔÓ 6: 0000000001100000b
-(long)(&co2_vars.co_scaleNum2Format),	//[2102h.05h], Õ‡Á‚‡ÌËÂ: Scale Number Format Prefix, “ÂÍÒÚœ”: Prefix, √ÛÔÔ‡: CAN, ·ËÚ˚ Ò 7 ÔÓ 9: 0000001110000000b
-(long)(&co2_vars.co_scaleNum2Format),	//[2102h.06h], Õ‡Á‚‡ÌËÂ: Scale Number Format Units, “ÂÍÒÚœ”: Units, √ÛÔÔ‡: CAN, ·ËÚ˚ Ò 10 ÔÓ 15: 1111110000000000b
-(long)(&co2_vars.co_scaleNum3),	//[2103h.01h], Õ‡Á‚‡ÌËÂ: Scale Number 3, “ÂÍÒÚœ”: SN3, √ÛÔÔ‡: CAN
-(long)(&co2_vars.co_scaleNum3Format),	//[2103h.02h], Õ‡Á‚‡ÌËÂ: Scale Number 3 Format, “ÂÍÒÚœ”: S3Fmt, √ÛÔÔ‡: CAN
-(long)(&co2_vars.co_scaleNum3Format),	//[2103h.03h], Õ‡Á‚‡ÌËÂ: Scale Number Format Q, “ÂÍÒÚœ”: Q-type, √ÛÔÔ‡: CAN, ·ËÚ˚ Ò 0 ÔÓ 4: 0000000000011111b
-(long)(&co2_vars.co_scaleNum3Format),	//[2103h.04h], Õ‡Á‚‡ÌËÂ: Scale Number Format NumOfFloat, “ÂÍÒÚœ”: NFloat, √ÛÔÔ‡: CAN, ·ËÚ˚ Ò 5 ÔÓ 6: 0000000001100000b
-(long)(&co2_vars.co_scaleNum3Format),	//[2103h.05h], Õ‡Á‚‡ÌËÂ: Scale Number Format Prefix, “ÂÍÒÚœ”: Prefix, √ÛÔÔ‡: CAN, ·ËÚ˚ Ò 7 ÔÓ 9: 0000001110000000b
-(long)(&co2_vars.co_scaleNum3Format),	//[2103h.06h], Õ‡Á‚‡ÌËÂ: Scale Number Format Units, “ÂÍÒÚœ”: Units, √ÛÔÔ‡: CAN, ·ËÚ˚ Ò 10 ÔÓ 15: 1111110000000000b
-(long)(&co2_vars.co_scaleNum4),	//[2104h.01h], Õ‡Á‚‡ÌËÂ: Scale Number 4, “ÂÍÒÚœ”: SN4, √ÛÔÔ‡: CAN
-(long)(&co2_vars.co_scaleNum4Format),	//[2104h.02h], Õ‡Á‚‡ÌËÂ: Scale Number 4 Format, “ÂÍÒÚœ”: S4Fmt, √ÛÔÔ‡: CAN
-(long)(&co2_vars.co_scaleNum4Format),	//[2104h.03h], Õ‡Á‚‡ÌËÂ: Scale Number Format Q, “ÂÍÒÚœ”: Q-type, √ÛÔÔ‡: CAN, ·ËÚ˚ Ò 0 ÔÓ 4: 0000000000011111b
-(long)(&co2_vars.co_scaleNum4Format),	//[2104h.04h], Õ‡Á‚‡ÌËÂ: Scale Number Format NumOfFloat, “ÂÍÒÚœ”: NFloat, √ÛÔÔ‡: CAN, ·ËÚ˚ Ò 5 ÔÓ 6: 0000000001100000b
-(long)(&co2_vars.co_scaleNum4Format),	//[2104h.05h], Õ‡Á‚‡ÌËÂ: Scale Number Format Prefix, “ÂÍÒÚœ”: Prefix, √ÛÔÔ‡: CAN, ·ËÚ˚ Ò 7 ÔÓ 9: 0000001110000000b
-(long)(&co2_vars.co_scaleNum4Format),	//[2104h.06h], Õ‡Á‚‡ÌËÂ: Scale Number Format Units, “ÂÍÒÚœ”: Units, √ÛÔÔ‡: CAN, ·ËÚ˚ Ò 10 ÔÓ 15: 1111110000000000b
-(long)(&co2_vars.co_scaleNum5),	//[2105h.01h], Õ‡Á‚‡ÌËÂ: Scale Number 5, “ÂÍÒÚœ”: SN5, √ÛÔÔ‡: CAN
-(long)(&co2_vars.co_scaleNum5Format),	//[2105h.02h], Õ‡Á‚‡ÌËÂ: Scale Number 5 Format, “ÂÍÒÚœ”: S5Fmt, √ÛÔÔ‡: CAN
-(long)(&co2_vars.co_scaleNum5Format),	//[2105h.03h], Õ‡Á‚‡ÌËÂ: Scale Number Format Q, “ÂÍÒÚœ”: Q-type, √ÛÔÔ‡: CAN, ·ËÚ˚ Ò 0 ÔÓ 4: 0000000000011111b
-(long)(&co2_vars.co_scaleNum5Format),	//[2105h.04h], Õ‡Á‚‡ÌËÂ: Scale Number Format NumOfFloat, “ÂÍÒÚœ”: NFloat, √ÛÔÔ‡: CAN, ·ËÚ˚ Ò 5 ÔÓ 6: 0000000001100000b
-(long)(&co2_vars.co_scaleNum5Format),	//[2105h.05h], Õ‡Á‚‡ÌËÂ: Scale Number Format Prefix, “ÂÍÒÚœ”: Prefix, √ÛÔÔ‡: CAN, ·ËÚ˚ Ò 7 ÔÓ 9: 0000001110000000b
-(long)(&co2_vars.co_scaleNum5Format),	//[2105h.06h], Õ‡Á‚‡ÌËÂ: Scale Number Format Units, “ÂÍÒÚœ”: Units, √ÛÔÔ‡: CAN, ·ËÚ˚ Ò 10 ÔÓ 15: 1111110000000000b
-(long)(&co2_vars.co_scaleNum6),	//[2106h.01h], Õ‡Á‚‡ÌËÂ: Scale Number 6, “ÂÍÒÚœ”: SN6, √ÛÔÔ‡: CAN
-(long)(&co2_vars.co_scaleNum6Format),	//[2106h.02h], Õ‡Á‚‡ÌËÂ: Scale Number 6 Format, “ÂÍÒÚœ”: S6Fmt, √ÛÔÔ‡: CAN
-(long)(&co2_vars.co_scaleNum6Format),	//[2106h.03h], Õ‡Á‚‡ÌËÂ: Scale Number Format Q, “ÂÍÒÚœ”: Q-type, √ÛÔÔ‡: CAN, ·ËÚ˚ Ò 0 ÔÓ 4: 0000000000011111b
-(long)(&co2_vars.co_scaleNum6Format),	//[2106h.04h], Õ‡Á‚‡ÌËÂ: Scale Number Format NumOfFloat, “ÂÍÒÚœ”: NFloat, √ÛÔÔ‡: CAN, ·ËÚ˚ Ò 5 ÔÓ 6: 0000000001100000b
-(long)(&co2_vars.co_scaleNum6Format),	//[2106h.05h], Õ‡Á‚‡ÌËÂ: Scale Number Format Prefix, “ÂÍÒÚœ”: Prefix, √ÛÔÔ‡: CAN, ·ËÚ˚ Ò 7 ÔÓ 9: 0000001110000000b
-(long)(&co2_vars.co_scaleNum6Format),	//[2106h.06h], Õ‡Á‚‡ÌËÂ: Scale Number Format Units, “ÂÍÒÚœ”: Units, √ÛÔÔ‡: CAN, ·ËÚ˚ Ò 10 ÔÓ 15: 1111110000000000b
-(long)(&co2_vars.co_scaleNum7),	//[2107h.01h], Õ‡Á‚‡ÌËÂ: Scale Number 7, “ÂÍÒÚœ”: SN7, √ÛÔÔ‡: CAN
-(long)(&co2_vars.co_scaleNum7Format),	//[2107h.02h], Õ‡Á‚‡ÌËÂ: Scale Number 7 Format, “ÂÍÒÚœ”: S7Fmt, √ÛÔÔ‡: CAN
-(long)(&co2_vars.co_scaleNum7Format),	//[2107h.03h], Õ‡Á‚‡ÌËÂ: Scale Number Format Q, “ÂÍÒÚœ”: Q-type, √ÛÔÔ‡: CAN, ·ËÚ˚ Ò 0 ÔÓ 4: 0000000000011111b
-(long)(&co2_vars.co_scaleNum7Format),	//[2107h.04h], Õ‡Á‚‡ÌËÂ: Scale Number Format NumOfFloat, “ÂÍÒÚœ”: NFloat, √ÛÔÔ‡: CAN, ·ËÚ˚ Ò 5 ÔÓ 6: 0000000001100000b
-(long)(&co2_vars.co_scaleNum7Format),	//[2107h.05h], Õ‡Á‚‡ÌËÂ: Scale Number Format Prefix, “ÂÍÒÚœ”: Prefix, √ÛÔÔ‡: CAN, ·ËÚ˚ Ò 7 ÔÓ 9: 0000001110000000b
-(long)(&co2_vars.co_scaleNum7Format),	//[2107h.06h], Õ‡Á‚‡ÌËÂ: Scale Number Format Units, “ÂÍÒÚœ”: Units, √ÛÔÔ‡: CAN, ·ËÚ˚ Ò 10 ÔÓ 15: 1111110000000000b
-(long)(&co2_vars.co_scaleNum8),	//[2108h.01h], Õ‡Á‚‡ÌËÂ: Scale Number 8, “ÂÍÒÚœ”: SN8, √ÛÔÔ‡: CAN
-(long)(&co2_vars.co_scaleNum8Format),	//[2108h.02h], Õ‡Á‚‡ÌËÂ: Scale Number 8 Format, “ÂÍÒÚœ”: S8Fmt, √ÛÔÔ‡: CAN
-(long)(&co2_vars.co_scaleNum8Format),	//[2108h.03h], Õ‡Á‚‡ÌËÂ: Scale Number Format Q, “ÂÍÒÚœ”: Q-type, √ÛÔÔ‡: CAN, ·ËÚ˚ Ò 0 ÔÓ 4: 0000000000011111b
-(long)(&co2_vars.co_scaleNum8Format),	//[2108h.04h], Õ‡Á‚‡ÌËÂ: Scale Number Format NumOfFloat, “ÂÍÒÚœ”: NFloat, √ÛÔÔ‡: CAN, ·ËÚ˚ Ò 5 ÔÓ 6: 0000000001100000b
-(long)(&co2_vars.co_scaleNum8Format),	//[2108h.05h], Õ‡Á‚‡ÌËÂ: Scale Number Format Prefix, “ÂÍÒÚœ”: Prefix, √ÛÔÔ‡: CAN, ·ËÚ˚ Ò 7 ÔÓ 9: 0000001110000000b
-(long)(&co2_vars.co_scaleNum8Format),	//[2108h.06h], Õ‡Á‚‡ÌËÂ: Scale Number Format Units, “ÂÍÒÚœ”: Units, √ÛÔÔ‡: CAN, ·ËÚ˚ Ò 10 ÔÓ 15: 1111110000000000b
-(long)(&co2_vars.co_scaleNum9),	//[2109h.01h], Õ‡Á‚‡ÌËÂ: Scale Number 9, “ÂÍÒÚœ”: SN9, √ÛÔÔ‡: CAN
-(long)(&co2_vars.co_scaleNum9Format),	//[2109h.02h], Õ‡Á‚‡ÌËÂ: Scale Number 9 Format, “ÂÍÒÚœ”: S9Fmt, √ÛÔÔ‡: CAN
-(long)(&co2_vars.co_scaleNum9Format),	//[2109h.03h], Õ‡Á‚‡ÌËÂ: Scale Number Format Q, “ÂÍÒÚœ”: Q-type, √ÛÔÔ‡: CAN, ·ËÚ˚ Ò 0 ÔÓ 4: 0000000000011111b
-(long)(&co2_vars.co_scaleNum9Format),	//[2109h.04h], Õ‡Á‚‡ÌËÂ: Scale Number Format NumOfFloat, “ÂÍÒÚœ”: NFloat, √ÛÔÔ‡: CAN, ·ËÚ˚ Ò 5 ÔÓ 6: 0000000001100000b
-(long)(&co2_vars.co_scaleNum9Format),	//[2109h.05h], Õ‡Á‚‡ÌËÂ: Scale Number Format Prefix, “ÂÍÒÚœ”: Prefix, √ÛÔÔ‡: CAN, ·ËÚ˚ Ò 7 ÔÓ 9: 0000001110000000b
-(long)(&co2_vars.co_scaleNum9Format),	//[2109h.06h], Õ‡Á‚‡ÌËÂ: Scale Number Format Units, “ÂÍÒÚœ”: Units, √ÛÔÔ‡: CAN, ·ËÚ˚ Ò 10 ÔÓ 15: 1111110000000000b
-(long)(&co2_vars.co_scaleNumA),	//[210Ah.01h], Õ‡Á‚‡ÌËÂ: Scale Number A, “ÂÍÒÚœ”: SNA, √ÛÔÔ‡: CAN
-(long)(&co2_vars.co_scaleNumAFormat),	//[210Ah.02h], Õ‡Á‚‡ÌËÂ: Scale Number A Format, “ÂÍÒÚœ”: SAFmt, √ÛÔÔ‡: CAN
-(long)(&co2_vars.co_scaleNumAFormat),	//[210Ah.03h], Õ‡Á‚‡ÌËÂ: Scale Number Format Q, “ÂÍÒÚœ”: Q-type, √ÛÔÔ‡: CAN, ·ËÚ˚ Ò 0 ÔÓ 4: 0000000000011111b
-(long)(&co2_vars.co_scaleNumAFormat),	//[210Ah.04h], Õ‡Á‚‡ÌËÂ: Scale Number Format NumOfFloat, “ÂÍÒÚœ”: NFloat, √ÛÔÔ‡: CAN, ·ËÚ˚ Ò 5 ÔÓ 6: 0000000001100000b
-(long)(&co2_vars.co_scaleNumAFormat),	//[210Ah.05h], Õ‡Á‚‡ÌËÂ: Scale Number Format Prefix, “ÂÍÒÚœ”: Prefix, √ÛÔÔ‡: CAN, ·ËÚ˚ Ò 7 ÔÓ 9: 0000001110000000b
-(long)(&co2_vars.co_scaleNumAFormat),	//[210Ah.06h], Õ‡Á‚‡ÌËÂ: Scale Number Format Units, “ÂÍÒÚœ”: Units, √ÛÔÔ‡: CAN, ·ËÚ˚ Ò 10 ÔÓ 15: 1111110000000000b
-(long)(&co2_vars.co_scaleNumB),	//[210Bh.01h], Õ‡Á‚‡ÌËÂ: Scale Number B, “ÂÍÒÚœ”: SNB, √ÛÔÔ‡: CAN
-(long)(&co2_vars.co_scaleNumBFormat),	//[210Bh.02h], Õ‡Á‚‡ÌËÂ: Scale Number B Format, “ÂÍÒÚœ”: SBFmt, √ÛÔÔ‡: CAN
-(long)(&co2_vars.co_scaleNumBFormat),	//[210Bh.03h], Õ‡Á‚‡ÌËÂ: Scale Number Format Q, “ÂÍÒÚœ”: Q-type, √ÛÔÔ‡: CAN, ·ËÚ˚ Ò 0 ÔÓ 4: 0000000000011111b
-(long)(&co2_vars.co_scaleNumBFormat),	//[210Bh.04h], Õ‡Á‚‡ÌËÂ: Scale Number Format NumOfFloat, “ÂÍÒÚœ”: NFloat, √ÛÔÔ‡: CAN, ·ËÚ˚ Ò 5 ÔÓ 6: 0000000001100000b
-(long)(&co2_vars.co_scaleNumBFormat),	//[210Bh.05h], Õ‡Á‚‡ÌËÂ: Scale Number Format Prefix, “ÂÍÒÚœ”: Prefix, √ÛÔÔ‡: CAN, ·ËÚ˚ Ò 7 ÔÓ 9: 0000001110000000b
-(long)(&co2_vars.co_scaleNumBFormat),	//[210Bh.06h], Õ‡Á‚‡ÌËÂ: Scale Number Format Units, “ÂÍÒÚœ”: Units, √ÛÔÔ‡: CAN, ·ËÚ˚ Ò 10 ÔÓ 15: 1111110000000000b
-(long)(&co2_vars.co_scaleNumC),	//[210Ch.01h], Õ‡Á‚‡ÌËÂ: Scale Number C, “ÂÍÒÚœ”: SNC, √ÛÔÔ‡: CAN
-(long)(&co2_vars.co_scaleNumCFormat),	//[210Ch.02h], Õ‡Á‚‡ÌËÂ: Scale Number C Format, “ÂÍÒÚœ”: SCFmt, √ÛÔÔ‡: CAN
-(long)(&co2_vars.co_scaleNumCFormat),	//[210Ch.03h], Õ‡Á‚‡ÌËÂ: Scale Number Format Q, “ÂÍÒÚœ”: Q-type, √ÛÔÔ‡: CAN, ·ËÚ˚ Ò 0 ÔÓ 4: 0000000000011111b
-(long)(&co2_vars.co_scaleNumCFormat),	//[210Ch.04h], Õ‡Á‚‡ÌËÂ: Scale Number Format NumOfFloat, “ÂÍÒÚœ”: NFloat, √ÛÔÔ‡: CAN, ·ËÚ˚ Ò 5 ÔÓ 6: 0000000001100000b
-(long)(&co2_vars.co_scaleNumCFormat),	//[210Ch.05h], Õ‡Á‚‡ÌËÂ: Scale Number Format Prefix, “ÂÍÒÚœ”: Prefix, √ÛÔÔ‡: CAN, ·ËÚ˚ Ò 7 ÔÓ 9: 0000001110000000b
-(long)(&co2_vars.co_scaleNumCFormat),	//[210Ch.06h], Õ‡Á‚‡ÌËÂ: Scale Number Format Units, “ÂÍÒÚœ”: Units, √ÛÔÔ‡: CAN, ·ËÚ˚ Ò 10 ÔÓ 15: 1111110000000000b
-(long)(&co2_vars.co_scaleNumD),	//[210Dh.01h], Õ‡Á‚‡ÌËÂ: Scale Number D, “ÂÍÒÚœ”: SND, √ÛÔÔ‡: CAN
-(long)(&co2_vars.co_scaleNumDFormat),	//[210Dh.02h], Õ‡Á‚‡ÌËÂ: Scale Number D Format, “ÂÍÒÚœ”: SDFmt, √ÛÔÔ‡: CAN
-(long)(&co2_vars.co_scaleNumDFormat),	//[210Dh.03h], Õ‡Á‚‡ÌËÂ: Scale Number Format Q, “ÂÍÒÚœ”: Q-type, √ÛÔÔ‡: CAN, ·ËÚ˚ Ò 0 ÔÓ 4: 0000000000011111b
-(long)(&co2_vars.co_scaleNumDFormat),	//[210Dh.04h], Õ‡Á‚‡ÌËÂ: Scale Number Format NumOfFloat, “ÂÍÒÚœ”: NFloat, √ÛÔÔ‡: CAN, ·ËÚ˚ Ò 5 ÔÓ 6: 0000000001100000b
-(long)(&co2_vars.co_scaleNumDFormat),	//[210Dh.05h], Õ‡Á‚‡ÌËÂ: Scale Number Format Prefix, “ÂÍÒÚœ”: Prefix, √ÛÔÔ‡: CAN, ·ËÚ˚ Ò 7 ÔÓ 9: 0000001110000000b
-(long)(&co2_vars.co_scaleNumDFormat),	//[210Dh.06h], Õ‡Á‚‡ÌËÂ: Scale Number Format Units, “ÂÍÒÚœ”: Units, √ÛÔÔ‡: CAN, ·ËÚ˚ Ò 10 ÔÓ 15: 1111110000000000b
-(long)(&co2_vars.co_scaleNumE),	//[210Eh.01h], Õ‡Á‚‡ÌËÂ: Scale Number E, “ÂÍÒÚœ”: SNE, √ÛÔÔ‡: CAN
-(long)(&co2_vars.co_scaleNumEFormat),	//[210Eh.02h], Õ‡Á‚‡ÌËÂ: Scale Number E Format, “ÂÍÒÚœ”: SEFmt, √ÛÔÔ‡: CAN
-(long)(&co2_vars.co_scaleNumEFormat),	//[210Eh.03h], Õ‡Á‚‡ÌËÂ: Scale Number Format Q, “ÂÍÒÚœ”: Q-type, √ÛÔÔ‡: CAN, ·ËÚ˚ Ò 0 ÔÓ 4: 0000000000011111b
-(long)(&co2_vars.co_scaleNumEFormat),	//[210Eh.04h], Õ‡Á‚‡ÌËÂ: Scale Number Format NumOfFloat, “ÂÍÒÚœ”: NFloat, √ÛÔÔ‡: CAN, ·ËÚ˚ Ò 5 ÔÓ 6: 0000000001100000b
-(long)(&co2_vars.co_scaleNumEFormat),	//[210Eh.05h], Õ‡Á‚‡ÌËÂ: Scale Number Format Prefix, “ÂÍÒÚœ”: Prefix, √ÛÔÔ‡: CAN, ·ËÚ˚ Ò 7 ÔÓ 9: 0000001110000000b
-(long)(&co2_vars.co_scaleNumEFormat),	//[210Eh.06h], Õ‡Á‚‡ÌËÂ: Scale Number Format Units, “ÂÍÒÚœ”: Units, √ÛÔÔ‡: CAN, ·ËÚ˚ Ò 10 ÔÓ 15: 1111110000000000b
-(long)(&co2_vars.co_scaleNumF),	//[210Fh.01h], Õ‡Á‚‡ÌËÂ: Scale Number F, “ÂÍÒÚœ”: SNF, √ÛÔÔ‡: CAN
-(long)(&co2_vars.co_scaleNumFFormat),	//[210Fh.02h], Õ‡Á‚‡ÌËÂ: Scale Number F Format, “ÂÍÒÚœ”: SFFmt, √ÛÔÔ‡: CAN
-(long)(&co2_vars.co_scaleNumFFormat),	//[210Fh.03h], Õ‡Á‚‡ÌËÂ: Scale Number Format Q, “ÂÍÒÚœ”: Q-type, √ÛÔÔ‡: CAN, ·ËÚ˚ Ò 0 ÔÓ 4: 0000000000011111b
-(long)(&co2_vars.co_scaleNumFFormat),	//[210Fh.04h], Õ‡Á‚‡ÌËÂ: Scale Number Format NumOfFloat, “ÂÍÒÚœ”: NFloat, √ÛÔÔ‡: CAN, ·ËÚ˚ Ò 5 ÔÓ 6: 0000000001100000b
-(long)(&co2_vars.co_scaleNumFFormat),	//[210Fh.05h], Õ‡Á‚‡ÌËÂ: Scale Number Format Prefix, “ÂÍÒÚœ”: Prefix, √ÛÔÔ‡: CAN, ·ËÚ˚ Ò 7 ÔÓ 9: 0000001110000000b
-(long)(&co2_vars.co_scaleNumFFormat),	//[210Fh.06h], Õ‡Á‚‡ÌËÂ: Scale Number Format Units, “ÂÍÒÚœ”: Units, √ÛÔÔ‡: CAN, ·ËÚ˚ Ò 10 ÔÓ 15: 1111110000000000b
-(long)(&co2_vars.co_scaleNum10),	//[2110h.01h], Õ‡Á‚‡ÌËÂ: Scale Number 10, “ÂÍÒÚœ”: SN10, √ÛÔÔ‡: CAN
-(long)(&co2_vars.co_scaleNum10Format),	//[2110h.02h], Õ‡Á‚‡ÌËÂ: Scale Number 10 Format, “ÂÍÒÚœ”: S10Fmt, √ÛÔÔ‡: CAN
-(long)(&co2_vars.co_scaleNum10Format),	//[2110h.03h], Õ‡Á‚‡ÌËÂ: Scale Number Format Q, “ÂÍÒÚœ”: Q-type, √ÛÔÔ‡: CAN, ·ËÚ˚ Ò 0 ÔÓ 4: 0000000000011111b
-(long)(&co2_vars.co_scaleNum10Format),	//[2110h.04h], Õ‡Á‚‡ÌËÂ: Scale Number Format NumOfFloat, “ÂÍÒÚœ”: NFloat, √ÛÔÔ‡: CAN, ·ËÚ˚ Ò 5 ÔÓ 6: 0000000001100000b
-(long)(&co2_vars.co_scaleNum10Format),	//[2110h.05h], Õ‡Á‚‡ÌËÂ: Scale Number Format Prefix, “ÂÍÒÚœ”: Prefix, √ÛÔÔ‡: CAN, ·ËÚ˚ Ò 7 ÔÓ 9: 0000001110000000b
-(long)(&co2_vars.co_scaleNum10Format),	//[2110h.06h], Õ‡Á‚‡ÌËÂ: Scale Number Format Units, “ÂÍÒÚœ”: Units, √ÛÔÔ‡: CAN, ·ËÚ˚ Ò 10 ÔÓ 15: 1111110000000000b
-(long)(&co2_vars.co_scaleNum11),	//[2111h.01h], Õ‡Á‚‡ÌËÂ: Scale Number 11, “ÂÍÒÚœ”: SN11, √ÛÔÔ‡: CAN
-(long)(&co2_vars.co_scaleNum11Format),	//[2111h.02h], Õ‡Á‚‡ÌËÂ: Scale Number 11 Format, “ÂÍÒÚœ”: S11Fmt, √ÛÔÔ‡: CAN
-(long)(&co2_vars.co_scaleNum11Format),	//[2111h.03h], Õ‡Á‚‡ÌËÂ: Scale Number Format Q, “ÂÍÒÚœ”: Q-type, √ÛÔÔ‡: CAN, ·ËÚ˚ Ò 0 ÔÓ 4: 0000000000011111b
-(long)(&co2_vars.co_scaleNum11Format),	//[2111h.04h], Õ‡Á‚‡ÌËÂ: Scale Number Format NumOfFloat, “ÂÍÒÚœ”: NFloat, √ÛÔÔ‡: CAN, ·ËÚ˚ Ò 5 ÔÓ 6: 0000000001100000b
-(long)(&co2_vars.co_scaleNum11Format),	//[2111h.05h], Õ‡Á‚‡ÌËÂ: Scale Number Format Prefix, “ÂÍÒÚœ”: Prefix, √ÛÔÔ‡: CAN, ·ËÚ˚ Ò 7 ÔÓ 9: 0000001110000000b
-(long)(&co2_vars.co_scaleNum11Format),	//[2111h.06h], Õ‡Á‚‡ÌËÂ: Scale Number Format Units, “ÂÍÒÚœ”: Units, √ÛÔÔ‡: CAN, ·ËÚ˚ Ò 10 ÔÓ 15: 1111110000000000b
-(long)(&co2_vars.co_scaleNum12),	//[2112h.01h], Õ‡Á‚‡ÌËÂ: Scale Number 12, “ÂÍÒÚœ”: SN12, √ÛÔÔ‡: CAN
-(long)(&co2_vars.co_scaleNum12Format),	//[2112h.02h], Õ‡Á‚‡ÌËÂ: Scale Number 12 Format, “ÂÍÒÚœ”: S12Fmt, √ÛÔÔ‡: CAN
-(long)(&co2_vars.co_scaleNum12Format),	//[2112h.03h], Õ‡Á‚‡ÌËÂ: Scale Number Format Q, “ÂÍÒÚœ”: Q-type, √ÛÔÔ‡: CAN, ·ËÚ˚ Ò 0 ÔÓ 4: 0000000000011111b
-(long)(&co2_vars.co_scaleNum12Format),	//[2112h.04h], Õ‡Á‚‡ÌËÂ: Scale Number Format NumOfFloat, “ÂÍÒÚœ”: NFloat, √ÛÔÔ‡: CAN, ·ËÚ˚ Ò 5 ÔÓ 6: 0000000001100000b
-(long)(&co2_vars.co_scaleNum12Format),	//[2112h.05h], Õ‡Á‚‡ÌËÂ: Scale Number Format Prefix, “ÂÍÒÚœ”: Prefix, √ÛÔÔ‡: CAN, ·ËÚ˚ Ò 7 ÔÓ 9: 0000001110000000b
-(long)(&co2_vars.co_scaleNum12Format),	//[2112h.06h], Õ‡Á‚‡ÌËÂ: Scale Number Format Units, “ÂÍÒÚœ”: Units, √ÛÔÔ‡: CAN, ·ËÚ˚ Ò 10 ÔÓ 15: 1111110000000000b
-(long)(&co2_vars.co_scaleNum13),	//[2113h.01h], Õ‡Á‚‡ÌËÂ: Scale Number 13, “ÂÍÒÚœ”: SN13, √ÛÔÔ‡: CAN
-(long)(&co2_vars.co_scaleNum13Format),	//[2113h.02h], Õ‡Á‚‡ÌËÂ: Scale Number 13 Format, “ÂÍÒÚœ”: S13Fmt, √ÛÔÔ‡: CAN
-(long)(&co2_vars.co_scaleNum13Format),	//[2113h.03h], Õ‡Á‚‡ÌËÂ: Scale Number Format Q, “ÂÍÒÚœ”: Q-type, √ÛÔÔ‡: CAN, ·ËÚ˚ Ò 0 ÔÓ 4: 0000000000011111b
-(long)(&co2_vars.co_scaleNum13Format),	//[2113h.04h], Õ‡Á‚‡ÌËÂ: Scale Number Format NumOfFloat, “ÂÍÒÚœ”: NFloat, √ÛÔÔ‡: CAN, ·ËÚ˚ Ò 5 ÔÓ 6: 0000000001100000b
-(long)(&co2_vars.co_scaleNum13Format),	//[2113h.05h], Õ‡Á‚‡ÌËÂ: Scale Number Format Prefix, “ÂÍÒÚœ”: Prefix, √ÛÔÔ‡: CAN, ·ËÚ˚ Ò 7 ÔÓ 9: 0000001110000000b
-(long)(&co2_vars.co_scaleNum13Format),	//[2113h.06h], Õ‡Á‚‡ÌËÂ: Scale Number Format Units, “ÂÍÒÚœ”: Units, √ÛÔÔ‡: CAN, ·ËÚ˚ Ò 10 ÔÓ 15: 1111110000000000b
-(long)(&co2_vars.co_scaleNum14),	//[2114h.01h], Õ‡Á‚‡ÌËÂ: Scale Number 14, “ÂÍÒÚœ”: SN14, √ÛÔÔ‡: CAN
-(long)(&co2_vars.co_scaleNum14Format),	//[2114h.02h], Õ‡Á‚‡ÌËÂ: Scale Number 14 Format, “ÂÍÒÚœ”: S14Fmt, √ÛÔÔ‡: CAN
-(long)(&co2_vars.co_scaleNum14Format),	//[2114h.03h], Õ‡Á‚‡ÌËÂ: Scale Number Format Q, “ÂÍÒÚœ”: Q-type, √ÛÔÔ‡: CAN, ·ËÚ˚ Ò 0 ÔÓ 4: 0000000000011111b
-(long)(&co2_vars.co_scaleNum14Format),	//[2114h.04h], Õ‡Á‚‡ÌËÂ: Scale Number Format NumOfFloat, “ÂÍÒÚœ”: NFloat, √ÛÔÔ‡: CAN, ·ËÚ˚ Ò 5 ÔÓ 6: 0000000001100000b
-(long)(&co2_vars.co_scaleNum14Format),	//[2114h.05h], Õ‡Á‚‡ÌËÂ: Scale Number Format Prefix, “ÂÍÒÚœ”: Prefix, √ÛÔÔ‡: CAN, ·ËÚ˚ Ò 7 ÔÓ 9: 0000001110000000b
-(long)(&co2_vars.co_scaleNum14Format),	//[2114h.06h], Õ‡Á‚‡ÌËÂ: Scale Number Format Units, “ÂÍÒÚœ”: Units, √ÛÔÔ‡: CAN, ·ËÚ˚ Ò 10 ÔÓ 15: 1111110000000000b
-(long)(&co2_vars.co_scaleNum15),	//[2115h.01h], Õ‡Á‚‡ÌËÂ: Scale Number 15, “ÂÍÒÚœ”: SN15, √ÛÔÔ‡: CAN
-(long)(&co2_vars.co_scaleNum15Format),	//[2115h.02h], Õ‡Á‚‡ÌËÂ: Scale Number 15Format, “ÂÍÒÚœ”: S15Fmt, √ÛÔÔ‡: CAN
-(long)(&co2_vars.co_scaleNum15Format),	//[2115h.03h], Õ‡Á‚‡ÌËÂ: Scale Number Format Q, “ÂÍÒÚœ”: Q-type, √ÛÔÔ‡: CAN, ·ËÚ˚ Ò 0 ÔÓ 4: 0000000000011111b
-(long)(&co2_vars.co_scaleNum15Format),	//[2115h.04h], Õ‡Á‚‡ÌËÂ: Scale Number Format NumOfFloat, “ÂÍÒÚœ”: NFloat, √ÛÔÔ‡: CAN, ·ËÚ˚ Ò 5 ÔÓ 6: 0000000001100000b
-(long)(&co2_vars.co_scaleNum15Format),	//[2115h.05h], Õ‡Á‚‡ÌËÂ: Scale Number Format Prefix, “ÂÍÒÚœ”: Prefix, √ÛÔÔ‡: CAN, ·ËÚ˚ Ò 7 ÔÓ 9: 0000001110000000b
-(long)(&co2_vars.co_scaleNum15Format),	//[2115h.06h], Õ‡Á‚‡ÌËÂ: Scale Number Format Units, “ÂÍÒÚœ”: Units, √ÛÔÔ‡: CAN, ·ËÚ˚ Ò 10 ÔÓ 15: 1111110000000000b
-(long)(&co2_vars.co_scaleNum16),	//[2116h.01h], Õ‡Á‚‡ÌËÂ: Scale Number 16, “ÂÍÒÚœ”: SN16, √ÛÔÔ‡: CAN
-(long)(&co2_vars.co_scaleNum16Format),	//[2116h.02h], Õ‡Á‚‡ÌËÂ: Scale Number 16Format, “ÂÍÒÚœ”: S16Fmt, √ÛÔÔ‡: CAN
-(long)(&co2_vars.co_scaleNum16Format),	//[2116h.03h], Õ‡Á‚‡ÌËÂ: Scale Number Format Q, “ÂÍÒÚœ”: Q-type, √ÛÔÔ‡: CAN, ·ËÚ˚ Ò 0 ÔÓ 4: 0000000000011111b
-(long)(&co2_vars.co_scaleNum16Format),	//[2116h.04h], Õ‡Á‚‡ÌËÂ: Scale Number Format NumOfFloat, “ÂÍÒÚœ”: NFloat, √ÛÔÔ‡: CAN, ·ËÚ˚ Ò 5 ÔÓ 6: 0000000001100000b
-(long)(&co2_vars.co_scaleNum16Format),	//[2116h.05h], Õ‡Á‚‡ÌËÂ: Scale Number Format Prefix, “ÂÍÒÚœ”: Prefix, √ÛÔÔ‡: CAN, ·ËÚ˚ Ò 7 ÔÓ 9: 0000001110000000b
-(long)(&co2_vars.co_scaleNum16Format),	//[2116h.06h], Õ‡Á‚‡ÌËÂ: Scale Number Format Units, “ÂÍÒÚœ”: Units, √ÛÔÔ‡: CAN, ·ËÚ˚ Ò 10 ÔÓ 15: 1111110000000000b
-(long)(&co2_vars.co_scaleNum17),	//[2117h.01h], Õ‡Á‚‡ÌËÂ: Scale Number 17, “ÂÍÒÚœ”: SN17, √ÛÔÔ‡: CAN
-(long)(&co2_vars.co_scaleNum17Format),	//[2117h.02h], Õ‡Á‚‡ÌËÂ: Scale Number 17Format, “ÂÍÒÚœ”: S17Fmt, √ÛÔÔ‡: CAN
-(long)(&co2_vars.co_scaleNum17Format),	//[2117h.03h], Õ‡Á‚‡ÌËÂ: Scale Number Format Q, “ÂÍÒÚœ”: Q-type, √ÛÔÔ‡: CAN, ·ËÚ˚ Ò 0 ÔÓ 4: 0000000000011111b
-(long)(&co2_vars.co_scaleNum17Format),	//[2117h.04h], Õ‡Á‚‡ÌËÂ: Scale Number Format NumOfFloat, “ÂÍÒÚœ”: NFloat, √ÛÔÔ‡: CAN, ·ËÚ˚ Ò 5 ÔÓ 6: 0000000001100000b
-(long)(&co2_vars.co_scaleNum17Format),	//[2117h.05h], Õ‡Á‚‡ÌËÂ: Scale Number Format Prefix, “ÂÍÒÚœ”: Prefix, √ÛÔÔ‡: CAN, ·ËÚ˚ Ò 7 ÔÓ 9: 0000001110000000b
-(long)(&co2_vars.co_scaleNum17Format),	//[2117h.06h], Õ‡Á‚‡ÌËÂ: Scale Number Format Units, “ÂÍÒÚœ”: Units, √ÛÔÔ‡: CAN, ·ËÚ˚ Ò 10 ÔÓ 15: 1111110000000000b
-(long)(&co2_vars.co_scaleNum18),	//[2118h.01h], Õ‡Á‚‡ÌËÂ: Scale Number 18, “ÂÍÒÚœ”: SN18, √ÛÔÔ‡: CAN
-(long)(&co2_vars.co_scaleNum18Format),	//[2118h.02h], Õ‡Á‚‡ÌËÂ: Scale Number 18Format, “ÂÍÒÚœ”: S18Fmt, √ÛÔÔ‡: CAN
-(long)(&co2_vars.co_scaleNum18Format),	//[2118h.03h], Õ‡Á‚‡ÌËÂ: Scale Number Format Q, “ÂÍÒÚœ”: Q-type, √ÛÔÔ‡: CAN, ·ËÚ˚ Ò 0 ÔÓ 4: 0000000000011111b
-(long)(&co2_vars.co_scaleNum18Format),	//[2118h.04h], Õ‡Á‚‡ÌËÂ: Scale Number Format NumOfFloat, “ÂÍÒÚœ”: NFloat, √ÛÔÔ‡: CAN, ·ËÚ˚ Ò 5 ÔÓ 6: 0000000001100000b
-(long)(&co2_vars.co_scaleNum18Format),	//[2118h.05h], Õ‡Á‚‡ÌËÂ: Scale Number Format Prefix, “ÂÍÒÚœ”: Prefix, √ÛÔÔ‡: CAN, ·ËÚ˚ Ò 7 ÔÓ 9: 0000001110000000b
-(long)(&co2_vars.co_scaleNum18Format),	//[2118h.06h], Õ‡Á‚‡ÌËÂ: Scale Number Format Units, “ÂÍÒÚœ”: Units, √ÛÔÔ‡: CAN, ·ËÚ˚ Ò 10 ÔÓ 15: 1111110000000000b
-(long)(&co2_vars.co_scaleNum19),	//[2119h.01h], Õ‡Á‚‡ÌËÂ: Scale Number 19, “ÂÍÒÚœ”: SN19, √ÛÔÔ‡: CAN
-(long)(&co2_vars.co_scaleNum19Format),	//[2119h.02h], Õ‡Á‚‡ÌËÂ: Scale Number 19Format, “ÂÍÒÚœ”: S19Fmt, √ÛÔÔ‡: CAN
-(long)(&co2_vars.co_scaleNum19Format),	//[2119h.03h], Õ‡Á‚‡ÌËÂ: Scale Number Format Q, “ÂÍÒÚœ”: Q-type, √ÛÔÔ‡: CAN, ·ËÚ˚ Ò 0 ÔÓ 4: 0000000000011111b
-(long)(&co2_vars.co_scaleNum19Format),	//[2119h.04h], Õ‡Á‚‡ÌËÂ: Scale Number Format NumOfFloat, “ÂÍÒÚœ”: NFloat, √ÛÔÔ‡: CAN, ·ËÚ˚ Ò 5 ÔÓ 6: 0000000001100000b
-(long)(&co2_vars.co_scaleNum19Format),	//[2119h.05h], Õ‡Á‚‡ÌËÂ: Scale Number Format Prefix, “ÂÍÒÚœ”: Prefix, √ÛÔÔ‡: CAN, ·ËÚ˚ Ò 7 ÔÓ 9: 0000001110000000b
-(long)(&co2_vars.co_scaleNum19Format),	//[2119h.06h], Õ‡Á‚‡ÌËÂ: Scale Number Format Units, “ÂÍÒÚœ”: Units, √ÛÔÔ‡: CAN, ·ËÚ˚ Ò 10 ÔÓ 15: 1111110000000000b
-(long)(&co2_vars.co_scaleNum1A),	//[211Ah.01h], Õ‡Á‚‡ÌËÂ: Scale Number 1A, “ÂÍÒÚœ”: SN1A, √ÛÔÔ‡: CAN
-(long)(&co2_vars.co_scaleNum1AFormat),	//[211Ah.02h], Õ‡Á‚‡ÌËÂ: Scale Number 1AFormat, “ÂÍÒÚœ”: S1AFmt, √ÛÔÔ‡: CAN
-(long)(&co2_vars.co_scaleNum1AFormat),	//[211Ah.03h], Õ‡Á‚‡ÌËÂ: Scale Number Format Q, “ÂÍÒÚœ”: Q-type, √ÛÔÔ‡: CAN, ·ËÚ˚ Ò 0 ÔÓ 4: 0000000000011111b
-(long)(&co2_vars.co_scaleNum1AFormat),	//[211Ah.04h], Õ‡Á‚‡ÌËÂ: Scale Number Format NumOfFloat, “ÂÍÒÚœ”: NFloat, √ÛÔÔ‡: CAN, ·ËÚ˚ Ò 5 ÔÓ 6: 0000000001100000b
-(long)(&co2_vars.co_scaleNum1AFormat),	//[211Ah.05h], Õ‡Á‚‡ÌËÂ: Scale Number Format Prefix, “ÂÍÒÚœ”: Prefix, √ÛÔÔ‡: CAN, ·ËÚ˚ Ò 7 ÔÓ 9: 0000001110000000b
-(long)(&co2_vars.co_scaleNum1AFormat),	//[211Ah.06h], Õ‡Á‚‡ÌËÂ: Scale Number Format Units, “ÂÍÒÚœ”: Units, √ÛÔÔ‡: CAN, ·ËÚ˚ Ò 10 ÔÓ 15: 1111110000000000b
-(long)(&co2_vars.co_scaleNum1B),	//[211Bh.01h], Õ‡Á‚‡ÌËÂ: Scale Number 1B, “ÂÍÒÚœ”: SN1B, √ÛÔÔ‡: CAN
-(long)(&co2_vars.co_scaleNum1BFormat),	//[211Bh.02h], Õ‡Á‚‡ÌËÂ: Scale Number 1BFormat, “ÂÍÒÚœ”: S1BFmt, √ÛÔÔ‡: CAN
-(long)(&co2_vars.co_scaleNum1BFormat),	//[211Bh.03h], Õ‡Á‚‡ÌËÂ: Scale Number Format Q, “ÂÍÒÚœ”: Q-type, √ÛÔÔ‡: CAN, ·ËÚ˚ Ò 0 ÔÓ 4: 0000000000011111b
-(long)(&co2_vars.co_scaleNum1BFormat),	//[211Bh.04h], Õ‡Á‚‡ÌËÂ: Scale Number Format NumOfFloat, “ÂÍÒÚœ”: NFloat, √ÛÔÔ‡: CAN, ·ËÚ˚ Ò 5 ÔÓ 6: 0000000001100000b
-(long)(&co2_vars.co_scaleNum1BFormat),	//[211Bh.05h], Õ‡Á‚‡ÌËÂ: Scale Number Format Prefix, “ÂÍÒÚœ”: Prefix, √ÛÔÔ‡: CAN, ·ËÚ˚ Ò 7 ÔÓ 9: 0000001110000000b
-(long)(&co2_vars.co_scaleNum1BFormat),	//[211Bh.06h], Õ‡Á‚‡ÌËÂ: Scale Number Format Units, “ÂÍÒÚœ”: Units, √ÛÔÔ‡: CAN, ·ËÚ˚ Ò 10 ÔÓ 15: 1111110000000000b
-(long)(&co2_vars.co_scaleNum1C),	//[211Ch.01h], Õ‡Á‚‡ÌËÂ: Scale Number 1C, “ÂÍÒÚœ”: SN1C, √ÛÔÔ‡: CAN
-(long)(&co2_vars.co_scaleNum1CFormat),	//[211Ch.02h], Õ‡Á‚‡ÌËÂ: Scale Number 1C Format, “ÂÍÒÚœ”: S1CFmt, √ÛÔÔ‡: CAN
-(long)(&co2_vars.co_scaleNum1CFormat),	//[211Ch.03h], Õ‡Á‚‡ÌËÂ: Scale Number Format Q, “ÂÍÒÚœ”: Q-type, √ÛÔÔ‡: CAN, ·ËÚ˚ Ò 0 ÔÓ 4: 0000000000011111b
-(long)(&co2_vars.co_scaleNum1CFormat),	//[211Ch.04h], Õ‡Á‚‡ÌËÂ: Scale Number Format NumOfFloat, “ÂÍÒÚœ”: NFloat, √ÛÔÔ‡: CAN, ·ËÚ˚ Ò 5 ÔÓ 6: 0000000001100000b
-(long)(&co2_vars.co_scaleNum1CFormat),	//[211Ch.05h], Õ‡Á‚‡ÌËÂ: Scale Number Format Prefix, “ÂÍÒÚœ”: Prefix, √ÛÔÔ‡: CAN, ·ËÚ˚ Ò 7 ÔÓ 9: 0000001110000000b
-(long)(&co2_vars.co_scaleNum1CFormat),	//[211Ch.06h], Õ‡Á‚‡ÌËÂ: Scale Number Format Units, “ÂÍÒÚœ”: Units, √ÛÔÔ‡: CAN, ·ËÚ˚ Ò 10 ÔÓ 15: 1111110000000000b
-(long)(&co2_vars.co_scaleNum1D),	//[211Dh.01h], Õ‡Á‚‡ÌËÂ: Scale Number 1D, “ÂÍÒÚœ”: SN1D, √ÛÔÔ‡: CAN
-(long)(&co2_vars.co_scaleNum1DFormat),	//[211Dh.02h], Õ‡Á‚‡ÌËÂ: Scale Number 1D Format, “ÂÍÒÚœ”: S1DFmt, √ÛÔÔ‡: CAN
-(long)(&co2_vars.co_scaleNum1DFormat),	//[211Dh.03h], Õ‡Á‚‡ÌËÂ: Scale Number Format Q, “ÂÍÒÚœ”: Q-type, √ÛÔÔ‡: CAN, ·ËÚ˚ Ò 0 ÔÓ 4: 0000000000011111b
-(long)(&co2_vars.co_scaleNum1DFormat),	//[211Dh.04h], Õ‡Á‚‡ÌËÂ: Scale Number Format NumOfFloat, “ÂÍÒÚœ”: NFloat, √ÛÔÔ‡: CAN, ·ËÚ˚ Ò 5 ÔÓ 6: 0000000001100000b
-(long)(&co2_vars.co_scaleNum1DFormat),	//[211Dh.05h], Õ‡Á‚‡ÌËÂ: Scale Number Format Prefix, “ÂÍÒÚœ”: Prefix, √ÛÔÔ‡: CAN, ·ËÚ˚ Ò 7 ÔÓ 9: 0000001110000000b
-(long)(&co2_vars.co_scaleNum1DFormat),	//[211Dh.06h], Õ‡Á‚‡ÌËÂ: Scale Number Format Units, “ÂÍÒÚœ”: Units, √ÛÔÔ‡: CAN, ·ËÚ˚ Ò 10 ÔÓ 15: 1111110000000000b
-(long)(&cmd.all),	//[2502h.01h], Õ‡Á‚‡ÌËÂ: œÛÒÍ, “ÂÍÒÚœ”: œÛÒÍ, √ÛÔÔ‡: —ÎÓ‚Ó ÛÔ‡‚ÎÂÌËˇ, ·ËÚ˚ Ò 0 ÔÓ 0: 0000000000000001b
-(long)(&cmd.all),	//[2502h.02h], Õ‡Á‚‡ÌËÂ: —ÚÓÔ, “ÂÍÒÚœ”: —ÚÓÔ, √ÛÔÔ‡: —ÎÓ‚Ó ÛÔ‡‚ÎÂÌËˇ, ·ËÚ˚ Ò 1 ÔÓ 1: 0000000000000010b
-(long)(&cmd.all),	//[2502h.03h], Õ‡Á‚‡ÌËÂ: —·ÓÒËÚ¸ ÒÓÒÚÓˇÌËÂ ¿‚‡ËË, “ÂÍÒÚœ”: —·¿‚, √ÛÔÔ‡: —ÎÓ‚Ó ÛÔ‡‚ÎÂÌËˇ, ·ËÚ˚ Ò 2 ÔÓ 2: 0000000000000100b
-(long)(&cmd.all),	//[2502h.04h], Õ‡Á‚‡ÌËÂ: —ÎÓ‚Ó ÛÔ‡‚ÎÂÌËˇ CAN, “ÂÍÒÚœ”:  Ï‰CAN, √ÛÔÔ‡: —ÎÓ‚Ó ÛÔ‡‚ÎÂÌËˇ
-(long)(&drv_interface.req_data),	//[2506h.01h], Õ‡Á‚‡ÌËÂ: “‡ÈÏ‡ÛÚ ÔÓÚÂË Ò‚ˇÁË, “ÂÍÒÚœ”: OfflineCounterMax, √ÛÔÔ‡: ¬Õ≈ √–”œœ
-(long)(&drv_interface.ans_data),	//[2506h.02h], Õ‡Á‚‡ÌËÂ: —˜ÂÚ˜ËÍ ÔÓÚÂË Ò‚ˇÁË, “ÂÍÒÚœ”: OfflineCounter, √ÛÔÔ‡: ¬Õ≈ √–”œœ
-(long)(&drv_interface.data_Low),	//[2506h.03h], Õ‡Á‚‡ÌËÂ: data_Low, “ÂÍÒÚœ”: data_L, √ÛÔÔ‡: ¬Õ≈ √–”œœ
-(long)(&drv_interface.data_High),	//[2506h.04h], Õ‡Á‚‡ÌËÂ: data_High, “ÂÍÒÚœ”: data_H, √ÛÔÔ‡: ¬Õ≈ √–”œœ
-(long)(&RTCclock.packed_time),	//[250Fh.00h], Õ‡Á‚‡ÌËÂ: ◊‡Ò˚ Â‡Î¸ÌÓ„Ó ‚ÂÏÂÌË, “ÂÍÒÚœ”: RTC, √ÛÔÔ‡: Õ‡·Î˛‰‡ÂÏ˚Â
-(long)(&sm_prot.Main_ErrorCode),	//[2532h.01h], Õ‡Á‚‡ÌËÂ:  Ó‰ ‡‚‡ËË ARM, “ÂÍÒÚœ”:  Ó‰ ‡‚‡ËË ARM, √ÛÔÔ‡: –Â„. ÚÓÍ‡ ˇÍÓˇ, ·ËÚ˚ Ò 0 ÔÓ 7: 0000000011111111b
-(long)(&sm_prot.Main_ErrorCode),	//[2532h.02h], Õ‡Á‚‡ÌËÂ: –‡Ò¯ËÂÌËÂ ÍÓ‰‡ ‡‚‡ËË, “ÂÍÒÚœ”: ¿‚+, √ÛÔÔ‡: –Â„. ÚÓÍ‡ ˇÍÓˇ, ·ËÚ˚ Ò 8 ÔÓ 15: 1111111100000000b
-(long)(&sm_prot.Main_Flags),	//[2532h.03h], Õ‡Á‚‡ÌËÂ: —ËÒÚÂÏÌ˚È Ó·˙ÂÍÚ, “ÂÍÒÚœ”: System, √ÛÔÔ‡: –Â„. ÚÓÍ‡ ˇÍÓˇ, ·ËÚ˚ Ò 0 ÔÓ 0: 0000000000000001b
-(long)(&disp_group_number),	//[2534h.01h], Õ‡Á‚‡ÌËÂ: ÕÓÏÂ „ÛÔ ‰Îˇ ÔÛÎ¸Ú‡ ÛÔ‡‚ÎÂÌËˇ, “ÂÍÒÚœ”: π „ œ”, √ÛÔÔ‡: CAN
-(long)(&VendorToken),	//[2600h.01h], Õ‡Á‚‡ÌËÂ: VendorToken, “ÂÍÒÚœ”: VendorToken, √ÛÔÔ‡: ¬Õ≈ √–”œœ
-(long)(&co2_vars.co_blockTransferCommand),	//[2700h.00h], Õ‡Á‚‡ÌËÂ: Block Transfer Interpreter, “ÂÍÒÚœ”: BT Interpreter, √ÛÔÔ‡: —ÎÓ‚Ó ÛÔ‡‚ÎÂÌËˇ
-(long)(&swu_vars),	//[2701h.01h], Õ‡Á‚‡ÌËÂ: cmd, “ÂÍÒÚœ”: cmd, √ÛÔÔ‡: —ÎÓ‚Ó ÛÔ‡‚ÎÂÌËˇ
-(long)(&swu_vars),	//[2701h.02h], Õ‡Á‚‡ÌËÂ: status, “ÂÍÒÚœ”: status, √ÛÔÔ‡: —ÎÓ‚Ó ÛÔ‡‚ÎÂÌËˇ
-(long)(&swu_vars),	//[2701h.03h], Õ‡Á‚‡ÌËÂ: quest1, “ÂÍÒÚœ”: quest1, √ÛÔÔ‡: —ÎÓ‚Ó ÛÔ‡‚ÎÂÌËˇ
-(long)(&swu_vars),	//[2701h.04h], Õ‡Á‚‡ÌËÂ: quest2, “ÂÍÒÚœ”: quest2, √ÛÔÔ‡: —ÎÓ‚Ó ÛÔ‡‚ÎÂÌËˇ
-(long)(&swu_vars),	//[2701h.05h], Õ‡Á‚‡ÌËÂ: quest3, “ÂÍÒÚœ”: quest3, √ÛÔÔ‡: —ÎÓ‚Ó ÛÔ‡‚ÎÂÌËˇ
-(long)(&swu_vars),	//[2701h.06h], Õ‡Á‚‡ÌËÂ: quest4, “ÂÍÒÚœ”: quest4, √ÛÔÔ‡: —ÎÓ‚Ó ÛÔ‡‚ÎÂÌËˇ
-(long)(&swu_vars),	//[2701h.07h], Õ‡Á‚‡ÌËÂ: ans1, “ÂÍÒÚœ”: ans1, √ÛÔÔ‡: —ÎÓ‚Ó ÛÔ‡‚ÎÂÌËˇ
-(long)(&swu_vars),	//[2701h.08h], Õ‡Á‚‡ÌËÂ: ans2, “ÂÍÒÚœ”: ans2, √ÛÔÔ‡: —ÎÓ‚Ó ÛÔ‡‚ÎÂÌËˇ
-(long)(&swu_vars),	//[2701h.09h], Õ‡Á‚‡ÌËÂ: ans3, “ÂÍÒÚœ”: ans3, √ÛÔÔ‡: —ÎÓ‚Ó ÛÔ‡‚ÎÂÌËˇ
-(long)(&swu_vars),	//[2701h.0Ah], Õ‡Á‚‡ÌËÂ: ans4, “ÂÍÒÚœ”: ans4, √ÛÔÔ‡: —ÎÓ‚Ó ÛÔ‡‚ÎÂÌËˇ
-(long)(&swu_vars),	//[2701h.0Bh], Õ‡Á‚‡ÌËÂ: addr, “ÂÍÒÚœ”: addr, √ÛÔÔ‡: —ÎÓ‚Ó ÛÔ‡‚ÎÂÌËˇ
-(long)(&swu_vars),	//[2701h.0Ch], Õ‡Á‚‡ÌËÂ: CPU_ID, “ÂÍÒÚœ”: CPU_ID, √ÛÔÔ‡: —ÎÓ‚Ó ÛÔ‡‚ÎÂÌËˇ
-(long)(&swu_vars),	//[2701h.0Dh], Õ‡Á‚‡ÌËÂ: sector_mask, “ÂÍÒÚœ”: sector_mask, √ÛÔÔ‡: —ÎÓ‚Ó ÛÔ‡‚ÎÂÌËˇ
-(long)(&swu_vars),	//[2701h.0Eh], Õ‡Á‚‡ÌËÂ: version, “ÂÍÒÚœ”: version, √ÛÔÔ‡: —ÎÓ‚Ó ÛÔ‡‚ÎÂÌËˇ
-(long)(&swu_vars),	//[2701h.0Fh], Õ‡Á‚‡ÌËÂ: CRC, “ÂÍÒÚœ”: CRC, √ÛÔÔ‡: —ÎÓ‚Ó ÛÔ‡‚ÎÂÌËˇ
-(long)(&drv_status.all),	//[3000h.00h], Õ‡Á‚‡ÌËÂ: —Ú‡ÚÛÒ ÔÂÓ·‡ÁÓ‚‡ÚÂÎˇ, “ÂÍÒÚœ”: —Ú‡ÚÛÒ, √ÛÔÔ‡: ¬Õ≈ √–”œœ, ·ËÚ˚ Ò 0 ÔÓ 5: 0000000000111111b
-(long)(&msCounter),	//[3100h.01h], Õ‡Á‚‡ÌËÂ: —˜∏Ú˜ËÍ ÔÂ˚‚‡ÌËÈ 1 Í√ˆ, “ÂÍÒÚœ”: —˜.ÔÂ˚‚.1 Í√ˆ, √ÛÔÔ‡: —˜ÂÚ˜ËÍË
-(long)(&FastCounter),	//[3100h.02h], Õ‡Á‚‡ÌËÂ: —˜∏Ú˜ËÍ ÔÂ˚‚‡ÌËÈ 10 Í√ˆ, “ÂÍÒÚœ”: —˜.ÔÂ˚‚.10 Í√ˆ, √ÛÔÔ‡: —˜ÂÚ˜ËÍË
-(long)(&LoopCounter),	//[3100h.03h], Õ‡Á‚‡ÌËÂ: BackgroundCounter, “ÂÍÒÚœ”: BackgroundCounter, √ÛÔÔ‡: —˜ÂÚ˜ËÍË
-(long)(&TIsr10),	//[3100h.04h], Õ‡Á‚‡ÌËÂ: T_10Í√ˆ, “ÂÍÒÚœ”: T_10Í√ˆ, √ÛÔÔ‡: —˜ÂÚ˜ËÍË
-(long)(&TIsr1),	//[3100h.05h], Õ‡Á‚‡ÌËÂ: T_1Í√ˆ, “ÂÍÒÚœ”: T_1Í√ˆ, √ÛÔÔ‡: —˜ÂÚ˜ËÍË
-(long)(&rmp.T),	//[5000h.01h], Õ‡Á‚‡ÌËÂ: T ‡Á„ÓÌ‡ ‰Ó ÌÓÏËÌ‡Î‡, “ÂÍÒÚœ”: rmpT, √ÛÔÔ‡: «»
-(long)(&rmp.input),	//[5000h.02h], Õ‡Á‚‡ÌËÂ: ¬ıÓ‰ «», “ÂÍÒÚœ”: ¬ıÓ‰«», √ÛÔÔ‡: «»
-(long)(&rmp.output),	//[5000h.03h], Õ‡Á‚‡ÌËÂ: ¬˚ıÓ‰ «», “ÂÍÒÚœ”: ¬˚ıÓ‰«», √ÛÔÔ‡: «»
-(long)(&pid_id.pid_ref_reg3),	//[5100h.01h], Õ‡Á‚‡ÌËÂ: «‡‰‡ÌËÂ, “ÂÍÒÚœ”: «‡‰-Â, √ÛÔÔ‡: –Â„. ÚÓÍ‡ Id
-(long)(&pid_id.pid_fdb_reg3),	//[5100h.02h], Õ‡Á‚‡ÌËÂ: Œ·‡ÚÌ‡ˇ Ò‚ˇÁ¸, “ÂÍÒÚœ”: Œ·.—‚, √ÛÔÔ‡: –Â„. ÚÓÍ‡ Id
-(long)(&pid_id.Kp_reg3),	//[5100h.03h], Õ‡Á‚‡ÌËÂ: œÓÔÓˆ. ÍÓ˝ÙÙ. Kp, “ÂÍÒÚœ”: Kp, √ÛÔÔ‡: –Â„. ÚÓÍ‡ Id
-(long)(&pid_id.pid_out_max),	//[5100h.04h], Õ‡Á‚‡ÌËÂ: Ã‡ÍÒËÏÛÏ ‚˚ıÓ‰‡, “ÂÍÒÚœ”: Max, √ÛÔÔ‡: –Â„. ÚÓÍ‡ Id
-(long)(&pid_id.pid_out_min),	//[5100h.05h], Õ‡Á‚‡ÌËÂ: ÃËÌËÏÛÏ ‚˚ıÓ‰‡, “ÂÍÒÚœ”: Min, √ÛÔÔ‡: –Â„. ÚÓÍ‡ Id
-(long)(&pid_id.Ki_reg3),	//[5100h.06h], Õ‡Á‚‡ÌËÂ: »ÌÚÂ„‡Î¸Ì˚È ÍÓ˝ÙÙ. Ki, “ÂÍÒÚœ”: Ki, √ÛÔÔ‡: –Â„. ÚÓÍ‡ Id
-(long)(&pid_id.Kd_reg3),	//[5100h.07h], Õ‡Á‚‡ÌËÂ: ƒËÙÙ. ÍÓ˝ÙÙ. Kd, “ÂÍÒÚœ”: Kd, √ÛÔÔ‡: –Â„. ÚÓÍ‡ Id
-(long)(&pid_id.Kc_reg3),	//[5100h.08h], Õ‡Á‚‡ÌËÂ: »ÌÚÂ„.ÍÓÂÍÚË.ÍÓ˝ÙÙËˆËÂÌÚ, “ÂÍÒÚœ”: Kc, √ÛÔÔ‡: –Â„. ÚÓÍ‡ Id
-(long)(&pid_id.e_reg3),	//[5100h.09h], Õ‡Á‚‡ÌËÂ: Œ¯Ë·Í‡ ‡ÒÒÓ„Î‡ÒÓ‚‡ÌËˇ ÒË„Ì‡ÎÓ‚, “ÂÍÒÚœ”: Œ¯Ë·Í‡, √ÛÔÔ‡: –Â„. ÚÓÍ‡ Id
-(long)(&pid_id.pid_out_reg3),	//[5100h.0Ah], Õ‡Á‚‡ÌËÂ: ¬˚ıÓ‰ Â„ÛÎˇÚÓ‡, “ÂÍÒÚœ”: ¬˚ıÓ‰, √ÛÔÔ‡: –Â„. ÚÓÍ‡ Id
-(long)(&pid_id.up_reg3),	//[5100h.0Bh], Õ‡Á‚‡ÌËÂ: ¬˚ı.œÓÔÓˆ., “ÂÍÒÚœ”: ¬˚ı.œÓÔÓˆ., √ÛÔÔ‡: –Â„. ÚÓÍ‡ Id
-(long)(&pid_id.ui_reg3),	//[5100h.0Ch], Õ‡Á‚‡ÌËÂ: ¬˚ı.»ÌÚÂ„., “ÂÍÒÚœ”: ¬˚ı.»ÌÚÂ„., √ÛÔÔ‡: –Â„. ÚÓÍ‡ Id
-(long)(&pid_id.ud_reg3),	//[5100h.0Dh], Õ‡Á‚‡ÌËÂ: ¬˚ı.ƒËÙÙÂ., “ÂÍÒÚœ”: ¬˚ı.ƒËÙÙÂ., √ÛÔÔ‡: –Â„. ÚÓÍ‡ Id
-(long)(&pid_spd.pid_ref_reg3),	//[5101h.01h], Õ‡Á‚‡ÌËÂ: «‡‰‡ÌËÂ, “ÂÍÒÚœ”: pisref, √ÛÔÔ‡: –Â„. ÒÍÓÓÒÚË
-(long)(&pid_spd.pid_fdb_reg3),	//[5101h.02h], Õ‡Á‚‡ÌËÂ: Œ·‡ÚÌ‡ˇ Ò‚ˇÁ¸, “ÂÍÒÚœ”: pisfbd, √ÛÔÔ‡: –Â„. ÒÍÓÓÒÚË
-(long)(&pid_spd.Kp_reg3),	//[5101h.03h], Õ‡Á‚‡ÌËÂ: œÓÔÓˆ. ÍÓ˝ÙÙ. Kp, “ÂÍÒÚœ”: Kp, √ÛÔÔ‡: –Â„. ÒÍÓÓÒÚË
-(long)(&pid_spd.pid_out_max),	//[5101h.04h], Õ‡Á‚‡ÌËÂ: Ã‡ÍÒËÏÛÏ ‚˚ıÓ‰‡, “ÂÍÒÚœ”: Max, √ÛÔÔ‡: –Â„. ÒÍÓÓÒÚË
-(long)(&pid_spd.pid_out_min),	//[5101h.05h], Õ‡Á‚‡ÌËÂ: ÃËÌËÏÛÏ ‚˚ıÓ‰‡, “ÂÍÒÚœ”: Min, √ÛÔÔ‡: –Â„. ÒÍÓÓÒÚË
-(long)(&pid_spd.Ki_reg3),	//[5101h.06h], Õ‡Á‚‡ÌËÂ: »ÌÚÂ„‡Î¸Ì˚È ÍÓ˝ÙÙ. Ki, “ÂÍÒÚœ”: Ki, √ÛÔÔ‡: –Â„. ÒÍÓÓÒÚË
-(long)(&pid_spd.Kd_reg3),	//[5101h.07h], Õ‡Á‚‡ÌËÂ: ƒËÙÙ. ÍÓ˝ÙÙ. Kd, “ÂÍÒÚœ”: pisKd, √ÛÔÔ‡: –Â„. ÒÍÓÓÒÚË
-(long)(&pid_spd.Kc_reg3),	//[5101h.08h], Õ‡Á‚‡ÌËÂ: »ÌÚÂ„.ÍÓÂÍÚË.ÍÓ˝ÙÙËˆËÂÌÚ, “ÂÍÒÚœ”: Kc, √ÛÔÔ‡: –Â„. ÒÍÓÓÒÚË
-(long)(&pid_spd.e_reg3),	//[5101h.09h], Õ‡Á‚‡ÌËÂ: Œ¯Ë·Í‡ ‡ÒÒÓ„Î‡ÒÓ‚‡ÌËˇ ÒË„Ì‡ÎÓ‚, “ÂÍÒÚœ”: Œ¯Ë·Í‡, √ÛÔÔ‡: –Â„. ÒÍÓÓÒÚË
-(long)(&pid_spd.pid_out_reg3),	//[5101h.0Ah], Õ‡Á‚‡ÌËÂ: ¬˚ıÓ‰ Â„ÛÎˇÚÓ‡, “ÂÍÒÚœ”: pisout, √ÛÔÔ‡: –Â„. ÒÍÓÓÒÚË
-(long)(&pid_spd.up_reg3),	//[5101h.0Bh], Õ‡Á‚‡ÌËÂ: ¬˚ı.œÓÔÓˆ., “ÂÍÒÚœ”: ¬˚ı.œÓÔÓˆ., √ÛÔÔ‡: –Â„. ÒÍÓÓÒÚË
-(long)(&pid_spd.ui_reg3),	//[5101h.0Ch], Õ‡Á‚‡ÌËÂ: ¬˚ı.»ÌÚÂ„., “ÂÍÒÚœ”: ¬˚ı.»ÌÚÂ„., √ÛÔÔ‡: –Â„. ÒÍÓÓÒÚË
-(long)(&pid_spd.ud_reg3),	//[5101h.0Dh], Õ‡Á‚‡ÌËÂ: ¬˚ı.ƒËÙÙÂ., “ÂÍÒÚœ”: ¬˚ı.ƒËÙÙÂ., √ÛÔÔ‡: –Â„. ÒÍÓÓÒÚË
-(long)(&pid_spd.saterr_reg3),	//[5101h.0Eh], Õ‡Á‚‡ÌËÂ: œÂ‚˚¯ÂÌËÂ Ì‡Ò˚˘ÂÌËˇ, “ÂÍÒÚœ”: œÂ‚. Ì‡Ò˚˘, √ÛÔÔ‡: –Â„. ÒÍÓÓÒÚË
-(long)(&pid_iq.pid_ref_reg3),	//[5102h.01h], Õ‡Á‚‡ÌËÂ: «‡‰‡ÌËÂ, “ÂÍÒÚœ”: «‡‰-ËÂ, √ÛÔÔ‡: –Â„. ÚÓÍ‡ Iq
-(long)(&pid_iq.pid_fdb_reg3),	//[5102h.02h], Õ‡Á‚‡ÌËÂ: Œ·‡ÚÌ‡ˇ Ò‚ˇÁ¸, “ÂÍÒÚœ”: Œ·.—‚, √ÛÔÔ‡: –Â„. ÚÓÍ‡ Iq
-(long)(&pid_iq.Kp_reg3),	//[5102h.03h], Õ‡Á‚‡ÌËÂ: œÓÔÓˆ. ÍÓ˝ÙÙ. Kp, “ÂÍÒÚœ”: Kp, √ÛÔÔ‡: –Â„. ÚÓÍ‡ Iq
-(long)(&pid_iq.pid_out_max),	//[5102h.04h], Õ‡Á‚‡ÌËÂ: Ã‡ÍÒËÏÛÏ ‚˚ıÓ‰‡, “ÂÍÒÚœ”: Max, √ÛÔÔ‡: –Â„. ÚÓÍ‡ Iq
-(long)(&pid_iq.pid_out_min),	//[5102h.05h], Õ‡Á‚‡ÌËÂ: ÃËÌËÏÛÏ ‚˚ıÓ‰‡, “ÂÍÒÚœ”: Min, √ÛÔÔ‡: –Â„. ÚÓÍ‡ Iq
-(long)(&pid_iq.Ki_reg3),	//[5102h.06h], Õ‡Á‚‡ÌËÂ: »ÌÚÂ„‡Î¸Ì˚È ÍÓ˝ÙÙ. Ki, “ÂÍÒÚœ”: Ki, √ÛÔÔ‡: –Â„. ÚÓÍ‡ Iq
-(long)(&pid_iq.Kd_reg3),	//[5102h.07h], Õ‡Á‚‡ÌËÂ: ƒËÙÙ. ÍÓ˝ÙÙ. Kd, “ÂÍÒÚœ”: Kd, √ÛÔÔ‡: –Â„. ÚÓÍ‡ Iq
-(long)(&pid_iq.Kc_reg3),	//[5102h.08h], Õ‡Á‚‡ÌËÂ: »ÌÚÂ„.ÍÓÂÍÚË.ÍÓ˝ÙÙËˆËÂÌÚ, “ÂÍÒÚœ”: Kc, √ÛÔÔ‡: –Â„. ÚÓÍ‡ Iq
-(long)(&pid_iq.e_reg3),	//[5102h.09h], Õ‡Á‚‡ÌËÂ: Œ¯Ë·Í‡ ‡ÒÒÓ„Î‡ÒÓ‚‡ÌËˇ ÒË„Ì‡ÎÓ‚, “ÂÍÒÚœ”: Œ¯Ë·Í‡, √ÛÔÔ‡: –Â„. ÚÓÍ‡ Iq
-(long)(&pid_iq.pid_out_reg3),	//[5102h.0Ah], Õ‡Á‚‡ÌËÂ: ¬˚ıÓ‰ Â„ÛÎˇÚÓ‡, “ÂÍÒÚœ”: ¬˚ıÓ‰, √ÛÔÔ‡: –Â„. ÚÓÍ‡ Iq
-(long)(&pid_iq.up_reg3),	//[5102h.0Bh], Õ‡Á‚‡ÌËÂ: ¬˚ı.œÓÔÓˆ., “ÂÍÒÚœ”: ¬˚ı.œÓÔÓˆ., √ÛÔÔ‡: –Â„. ÚÓÍ‡ Iq
-(long)(&pid_iq.ui_reg3),	//[5102h.0Ch], Õ‡Á‚‡ÌËÂ: ¬˚ı.»ÌÚÂ„., “ÂÍÒÚœ”: ¬˚ı.»ÌÚÂ„., √ÛÔÔ‡: –Â„. ÚÓÍ‡ Iq
-(long)(&pid_iq.ud_reg3),	//[5102h.0Dh], Õ‡Á‚‡ÌËÂ: ¬˚ı.ƒËÙÙÂ., “ÂÍÒÚœ”: ¬˚ı.ƒËÙÙÂ., √ÛÔÔ‡: –Â„. ÚÓÍ‡ Iq
-(long)(&pid_pos.pid_ref_reg3),	//[5103h.01h], Õ‡Á‚‡ÌËÂ: «‡‰‡ÌËÂ, “ÂÍÒÚœ”: pisref, √ÛÔÔ‡: –Â„. ÔÓÎÓÊÂÌËˇ
-(long)(&pid_pos.pid_ref_reg3),	//[5103h.02h], Õ‡Á‚‡ÌËÂ: «‡‰‡ÌËÂ, “ÂÍÒÚœ”: pisref, √ÛÔÔ‡: –Â„. ÔÓÎÓÊÂÌËˇ
-(long)(&pid_pos.pid_fdb_reg3),	//[5103h.03h], Õ‡Á‚‡ÌËÂ: Œ·‡ÚÌ‡ˇ Ò‚ˇÁ¸, “ÂÍÒÚœ”: pisfbd, √ÛÔÔ‡: –Â„. ÔÓÎÓÊÂÌËˇ
-(long)(&pid_pos.pid_fdb_reg3),	//[5103h.04h], Õ‡Á‚‡ÌËÂ: Œ·‡ÚÌ‡ˇ Ò‚ˇÁ¸, “ÂÍÒÚœ”: pisfbd, √ÛÔÔ‡: –Â„. ÔÓÎÓÊÂÌËˇ
-(long)(&pid_pos.Kp_reg3),	//[5103h.05h], Õ‡Á‚‡ÌËÂ: œÓÔÓˆ. ÍÓ˝ÙÙ. Kp, “ÂÍÒÚœ”: Kp, √ÛÔÔ‡: –Â„. ÔÓÎÓÊÂÌËˇ
-(long)(&pid_pos.pid_out_max),	//[5103h.06h], Õ‡Á‚‡ÌËÂ: Ã‡ÍÒËÏÛÏ ‚˚ıÓ‰‡, “ÂÍÒÚœ”: Max, √ÛÔÔ‡: –Â„. ÔÓÎÓÊÂÌËˇ
-(long)(&pid_pos.pid_out_min),	//[5103h.07h], Õ‡Á‚‡ÌËÂ: ÃËÌËÏÛÏ ‚˚ıÓ‰‡, “ÂÍÒÚœ”: Min, √ÛÔÔ‡: –Â„. ÔÓÎÓÊÂÌËˇ
-(long)(&pid_pos.Ki_reg3),	//[5103h.08h], Õ‡Á‚‡ÌËÂ: »ÌÚÂ„‡Î¸Ì˚È ÍÓ˝ÙÙ. Ki, “ÂÍÒÚœ”: Ki, √ÛÔÔ‡: –Â„. ÔÓÎÓÊÂÌËˇ
-(long)(&pid_pos.Kd_reg3),	//[5103h.09h], Õ‡Á‚‡ÌËÂ: ƒËÙÙ. ÍÓ˝ÙÙ. Kd, “ÂÍÒÚœ”: pisKd, √ÛÔÔ‡: –Â„. ÔÓÎÓÊÂÌËˇ
-(long)(&pid_pos.DiffDelim),	//[5103h.0Ah], Õ‡Á‚‡ÌËÂ: ƒÂÎËÚ. ‰ËÙÙ. ˜‡ÒÚË, “ÂÍÒÚœ”: ƒÂÎËÚ. ‰ËÙÙ. ˜‡ÒÚË, √ÛÔÔ‡: –Â„. ÔÓÎÓÊÂÌËˇ
-(long)(&pid_pos.Kf_d),	//[5103h.0Bh], Õ‡Á‚‡ÌËÂ:  Ó˝Ù. ÙËÎ¸Ú‡, “ÂÍÒÚœ”:  Ó˝Ù. ÙËÎ¸Ú‡, √ÛÔÔ‡: –Â„. ÔÓÎÓÊÂÌËˇ
-(long)(&pid_pos.Kc_reg3),	//[5103h.0Ch], Õ‡Á‚‡ÌËÂ: »ÌÚÂ„.ÍÓÂÍÚË.ÍÓ˝ÙÙËˆËÂÌÚ, “ÂÍÒÚœ”: Kc, √ÛÔÔ‡: –Â„. ÔÓÎÓÊÂÌËˇ
-(long)(&pid_pos.DeadZone),	//[5103h.0Dh], Õ‡Á‚‡ÌËÂ: ÃÂÚ‚‡ˇ ÁÓÌ‡, “ÂÍÒÚœ”: ÃÂÚ‚‡ˇ ÁÓÌ‡, √ÛÔÔ‡: –Â„. ÔÓÎÓÊÂÌËˇ
-(long)(&pid_pos.e_reg3),	//[5103h.0Eh], Õ‡Á‚‡ÌËÂ: Œ¯Ë·Í‡ ‡ÒÒÓ„Î‡ÒÓ‚‡ÌËˇ ÒË„Ì‡ÎÓ‚, “ÂÍÒÚœ”: Œ¯Ë·Í‡, √ÛÔÔ‡: –Â„. ÔÓÎÓÊÂÌËˇ
-(long)(&pid_spd.saterr_reg3),	//[5103h.0Fh], Õ‡Á‚‡ÌËÂ: œÂ‚˚¯ÂÌËÂ Ì‡Ò˚˘ÂÌËˇ, “ÂÍÒÚœ”: œÂ‚. Ì‡Ò˚˘, √ÛÔÔ‡: –Â„. ÔÓÎÓÊÂÌËˇ
-(long)(&pid_pos.pid_out_reg3),	//[5103h.10h], Õ‡Á‚‡ÌËÂ: ¬˚ıÓ‰ Â„ÛÎˇÚÓ‡, “ÂÍÒÚœ”: pisout, √ÛÔÔ‡: –Â„. ÔÓÎÓÊÂÌËˇ
-(long)(&pid_pos.up_reg3),	//[5103h.11h], Õ‡Á‚‡ÌËÂ: ¬˚ı.œÓÔÓˆ., “ÂÍÒÚœ”: ¬˚ı.œÓÔÓˆ., √ÛÔÔ‡: –Â„. ÔÓÎÓÊÂÌËˇ
-(long)(&pid_pos.ui_reg3),	//[5103h.12h], Õ‡Á‚‡ÌËÂ: ¬˚ı.»ÌÚÂ„., “ÂÍÒÚœ”: ¬˚ı.»ÌÚÂ„., √ÛÔÔ‡: –Â„. ÔÓÎÓÊÂÌËˇ
-(long)(&pid_pos.ud_reg3),	//[5103h.13h], Õ‡Á‚‡ÌËÂ: ¬˚ı.ƒËÙÙÂ., “ÂÍÒÚœ”: ¬˚ı.ƒËÙÙÂ., √ÛÔÔ‡: –Â„. ÔÓÎÓÊÂÌËˇ
-(long)(&pid_pos.e_reg3_filterOut),	//[5103h.14h], Õ‡Á‚‡ÌËÂ: ‘ËÎ¸Ú Ó¯Ë·ÍË, “ÂÍÒÚœ”: ‘ËÎ¸Ú Ó¯Ë·ÍË, √ÛÔÔ‡: –Â„. ÔÓÎÓÊÂÌËˇ
-(long)(&pid_ia.pid_ref_reg3),	//[5104h.01h], Õ‡Á‚‡ÌËÂ: «‡‰‡ÌËÂ, “ÂÍÒÚœ”: «‡‰-ËÂ, √ÛÔÔ‡: –Â„. ÚÓÍ‡ ˇÍÓˇ
-(long)(&pid_ia.pid_fdb_reg3),	//[5104h.02h], Õ‡Á‚‡ÌËÂ: Œ·‡ÚÌ‡ˇ Ò‚ˇÁ¸, “ÂÍÒÚœ”: Œ·.—‚, √ÛÔÔ‡: –Â„. ÚÓÍ‡ ˇÍÓˇ
-(long)(&pid_ia.Kp_reg3),	//[5104h.03h], Õ‡Á‚‡ÌËÂ: œÓÔÓˆ. ÍÓ˝ÙÙ. Kp, “ÂÍÒÚœ”: Kp, √ÛÔÔ‡: –Â„. ÚÓÍ‡ ˇÍÓˇ
-(long)(&pid_ia.pid_out_max),	//[5104h.04h], Õ‡Á‚‡ÌËÂ: Ã‡ÍÒËÏÛÏ ‚˚ıÓ‰‡, “ÂÍÒÚœ”: Max, √ÛÔÔ‡: –Â„. ÚÓÍ‡ ˇÍÓˇ
-(long)(&pid_ia.pid_out_min),	//[5104h.05h], Õ‡Á‚‡ÌËÂ: ÃËÌËÏÛÏ ‚˚ıÓ‰‡, “ÂÍÒÚœ”: Min, √ÛÔÔ‡: –Â„. ÚÓÍ‡ ˇÍÓˇ
-(long)(&pid_ia.Ki_reg3),	//[5104h.06h], Õ‡Á‚‡ÌËÂ: »ÌÚÂ„‡Î¸Ì˚È ÍÓ˝ÙÙ. Ki, “ÂÍÒÚœ”: Ki, √ÛÔÔ‡: –Â„. ÚÓÍ‡ ˇÍÓˇ
-(long)(&pid_ia.Kd_reg3),	//[5104h.07h], Õ‡Á‚‡ÌËÂ: ƒËÙÙ. ÍÓ˝ÙÙ. Kd, “ÂÍÒÚœ”: Kd, √ÛÔÔ‡: –Â„. ÚÓÍ‡ ˇÍÓˇ
-(long)(&pid_ia.Kc_reg3),	//[5104h.08h], Õ‡Á‚‡ÌËÂ: »ÌÚÂ„.ÍÓÂÍÚË.ÍÓ˝ÙÙËˆËÂÌÚ, “ÂÍÒÚœ”: Kc, √ÛÔÔ‡: –Â„. ÚÓÍ‡ ˇÍÓˇ
-(long)(&pid_ia.e_reg3),	//[5104h.09h], Õ‡Á‚‡ÌËÂ: Œ¯Ë·Í‡ ‡ÒÒÓ„Î‡ÒÓ‚‡ÌËˇ ÒË„Ì‡ÎÓ‚, “ÂÍÒÚœ”: Œ¯Ë·Í‡, √ÛÔÔ‡: –Â„. ÚÓÍ‡ ˇÍÓˇ
-(long)(&pid_ia.pid_out_reg3),	//[5104h.0Ah], Õ‡Á‚‡ÌËÂ: ¬˚ıÓ‰ Â„ÛÎˇÚÓ‡, “ÂÍÒÚœ”: ¬˚ıÓ‰, √ÛÔÔ‡: –Â„. ÚÓÍ‡ ˇÍÓˇ
-(long)(&pid_ia.up_reg3),	//[5104h.0Bh], Õ‡Á‚‡ÌËÂ: ¬˚ı.œÓÔÓˆ., “ÂÍÒÚœ”: ¬˚ı.œÓÔÓˆ., √ÛÔÔ‡: –Â„. ÚÓÍ‡ ˇÍÓˇ
-(long)(&pid_ia.ui_reg3),	//[5104h.0Ch], Õ‡Á‚‡ÌËÂ: ¬˚ı.»ÌÚÂ„., “ÂÍÒÚœ”: ¬˚ı.»ÌÚÂ„., √ÛÔÔ‡: –Â„. ÚÓÍ‡ ˇÍÓˇ
-(long)(&pid_ia.ud_reg3),	//[5104h.0Dh], Õ‡Á‚‡ÌËÂ: ¬˚ı.ƒËÙÙÂ., “ÂÍÒÚœ”: ¬˚ı.ƒËÙÙÂ., √ÛÔÔ‡: –Â„. ÚÓÍ‡ ˇÍÓˇ
-(long)(&pwm.UalphaRef),	//[5105h.01h], Õ‡Á‚‡ÌËÂ: Ua«‡‰, “ÂÍÒÚœ”: Ua«‡‰, √ÛÔÔ‡: ÿ»Ã
-(long)(&pwm.UbetaRef),	//[5105h.02h], Õ‡Á‚‡ÌËÂ: Ub«‡‰, “ÂÍÒÚœ”: Ub«‡‰, √ÛÔÔ‡: ÿ»Ã
-(long)(&pwm.U_lim),	//[5105h.03h], Õ‡Á‚‡ÌËÂ: U_Ó„, “ÂÍÒÚœ”: U_Ó„, √ÛÔÔ‡: ÿ»Ã
-(long)(&pwm.GammaA),	//[5105h.04h], Õ‡Á‚‡ÌËÂ: GammaA, “ÂÍÒÚœ”: GmA, √ÛÔÔ‡: ÿ»Ã
-(long)(&pwm.GammaB),	//[5105h.05h], Õ‡Á‚‡ÌËÂ: GammaB, “ÂÍÒÚœ”: GmB, √ÛÔÔ‡: ÿ»Ã
-(long)(&pwm.GammaC),	//[5105h.06h], Õ‡Á‚‡ÌËÂ: GammaC, “ÂÍÒÚœ”: GmC, √ÛÔÔ‡: ÿ»Ã
-(long)(&pwm.k_pwm),	//[5105h.07h], Õ‡Á‚‡ÌËÂ: TPWM, “ÂÍÒÚœ”: TPWM, √ÛÔÔ‡: ÿ»Ã
-(long)(&pwm.DeadBand),	//[5105h.08h], Õ‡Á‚‡ÌËÂ: ÃÂÚ‚ÓÂ ‚ÂÏˇ (ÏÍÒ), “ÂÍÒÚœ”: ÃÂÚ. ‚ÂÏˇ, √ÛÔÔ‡: ÿ»Ã
-(long)(&pwm.MinGammaLimit),	//[5105h.09h], Õ‡Á‚‡ÌËÂ: Œ„‡ÌË˜ÂÌËÂ ÏËÌ. ÒÍ‚‡ÊÌ., “ÂÍÒÚœ”: GamLim, √ÛÔÔ‡: ÿ»Ã
-(long)(&pwm.UdCompK),	//[5105h.0Ah], Õ‡Á‚‡ÌËÂ:  Ó˝Ù. ÍÓÏÔÂÌÒ‡ˆËË Ud, “ÂÍÒÚœ”: Ud ÓÏÔK, √ÛÔÔ‡: ÿ»Ã
-(long)(&pwm.UdCompEnable),	//[5105h.0Bh], Õ‡Á‚‡ÌËÂ:  ÓÏÔÂÌÒ‡ˆËˇ Ud, “ÂÍÒÚœ”: Ud ÓÏÔ, √ÛÔÔ‡: ÿ»Ã, ·ËÚ˚ Ò 0 ÔÓ 0: 0000000000000001b
-(long)(&pwm.PWM_type),	//[5105h.0Ch], Õ‡Á‚‡ÌËÂ: “ËÔ ÿ»Ã, “ÂÍÒÚœ”: “ËÔÿ»Ã, √ÛÔÔ‡: ÿ»Ã
-(long)(&pwm.ULimitation),	//[5105h.0Dh], Õ‡Á‚‡ÌËÂ: ULimitation, “ÂÍÒÚœ”: ULimitation, √ÛÔÔ‡: ÿ»Ã
-(long)(&pwm.Frequency),	//[5105h.0Eh], Õ‡Á‚‡ÌËÂ: ◊‡ÒÚÓÚ‡ ÿ»Ã, “ÂÍÒÚœ”: F¯ËÏ, √ÛÔÔ‡: ÿ»Ã
-(long)(&pwm.sector),	//[5105h.0Fh], Õ‡Á‚‡ÌËÂ: —ÂÍÚÓ, “ÂÍÒÚœ”: —ÂÍÚÓ, √ÛÔÔ‡: ÿ»Ã
-(long)(&pwm.U_mag),	//[5105h.10h], Õ‡Á‚‡ÌËÂ: U_‡ÏÔÎ, “ÂÍÒÚœ”: U_‡ÏÔÎ, √ÛÔÔ‡: ÿ»Ã
-(long)(&pwm.PDP_Fault),	//[5105h.11h], Õ‡Á‚‡ÌËÂ: ‘Î‡„Ë ‡‚‡ËÈ, “ÂÍÒÚœ”: F_bits, √ÛÔÔ‡: ÿ»Ã
-(long)(&sm_ctrl.state),	//[510Bh.01h], Õ‡Á‚‡ÌËÂ: sm_state, “ÂÍÒÚœ”: smstat, √ÛÔÔ‡: ƒ¿ sm_ctrl
-(long)(&drv_status_code),	//[510Bh.02h], Õ‡Á‚‡ÌËÂ: drv_status_code, “ÂÍÒÚœ”: stcode, √ÛÔÔ‡: ƒ¿ sm_ctrl, ·ËÚ˚ Ò 0 ÔÓ 7: 0000000011111111b
-(long)(&sm_prot.bit_fault1),	//[510Eh.01h], Õ‡Á‚‡ÌËÂ: ‘Î‡„Ë ‡‚‡ËÈ 1, “ÂÍÒÚœ”: bitF_1, √ÛÔÔ‡: «‡˘ËÚ˚
-(long)(&sm_prot.bit_fault2),	//[510Eh.02h], Õ‡Á‚‡ÌËÂ: ‘Î‡„Ë ‡‚‡ËÈ 2, “ÂÍÒÚœ”: bitF_2, √ÛÔÔ‡: «‡˘ËÚ˚
-(long)(&sm_prot.mask_fault1),	//[510Eh.03h], Õ‡Á‚‡ÌËÂ: Ã‡ÒÍ‡ ‡‚‡ËÈ 1L, “ÂÍÒÚœ”: mask1L, √ÛÔÔ‡: «‡˘ËÚ˚, ·ËÚ˚ Ò 0 ÔÓ 7: 0000000011111111b
-(long)(&sm_prot.mask_fault1),	//[510Eh.04h], Õ‡Á‚‡ÌËÂ: Ã‡ÒÍ‡ ‡‚‡ËÈ 1H, “ÂÍÒÚœ”: mask1H, √ÛÔÔ‡: «‡˘ËÚ˚, ·ËÚ˚ Ò 8 ÔÓ 15: 1111111100000000b
-(long)(&sm_prot.mask_fault2),	//[510Eh.05h], Õ‡Á‚‡ÌËÂ: Ã‡ÒÍ‡ ‡‚‡ËÈ 2L, “ÂÍÒÚœ”: mask2L, √ÛÔÔ‡: «‡˘ËÚ˚, ·ËÚ˚ Ò 0 ÔÓ 7: 0000000011111111b
-(long)(&sm_prot.mask_fault2),	//[510Eh.06h], Õ‡Á‚‡ÌËÂ: Ã‡ÒÍ‡ ‡‚‡ËÈ  2H, “ÂÍÒÚœ”: mask2H, √ÛÔÔ‡: «‡˘ËÚ˚, ·ËÚ˚ Ò 8 ÔÓ 15: 1111111100000000b
-(long)(&sm_prot.Imax_protect),	//[510Eh.07h], Õ‡Á‚‡ÌËÂ: Ã‡ÍÒËÏ‡Î¸Ì˚È ÚÓÍ, “ÂÍÒÚœ”: Ã‡ÍÒ.“ÓÍ, √ÛÔÔ‡: «‡˘ËÚ˚
-(long)(&sm_prot.Umax_protect),	//[510Eh.08h], Õ‡Á‚‡ÌËÂ: Ã‡ÍÒËÏ‡Î¸ÌÓÂ Ì‡ÔˇÊÂÌËÂ, “ÂÍÒÚœ”: Ud_max, √ÛÔÔ‡: «‡˘ËÚ˚
-(long)(&sm_prot.Umin_protect),	//[510Eh.09h], Õ‡Á‚‡ÌËÂ: ÃËÌËÏ‡Î¸ÌÓÂ Ì‡ÔˇÊÂÌËÂ, “ÂÍÒÚœ”: Ud_min, √ÛÔÔ‡: «‡˘ËÚ˚
-(long)(&sm_prot.speed_max),	//[510Eh.0Ah], Õ‡Á‚‡ÌËÂ: Ã‡ÍÒËÏ‡Î¸Ì‡ˇ ÒÍÓÓÒÚ¸, “ÂÍÒÚœ”: speed_max, √ÛÔÔ‡: «‡˘ËÚ˚
-(long)(&sm_prot.T_max),	//[510Eh.0Bh], Õ‡Á‚‡ÌËÂ: Ã‡ÍÒËÏ‡Î¸Ì‡ˇ ÚÂÏÔÂ‡ÚÛ‡, “ÂÍÒÚœ”: t_max, √ÛÔÔ‡: «‡˘ËÚ˚
-(long)(&refs.speed_ref),	//[5112h.01h], Õ‡Á‚‡ÌËÂ: —ÍÓÓÒÚ¸, “ÂÍÒÚœ”: —ÍÓ_Á, √ÛÔÔ‡: «‡‰‡ÌËˇ
-(long)(&refs.Iq_ref),	//[5112h.02h], Õ‡Á‚‡ÌËÂ: Ã‡ÍÒ. ÚÓÍ ¬”, “ÂÍÒÚœ”: “ÓÍ—“Á, √ÛÔÔ‡: «‡‰‡ÌËˇ
-(long)(&refs.i_flux_ref),	//[5112h.03h], Õ‡Á‚‡ÌËÂ: “ÓÍ Û‰ÂÊ‡ÌËˇ, “ÂÍÒÚœ”: “ÓÍ”œÁ, √ÛÔÔ‡: «‡‰‡ÌËˇ
-(long)(&refs.theta_elec),	//[5112h.04h], Õ‡Á‚‡ÌËÂ: theta_elec, “ÂÍÒÚœ”: ˝ÎÂÍ”„, √ÛÔÔ‡: «‡‰‡ÌËˇ
-(long)(&refs.uf_ref),	//[5112h.05h], Õ‡Á‚‡ÌËÂ: «‡‰‡ÌÌÓÂ Ì‡ÔˇÊÂÌËÂ Œ¬, “ÂÍÒÚœ”: Uf_ref, √ÛÔÔ‡: «‡‰‡ÌËˇ
-(long)(&drv_params.p),	//[5113h.01h], Õ‡Á‚‡ÌËÂ: ◊ËÒÎÓ Ô‡ ÔÓÎ˛ÒÓ‚, “ÂÍÒÚœ”: œ‡œÓÎ, √ÛÔÔ‡: ¡‡ÁÓ‚. Ô‡‡Ï
-(long)(&drv_params.I_nom),	//[5113h.02h], Õ‡Á‚‡ÌËÂ: ÕÓÏËÌ‡Î¸Ì˚È ÚÓÍ, “ÂÍÒÚœ”: IÔ˜ÕÓÏ, √ÛÔÔ‡: ¡‡ÁÓ‚. Ô‡‡Ï
-(long)(&drv_params.U_nom),	//[5113h.03h], Õ‡Á‚‡ÌËÂ: ÕÓÏËÌ‡Î¸ÌÓÂ Ì‡ÔˇÊÂÌËÂ Ù‡ÁÌ., “ÂÍÒÚœ”: UÙ_ÌÓÏ, √ÛÔÔ‡: ¡‡ÁÓ‚. Ô‡‡Ï
-(long)(&drv_params.speed_nom),	//[5113h.04h], Õ‡Á‚‡ÌËÂ: ÕÓÏËÌ‡Î¸Ì‡ˇ ÒÍÓÓÒÚ¸, “ÂÍÒÚœ”: —ÍÓÓÒÚ¸ÕÓÏ, √ÛÔÔ‡: ¡‡ÁÓ‚. Ô‡‡Ï
-(long)(&drv_params.Udc_nom),	//[5113h.05h], Õ‡Á‚‡ÌËÂ: ÕÓÏËÌ‡Î¸ÌÓÂ Ì‡ÔˇÊÂÌËÂ «œ“, “ÂÍÒÚœ”: UdcÕÓÏ, √ÛÔÔ‡: ¡‡ÁÓ‚. Ô‡‡Ï
-(long)(&drv_params.Rs),	//[5113h.06h], Õ‡Á‚‡ÌËÂ: Rs, “ÂÍÒÚœ”: Rs, √ÛÔÔ‡: ¡‡ÁÓ‚. Ô‡‡Ï
-(long)(&drv_params.Ls),	//[5113h.07h], Õ‡Á‚‡ÌËÂ: Ls, “ÂÍÒÚœ”: Ls, √ÛÔÔ‡: ¡‡ÁÓ‚. Ô‡‡Ï
-(long)(&drv_params.freq_nom),	//[5113h.08h], Õ‡Á‚‡ÌËÂ: ÕÓÏËÌ‡Î¸Ì‡ˇ ˜‡ÒÚÓÚ‡, “ÂÍÒÚœ”: ÕÓÏ.˜‡ÒÚ., √ÛÔÔ‡: ¡‡ÁÓ‚. Ô‡‡Ï
-(long)(&drv_params.sens_type),	//[5113h.09h], Õ‡Á‚‡ÌËÂ: “ËÔ ‰‡Ú˜ËÍ‡ ÔÓÎÓÊÂÌËˇ, “ÂÍÒÚœ”: Sens_type, √ÛÔÔ‡: ¡‡ÁÓ‚. Ô‡‡Ï, ·ËÚ˚ Ò 0 ÔÓ 2: 0000000000000111b
-(long)(&sw.HardwareType),	//[5114h.01h], Õ‡Á‚‡ÌËÂ: “ËÔ ‡ÔÔ‡‡ÚÌÓÈ ˜‡ÒÚË, “ÂÍÒÚœ”: HardwareType, √ÛÔÔ‡: Õ‡ÒÚÓÈÍË —”, ·ËÚ˚ Ò 0 ÔÓ 7: 0000000011111111b
-(long)(&sm_ctrl.run_mode),	//[5114h.02h], Õ‡Á‚‡ÌËÂ: –ÂÊËÏ ‡·ÓÚ˚, “ÂÍÒÚœ”: –ÂÊ–‡·, √ÛÔÔ‡: Õ‡ÒÚÓÈÍË —”
-(long)(&sw.recuperation_ena),	//[5114h.03h], Õ‡Á‚‡ÌËÂ: –ÂÍÛÔÂ‡ˆËˇ, “ÂÍÒÚœ”: –ÂÍÛÔ, √ÛÔÔ‡: Õ‡ÒÚÓÈÍË —”
-(long)(&sw.AutoOffset),	//[5114h.04h], Õ‡Á‚‡ÌËÂ: ¿÷œ ‡‚ÚÓ ÒÏÂ˘., “ÂÍÒÚœ”: ¿÷œÒÏÂ˘, √ÛÔÔ‡: Õ‡ÒÚÓÈÍË —”
-(long)(&sw.Reboot),	//[5114h.05h], Õ‡Á‚‡ÌËÂ: œÂÂÁ‡„ÛÁÍ‡, “ÂÍÒÚœ”: œÂÂÁ‡„ÛÁÍ‡, √ÛÔÔ‡: Õ‡ÒÚÓÈÍË —”
-(long)(&sw.excitation_ena),	//[5114h.06h], Õ‡Á‚‡ÌËÂ: ¬ÓÁ·Û‰ËÚÂÎ¸, “ÂÍÒÚœ”: ¬ÓÁ·, √ÛÔÔ‡: Õ‡ÒÚÓÈÍË —”
-(long)(&adc.Imeas_a_gain),	//[5116h.01h], Õ‡Á‚‡ÌËÂ:  Ó˝ÙÙËˆËÂÌÚ ÚÓÍ‡ Ù‡Á˚ ¿, “ÂÍÒÚœ”: Ia”ÒËÎ, √ÛÔÔ‡: ¿÷œ
-(long)(&adc.Imeas_a_offset),	//[5116h.02h], Õ‡Á‚‡ÌËÂ: —ÏÂ˘ÂÌËÂ ÚÓÍ‡ Ù‡Á˚ ¿, “ÂÍÒÚœ”: Ia—ÏÂ˘, √ÛÔÔ‡: ¿÷œ
-(long)(&adc.Imeas_a),	//[5116h.03h], Õ‡Á‚‡ÌËÂ: “ÓÍ Ù‡Á˚ ¿, “ÂÍÒÚœ”: Ia_Ï„Ì, √ÛÔÔ‡: ¿÷œ
-(long)(&adc.Imeas_b_gain),	//[5116h.04h], Õ‡Á‚‡ÌËÂ:  Ó˝ÙÙËˆËÂÌÚ ÚÓÍ‡ Ù‡Á˚ ¬, “ÂÍÒÚœ”: Ib”ÒËÎ, √ÛÔÔ‡: ¿÷œ
-(long)(&adc.Imeas_b_offset),	//[5116h.05h], Õ‡Á‚‡ÌËÂ: —ÏÂ˘ÂÌËÂ ÚÓÍ‡ Ù‡Á˚ ¬, “ÂÍÒÚœ”: Ib—ÏÂ˘, √ÛÔÔ‡: ¿÷œ
-(long)(&adc.Imeas_b),	//[5116h.06h], Õ‡Á‚‡ÌËÂ: “ÓÍ Ù‡Á˚ ¬, “ÂÍÒÚœ”: Ib_Ï„Ì, √ÛÔÔ‡: ¿÷œ
-(long)(&adc.Imeas_c_gain),	//[5116h.07h], Õ‡Á‚‡ÌËÂ:  Ó˝ÙÙËˆËÂÌÚ ÚÓÍ‡ Ù‡Á˚ C, “ÂÍÒÚœ”: Ic”ÒËÎ, √ÛÔÔ‡: ¿÷œ
-(long)(&adc.Imeas_c_offset),	//[5116h.08h], Õ‡Á‚‡ÌËÂ: —ÏÂ˘ÂÌËÂ ÚÓÍ‡ Ù‡Á˚ C, “ÂÍÒÚœ”: Ic—ÏÂ˘, √ÛÔÔ‡: ¿÷œ
-(long)(&adc.Imeas_c),	//[5116h.09h], Õ‡Á‚‡ÌËÂ: “ÓÍ Ù‡Á˚ —, “ÂÍÒÚœ”: Ic_Ï„Ì, √ÛÔÔ‡: ¿÷œ
-(long)(&adc.Imeas_d_gain),	//[5116h.0Ah], Õ‡Á‚‡ÌËÂ:  Ó˝ÙÙËˆËÂÌÚ ÚÓÍ‡ Ù‡Á˚ D, “ÂÍÒÚœ”: Id”ÒËÎ, √ÛÔÔ‡: ¿÷œ
-(long)(&adc.Imeas_d_offset),	//[5116h.0Bh], Õ‡Á‚‡ÌËÂ: —ÏÂ˘ÂÌËÂ ÚÓÍ‡ Ù‡Á˚ D, “ÂÍÒÚœ”: Id—ÏÂ˘, √ÛÔÔ‡: ¿÷œ
-(long)(&adc.Imeas_d),	//[5116h.0Ch], Õ‡Á‚‡ÌËÂ: “ÓÍ Ù‡Á˚ D, “ÂÍÒÚœ”: Id_Ï„Ì, √ÛÔÔ‡: ¿÷œ
-(long)(&adc.Udc_meas_gain),	//[5116h.0Dh], Õ‡Á‚‡ÌËÂ:  Ó˝ÙÙËˆËÂÌÚ Ì‡ÔˇÊÂÌËˇ «œ“, “ÂÍÒÚœ”: Ud”ÒËÎ, √ÛÔÔ‡: ¿÷œ
-(long)(&adc.Udc_meas_offset),	//[5116h.0Eh], Õ‡Á‚‡ÌËÂ: —ÏÂ˘ÂÌËÂ Ì‡ÔˇÊ. «œ“, “ÂÍÒÚœ”: UdÒÏÂ˘, √ÛÔÔ‡: ¿÷œ
-(long)(&adc.Udc_meas),	//[5116h.0Fh], Õ‡Á‚‡ÌËÂ: Õ‡ÔˇÊÂÌËÂ «œ“, “ÂÍÒÚœ”: Ud, √ÛÔÔ‡: ¿÷œ
-(long)(&adc.T_meas_gain),	//[5116h.10h], Õ‡Á‚‡ÌËÂ:  Ó˝ÙÙËˆËÂÌÚ ÚÂÏÔÂ‡ÚÛ˚, “ÂÍÒÚœ”: t_gain, √ÛÔÔ‡: ¿÷œ
-(long)(&adc.T_meas),	//[5116h.11h], Õ‡Á‚‡ÌËÂ: “ÂÏÔÂ‡ÚÛ‡, “ÂÍÒÚœ”: t, √ÛÔÔ‡: ¿÷œ
-(long)(&adc.ref_meas_gain),	//[5116h.12h], Õ‡Á‚‡ÌËÂ:  Ó˝ÙÙËˆËÂÌÚ ‚ÌÂ¯ÌÂ„Ó ‚ıÓ‰‡, “ÂÍÒÚœ”: ADC_ext_gain, √ÛÔÔ‡: ¿÷œ
-(long)(&adc.ref_meas_offset),	//[5116h.13h], Õ‡Á‚‡ÌËÂ: —ÏÂ˘ÂÌËÂ ‚ÌÂ¯ÌÂ„Ó ‚ıÓ‰‡, “ÂÍÒÚœ”: ADC_ext_offset, √ÛÔÔ‡: ¿÷œ
-(long)(&adc.ref_meas),	//[5116h.14h], Õ‡Á‚‡ÌËÂ: ¬ÌÂ¯ÌËÈ ‡Ì‡ÎÓ„Ó‚˚È ‚ıÓ‰ 1, “ÂÍÒÚœ”: ADC_ext1, √ÛÔÔ‡: ¿÷œ
-(long)(&vhz.freq),	//[511Ah.01h], Õ‡Á‚‡ÌËÂ: ¬˚ıÓ‰Ì‡ˇ ˜‡ÒÚÓÚ‡, “ÂÍÒÚœ”: F_‚˚ı, √ÛÔÔ‡:  Ë‚‡ˇ U-f
-(long)(&vhz.vout),	//[511Ah.02h], Õ‡Á‚‡ÌËÂ: ¬˚ıÓ‰ÌÓÂ Ì‡ÔˇÊÂÌËÂ, “ÂÍÒÚœ”: U_‚˚ı, √ÛÔÔ‡:  Ë‚‡ˇ U-f
-(long)(&vhz.FL),	//[511Ah.03h], Õ‡Á‚‡ÌËÂ: ÕÛÎÂ‚‡ˇ ÓÔÓÌ‡ˇ ˜‡ÒÚÓÚ‡, “ÂÍÒÚœ”: f [0], √ÛÔÔ‡:  Ë‚‡ˇ U-f
-(long)(&vhz.Vmin),	//[511Ah.04h], Õ‡Á‚‡ÌËÂ: ÕÛÎÂ‚ÓÂ ÓÔÓÌÓÂ Ì‡ÔˇÊÂÌËÂ, “ÂÍÒÚœ”: U [0], √ÛÔÔ‡:  Ë‚‡ˇ U-f
-(long)(&vhz.FH),	//[511Ah.05h], Õ‡Á‚‡ÌËÂ: œÂ‚‡ˇ ÓÔÓÌ‡ˇ ˜‡ÒÚÓÚ‡, “ÂÍÒÚœ”: f [1], √ÛÔÔ‡:  Ë‚‡ˇ U-f
-(long)(&vhz.Vmax),	//[511Ah.06h], Õ‡Á‚‡ÌËÂ: œÂ‚ÓÂ ÓÔÓÌÓÂ Ì‡ÔˇÊÂÌËÂ, “ÂÍÒÚœ”: U [1], √ÛÔÔ‡:  Ë‚‡ˇ U-f
-(long)(&vhz.Fmax),	//[511Ah.07h], Õ‡Á‚‡ÌËÂ: Ã‡ÍÒËÏ‡Î¸Ì‡ˇ ˜‡ÒÚÓÚ‡, “ÂÍÒÚœ”: f max, √ÛÔÔ‡:  Ë‚‡ˇ U-f
-(long)(&cur_par.speed),	//[5138h.01h], Õ‡Á‚‡ÌËÂ: —ÍÓÓÒÚ¸, “ÂÍÒÚœ”: ÒÍÓ, √ÛÔÔ‡: Õ‡·Î˛‰‡ÂÏ˚Â
-(long)(&cur_par.power),	//[5138h.02h], Õ‡Á‚‡ÌËÂ: ¿ÍÚ. ÏÓ˘ÌÓÒÚ¸, “ÂÍÒÚœ”: ¿ÍÚÃÓ˘, √ÛÔÔ‡: Õ‡·Î˛‰‡ÂÏ˚Â
-(long)(&cur_par.Is),	//[5138h.03h], Õ‡Á‚‡ÌËÂ: “ÓÍ ÒÚ‡ÚÓ‡, “ÂÍÒÚœ”: “ÓÍ—Ú, √ÛÔÔ‡: Õ‡·Î˛‰‡ÂÏ˚Â
-(long)(&cur_par.ThetaRefCurr),	//[5138h.04h], Õ‡Á‚‡ÌËÂ: ›Î”„ÓÎ«‡‰, “ÂÍÒÚœ”: ›Î”„ÓÎ«‡‰, √ÛÔÔ‡: Õ‡·Î˛‰‡ÂÏ˚Â
-(long)(&cur_par.ThetaCurr),	//[5138h.05h], Õ‡Á‚‡ÌËÂ: ›Î”„ÓÎ, “ÂÍÒÚœ”: ›Î”„ÓÎ, √ÛÔÔ‡: Õ‡·Î˛‰‡ÂÏ˚Â
-(long)(&cur_par.IsRef),	//[5138h.06h], Õ‡Á‚‡ÌËÂ: “ÓÍ ÒÚ‡ÚÓ‡ Á‡‰, “ÂÍÒÚœ”: “ÓÍ—Ú«‡‰, √ÛÔÔ‡: Õ‡·Î˛‰‡ÂÏ˚Â
-(long)(&global_time.PowerOn_time_min),	//[5138h.07h], Õ‡Á‚‡ÌËÂ: ¬ÂÏˇ Á‡ÔËÚ‡ÌÌÓ„Ó ÒÓÒÚÓˇÌËˇ, ÏËÌ, “ÂÍÒÚœ”: Power On Time, √ÛÔÔ‡: Õ‡·Î˛‰‡ÂÏ˚Â
-(long)(&global_time.operational_time_min),	//[5138h.08h], Õ‡Á‚‡ÌËÂ: ¬Âˇ ‡·ÓÚ˚ ÔË‚Ó‰‡, ÏËÌ, “ÂÍÒÚœ”: Work Time, √ÛÔÔ‡: Õ‡·Î˛‰‡ÂÏ˚Â
-(long)(&dlog.mode_reset),	//[5150h.01h], Õ‡Á‚‡ÌËÂ: dlog.mode_reset, “ÂÍÒÚœ”: mode, √ÛÔÔ‡: dlog
-(long)(&dlog.control),	//[5150h.02h], Õ‡Á‚‡ÌËÂ: dlog.control, “ÂÍÒÚœ”: dlcont, √ÛÔÔ‡: dlog
-(long)(&dlog.ind_subind1),	//[5150h.03h], Õ‡Á‚‡ÌËÂ: dlog.ind_subind1, “ÂÍÒÚœ”: dlisi1, √ÛÔÔ‡: dlog
-(long)(&dlog.ind_subind2),	//[5150h.04h], Õ‡Á‚‡ÌËÂ: dlog.ind_subind2, “ÂÍÒÚœ”: dlisi2, √ÛÔÔ‡: dlog
-(long)(&dlog.ind_subind3),	//[5150h.05h], Õ‡Á‚‡ÌËÂ: dlog.ind_subind3, “ÂÍÒÚœ”: dlisi3, √ÛÔÔ‡: dlog
-(long)(&dlog.ind_subind4),	//[5150h.06h], Õ‡Á‚‡ÌËÂ: dlog.ind_subind4, “ÂÍÒÚœ”: dlisi4, √ÛÔÔ‡: dlog
-(long)(&dlog.StartBits),	//[5150h.07h], Õ‡Á‚‡ÌËÂ: StartBitL, “ÂÍÒÚœ”: StrtBL, √ÛÔÔ‡: dlog, ·ËÚ˚ Ò 0 ÔÓ 7: 0000000011111111b
-(long)(&dlog.StartBits),	//[5150h.08h], Õ‡Á‚‡ÌËÂ: StartBitH, “ÂÍÒÚœ”: StrtBH, √ÛÔÔ‡: dlog, ·ËÚ˚ Ò 8 ÔÓ 15: 1111111100000000b
-(long)(&dlog.OneShotOperation),	//[5150h.09h], Õ‡Á‚‡ÌËÂ: OneShotOperation, “ÂÍÒÚœ”: OneShotOp, √ÛÔÔ‡: dlog, ·ËÚ˚ Ò 0 ÔÓ 0: 0000000000000001b
-(long)(&dlog.trig_shift),	//[5150h.0Ah], Õ‡Á‚‡ÌËÂ:  ÓÎË˜ÂÒÚ‚Ó ÚÓ˜ÂÍ ÔÂ‰˚ÒÚÓËË, “ÂÍÒÚœ”: N ÔÂ‰˚ÒÚ., √ÛÔÔ‡: dlog
-(long)(&dlog.sampling_rate),	//[5150h.0Bh], Õ‡Á‚‡ÌËÂ: ◊‡ÒÚÓÚ‡ ‰‡Ú‡ÎÓ„Â‡, “ÂÍÒÚœ”: dlogFreq, √ÛÔÔ‡: dlog
-(long)(&dlog.next_value_var),	//[5151h.00h], Õ‡Á‚‡ÌËÂ: dlog.next_value_var, “ÂÍÒÚœ”: dlnval, √ÛÔÔ‡: ¬Õ≈ √–”œœ
-(long)(&posspeedEqep.resol),	//[5152h.01h], Õ‡Á‚‡ÌËÂ:  ÓÎ-‚Ó ÔÂËÓ‰Ó‚, “ÂÍÒÚœ”:  ÓÎ-‚Ó ÔÂËÓ‰Ó‚, √ÛÔÔ‡: ƒœ–-›ÌÍÓ‰Â
-(long)(&posspeedEqep.Posspeed_CTL.all),	//[5152h.02h], Õ‡Á‚‡ÌËÂ: Õ‡ÎË˜ËÂ ÂÔÂ‡, “ÂÍÒÚœ”: Õ‡ÎË˜ËÂ ÂÔÂ‡, √ÛÔÔ‡: ƒœ–-›ÌÍÓ‰Â, ·ËÚ˚ Ò 2 ÔÓ 2: 0000000000000100b
-(long)(&posspeedEqep.SpeedCalcType),	//[5152h.03h], Õ‡Á‚‡ÌËÂ: –‡ÒÒ˜ËÚ˚‚‡Ú¸ ÒÍÓÓÒÚ¸ ÔÓ„‡ÏÏÌÓ, “ÂÍÒÚœ”: SpeedCalcType, √ÛÔÔ‡: ƒœ–-›ÌÍÓ‰Â
-(long)(&posspeedEqep.AngleOffset),	//[5152h.04h], Õ‡Á‚‡ÌËÂ: —ÏÂ˘”„ÓÎ, “ÂÍÒÚœ”: —ÏÂ˘”„, √ÛÔÔ‡: ƒœ–-›ÌÍÓ‰Â
-(long)(&posspeedEqep.Poscnt_res),	//[5152h.05h], Õ‡Á‚‡ÌËÂ: ÃÂı‡ÌË˜ÂÒÍ.Û„ÓÎ ‚ ÏÂÚÍ‡ı, “ÂÍÒÚœ”: ÃÂı‡ÌË˜ÂÒÍ.Û„ÓÎ ‚ ÏÂ, √ÛÔÔ‡: ƒœ–-›ÌÍÓ‰Â
-(long)(&posspeedEqep.Poscnt_res16),	//[5152h.06h], Õ‡Á‚‡ÌËÂ: ÃÂı‡ÌË˜ÂÒÍ.Û„ÓÎ ‚ ÏÂÚÍ‡ı, “ÂÍÒÚœ”: ÃÂı‡ÌË˜ÂÒÍ.Û„ÓÎ ‚ ÏÂ, √ÛÔÔ‡: ƒœ–-›ÌÍÓ‰Â
-(long)(&posspeedEqep.speed_elec),	//[5152h.07h], Õ‡Á‚‡ÌËÂ: —ÍÓÓÒÚ¸ , “ÂÍÒÚœ”: —ÍÓÓÒÚ¸, √ÛÔÔ‡: ƒœ–-›ÌÍÓ‰Â
-(long)(&posspeedEqep.theta_elec),	//[5152h.08h], Õ‡Á‚‡ÌËÂ: ”„ÓÎ. ˝ÎÂÍÚ., “ÂÍÒÚœ”: ”„ÓÎ. ˝ÎÂÍÚ., √ÛÔÔ‡: ƒœ–-›ÌÍÓ‰Â
-(long)(&posspeedEqep.theta_mech),	//[5152h.09h], Õ‡Á‚‡ÌËÂ: ”„ÓÎ ÏÂı., “ÂÍÒÚœ”: ”„ÓÎ ÏÂı., √ÛÔÔ‡: ƒœ–-›ÌÍÓ‰Â
-(long)(&posspeedEqep.Posspeed_CTL.all),	//[5152h.0Ah], Õ‡Á‚‡ÌËÂ:  ÓÏ‡Ì‰‡ ËÌËˆ., “ÂÍÒÚœ”:  ÓÏ‡Ì‰‡ ËÌËˆ., √ÛÔÔ‡: ƒœ–-›ÌÍÓ‰Â, ·ËÚ˚ Ò 4 ÔÓ 4: 0000000000010000b
-(long)(&posspeedEqep.speed_filter.T),	//[5152h.0Bh], Õ‡Á‚‡ÌËÂ:   ·˚ÒÚÓ‰ÂÈÒÚ‚Ëˇ ÙËÎ¸Ú‡ ÒÍÓÓÒÚË, “ÂÍÒÚœ”:  Ù. ÒÍÓÓÒÚË, √ÛÔÔ‡: ƒœ–-›ÌÍÓ‰Â
-(long)(&posspeedEqep.Posspeed_FLG1.all),	//[5152h.0Ch], Õ‡Á‚‡ÌËÂ: Posspeed_FLG1, “ÂÍÒÚœ”: Posspeed_FLG1, √ÛÔÔ‡: ƒœ–-›ÌÍÓ‰Â
-(long)(&posspeedEqep.GPIOsValue),	//[5152h.0Dh], Õ‡Á‚‡ÌËÂ: GPIOsValue, “ÂÍÒÚœ”: GPIOsValue, √ÛÔÔ‡: ƒœ–-›ÌÍÓ‰Â
-(long)(&posspeedEqep.UPPS_forWatch),	//[5152h.0Eh], Õ‡Á‚‡ÌËÂ: UPPS, “ÂÍÒÚœ”: UPPS, √ÛÔÔ‡: ƒœ–-›ÌÍÓ‰Â
-(long)(&posspeedEqep.Qcprdlat_tmp),	//[5152h.0Fh], Õ‡Á‚‡ÌËÂ: QCPRD, “ÂÍÒÚœ”: QCPRD, √ÛÔÔ‡: ƒœ–-›ÌÍÓ‰Â
-(long)(&posspeedEqep.Qcprdlat16_tmp),	//[5152h.10h], Õ‡Á‚‡ÌËÂ: QCPRD, “ÂÍÒÚœ”: QCPRD, √ÛÔÔ‡: ƒœ–-›ÌÍÓ‰Â
-(long)(&posspeedEqep.QEPSTS),	//[5152h.11h], Õ‡Á‚‡ÌËÂ: QEPSTS, “ÂÍÒÚœ”: QEPSTS, √ÛÔÔ‡: ƒœ–-›ÌÍÓ‰Â
-(long)(&posspeedEqep.RevolutionCounter),	//[5152h.12h], Õ‡Á‚‡ÌËÂ: ◊ËÒÎÓ Ó·ÓÓÚÓ‚, “ÂÍÒÚœ”: revolCounter, √ÛÔÔ‡: ƒœ–-›ÌÍÓ‰Â
-(long)(&posspeedEqep.Poscnt_resContinouosInt8),	//[5152h.13h], Õ‡Á‚‡ÌËÂ: ¿·Ò. ÔÓÎÓÊÂÌËÂ ‚ ÏÂÚÍ‡ı, “ÂÍÒÚœ”: qcAbsPos, √ÛÔÔ‡: ƒœ–-›ÌÍÓ‰Â
-(long)(&posspeedEqep.Poscnt_resContinouosInt),	//[5152h.14h], Õ‡Á‚‡ÌËÂ: ¿·Ò. ÔÓÎÓÊÂÌËÂ ‚ ÏÂÚÍ‡ı, “ÂÍÒÚœ”: qcAbsPos, √ÛÔÔ‡: ƒœ–-›ÌÍÓ‰Â
-(long)(&posspeedEqep.Poscnt_resContinouosLong),	//[5152h.15h], Õ‡Á‚‡ÌËÂ: ¿·Ò. ÔÓÎÓÊÂÌËÂ ‚ ÏÂÚÍ‡ı, “ÂÍÒÚœ”: qcAbsPos, √ÛÔÔ‡: ƒœ–-›ÌÍÓ‰Â
-(long)(&posspeedEqep.theta_mechContinouos),	//[5152h.16h], Õ‡Á‚‡ÌËÂ: ”„ÓÎ ÏÂı‡ÌË˜ÂÒÍËÈ ÌÂ Ó„‡ÌË˜., “ÂÍÒÚœ”: ”„.ÏÂı.ÌÂ_Ó„, √ÛÔÔ‡: ƒœ–-›ÌÍÓ‰Â
-(long)(&posspeedEqep.theta_elecContinouos),	//[5152h.17h], Õ‡Á‚‡ÌËÂ: ”„ÓÎ ˝ÎÂÍÚË˜ÂÒÍËÈ ÌÂ Ó„‡ÌË˜., “ÂÍÒÚœ”: ”„.˝Î.ÌÂ_Ó„, √ÛÔÔ‡: ƒœ–-›ÌÍÓ‰Â
-(long)(&DPReCAP.Angle),	//[5155h.01h], Õ‡Á‚‡ÌËÂ: ›Î”„ÓÎ, “ÂÍÒÚœ”: ›Î”„ÓÎ, √ÛÔÔ‡: ƒœ–-’ÓÎÎ
-(long)(&DPReCAP.speed),	//[5155h.02h], Õ‡Á‚‡ÌËÂ: —ÍÓÓÒÚ¸ , “ÂÍÒÚœ”: —ÍÓÓÒÚ¸, √ÛÔÔ‡: ƒœ–-’ÓÎÎ
-(long)(&DPReCAP.speedMIN),	//[5155h.03h], Õ‡Á‚‡ÌËÂ: ”ÒÚ‡‚Í‡ —ÍÓÓÒÚË, “ÂÍÒÚœ”: ”ÒÚ‡‚Í‡ —ÍÓÓÒÚË, √ÛÔÔ‡: ƒœ–-’ÓÎÎ
-(long)(&DPReCAP.Angle6),	//[5155h.04h], Õ‡Á‚‡ÌËÂ: ›Î”„ÓÎ6, “ÂÍÒÚœ”: ›Î”„ÓÎ6, √ÛÔÔ‡: ƒœ–-’ÓÎÎ
-(long)(&DPReCAP.DPReCAP_FLG1.all),	//[5155h.05h], Õ‡Á‚‡ÌËÂ: »ÌÚ-ÔÓÎˇÚÓ ‚ÍÎ, “ÂÍÒÚœ”: »ÌÚ-ÔÓÎˇÚÓ ‚ÍÎ, √ÛÔÔ‡: ƒœ–-’ÓÎÎ, ·ËÚ˚ Ò 0 ÔÓ 0: 0000000000000001b
-(long)(&DPReCAP.milsecREF),	//[5155h.06h], Õ‡Á‚‡ÌËÂ: ”ÒÚ‡‚Í‡ Ó·ÌÛÎÂÌËˇ ÒÍÓÓÒÚË, “ÂÍÒÚœ”: ”ÒÚ‡‚Í‡ Ó·ÌÛÎÂÌËˇ ÒÍ, √ÛÔÔ‡: ƒœ–-’ÓÎÎ
-(long)(&DPReCAP.speedMinREF),	//[5155h.07h], Õ‡Á‚‡ÌËÂ: —ÍÓÓÒÚ¸ ÃËÌ., “ÂÍÒÚœ”: —ÍÓÓÒÚ¸ ÃËÌ., √ÛÔÔ‡: ƒœ–-’ÓÎÎ
-(long)(&DPReCAP.CAP_WrongEdgeCnt),	//[5155h.08h], Õ‡Á‚‡ÌËÂ: ÀÓÊÌ˚Â ÙÓÌÚ˚, “ÂÍÒÚœ”: ÀÓÊÌ˚Â ÙÓÌÚ˚, √ÛÔÔ‡: ƒœ–-’ÓÎÎ
-(long)(&DPReCAP.HallCode),	//[5155h.09h], Õ‡Á‚‡ÌËÂ: ƒËÒÍÂÚÌ˚Â ‚ıÓ‰˚, “ÂÍÒÚœ”: ¬ıÓ‰˚, √ÛÔÔ‡: ƒœ–-’ÓÎÎ, ·ËÚ˚ Ò 0 ÔÓ 2: 0000000000000111b
-(long)(&DPReCAP.AngleOffset),	//[5155h.0Ah], Õ‡Á‚‡ÌËÂ: —ÏÂ˘”„ÓÎ, “ÂÍÒÚœ”: —ÏÂ˘”„, √ÛÔÔ‡: ƒœ–-’ÓÎÎ
-(long)(&DPReCAP.ErrorLevel),	//[5155h.0Bh], Õ‡Á‚‡ÌËÂ: ”Ó‚ÂÌ¸ ÔÓÏÂı, “ÂÍÒÚœ”: ”Ó‚ÂÌ¸ ÔÓÏÂı, √ÛÔÔ‡: ƒœ–-’ÓÎÎ
-(long)(&DPReCAP.CAP_WrongEdgeCnt1),	//[5155h.0Ch], Õ‡Á‚‡ÌËÂ: Œ¯Ë·Í‡ 1 Í‡Ì‡Î‡, “ÂÍÒÚœ”: Œ¯Ë·_1_Í., √ÛÔÔ‡: ƒœ–-’ÓÎÎ
-(long)(&DPReCAP.CAP_WrongEdgeCnt2),	//[5155h.0Dh], Õ‡Á‚‡ÌËÂ: Œ¯Ë·Í‡ 2 Í‡Ì‡Î‡, “ÂÍÒÚœ”: Œ¯Ë·_2_Í., √ÛÔÔ‡: ƒœ–-’ÓÎÎ
-(long)(&DPReCAP.CAP_WrongEdgeCnt3),	//[5155h.0Eh], Õ‡Á‚‡ÌËÂ: Œ¯Ë·Í‡ 3 Í‡Ì‡Î‡, “ÂÍÒÚœ”: Œ¯Ë·_3_Í., √ÛÔÔ‡: ƒœ–-’ÓÎÎ
-(long)(&DPReCAP.UserDirection),	//[5155h.0Fh], Õ‡Á‚‡ÌËÂ: Õ‡Ô‡‚ÎÂÌËÂ ‚‡˘ÂÌËˇ, “ÂÍÒÚœ”: Õ‡Ô¬, √ÛÔÔ‡: ƒœ–-’ÓÎÎ, ·ËÚ˚ Ò 2 ÔÓ 2: 0000000000000100b
-(long)(&DPReCAP.WrongCodeCounterLimitPerSec),	//[5155h.10h], Õ‡Á‚‡ÌËÂ: Ã‡ÍÒ.˜ËÒÎÓ Ó¯Ë·ÓÍ ƒœ–, “ÂÍÒÚœ”: Ã‡ÍÒ.Ó¯.ƒœ–, √ÛÔÔ‡: ƒœ–-’ÓÎÎ
-(long)(&DPReCAP.WrongCodeCounter),	//[5155h.11h], Õ‡Á‚‡ÌËÂ:  ÓÎ-‚Ó Ó¯Ë·ÓÍ ÌÂ‚ÂÌÓÈ ÔÓÒÎÂ‰Ó‚‡ÚÂÎ¸ÌÓÒÚË , “ÂÍÒÚœ”: Œ¯Ë·ÍË ÔÓÒÎÂ‰Ó‚‡Ú., √ÛÔÔ‡: ƒœ–-’ÓÎÎ
-(long)(&CounterCAP_isr),	//[5155h.12h], Õ‡Á‚‡ÌËÂ: —˜∏Ú˜ËÍ ÔÂ˚‚‡ÌËÈ ÔÓ ÔËÂÏÛ, “ÂÍÒÚœ”: —˜∏Ú.Rx.Int., √ÛÔÔ‡: ƒœ–-’ÓÎÎ
-(long)(&cap0_counter),	//[5155h.13h], Õ‡Á‚‡ÌËÂ: —˜∏Ú˜ËÍ ÔÂ˚‚‡ÌËÈ CAP1, “ÂÍÒÚœ”: —˜.ÔÂ˚‚.CAP1, √ÛÔÔ‡: ƒœ–-’ÓÎÎ
-(long)(&cap1_counter),	//[5155h.14h], Õ‡Á‚‡ÌËÂ: —˜∏Ú˜ËÍ ÔÂ˚‚‡ÌËÈ CAP2, “ÂÍÒÚœ”: —˜.ÔÂ˚‚.CAP2, √ÛÔÔ‡: ƒœ–-’ÓÎÎ
-(long)(&cap2_counter),	//[5155h.15h], Õ‡Á‚‡ÌËÂ: —˜∏Ú˜ËÍ ÔÂ˚‚‡ÌËÈ CAP3, “ÂÍÒÚœ”: —˜.ÔÂ˚‚.CAP3, √ÛÔÔ‡: ƒœ–-’ÓÎÎ
-(long)(&SSI_Encoder.resol),	//[5157h.01h], Õ‡Á‚‡ÌËÂ:  ÓÎË˜ÂÒÚ‚Ó ËÏÔÛÎ¸ÒÓ‚ Ì‡ Ó·ÓÓÚ, “ÂÍÒÚœ”: qepTik, √ÛÔÔ‡: ƒœ–-SSI ˝ÌÍÓ‰Â
-(long)(&SSI_Encoder.AngleOffset),	//[5157h.02h], Õ‡Á‚‡ÌËÂ: —ÏÂ˘”„ÓÎ, “ÂÍÒÚœ”: —ÏÂ˘”„, √ÛÔÔ‡: ƒœ–-SSI ˝ÌÍÓ‰Â
-(long)(&SSI_Encoder.Poscnt_res),	//[5157h.03h], Õ‡Á‚‡ÌËÂ: ÃÂı‡ÌË˜ÂÒÍ.Û„ÓÎ ‚ ÏÂÚÍ‡ı, “ÂÍÒÚœ”: ÃÂı‡ÌË˜ÂÒÍ.Û„ÓÎ ‚ ÏÂ, √ÛÔÔ‡: ƒœ–-SSI ˝ÌÍÓ‰Â
-(long)(&SSI_Encoder.speed_elec),	//[5157h.04h], Õ‡Á‚‡ÌËÂ: —ÍÓÓÒÚ¸ , “ÂÍÒÚœ”: —ÍÓÓÒÚ¸, √ÛÔÔ‡: ƒœ–-SSI ˝ÌÍÓ‰Â
-(long)(&SSI_Encoder.theta_elec),	//[5157h.05h], Õ‡Á‚‡ÌËÂ: ”„ÓÎ. ˝ÎÂÍÚ., “ÂÍÒÚœ”: ”„ÓÎ. ˝ÎÂÍÚ., √ÛÔÔ‡: ƒœ–-SSI ˝ÌÍÓ‰Â
-(long)(&SSI_Encoder.theta_mech),	//[5157h.06h], Õ‡Á‚‡ÌËÂ: ”„ÓÎ ÏÂı., “ÂÍÒÚœ”: ”„ÓÎ ÏÂı., √ÛÔÔ‡: ƒœ–-SSI ˝ÌÍÓ‰Â
-(long)(&SSI_Encoder.theta_mech_filtered),	//[5157h.07h], Õ‡Á‚‡ÌËÂ: ”„ÓÎ ÏÂı. ÙËÎ¸ÚÓ‚‡ÌÌ˚È, “ÂÍÒÚœ”: theta_mech_filtered, √ÛÔÔ‡: ƒœ–-SSI ˝ÌÍÓ‰Â
-(long)(&SSI_Encoder.theta_mech_filterK),	//[5157h.08h], Õ‡Á‚‡ÌËÂ:   ·˚ÒÚÓ‰ÂÈÒÚ‚Ëˇ ÙËÎ¸Ú‡ Û„Î‡, “ÂÍÒÚœ”:  Ù. Û„Î‡, √ÛÔÔ‡: ƒœ–-SSI ˝ÌÍÓ‰Â
-(long)(&SSI_Encoder.RevolutionCounter),	//[5157h.09h], Õ‡Á‚‡ÌËÂ: ◊ËÒÎÓ Ó·ÓÓÚÓ‚, “ÂÍÒÚœ”: revolCounter, √ÛÔÔ‡: ƒœ–-SSI ˝ÌÍÓ‰Â
-(long)(&SSI_Encoder.Poscnt_resContinouosLong),	//[5157h.0Ah], Õ‡Á‚‡ÌËÂ: ¿·Ò. ÔÓÎÓÊÂÌËÂ ‚ ÏÂÚÍ‡ı, “ÂÍÒÚœ”: qcAbsPos, √ÛÔÔ‡: ƒœ–-SSI ˝ÌÍÓ‰Â
-(long)(&SSI_Encoder.Poscnt_resContinouosInt8),	//[5157h.0Bh], Õ‡Á‚‡ÌËÂ: ¿·Ò. ÔÓÎÓÊÂÌËÂ ‚ ÏÂÚÍ‡ı, “ÂÍÒÚœ”: qcAbsPos, √ÛÔÔ‡: ƒœ–-SSI ˝ÌÍÓ‰Â
-(long)(&SSI_Encoder.Poscnt_resContinouosInt),	//[5157h.0Ch], Õ‡Á‚‡ÌËÂ: ¿·Ò. ÔÓÎÓÊÂÌËÂ ‚ ÏÂÚÍ‡ı, “ÂÍÒÚœ”: qcAbsPos, √ÛÔÔ‡: ƒœ–-SSI ˝ÌÍÓ‰Â
-(long)(&SSI_Encoder.theta_mechContinouos),	//[5157h.0Dh], Õ‡Á‚‡ÌËÂ: ”„ÓÎ ÏÂı‡ÌË˜ÂÒÍËÈ ÌÂ Ó„‡ÌË˜., “ÂÍÒÚœ”: ”„.ÏÂı.ÌÂ_Ó„, √ÛÔÔ‡: ƒœ–-SSI ˝ÌÍÓ‰Â
-(long)(&SSI_Encoder.theta_elecContinouos),	//[5157h.0Eh], Õ‡Á‚‡ÌËÂ: ”„ÓÎ ˝ÎÂÍÚË˜ÂÒÍËÈ ÌÂ Ó„‡ÌË˜., “ÂÍÒÚœ”: ”„.˝Î.ÌÂ_Ó„, √ÛÔÔ‡: ƒœ–-SSI ˝ÌÍÓ‰Â
-(long)(&Debug1),	//[5174h.01h], Õ‡Á‚‡ÌËÂ: DebugL1, “ÂÍÒÚœ”: DebugL1, √ÛÔÔ‡: ƒÎˇ ÓÚÎ‡‰ÍË
-(long)(&Debug1),	//[5174h.02h], Õ‡Á‚‡ÌËÂ: DebugL1, “ÂÍÒÚœ”: DebugL1, √ÛÔÔ‡: ƒÎˇ ÓÚÎ‡‰ÍË
-(long)(&Debug2),	//[5174h.03h], Õ‡Á‚‡ÌËÂ: DebugL2, “ÂÍÒÚœ”: DebugL2, √ÛÔÔ‡: ƒÎˇ ÓÚÎ‡‰ÍË
-(long)(&Debug2),	//[5174h.04h], Õ‡Á‚‡ÌËÂ: DebugL2, “ÂÍÒÚœ”: DebugL2, √ÛÔÔ‡: ƒÎˇ ÓÚÎ‡‰ÍË
-(long)(&Debug3),	//[5174h.05h], Õ‡Á‚‡ÌËÂ: DebugI3, “ÂÍÒÚœ”: DebugI3, √ÛÔÔ‡: ƒÎˇ ÓÚÎ‡‰ÍË
-(long)(&Debug3),	//[5174h.06h], Õ‡Á‚‡ÌËÂ: DebugI3, “ÂÍÒÚœ”: DebugI3, √ÛÔÔ‡: ƒÎˇ ÓÚÎ‡‰ÍË
-(long)(&Debug4),	//[5174h.07h], Õ‡Á‚‡ÌËÂ: DebugI4, “ÂÍÒÚœ”: DebugI4, √ÛÔÔ‡: ƒÎˇ ÓÚÎ‡‰ÍË
-(long)(&Debug4),	//[5174h.08h], Õ‡Á‚‡ÌËÂ: DebugI4, “ÂÍÒÚœ”: DebugI4, √ÛÔÔ‡: ƒÎˇ ÓÚÎ‡‰ÍË
-(long)(&DebugW1),	//[5174h.09h], Õ‡Á‚‡ÌËÂ: DebugW1, “ÂÍÒÚœ”: DebugW1, √ÛÔÔ‡: ƒÎˇ ÓÚÎ‡‰ÍË
-(long)(&DebugW1),	//[5174h.0Ah], Õ‡Á‚‡ÌËÂ: DebugW1, “ÂÍÒÚœ”: DebugW1, √ÛÔÔ‡: ƒÎˇ ÓÚÎ‡‰ÍË
-(long)(&DebugW2),	//[5174h.0Bh], Õ‡Á‚‡ÌËÂ: DebugW2, “ÂÍÒÚœ”: DebugW2, √ÛÔÔ‡: ƒÎˇ ÓÚÎ‡‰ÍË
-(long)(&DebugW2),	//[5174h.0Ch], Õ‡Á‚‡ÌËÂ: DebugW2, “ÂÍÒÚœ”: DebugW2, √ÛÔÔ‡: ƒÎˇ ÓÚÎ‡‰ÍË
-(long)(&DebugW3),	//[5174h.0Dh], Õ‡Á‚‡ÌËÂ: DebugW3, “ÂÍÒÚœ”: DebugW3, √ÛÔÔ‡: ƒÎˇ ÓÚÎ‡‰ÍË
-(long)(&DebugW3),	//[5174h.0Eh], Õ‡Á‚‡ÌËÂ: DebugW3, “ÂÍÒÚœ”: DebugW3, √ÛÔÔ‡: ƒÎˇ ÓÚÎ‡‰ÍË
-(long)(&DebugW4),	//[5174h.0Fh], Õ‡Á‚‡ÌËÂ: DebugW4, “ÂÍÒÚœ”: DebugW4, √ÛÔÔ‡: ƒÎˇ ÓÚÎ‡‰ÍË
-(long)(&DebugW4),	//[5174h.10h], Õ‡Á‚‡ÌËÂ: DebugW4, “ÂÍÒÚœ”: DebugW4, √ÛÔÔ‡: ƒÎˇ ÓÚÎ‡‰ÍË
-(long)(&DebugF1),	//[5174h.11h], Õ‡Á‚‡ÌËÂ: DebugF1, “ÂÍÒÚœ”: DebugF1, √ÛÔÔ‡: ƒÎˇ ÓÚÎ‡‰ÍË
-(long)(&DebugF2),	//[5174h.12h], Õ‡Á‚‡ÌËÂ: DebugF2, “ÂÍÒÚœ”: DebugF2, √ÛÔÔ‡: ƒÎˇ ÓÚÎ‡‰ÍË
-(long)(&DebugF3),	//[5174h.13h], Õ‡Á‚‡ÌËÂ: DebugF3, “ÂÍÒÚœ”: DebugF3, √ÛÔÔ‡: ƒÎˇ ÓÚÎ‡‰ÍË
-(long)(&DebugF4),	//[5174h.14h], Õ‡Á‚‡ÌËÂ: DebugF4, “ÂÍÒÚœ”: DebugF4, √ÛÔÔ‡: ƒÎˇ ÓÚÎ‡‰ÍË
-(long)(&model.MotorType),	//[5181h.01h], Õ‡Á‚‡ÌËÂ: “ËÔ ‰‚Ë„‡ÚÂÎˇ ÏÓ‰ÂÎË, “ÂÍÒÚœ”: ModelMotorType, √ÛÔÔ‡: ÃÓ‰ÂÎ¸ Ó·˘ËÂ ‰‡ÌÌ˚Â, ·ËÚ˚ Ò 0 ÔÓ 7: 0000000011111111b
-(long)(&model.MotorParametersNum),	//[5181h.02h], Õ‡Á‚‡ÌËÂ: œ‡‡ÏÂÚ˚ ‰‚Ë„‡ÚÂÎˇ, “ÂÍÒÚœ”: œ‡ƒ‚, √ÛÔÔ‡: ÃÓ‰ÂÎ¸ Ó·˘ËÂ ‰‡ÌÌ˚Â
-(long)(&model.load),	//[5181h.03h], Õ‡Á‚‡ÌËÂ: —ËÏÛÎËÛÂÏ˚È ÏÓÏÂÌÚ Ì‡„ÛÁÍË, “ÂÍÒÚœ”: ÃÌ‡„ ÒËÏ., √ÛÔÔ‡: ÃÓ‰ÂÎ¸ Ó·˘ËÂ ‰‡ÌÌ˚Â
-(long)(&model.motorInternals.udc),	//[5181h.04h], Õ‡Á‚‡ÌËÂ: Õ‡ÔˇÊÂÌËÂ «œ“, “ÂÍÒÚœ”: Ud, √ÛÔÔ‡: ÃÓ‰ÂÎ¸ Ó·˘ËÂ ‰‡ÌÌ˚Â
-(long)(&model.motorInternals.torque),	//[5181h.05h], Õ‡Á‚‡ÌËÂ: –Â‡ÎËÁÓ‚‡ÌÌ˚È ˝ÎÂÍÚË˜ÂÒÍËÈ ÏÓÏÂÌÚ, “ÂÍÒÚœ”: –Â‡Î.›Î.ÃÓÏ, √ÛÔÔ‡: ÃÓ‰ÂÎ¸ Ó·˘ËÂ ‰‡ÌÌ˚Â
-(long)(&model.motorInternals.omega),	//[5181h.06h], Õ‡Á‚‡ÌËÂ: —ÍÓÓÒÚ¸, “ÂÍÒÚœ”: qepspd, √ÛÔÔ‡: ÃÓ‰ÂÎ¸ Ó·˘ËÂ ‰‡ÌÌ˚Â
-(long)(&model.motorInternals.omega_rpm),	//[5181h.07h], Õ‡Á‚‡ÌËÂ: —ÍÓÓÒÚ¸, “ÂÍÒÚœ”: qepspd, √ÛÔÔ‡: ÃÓ‰ÂÎ¸ Ó·˘ËÂ ‰‡ÌÌ˚Â
-(long)(&model.motorInternals.tetaRM),	//[5181h.08h], Õ‡Á‚‡ÌËÂ: ÃÂı‡ÌË˜ÂÒÍËÈ Û„ÓÎ, “ÂÍÒÚœ”: qeptm, √ÛÔÔ‡: ÃÓ‰ÂÎ¸ Ó·˘ËÂ ‰‡ÌÌ˚Â
-(long)(&model.qepCounter),	//[5181h.09h], Õ‡Á‚‡ÌËÂ: EncoderIncrements, “ÂÍÒÚœ”: EncoderIncrements, √ÛÔÔ‡: ÃÓ‰ÂÎ¸ Ó·˘ËÂ ‰‡ÌÌ˚Â
-(long)(&model.motorInternals.isa),	//[5181h.0Ah], Õ‡Á‚‡ÌËÂ: “ÓÍ ÒÚ‡ÚÓ‡ ÔÓ ÓÒË Alpha, “ÂÍÒÚœ”: IsAlpha, √ÛÔÔ‡: ÃÓ‰ÂÎ¸ Ó·˘ËÂ ‰‡ÌÌ˚Â
-(long)(&model.motorInternals.isb),	//[5181h.0Bh], Õ‡Á‚‡ÌËÂ: “ÓÍ ÒÚ‡ÚÓ‡ ÔÓ ÓÒË Beta, “ÂÍÒÚœ”: IsBeta, √ÛÔÔ‡: ÃÓ‰ÂÎ¸ Ó·˘ËÂ ‰‡ÌÌ˚Â
-(long)(&model.motorInternals.isPhaseA),	//[5181h.0Ch], Õ‡Á‚‡ÌËÂ: “ÓÍ Ù‡Á˚ ¿, “ÂÍÒÚœ”: Ia, √ÛÔÔ‡: ÃÓ‰ÂÎ¸ Ó·˘ËÂ ‰‡ÌÌ˚Â
-(long)(&model.motorInternals.isPhaseB),	//[5181h.0Dh], Õ‡Á‚‡ÌËÂ: “ÓÍ Ù‡Á˚ ¬, “ÂÍÒÚœ”: Ib_Ï„Ì, √ÛÔÔ‡: ÃÓ‰ÂÎ¸ Ó·˘ËÂ ‰‡ÌÌ˚Â
-(long)(&model.motorInternals.isPhaseC),	//[5181h.0Eh], Õ‡Á‚‡ÌËÂ: “ÓÍ Ù‡Á˚ C, “ÂÍÒÚœ”: Ic, √ÛÔÔ‡: ÃÓ‰ÂÎ¸ Ó·˘ËÂ ‰‡ÌÌ˚Â
-(long)(&model.motorInternals.isPhaseD),	//[5181h.0Fh], Õ‡Á‚‡ÌËÂ: “ÓÍ Ù‡Á˚ D, “ÂÍÒÚœ”: Id, √ÛÔÔ‡: ÃÓ‰ÂÎ¸ Ó·˘ËÂ ‰‡ÌÌ˚Â
-(long)(&model.motorInternals.ua),	//[5181h.10h], Õ‡Á‚‡ÌËÂ: Õ‡ÔˇÊÂÌËÂ Ù‡Á˚ A, “ÂÍÒÚœ”: Ua, √ÛÔÔ‡: ÃÓ‰ÂÎ¸ Ó·˘ËÂ ‰‡ÌÌ˚Â
-(long)(&model.motorInternals.ub),	//[5181h.11h], Õ‡Á‚‡ÌËÂ: Õ‡ÔˇÊÂÌËÂ Ù‡Á˚ B, “ÂÍÒÚœ”: Ub, √ÛÔÔ‡: ÃÓ‰ÂÎ¸ Ó·˘ËÂ ‰‡ÌÌ˚Â
-(long)(&model.motorInternals.uc),	//[5181h.12h], Õ‡Á‚‡ÌËÂ: Õ‡ÔˇÊÂÌËÂ Ù‡Á˚ C, “ÂÍÒÚœ”: Uc, √ÛÔÔ‡: ÃÓ‰ÂÎ¸ Ó·˘ËÂ ‰‡ÌÌ˚Â
-(long)(&model.motorInternals.power),	//[5181h.13h], Õ‡Á‚‡ÌËÂ: ÃÓ˘ÌÓÒÚ¸, “ÂÍÒÚœ”: ÃÓ˘-Ú¸, √ÛÔÔ‡: ÃÓ‰ÂÎ¸ Ó·˘ËÂ ‰‡ÌÌ˚Â
-(long)(&model.fault),	//[5181h.14h], Õ‡Á‚‡ÌËÂ:  Ó‰ ‡‚‡ËË, “ÂÍÒÚœ”:  Ó‰¿‚, √ÛÔÔ‡: ÃÓ‰ÂÎ¸ Ó·˘ËÂ ‰‡ÌÌ˚Â
-(long)(&model.motorInternals.lm),	//[5182h.01h], Õ‡Á‚‡ÌËÂ: ¬Á‡ËÏÌ‡ˇ ËÌ‰ÛÍÚË‚ÌÓÒÚ¸ Lm, “ÂÍÒÚœ”: Lm, √ÛÔÔ‡: ÃÓ‰ÂÎ¸ (‡ÒËÌıÓÌÌ˚È)
-(long)(&model.motorInternals.ls),	//[5182h.02h], Õ‡Á‚‡ÌËÂ: »Ì‰ÛÍÚË‚ÌÓÒÚ¸ ÒÚ‡ÚÓ‡ Ls, “ÂÍÒÚœ”: Ls, √ÛÔÔ‡: ÃÓ‰ÂÎ¸ (‡ÒËÌıÓÌÌ˚È)
-(long)(&model.motorInternals.lr),	//[5182h.03h], Õ‡Á‚‡ÌËÂ: »Ì‰ÛÍÚË‚ÌÓÒÚ¸ ÓÚÓ‡ Lr, “ÂÍÒÚœ”: Lr, √ÛÔÔ‡: ÃÓ‰ÂÎ¸ (‡ÒËÌıÓÌÌ˚È)
-(long)(&model.motorInternals.rs),	//[5182h.04h], Õ‡Á‚‡ÌËÂ: —ÓÔÓÚË‚ÎÂÌËÂ ÒÚ‡ÚÓ‡ Rs, “ÂÍÒÚœ”: Rs, √ÛÔÔ‡: ÃÓ‰ÂÎ¸ (‡ÒËÌıÓÌÌ˚È)
-(long)(&model.motorInternals.rr),	//[5182h.05h], Õ‡Á‚‡ÌËÂ: —ÓÔÓÚË‚ÎÂÌËÂ ÓÚÓ‡ Rr, “ÂÍÒÚœ”: Rr, √ÛÔÔ‡: ÃÓ‰ÂÎ¸ (‡ÒËÌıÓÌÌ˚È)
-(long)(&model.motorInternals.pp),	//[5182h.06h], Õ‡Á‚‡ÌËÂ: ◊ËÒÎÓ Ô‡ ÔÓÎ˛ÒÓ‚, “ÂÍÒÚœ”: œ‡œÓÎ, √ÛÔÔ‡: ÃÓ‰ÂÎ¸ (‡ÒËÌıÓÌÌ˚È)
-(long)(&model.motorInternals.j),	//[5182h.07h], Õ‡Á‚‡ÌËÂ: —ËÏÛÎËÛÂÏ˚È ÏÓÏÂÌÚ ËÌÂˆËË, “ÂÍÒÚœ”: »ÌÂˆËˇ ÒËÏ., √ÛÔÔ‡: ÃÓ‰ÂÎ¸ (‡ÒËÌıÓÌÌ˚È)
-(long)(&model.motorInternals.MechLoss),	//[5182h.08h], Õ‡Á‚‡ÌËÂ: “ÓÏÓÁÌÓÈ ÏÓÏÂÌÚ ‰Îˇ ‚˚·Â„‡, “ÂÍÒÚœ”: “ÓÏ.ÃÓÏ.¬˚·Â„, √ÛÔÔ‡: ÃÓ‰ÂÎ¸ (‡ÒËÌıÓÌÌ˚È)
-(long)(&model.motorInternals.QEPResolution),	//[5182h.09h], Õ‡Á‚‡ÌËÂ: ◊ËÒÎÓ ÔÂËÓ‰Ó‚ Í‚‡‰‡ÚÛÌÓ„Ó ‰‡Ú˜ËÍ‡, “ÂÍÒÚœ”: QEPResolution, √ÛÔÔ‡: ÃÓ‰ÂÎ¸ (‡ÒËÌıÓÌÌ˚È)
-(long)(&model.motorInternals.RatedCurrent),	//[5182h.0Ah], Õ‡Á‚‡ÌËÂ: ÕÓÏËÌ‡Î¸Ì˚È ‰ÂÈÒÚ‚Û˛˘ËÈ ÚÓÍ, “ÂÍÒÚœ”: RatedCurrent, √ÛÔÔ‡: ÃÓ‰ÂÎ¸ (‡ÒËÌıÓÌÌ˚È)
-(long)(&model.motorInternals.RatedPower),	//[5182h.0Bh], Õ‡Á‚‡ÌËÂ: ÕÓÏËÌ‡Î¸Ì‡ˇ ÏÓ˘ÌÓÒÚ¸, “ÂÍÒÚœ”: RatedPower, √ÛÔÔ‡: ÃÓ‰ÂÎ¸ (‡ÒËÌıÓÌÌ˚È)
-(long)(&model.motorInternals.RatedSpeed),	//[5182h.0Ch], Õ‡Á‚‡ÌËÂ: ÕÓÏËÌ‡Î¸Ì‡ˇ ÒÍÓÓÒÚ¸, “ÂÍÒÚœ”: —ÍÓÓÒÚ¸ÕÓÏ, √ÛÔÔ‡: ÃÓ‰ÂÎ¸ (‡ÒËÌıÓÌÌ˚È)
-(long)(&model.motorInternals.iADCk),	//[5182h.0Dh], Õ‡Á‚‡ÌËÂ:  Ó˝ÙÙËˆËÂÌÚ ¿÷œ ÚÓÍ‡ Ù‡Á, “ÂÍÒÚœ”:  Ó˝Ù. ¿÷œ ÚÓÍ‡, √ÛÔÔ‡: ÃÓ‰ÂÎ¸ (‡ÒËÌıÓÌÌ˚È)
-(long)(&model.motorInternals.isa),	//[5182h.0Eh], Õ‡Á‚‡ÌËÂ: “ÓÍ ÒÚ‡ÚÓ‡ ÔÓ ÓÒË Alpha, “ÂÍÒÚœ”: IsAlpha, √ÛÔÔ‡: ÃÓ‰ÂÎ¸ (‡ÒËÌıÓÌÌ˚È)
-(long)(&model.motorInternals.isb),	//[5182h.0Fh], Õ‡Á‚‡ÌËÂ: “ÓÍ ÒÚ‡ÚÓ‡ ÔÓ ÓÒË Beta, “ÂÍÒÚœ”: IsBeta, √ÛÔÔ‡: ÃÓ‰ÂÎ¸ (‡ÒËÌıÓÌÌ˚È)
-(long)(&model.motorInternals.prd),	//[5182h.10h], Õ‡Á‚‡ÌËÂ: œÓÚÓÍ ÓÚÓ‡ ÔÓ ÓÒË D, “ÂÍÒÚœ”: PsiRD, √ÛÔÔ‡: ÃÓ‰ÂÎ¸ (‡ÒËÌıÓÌÌ˚È)
-(long)(&model.motorInternals.prq),	//[5182h.11h], Õ‡Á‚‡ÌËÂ: œÓÚÓÍ ÓÚÓ‡ ÔÓ ÓÒË Q, “ÂÍÒÚœ”: PsiRQ, √ÛÔÔ‡: ÃÓ‰ÂÎ¸ (‡ÒËÌıÓÌÌ˚È)
-(long)(&model.motorInternals.pra),	//[5182h.12h], Õ‡Á‚‡ÌËÂ: œÓÚÓÍ ÓÚÓ‡ ÔÓ ÓÒË Alpha, “ÂÍÒÚœ”: PsiRAlfa, √ÛÔÔ‡: ÃÓ‰ÂÎ¸ (‡ÒËÌıÓÌÌ˚È)
-(long)(&model.motorInternals.prb),	//[5182h.13h], Õ‡Á‚‡ÌËÂ: œÓÚÓÍ ÓÚÓ‡ ÔÓ ÓÒË Beta, “ÂÍÒÚœ”: PsiRBeta, √ÛÔÔ‡: ÃÓ‰ÂÎ¸ (‡ÒËÌıÓÌÌ˚È)
-(long)(&model.motorInternals.m),	//[5183h.01h], Õ‡Á‚‡ÌËÂ: œÓÚÓÍÓÒˆÂÔÎÂÌËÂ Ï‡„ÌËÚÓ‚, “ÂÍÒÚœ”: m, √ÛÔÔ‡: ÃÓ‰ÂÎ¸ (ÒËÌıÓÌÌ˚È)
-(long)(&model.motorInternals.lsd),	//[5183h.02h], Õ‡Á‚‡ÌËÂ: »Ì‰ÛÍÚË‚ÌÓÒÚ¸ ÒÚ‡ÚÓ‡ Lsd, “ÂÍÒÚœ”: Lsd, √ÛÔÔ‡: ÃÓ‰ÂÎ¸ (ÒËÌıÓÌÌ˚È)
-(long)(&model.motorInternals.lsq),	//[5183h.03h], Õ‡Á‚‡ÌËÂ: »Ì‰ÛÍÚË‚ÌÓÒÚ¸ ÒÚ‡ÚÓ‡ Lsq, “ÂÍÒÚœ”: Lsq, √ÛÔÔ‡: ÃÓ‰ÂÎ¸ (ÒËÌıÓÌÌ˚È)
-(long)(&model.motorInternals.rs),	//[5183h.04h], Õ‡Á‚‡ÌËÂ: —ÓÔÓÚË‚ÎÂÌËÂ ÒÚ‡ÚÓ‡ Rs, “ÂÍÒÚœ”: Rs, √ÛÔÔ‡: ÃÓ‰ÂÎ¸ (ÒËÌıÓÌÌ˚È)
-(long)(&model.motorInternals.pp),	//[5183h.05h], Õ‡Á‚‡ÌËÂ: ◊ËÒÎÓ Ô‡ ÔÓÎ˛ÒÓ‚, “ÂÍÒÚœ”: œ‡œÓÎ, √ÛÔÔ‡: ÃÓ‰ÂÎ¸ (ÒËÌıÓÌÌ˚È)
-(long)(&model.motorInternals.j),	//[5183h.06h], Õ‡Á‚‡ÌËÂ: —ËÏÛÎËÛÂÏ˚È ÏÓÏÂÌÚ ËÌÂˆËË, “ÂÍÒÚœ”: »ÌÂˆËˇ ÒËÏ., √ÛÔÔ‡: ÃÓ‰ÂÎ¸ (ÒËÌıÓÌÌ˚È)
-(long)(&model.motorInternals.MechLoss),	//[5183h.07h], Õ‡Á‚‡ÌËÂ: “ÓÏÓÁÌÓÈ ÏÓÏÂÌÚ ‰Îˇ ‚˚·Â„‡, “ÂÍÒÚœ”: “ÓÏ.ÃÓÏ.¬˚·Â„, √ÛÔÔ‡: ÃÓ‰ÂÎ¸ (ÒËÌıÓÌÌ˚È)
-(long)(&model.motorInternals.QEPResolution),	//[5183h.08h], Õ‡Á‚‡ÌËÂ: ◊ËÒÎÓ ÔÂËÓ‰Ó‚ Í‚‡‰‡ÚÛÌÓ„Ó ‰‡Ú˜ËÍ‡, “ÂÍÒÚœ”: QEPResolution, √ÛÔÔ‡: ÃÓ‰ÂÎ¸ (ÒËÌıÓÌÌ˚È)
-(long)(&model.motorInternals.iADCk),	//[5183h.09h], Õ‡Á‚‡ÌËÂ:  Ó˝ÙÙËˆËÂÌÚ ¿÷œ ÚÓÍ‡ Ù‡Á, “ÂÍÒÚœ”:  Ó˝Ù. ¿÷œ ÚÓÍ‡, √ÛÔÔ‡: ÃÓ‰ÂÎ¸ (ÒËÌıÓÌÌ˚È)
-(long)(&model.motorInternals.ifADCk),	//[5183h.0Ah], Õ‡Á‚‡ÌËÂ:  Ó˝ÙÙËˆËÂÌÚ ¿÷œ ÚÓÍ‡ Œ¬, “ÂÍÒÚœ”:  Ó˝Ù. ¿÷œ ÚÓÍ Œ¬, √ÛÔÔ‡: ÃÓ‰ÂÎ¸ (ÒËÌıÓÌÌ˚È)
-(long)(&model.motorInternals.RatedCurrent),	//[5183h.0Bh], Õ‡Á‚‡ÌËÂ: ÕÓÏËÌ‡Î¸Ì˚È ‰ÂÈÒÚ‚Û˛˘ËÈ ÚÓÍ, “ÂÍÒÚœ”: RatedCurrent, √ÛÔÔ‡: ÃÓ‰ÂÎ¸ (ÒËÌıÓÌÌ˚È)
-(long)(&model.motorInternals.RatedPower),	//[5183h.0Ch], Õ‡Á‚‡ÌËÂ: ÕÓÏËÌ‡Î¸Ì‡ˇ ÏÓ˘ÌÓÒÚ¸, “ÂÍÒÚœ”: RatedPower, √ÛÔÔ‡: ÃÓ‰ÂÎ¸ (ÒËÌıÓÌÌ˚È)
-(long)(&model.motorInternals.RatedSpeed),	//[5183h.0Dh], Õ‡Á‚‡ÌËÂ: ÕÓÏËÌ‡Î¸Ì‡ˇ ÒÍÓÓÒÚ¸, “ÂÍÒÚœ”: —ÍÓÓÒÚ¸ÕÓÏ, √ÛÔÔ‡: ÃÓ‰ÂÎ¸ (ÒËÌıÓÌÌ˚È)
-(long)(&model.motorInternals.RatedFluxCurrent),	//[5183h.0Eh], Õ‡Á‚‡ÌËÂ: ÕÓÏËÌ‡Î¸Ì˚È ÚÓÍ Œ¬, “ÂÍÒÚœ”: RatedFluxCurrent, √ÛÔÔ‡: ÃÓ‰ÂÎ¸ (ÒËÌıÓÌÌ˚È)
-(long)(&model.motorInternals.u_f),	//[5183h.0Fh], Õ‡Á‚‡ÌËÂ: –‡ÁÌÓÒÚ¸ ÔÓÚÂÌˆË‡ÎÓ‚ Œ¬, “ÂÍÒÚœ”: Uf, √ÛÔÔ‡: ÃÓ‰ÂÎ¸ (ÒËÌıÓÌÌ˚È)
-(long)(&model.motorInternals.i_f),	//[5183h.10h], Õ‡Á‚‡ÌËÂ: “ÓÍ Œ¬, “ÂÍÒÚœ”: “ÓÍ Œ¬, √ÛÔÔ‡: ÃÓ‰ÂÎ¸ (ÒËÌıÓÌÌ˚È)
-(long)(&model.motorInternals.m),	//[5183h.11h], Õ‡Á‚‡ÌËÂ: œÓÚÓÍ ‚ÓÁ·ÛÊ‰ÂÌËˇ, “ÂÍÒÚœ”: Psi ‚ÓÁ·, √ÛÔÔ‡: ÃÓ‰ÂÎ¸ (ÒËÌıÓÌÌ˚È)
-(long)(&model.motorInternals.l_a),	//[5184h.01h], Õ‡Á‚‡ÌËÂ: »Ì‰ÛÍÚË‚ÌÓÒÚ¸ ˇÍÓˇ, “ÂÍÒÚœ”: La, √ÛÔÔ‡: ÃÓ‰ÂÎ¸ (ƒœ“)
-(long)(&model.motorInternals.l_f),	//[5184h.02h], Õ‡Á‚‡ÌËÂ: »Ì‰ÛÍÚË‚ÌÓÒÚ¸ Œ¬, “ÂÍÒÚœ”: Lf, √ÛÔÔ‡: ÃÓ‰ÂÎ¸ (ƒœ“)
-(long)(&model.motorInternals.r_a),	//[5184h.03h], Õ‡Á‚‡ÌËÂ: —ÓÔÓÚË‚ÎÂÌËÂ ˇÍÓˇ, “ÂÍÒÚœ”: Ra, √ÛÔÔ‡: ÃÓ‰ÂÎ¸ (ƒœ“)
-(long)(&model.motorInternals.r_f),	//[5184h.04h], Õ‡Á‚‡ÌËÂ: —ÓÔÓÚË‚ÎÂÌËÂ Œ¬, “ÂÍÒÚœ”: Rf, √ÛÔÔ‡: ÃÓ‰ÂÎ¸ (ƒœ“)
-(long)(&model.motorInternals.j),	//[5184h.05h], Õ‡Á‚‡ÌËÂ: —ËÏÛÎËÛÂÏ˚È ÏÓÏÂÌÚ ËÌÂˆËË, “ÂÍÒÚœ”: »ÌÂˆËˇ ÒËÏ., √ÛÔÔ‡: ÃÓ‰ÂÎ¸ (ƒœ“)
-(long)(&model.motorInternals.MechLoss),	//[5184h.06h], Õ‡Á‚‡ÌËÂ: “ÓÏÓÁÌÓÈ ÏÓÏÂÌÚ ‰Îˇ ‚˚·Â„‡, “ÂÍÒÚœ”: “ÓÏ.ÃÓÏ.¬˚·Â„, √ÛÔÔ‡: ÃÓ‰ÂÎ¸ (ƒœ“)
-(long)(&model.motorInternals.QEPResolution),	//[5184h.07h], Õ‡Á‚‡ÌËÂ: ◊ËÒÎÓ ÔÂËÓ‰Ó‚ Í‚‡‰‡ÚÛÌÓ„Ó ‰‡Ú˜ËÍ‡, “ÂÍÒÚœ”: QEPResolution, √ÛÔÔ‡: ÃÓ‰ÂÎ¸ (ƒœ“)
-(long)(&model.motorInternals.RatedCurrent),	//[5184h.08h], Õ‡Á‚‡ÌËÂ: ÕÓÏËÌ‡Î¸Ì˚È ÚÓÍ ˇÍÓˇ, “ÂÍÒÚœ”: RatedCurrent, √ÛÔÔ‡: ÃÓ‰ÂÎ¸ (ƒœ“)
-(long)(&model.motorInternals.RatedFluxCurrent),	//[5184h.09h], Õ‡Á‚‡ÌËÂ: ÕÓÏËÌ‡Î¸Ì˚È ÚÓÍ Œ¬, “ÂÍÒÚœ”: RatedFluxCurrent, √ÛÔÔ‡: ÃÓ‰ÂÎ¸ (ƒœ“)
-(long)(&model.motorInternals.iADCk),	//[5184h.0Ah], Õ‡Á‚‡ÌËÂ:  Ó˝ÙÙËˆËÂÌÚ ¿÷œ ÚÓÍ‡ Œﬂ, “ÂÍÒÚœ”:  Ó˝Ù. ¿÷œ ÚÓÍ Œﬂ, √ÛÔÔ‡: ÃÓ‰ÂÎ¸ (ƒœ“)
-(long)(&model.motorInternals.ifADCk),	//[5184h.0Bh], Õ‡Á‚‡ÌËÂ:  Ó˝ÙÙËˆËÂÌÚ ¿÷œ ÚÓÍ‡ Œ¬, “ÂÍÒÚœ”:  Ó˝Ù. ¿÷œ ÚÓÍ Œ¬, √ÛÔÔ‡: ÃÓ‰ÂÎ¸ (ƒœ“)
-(long)(&model.motorInternals.RatedPower),	//[5184h.0Ch], Õ‡Á‚‡ÌËÂ: ÕÓÏËÌ‡Î¸Ì‡ˇ ÏÓ˘ÌÓÒÚ¸, “ÂÍÒÚœ”: RatedPower, √ÛÔÔ‡: ÃÓ‰ÂÎ¸ (ƒœ“)
-(long)(&model.motorInternals.RatedSpeed),	//[5184h.0Dh], Õ‡Á‚‡ÌËÂ: ÕÓÏËÌ‡Î¸Ì‡ˇ ÒÍÓÓÒÚ¸, “ÂÍÒÚœ”: —ÍÓÓÒÚ¸ÕÓÏ, √ÛÔÔ‡: ÃÓ‰ÂÎ¸ (ƒœ“)
-(long)(&model.motorInternals.r_ad),	//[5184h.0Eh], Õ‡Á‚‡ÌËÂ: ƒÓ·‡‚Ó˜ÌÓÂ ÒÓÔÓÚË‚ÎÂÌËÂ, Rad, “ÂÍÒÚœ”: ƒÓ·.ÒÓÔÓÚË‚., √ÛÔÔ‡: ÃÓ‰ÂÎ¸ (ƒœ“)
-(long)(&model.motorInternals.u_a),	//[5184h.0Fh], Õ‡Á‚‡ÌËÂ: –‡ÁÌÓÒÚ¸ ÔÓÚÂÌˆË‡ÎÓ‚ Œﬂ, “ÂÍÒÚœ”: Ua, √ÛÔÔ‡: ÃÓ‰ÂÎ¸ (ƒœ“)
-(long)(&model.motorInternals.u_f),	//[5184h.10h], Õ‡Á‚‡ÌËÂ: –‡ÁÌÓÒÚ¸ ÔÓÚÂÌˆË‡ÎÓ‚ Œ¬, “ÂÍÒÚœ”: Uf, √ÛÔÔ‡: ÃÓ‰ÂÎ¸ (ƒœ“)
-(long)(&model.motorInternals.i_a),	//[5184h.11h], Õ‡Á‚‡ÌËÂ: “ÓÍ Œﬂ, “ÂÍÒÚœ”: Ia, √ÛÔÔ‡: ÃÓ‰ÂÎ¸ (ƒœ“)
-(long)(&model.motorInternals.i_f),	//[5184h.12h], Õ‡Á‚‡ÌËÂ: “ÓÍ Œ¬, “ÂÍÒÚœ”: “ÓÍ Œ¬, √ÛÔÔ‡: ÃÓ‰ÂÎ¸ (ƒœ“)
-(long)(&refs.DCMspeed_ref),	//[5185h.01h], Õ‡Á‚‡ÌËÂ: «‡‰‡ÌËÂ ÒÍÓÓÒÚË (œÓ‰˜. –Â„.), “ÂÍÒÚœ”: «‡‰. —ÍÓ., √ÛÔÔ‡: ƒœ“ —ËÒÚ. ”Ô.
-(long)(&refs.ua_ref),	//[5185h.02h], Õ‡Á‚‡ÌËÂ: «‡‰‡ÌÌÓÂ Ì‡ÔˇÊÂÌËÂ ˇÍÓˇ, “ÂÍÒÚœ”: Ua_ref, √ÛÔÔ‡: ƒœ“ —ËÒÚ. ”Ô.
-(long)(&refs.uf_ref),	//[5185h.03h], Õ‡Á‚‡ÌËÂ: «‡‰‡ÌÌÓÂ Ì‡ÔˇÊÂÌËÂ Œ¬, “ÂÍÒÚœ”: Uf_ref, √ÛÔÔ‡: ƒœ“ —ËÒÚ. ”Ô.
-(long)(&model.motorInternals.j),	//[5186h.01h], Õ‡Á‚‡ÌËÂ: —ËÏÛÎËÛÂÏ˚È ÏÓÏÂÌÚ ËÌÂˆËË, “ÂÍÒÚœ”: »ÌÂˆËˇ ÒËÏ., √ÛÔÔ‡: ÃÓ‰ÂÎ¸ (¬»ƒ)
-(long)(&model.motorInternals.MechLoss),	//[5186h.02h], Õ‡Á‚‡ÌËÂ: “ÓÏÓÁÌÓÈ ÏÓÏÂÌÚ ‰Îˇ ‚˚·Â„‡, “ÂÍÒÚœ”: “ÓÏ.ÃÓÏ.¬˚·Â„, √ÛÔÔ‡: ÃÓ‰ÂÎ¸ (¬»ƒ)
-(long)(&model.motorInternals.rs),	//[5186h.03h], Õ‡Á‚‡ÌËÂ: —ÓÔÓÚË‚ÎÂÌËÂ ÒÚ‡ÚÓ‡ Rs, “ÂÍÒÚœ”: Rs, √ÛÔÔ‡: ÃÓ‰ÂÎ¸ (¬»ƒ)
-(long)(&model.motorInternals.pp),	//[5186h.04h], Õ‡Á‚‡ÌËÂ: ◊ËÒÎÓ Ô‡ ÔÓÎ˛ÒÓ‚, “ÂÍÒÚœ”: œ‡œÓÎ, √ÛÔÔ‡: ÃÓ‰ÂÎ¸ (¬»ƒ)
-(long)(&model.motorInternals.QEPResolution),	//[5186h.05h], Õ‡Á‚‡ÌËÂ: ◊ËÒÎÓ ÔÂËÓ‰Ó‚ Í‚‡‰‡ÚÛÌÓ„Ó ‰‡Ú˜ËÍ‡, “ÂÍÒÚœ”: QEPResolution, √ÛÔÔ‡: ÃÓ‰ÂÎ¸ (¬»ƒ)
-(long)(&model.motorInternals.iADCk),	//[5186h.06h], Õ‡Á‚‡ÌËÂ:  Ó˝ÙÙËˆËÂÌÚ ¿÷œ ÚÓÍ‡ Ù‡Á, “ÂÍÒÚœ”:  Ó˝Ù. ¿÷œ ÚÓÍ‡, √ÛÔÔ‡: ÃÓ‰ÂÎ¸ (¬»ƒ)
-(long)(&model.motorInternals.RatedCurrent),	//[5186h.07h], Õ‡Á‚‡ÌËÂ: ÕÓÏËÌ‡Î¸Ì˚È ‰ÂÈÒÚ‚Û˛˘ËÈ ÚÓÍ, “ÂÍÒÚœ”: RatedCurrent, √ÛÔÔ‡: ÃÓ‰ÂÎ¸ (¬»ƒ)
-(long)(&model.motorInternals.RatedPower),	//[5186h.08h], Õ‡Á‚‡ÌËÂ: ÕÓÏËÌ‡Î¸Ì‡ˇ ÏÓ˘ÌÓÒÚ¸, “ÂÍÒÚœ”: RatedPower, √ÛÔÔ‡: ÃÓ‰ÂÎ¸ (¬»ƒ)
-(long)(&model.motorInternals.RatedSpeed),	//[5186h.09h], Õ‡Á‚‡ÌËÂ: ÕÓÏËÌ‡Î¸Ì‡ˇ ÒÍÓÓÒÚ¸, “ÂÍÒÚœ”: —ÍÓÓÒÚ¸ÕÓÏ, √ÛÔÔ‡: ÃÓ‰ÂÎ¸ (¬»ƒ)
-(long)(&model.motorInternals.psa),	//[5186h.0Ah], Õ‡Á‚‡ÌËÂ: œÓÚÓÍ ÒÚ‡ÚÓ‡ Ù‡Á˚ A, “ÂÍÒÚœ”: œÓÚÓÍ A, √ÛÔÔ‡: ÃÓ‰ÂÎ¸ (¬»ƒ)
-(long)(&model.motorInternals.psb),	//[5186h.0Bh], Õ‡Á‚‡ÌËÂ: œÓÚÓÍ ÒÚ‡ÚÓ‡ Ù‡Á˚ B, “ÂÍÒÚœ”: œÓÚÓÍ B, √ÛÔÔ‡: ÃÓ‰ÂÎ¸ (¬»ƒ)
-(long)(&model.motorInternals.psc),	//[5186h.0Ch], Õ‡Á‚‡ÌËÂ: œÓÚÓÍ ÒÚ‡ÚÓ‡ Ù‡Á˚ C, “ÂÍÒÚœ”: œÓÚÓÍ C, √ÛÔÔ‡: ÃÓ‰ÂÎ¸ (¬»ƒ)
-(long)(&model.motorInternals.torque_a),	//[5186h.0Dh], Õ‡Á‚‡ÌËÂ: ÃÓÏÂÌÚ Ù‡Á˚ A, “ÂÍÒÚœ”: ÃÓÏÂÌÚ A, √ÛÔÔ‡: ÃÓ‰ÂÎ¸ (¬»ƒ)
-(long)(&model.motorInternals.torque_b),	//[5186h.0Eh], Õ‡Á‚‡ÌËÂ: ÃÓÏÂÌÚ Ù‡Á˚ B, “ÂÍÒÚœ”: ÃÓÏÂÌÚ B, √ÛÔÔ‡: ÃÓ‰ÂÎ¸ (¬»ƒ)
-(long)(&model.motorInternals.torque_c),	//[5186h.0Fh], Õ‡Á‚‡ÌËÂ: ÃÓÏÂÌÚ Ù‡Á˚ C, “ÂÍÒÚœ”: ÃÓÏÂÌÚ C, √ÛÔÔ‡: ÃÓ‰ÂÎ¸ (¬»ƒ)
-(long)(&ModBus.Enabled),	//[5A20h.01h], Õ‡Á‚‡ÌËÂ: ¬ÍÎ˛˜ÂÌ, “ÂÍÒÚœ”: ¬ÍÎ, √ÛÔÔ‡: MODBUS
-(long)(&ModBus.RSNodeID),	//[5A20h.02h], Õ‡Á‚‡ÌËÂ: ÕÓÏÂ ‚ ÒÂÚË ModBus, “ÂÍÒÚœ”: ModBus_ID, √ÛÔÔ‡: MODBUS
-(long)(&ModBus.BaudRate),	//[5A20h.03h], Õ‡Á‚‡ÌËÂ: —ÍÓÓÒÚ¸, “ÂÍÒÚœ”: ÒÍÓ, √ÛÔÔ‡: MODBUS
-(long)(&ModBus.OfflineCounterMax),	//[5A20h.04h], Õ‡Á‚‡ÌËÂ: “‡ÈÏ‡ÛÚ ÔÓÚÂË Ò‚ˇÁË, “ÂÍÒÚœ”: OfflineCounterMax, √ÛÔÔ‡: MODBUS
-(long)(&ModBus.AutoRestart),	//[5A20h.05h], Õ‡Á‚‡ÌËÂ: œÂÂÁ‡ÔÛÒÍ ÔË Ò·Óˇı Ì‡ ÎËÌËË, “ÂÍÒÚœ”: auto_res, √ÛÔÔ‡: MODBUS
-(long)(&ModBus.OfflineCounter),	//[5A20h.06h], Õ‡Á‚‡ÌËÂ: —˜ÂÚ˜ËÍ ÔÓÚÂË Ò‚ˇÁË, “ÂÍÒÚœ”: OfflineCounter, √ÛÔÔ‡: MODBUS
-(long)(&ModBus.isOnline),	//[5A20h.07h], Õ‡Á‚‡ÌËÂ: MODBUS online, “ÂÍÒÚœ”: MODBUS online, √ÛÔÔ‡: MODBUS
-(long)(&ModBus.received_data),	//[5A20h.08h], Õ‡Á‚‡ÌËÂ: rs485_last_received_data, “ÂÍÒÚœ”: 485_RD, √ÛÔÔ‡: MODBUS
-(long)(&ModBus.MBInternals.TxState),	//[5A20h.09h], Õ‡Á‚‡ÌËÂ: —ÓÒÚÓˇÌËÂ ÔÂÂ‰‡˜Ë ÔÓÒ˚ÎÍË, “ÂÍÒÚœ”: TXState, √ÛÔÔ‡: MODBUS
-(long)(&ModBus.GPIOsValue),	//[5A20h.0Ah], Õ‡Á‚‡ÌËÂ: GPIOsValue, “ÂÍÒÚœ”: GPIOsValue, √ÛÔÔ‡: MODBUS
-(long)(&ModBus.ReceivePacketCounter),	//[5A20h.0Bh], Õ‡Á‚‡ÌËÂ: œ‡ÍÂÚÓ‚ ÔËÌˇÚÓ, “ÂÍÒÚœ”: ReceivePacketCounte, √ÛÔÔ‡: MODBUS
-(long)(&ModBus.ReceiveByteCounter),	//[5A20h.0Ch], Õ‡Á‚‡ÌËÂ: ¡‡ÈÚ ÔËÌˇÚÓ, “ÂÍÒÚœ”: ReceiveByteCounter, √ÛÔÔ‡: MODBUS
-(long)(&RotorObserver.Tr),	//[5B04h.01h], Õ‡Á‚‡ÌËÂ: œÓÒÚ. ‚ÂÏÂÌË ÓÚÓ‡, “ÂÍÒÚœ”: Tr, √ÛÔÔ‡: Õ‡·Î˛‰‡ÚÂÎ¸ ÓÚÓ‡ ¿ƒ
-(long)(&RotorObserver.FluxCurrentRatio),	//[5B04h.02h], Õ‡Á‚‡ÌËÂ: —ÓÓÚÌÓ¯ÂÌËÂ ÚÓÍ‡ ‚ÓÁ·. X Í ÚÓÍÛ Y, “ÂÍÒÚœ”: FluxCurrentRatio, √ÛÔÔ‡: Õ‡·Î˛‰‡ÚÂÎ¸ ÓÚÓ‡ ¿ƒ
-(long)(&RotorObserver.FluxCurrentMin),	//[5B04h.03h], Õ‡Á‚‡ÌËÂ: ÃËÌËÏ‡Î¸Ì˚È ÚÓÍ ‚ÓÁ·ÛÊ‰ÂÌËˇ, “ÂÍÒÚœ”: FluxCurrentMin, √ÛÔÔ‡: Õ‡·Î˛‰‡ÚÂÎ¸ ÓÚÓ‡ ¿ƒ
-(long)(&RotorObserver.id),	//[5B04h.04h], Õ‡Á‚‡ÌËÂ: “ÓÍ ÒÚ‡ÚÓ‡ ÔÓ ÓÒË D, “ÂÍÒÚœ”: IsD, √ÛÔÔ‡: Õ‡·Î˛‰‡ÚÂÎ¸ ÓÚÓ‡ ¿ƒ
-(long)(&RotorObserver.iq),	//[5B04h.05h], Õ‡Á‚‡ÌËÂ: “ÓÍ ÒÚ‡ÚÓ‡ ÔÓ ÓÒË Q, “ÂÍÒÚœ”: IsQ, √ÛÔÔ‡: Õ‡·Î˛‰‡ÚÂÎ¸ ÓÚÓ‡ ¿ƒ
-(long)(&RotorObserver.psi_d),	//[5B04h.06h], Õ‡Á‚‡ÌËÂ: œÓÚÓÍ ÓÚÓ‡ ÔÓ ÓÒË D, “ÂÍÒÚœ”: PsiRD, √ÛÔÔ‡: Õ‡·Î˛‰‡ÚÂÎ¸ ÓÚÓ‡ ¿ƒ
-(long)(&RotorObserver.psi_q),	//[5B04h.07h], Õ‡Á‚‡ÌËÂ: œÓÚÓÍ ÓÚÓ‡ ÔÓ ÓÒË Q, “ÂÍÒÚœ”: PsiRQ, √ÛÔÔ‡: Õ‡·Î˛‰‡ÚÂÎ¸ ÓÚÓ‡ ¿ƒ
-(long)(&RotorObserver.theta_psi_elec),	//[5B04h.08h], Õ‡Á‚‡ÌËÂ: ”„ÓÎ ÔÓÚÓÍ‡ ÓÚÓ‡, “ÂÍÒÚœ”: psiRalpha, √ÛÔÔ‡: Õ‡·Î˛‰‡ÚÂÎ¸ ÓÚÓ‡ ¿ƒ
-(long)(&udControl.StateOn),	//[5B05h.01h], Õ‡Á‚‡ÌËÂ: “ÂÍÛ˘ÂÂ ÒÓÒÚÓˇÌËÂ ÂÎÂ, “ÂÍÒÚœ”: Relay_state, √ÛÔÔ‡: œÎ‡‚Ì˚È Á‡ˇ‰ «œ“
-(long)(&udControl.Timeout_on),	//[5B05h.02h], Õ‡Á‚‡ÌËÂ: «‡‰ÂÊÍ‡ ‚ÍÎ˛˜ÂÌËˇ ÂÎÂ, ÏÒ, “ÂÍÒÚœ”: relay on-delay, √ÛÔÔ‡: œÎ‡‚Ì˚È Á‡ˇ‰ «œ“
-(long)(&udControl.U_on),	//[5B05h.03h], Õ‡Á‚‡ÌËÂ: Õ‡ÔˇÊÂÌËÂ ‚ÍÎ˛˜ÂÌËˇ, ¬, “ÂÍÒÚœ”: on-voltage, √ÛÔÔ‡: œÎ‡‚Ì˚È Á‡ˇ‰ «œ“
-(long)(&udControl.U_off),	//[5B05h.04h], Õ‡Á‚‡ÌËÂ: Õ‡ÔˇÊÂÌËÂ ‚˚ÍÎ˛˜ÂÌËˇ, ¬, “ÂÍÒÚœ”: off-voltage, √ÛÔÔ‡: œÎ‡‚Ì˚È Á‡ˇ‰ «œ“
-(long)(&udControl.deriv_time_ZPT),	//[5B05h.05h], Õ‡Á‚‡ÌËÂ: œÓËÁ‚Ó‰Ì‡ˇ Ì‡ÔˇÊÂÌËˇ «œ“, “ÂÍÒÚœ”: derivative_voltage, √ÛÔÔ‡: œÎ‡‚Ì˚È Á‡ˇ‰ «œ“
-(long)(&udControl.deriv_const),	//[5B05h.06h], Õ‡Á‚‡ÌËÂ: ”ÒÚ‡‚Í‡ ÔÓ ÔÓËÁ‚Ó‰ÌÓÈ «œ“, “ÂÍÒÚœ”: derivative_const, √ÛÔÔ‡: œÎ‡‚Ì˚È Á‡ˇ‰ «œ“
-(long)(&FanControl.StateOn),	//[5B06h.01h], Õ‡Á‚‡ÌËÂ: “ÂÍÛ˘ÂÂ ÒÓÒÚÓˇÌËÂ ‚ÂÌÚËÎˇÚÓ‡, “ÂÍÒÚœ”: fan_state, √ÛÔÔ‡: —ËÒÚÂÏ‡ ÓıÎ‡Ê‰ÂÌËˇ
-(long)(&FanControl.T_on),	//[5B06h.02h], Õ‡Á‚‡ÌËÂ: “ÂÏÔÂ‡ÚÛ‡ ‚ÍÎ˛˜ÂÌËˇ ‚ÂÌÚËÎˇÚÓ‡, “ÂÍÒÚœ”: t_on, √ÛÔÔ‡: —ËÒÚÂÏ‡ ÓıÎ‡Ê‰ÂÌËˇ
-(long)(&FanControl.T_off),	//[5B06h.03h], Õ‡Á‚‡ÌËÂ: “ÂÏÔÂ‡ÚÛ‡ ‚˚ÍÎ˛˜ÂÌËˇ ‚ÂÌÚËÎˇÚÓ‡, “ÂÍÒÚœ”: t_off, √ÛÔÔ‡: —ËÒÚÂÏ‡ ÓıÎ‡Ê‰ÂÌËˇ
-(long)(&FanControl.T_alarm),	//[5B06h.04h], Õ‡Á‚‡ÌËÂ: “ÂÏÔÂ‡ÚÛ‡ ‚˚‚Ó‰‡ ÔÂ‰ÛÔÂÊ‰ÂÌËˇ Ó ÔÂÂ„Â‚Â, “ÂÍÒÚœ”: t_alarm, √ÛÔÔ‡: —ËÒÚÂÏ‡ ÓıÎ‡Ê‰ÂÌËˇ
+(long)(&co2_vars.co_deviceType),	//[1000h.00h], –ù–∞–∑–≤–∞–Ω–∏–µ: –¢–∏–ø —É—Å—Ç—Ä–æ–π—Å—Ç–≤–∞, –¢–µ–∫—Å—Ç–ü–£: Device Type, –ì—Ä—É–ø–ø–∞: CAN
+(long)(&co2_vars.co_errorRegister),	//[1001h.00h], –ù–∞–∑–≤–∞–Ω–∏–µ: –†–µ–≥–∏—Å—Ç—Ä –æ—à–∏–±–æ–∫, –¢–µ–∫—Å—Ç–ü–£: ErrReg, –ì—Ä—É–ø–ø–∞: CAN
+(long)(&co2_vars.co_deviceState),	//[1002h.00h], –ù–∞–∑–≤–∞–Ω–∏–µ: Manufacturer Status Register, –¢–µ–∫—Å—Ç–ü–£: DevSta, –ì—Ä—É–ø–ø–∞: CAN
+(long)(&co2_vars.co_emcyCOBID),	//[1014h.00h], –ù–∞–∑–≤–∞–Ω–∏–µ: COB-ID Emergency Object, –¢–µ–∫—Å—Ç–ü–£: eCOBID, –ì—Ä—É–ø–ø–∞: CAN
+(long)(&co2_vars.co_CHBT),	//[1016h.01h], –ù–∞–∑–≤–∞–Ω–∏–µ: –í—Ä–µ–º—è –æ–∂–∏–¥–∞–Ω–∏—è —Å–æ–æ–±—â–µ–Ω–∏—è Heartbeat, –¢–µ–∫—Å—Ç–ü–£: CHBT, –ì—Ä—É–ø–ø–∞: CAN
+(long)(&co2_vars.co_PHBT),	//[1017h.00h], –ù–∞–∑–≤–∞–Ω–∏–µ: –ü–µ—Ä–∏–æ–¥ –≥–µ–Ω–µ—Ä–∞—Ü–∏–∏ —Å–æ–æ–±—â–µ–Ω–∏—è Heartbeat, –¢–µ–∫—Å—Ç–ü–£: PHBT, –ì—Ä—É–ø–ø–∞: CAN
+(long)(&co2_vars.co_vendorID),	//[1018h.01h], –ù–∞–∑–≤–∞–Ω–∏–µ: –ö–æ–¥ –ø—Ä–æ–∏–∑–≤–æ–¥–∏—Ç–µ–ª—è, –¢–µ–∫—Å—Ç–ü–£: VendID, –ì—Ä—É–ø–ø–∞: CAN
+(long)(&co2_vars.co_productCode),	//[1018h.02h], –ù–∞–∑–≤–∞–Ω–∏–µ: –ö–æ–¥ –ø—Ä–æ–¥—É–∫—Ç–∞, –¢–µ–∫—Å—Ç–ü–£: PrCode, –ì—Ä—É–ø–ø–∞: CAN
+(long)(&co2_vars.co_revisionNumber),	//[1018h.03h], –ù–∞–∑–≤–∞–Ω–∏–µ: –ù–æ–º–µ—Ä —Ä–µ–≤–∏–∑–∏–∏, –¢–µ–∫—Å—Ç–ü–£: RevNum, –ì—Ä—É–ø–ø–∞: CAN
+(long)(&co2_vars.co_serialNumber),	//[1018h.04h], –ù–∞–∑–≤–∞–Ω–∏–µ: –°–µ—Ä–∏–π–Ω—ã–π –Ω–æ–º–µ—Ä, –¢–µ–∫—Å—Ç–ü–£: SerNum, –ì—Ä—É–ø–ø–∞: CAN
+(long)(&co2_vars.co_csrxCOBID),	//[1200h.01h], –ù–∞–∑–≤–∞–Ω–∏–µ: COB-ID Client->Server(rx), –¢–µ–∫—Å—Ç–ü–£: CSRXID, –ì—Ä—É–ø–ø–∞: CAN
+(long)(&co2_vars.co_sctxCOBID),	//[1200h.02h], –ù–∞–∑–≤–∞–Ω–∏–µ: COB-ID Server->Client(tx), –¢–µ–∫—Å—Ç–ü–£: SCTXID, –ì—Ä—É–ø–ø–∞: CAN
+(long)(&co2_vars.co_cstxCOBID),	//[1280h.01h], –ù–∞–∑–≤–∞–Ω–∏–µ: COB-ID Client->Server(tx), –¢–µ–∫—Å—Ç–ü–£: CSTXID, –ì—Ä—É–ø–ø–∞: CAN
+(long)(&co2_vars.co_scrxCOBID),	//[1280h.02h], –ù–∞–∑–≤–∞–Ω–∏–µ: COB-ID Server->Client(rx), –¢–µ–∫—Å—Ç–ü–£: SCRXID, –ì—Ä—É–ø–ø–∞: CAN
+(long)(&co2_vars.co_ssNODEID),	//[1280h.03h], –ù–∞–∑–≤–∞–Ω–∏–µ: NODE-ID on SDO server, –¢–µ–∫—Å—Ç–ü–£: SDOSID, –ì—Ä—É–ø–ø–∞: CAN
+(long)(&co2_vars.co_RPDO1COBID),	//[1400h.01h], –ù–∞–∑–≤–∞–Ω–∏–µ: COB-ID for RPDO1, –¢–µ–∫—Å—Ç–ü–£: IRPDO1, –ì—Ä—É–ø–ø–∞: CAN
+(long)(&co2_vars.co_transType),	//[1400h.02h], –ù–∞–∑–≤–∞–Ω–∏–µ: –¢–∏–ø –ø–µ—Ä–µ–¥–∞—á–∏, –¢–µ–∫—Å—Ç–ü–£: TransT, –ì—Ä—É–ø–ø–∞: CAN
+(long)(&co2_vars.co_RPDO2COBID),	//[1401h.01h], –ù–∞–∑–≤–∞–Ω–∏–µ: COB-ID for RPDO2, –¢–µ–∫—Å—Ç–ü–£: IRPDO2, –ì—Ä—É–ø–ø–∞: CAN
+(long)(&co2_vars.co_transType),	//[1401h.02h], –ù–∞–∑–≤–∞–Ω–∏–µ: –¢–∏–ø –ø–µ—Ä–µ–¥–∞—á–∏, –¢–µ–∫—Å—Ç–ü–£: TransT, –ì—Ä—É–ø–ø–∞: CAN
+(long)(&co2_vars.co_RPDO3COBID),	//[1402h.01h], –ù–∞–∑–≤–∞–Ω–∏–µ: COB-ID for RPDO3, –¢–µ–∫—Å—Ç–ü–£: IRPDO3, –ì—Ä—É–ø–ø–∞: CAN
+(long)(&co2_vars.co_transType),	//[1402h.02h], –ù–∞–∑–≤–∞–Ω–∏–µ: –¢–∏–ø –ø–µ—Ä–µ–¥–∞—á–∏, –¢–µ–∫—Å—Ç–ü–£: TransT, –ì—Ä—É–ø–ø–∞: CAN
+(long)(&co2_vars.co_RPDO4COBID),	//[1403h.01h], –ù–∞–∑–≤–∞–Ω–∏–µ: COB-ID for RPDO4, –¢–µ–∫—Å—Ç–ü–£: IRPDO4, –ì—Ä—É–ø–ø–∞: CAN
+(long)(&co2_vars.co_transType),	//[1403h.02h], –ù–∞–∑–≤–∞–Ω–∏–µ: –¢–∏–ø –ø–µ—Ä–µ–¥–∞—á–∏, –¢–µ–∫—Å—Ç–ü–£: TransT, –ì—Ä—É–ø–ø–∞: CAN
+(long)(&co2_vars.co_RPDO5COBID),	//[1404h.01h], –ù–∞–∑–≤–∞–Ω–∏–µ: COB-ID for RPDO5, –¢–µ–∫—Å—Ç–ü–£: IRPDO5, –ì—Ä—É–ø–ø–∞: CAN
+(long)(&co2_vars.co_transType),	//[1404h.02h], –ù–∞–∑–≤–∞–Ω–∏–µ: –¢–∏–ø –ø–µ—Ä–µ–¥–∞—á–∏, –¢–µ–∫—Å—Ç–ü–£: TransT, –ì—Ä—É–ø–ø–∞: CAN
+(long)(&co2_vars.co_RPDO6COBID),	//[1405h.01h], –ù–∞–∑–≤–∞–Ω–∏–µ: COB-ID for RPDO6, –¢–µ–∫—Å—Ç–ü–£: IRPDO6, –ì—Ä—É–ø–ø–∞: CAN
+(long)(&co2_vars.co_transType),	//[1405h.02h], –ù–∞–∑–≤–∞–Ω–∏–µ: –¢–∏–ø –ø–µ—Ä–µ–¥–∞—á–∏, –¢–µ–∫—Å—Ç–ü–£: TransT, –ì—Ä—É–ø–ø–∞: CAN
+(long)(&co2_vars.co_RPDO7COBID),	//[1406h.01h], –ù–∞–∑–≤–∞–Ω–∏–µ: COB-ID for RPDO7, –¢–µ–∫—Å—Ç–ü–£: IRPDO7, –ì—Ä—É–ø–ø–∞: CAN
+(long)(&co2_vars.co_transType),	//[1406h.02h], –ù–∞–∑–≤–∞–Ω–∏–µ: –¢–∏–ø –ø–µ—Ä–µ–¥–∞—á–∏, –¢–µ–∫—Å—Ç–ü–£: TransT, –ì—Ä—É–ø–ø–∞: CAN
+(long)(&co2_vars.co_RPDO8COBID),	//[1407h.01h], –ù–∞–∑–≤–∞–Ω–∏–µ: COB-ID for RPDO8, –¢–µ–∫—Å—Ç–ü–£: IRPDO8, –ì—Ä—É–ø–ø–∞: CAN
+(long)(&co2_vars.co_transType),	//[1407h.02h], –ù–∞–∑–≤–∞–Ω–∏–µ: –¢–∏–ø –ø–µ—Ä–µ–¥–∞—á–∏, –¢–µ–∫—Å—Ç–ü–£: TransT, –ì—Ä—É–ø–ø–∞: CAN
+(long)(&co2_vars.co_RPDO1_1Mapping),	//[1600h.01h], –ù–∞–∑–≤–∞–Ω–∏–µ: RPDO1-1 Mapping, –¢–µ–∫—Å—Ç–ü–£: RPM11, –ì—Ä—É–ø–ø–∞: CAN
+(long)(&co2_vars.co_RPDO1_2Mapping),	//[1600h.02h], –ù–∞–∑–≤–∞–Ω–∏–µ: RPDO1-2 Mapping, –¢–µ–∫—Å—Ç–ü–£: RPM12, –ì—Ä—É–ø–ø–∞: CAN
+(long)(&co2_vars.co_RPDO1_3Mapping),	//[1600h.03h], –ù–∞–∑–≤–∞–Ω–∏–µ: RPDO1-3 Mapping, –¢–µ–∫—Å—Ç–ü–£: RPM13, –ì—Ä—É–ø–ø–∞: CAN
+(long)(&co2_vars.co_RPDO1_4Mapping),	//[1600h.04h], –ù–∞–∑–≤–∞–Ω–∏–µ: RPDO1-4 Mapping, –¢–µ–∫—Å—Ç–ü–£: RPM14, –ì—Ä—É–ø–ø–∞: CAN
+(long)(&co2_vars.co_RPDO2_1Mapping),	//[1601h.01h], –ù–∞–∑–≤–∞–Ω–∏–µ: RPDO2-1 Mapping, –¢–µ–∫—Å—Ç–ü–£: RPM21, –ì—Ä—É–ø–ø–∞: CAN
+(long)(&co2_vars.co_RPDO2_2Mapping),	//[1601h.02h], –ù–∞–∑–≤–∞–Ω–∏–µ: RPDO2-2 Mapping, –¢–µ–∫—Å—Ç–ü–£: RPM22, –ì—Ä—É–ø–ø–∞: CAN
+(long)(&co2_vars.co_RPDO2_3Mapping),	//[1601h.03h], –ù–∞–∑–≤–∞–Ω–∏–µ: RPDO2-3 Mapping, –¢–µ–∫—Å—Ç–ü–£: RPM23, –ì—Ä—É–ø–ø–∞: CAN
+(long)(&co2_vars.co_RPDO2_4Mapping),	//[1601h.04h], –ù–∞–∑–≤–∞–Ω–∏–µ: RPDO2-4 Mapping, –¢–µ–∫—Å—Ç–ü–£: RPM24, –ì—Ä—É–ø–ø–∞: CAN
+(long)(&co2_vars.co_RPDO3_1Mapping),	//[1602h.01h], –ù–∞–∑–≤–∞–Ω–∏–µ: RPDO3-1 Mapping, –¢–µ–∫—Å—Ç–ü–£: RPM31, –ì—Ä—É–ø–ø–∞: CAN
+(long)(&co2_vars.co_RPDO3_2Mapping),	//[1602h.02h], –ù–∞–∑–≤–∞–Ω–∏–µ: RPDO3-2 Mapping, –¢–µ–∫—Å—Ç–ü–£: RPM32, –ì—Ä—É–ø–ø–∞: CAN
+(long)(&co2_vars.co_RPDO3_3Mapping),	//[1602h.03h], –ù–∞–∑–≤–∞–Ω–∏–µ: RPDO3-3 Mapping, –¢–µ–∫—Å—Ç–ü–£: RPM33, –ì—Ä—É–ø–ø–∞: CAN
+(long)(&co2_vars.co_RPDO3_4Mapping),	//[1602h.04h], –ù–∞–∑–≤–∞–Ω–∏–µ: RPDO3-4 Mapping, –¢–µ–∫—Å—Ç–ü–£: RPM34, –ì—Ä—É–ø–ø–∞: CAN
+(long)(&co2_vars.co_RPDO4_1Mapping),	//[1603h.01h], –ù–∞–∑–≤–∞–Ω–∏–µ: RPDO4-1 Mapping, –¢–µ–∫—Å—Ç–ü–£: RPM41, –ì—Ä—É–ø–ø–∞: CAN
+(long)(&co2_vars.co_RPDO4_2Mapping),	//[1603h.02h], –ù–∞–∑–≤–∞–Ω–∏–µ: RPDO4-2 Mapping, –¢–µ–∫—Å—Ç–ü–£: RPM42, –ì—Ä—É–ø–ø–∞: CAN
+(long)(&co2_vars.co_RPDO4_3Mapping),	//[1603h.03h], –ù–∞–∑–≤–∞–Ω–∏–µ: RPDO4-3 Mapping, –¢–µ–∫—Å—Ç–ü–£: RPM43, –ì—Ä—É–ø–ø–∞: CAN
+(long)(&co2_vars.co_RPDO4_4Mapping),	//[1603h.04h], –ù–∞–∑–≤–∞–Ω–∏–µ: RPDO4-4 Mapping, –¢–µ–∫—Å—Ç–ü–£: RPM44, –ì—Ä—É–ø–ø–∞: CAN
+(long)(&co2_vars.co_RPDO5_1Mapping),	//[1604h.01h], –ù–∞–∑–≤–∞–Ω–∏–µ: RPDO5-1 Mapping, –¢–µ–∫—Å—Ç–ü–£: RPM51, –ì—Ä—É–ø–ø–∞: CAN
+(long)(&co2_vars.co_RPDO5_2Mapping),	//[1604h.02h], –ù–∞–∑–≤–∞–Ω–∏–µ: RPDO5-2 Mapping, –¢–µ–∫—Å—Ç–ü–£: RPM52, –ì—Ä—É–ø–ø–∞: CAN
+(long)(&co2_vars.co_RPDO5_3Mapping),	//[1604h.03h], –ù–∞–∑–≤–∞–Ω–∏–µ: RPDO5-3 Mapping, –¢–µ–∫—Å—Ç–ü–£: RPM53, –ì—Ä—É–ø–ø–∞: CAN
+(long)(&co2_vars.co_RPDO5_4Mapping),	//[1604h.04h], –ù–∞–∑–≤–∞–Ω–∏–µ: RPDO5-4 Mapping, –¢–µ–∫—Å—Ç–ü–£: RPM54, –ì—Ä—É–ø–ø–∞: CAN
+(long)(&co2_vars.co_RPDO6_1Mapping),	//[1605h.01h], –ù–∞–∑–≤–∞–Ω–∏–µ: RPDO6-1 Mapping, –¢–µ–∫—Å—Ç–ü–£: RPM61, –ì—Ä—É–ø–ø–∞: CAN
+(long)(&co2_vars.co_RPDO6_2Mapping),	//[1605h.02h], –ù–∞–∑–≤–∞–Ω–∏–µ: RPDO6-2 Mapping, –¢–µ–∫—Å—Ç–ü–£: RPM62, –ì—Ä—É–ø–ø–∞: CAN
+(long)(&co2_vars.co_RPDO6_3Mapping),	//[1605h.03h], –ù–∞–∑–≤–∞–Ω–∏–µ: RPDO6-3 Mapping, –¢–µ–∫—Å—Ç–ü–£: RPM63, –ì—Ä—É–ø–ø–∞: CAN
+(long)(&co2_vars.co_RPDO6_4Mapping),	//[1605h.04h], –ù–∞–∑–≤–∞–Ω–∏–µ: RPDO6-4 Mapping, –¢–µ–∫—Å—Ç–ü–£: RPM64, –ì—Ä—É–ø–ø–∞: CAN
+(long)(&co2_vars.co_RPDO7_1Mapping),	//[1606h.01h], –ù–∞–∑–≤–∞–Ω–∏–µ: RPDO7-1 Mapping, –¢–µ–∫—Å—Ç–ü–£: RPM71, –ì—Ä—É–ø–ø–∞: CAN
+(long)(&co2_vars.co_RPDO7_2Mapping),	//[1606h.02h], –ù–∞–∑–≤–∞–Ω–∏–µ: RPDO7-2 Mapping, –¢–µ–∫—Å—Ç–ü–£: RPM72, –ì—Ä—É–ø–ø–∞: CAN
+(long)(&co2_vars.co_RPDO7_3Mapping),	//[1606h.03h], –ù–∞–∑–≤–∞–Ω–∏–µ: RPDO7-3 Mapping, –¢–µ–∫—Å—Ç–ü–£: RPM73, –ì—Ä—É–ø–ø–∞: CAN
+(long)(&co2_vars.co_RPDO7_4Mapping),	//[1606h.04h], –ù–∞–∑–≤–∞–Ω–∏–µ: RPDO7-4 Mapping, –¢–µ–∫—Å—Ç–ü–£: RPM74, –ì—Ä—É–ø–ø–∞: CAN
+(long)(&co2_vars.co_RPDO8_1Mapping),	//[1607h.01h], –ù–∞–∑–≤–∞–Ω–∏–µ: RPDO8-1 Mapping, –¢–µ–∫—Å—Ç–ü–£: RPM81, –ì—Ä—É–ø–ø–∞: CAN
+(long)(&co2_vars.co_RPDO8_2Mapping),	//[1607h.02h], –ù–∞–∑–≤–∞–Ω–∏–µ: RPDO8-2 Mapping, –¢–µ–∫—Å—Ç–ü–£: RPM82, –ì—Ä—É–ø–ø–∞: CAN
+(long)(&co2_vars.co_RPDO8_3Mapping),	//[1607h.03h], –ù–∞–∑–≤–∞–Ω–∏–µ: RPDO8-3 Mapping, –¢–µ–∫—Å—Ç–ü–£: RPM83, –ì—Ä—É–ø–ø–∞: CAN
+(long)(&co2_vars.co_RPDO8_4Mapping),	//[1607h.04h], –ù–∞–∑–≤–∞–Ω–∏–µ: RPDO8-4 Mapping, –¢–µ–∫—Å—Ç–ü–£: RPM84, –ì—Ä—É–ø–ø–∞: CAN
+(long)(&co2_vars.co_TPDO1COBID),	//[1800h.01h], –ù–∞–∑–≤–∞–Ω–∏–µ: COB-ID for TPDO1, –¢–µ–∫—Å—Ç–ü–£: ITPDO1, –ì—Ä—É–ø–ø–∞: CAN
+(long)(&co2_vars.co_transType),	//[1800h.02h], –ù–∞–∑–≤–∞–Ω–∏–µ: –¢–∏–ø –ø–µ—Ä–µ–¥–∞—á–∏, –¢–µ–∫—Å—Ç–ü–£: TransT, –ì—Ä—É–ø–ø–∞: CAN
+(long)(&co2_vars.co_TPDO1ITime),	//[1800h.03h], –ù–∞–∑–≤–∞–Ω–∏–µ: Inhibit Time 1, –¢–µ–∫—Å—Ç–ü–£: ITime1, –ì—Ä—É–ø–ø–∞: CAN
+(long)(&co2_vars.co_compatEntry),	//[1800h.04h], –ù–∞–∑–≤–∞–Ω–∏–µ: Compatibility Entry, –¢–µ–∫—Å—Ç–ü–£: CompEn, –ì—Ä—É–ø–ø–∞: CAN
+(long)(&co2_vars.co_TPDO1EventTimer),	//[1800h.05h], –ù–∞–∑–≤–∞–Ω–∏–µ: Event Timer 1, –¢–µ–∫—Å—Ç–ü–£: EvTmr1, –ì—Ä—É–ø–ø–∞: CAN
+(long)(&co2_vars.co_TPDO2COBID),	//[1801h.01h], –ù–∞–∑–≤–∞–Ω–∏–µ: COB-ID for TPDO2, –¢–µ–∫—Å—Ç–ü–£: ITPDO2, –ì—Ä—É–ø–ø–∞: CAN
+(long)(&co2_vars.co_transType),	//[1801h.02h], –ù–∞–∑–≤–∞–Ω–∏–µ: –¢–∏–ø –ø–µ—Ä–µ–¥–∞—á–∏, –¢–µ–∫—Å—Ç–ü–£: TransT, –ì—Ä—É–ø–ø–∞: CAN
+(long)(&co2_vars.co_TPDO2ITime),	//[1801h.03h], –ù–∞–∑–≤–∞–Ω–∏–µ: Inhibit Time 2, –¢–µ–∫—Å—Ç–ü–£: ITime2, –ì—Ä—É–ø–ø–∞: CAN
+(long)(&co2_vars.co_compatEntry),	//[1801h.04h], –ù–∞–∑–≤–∞–Ω–∏–µ: Compatibility Entry, –¢–µ–∫—Å—Ç–ü–£: CompEn, –ì—Ä—É–ø–ø–∞: CAN
+(long)(&co2_vars.co_TPDO2EventTimer),	//[1801h.05h], –ù–∞–∑–≤–∞–Ω–∏–µ: Event Timer 2, –¢–µ–∫—Å—Ç–ü–£: EvTmr2, –ì—Ä—É–ø–ø–∞: CAN
+(long)(&co2_vars.co_TPDO3COBID),	//[1802h.01h], –ù–∞–∑–≤–∞–Ω–∏–µ: COB-ID for TPDO3, –¢–µ–∫—Å—Ç–ü–£: ITPDO3, –ì—Ä—É–ø–ø–∞: CAN
+(long)(&co2_vars.co_transType),	//[1802h.02h], –ù–∞–∑–≤–∞–Ω–∏–µ: –¢–∏–ø –ø–µ—Ä–µ–¥–∞—á–∏, –¢–µ–∫—Å—Ç–ü–£: TransT, –ì—Ä—É–ø–ø–∞: CAN
+(long)(&co2_vars.co_TPDO3ITime),	//[1802h.03h], –ù–∞–∑–≤–∞–Ω–∏–µ: Inhibit Time 3, –¢–µ–∫—Å—Ç–ü–£: ITime3, –ì—Ä—É–ø–ø–∞: CAN
+(long)(&co2_vars.co_compatEntry),	//[1802h.04h], –ù–∞–∑–≤–∞–Ω–∏–µ: Compatibility Entry, –¢–µ–∫—Å—Ç–ü–£: CompEn, –ì—Ä—É–ø–ø–∞: CAN
+(long)(&co2_vars.co_TPDO3EventTimer),	//[1802h.05h], –ù–∞–∑–≤–∞–Ω–∏–µ: Event Timer 3, –¢–µ–∫—Å—Ç–ü–£: EvTmr3, –ì—Ä—É–ø–ø–∞: CAN
+(long)(&co2_vars.co_TPDO4COBID),	//[1803h.01h], –ù–∞–∑–≤–∞–Ω–∏–µ: COB-ID for TPDO4, –¢–µ–∫—Å—Ç–ü–£: ITPDO4, –ì—Ä—É–ø–ø–∞: CAN
+(long)(&co2_vars.co_transType),	//[1803h.02h], –ù–∞–∑–≤–∞–Ω–∏–µ: –¢–∏–ø –ø–µ—Ä–µ–¥–∞—á–∏, –¢–µ–∫—Å—Ç–ü–£: TransT, –ì—Ä—É–ø–ø–∞: CAN
+(long)(&co2_vars.co_TPDO4ITime),	//[1803h.03h], –ù–∞–∑–≤–∞–Ω–∏–µ: Inhibit Time 4, –¢–µ–∫—Å—Ç–ü–£: ITime4, –ì—Ä—É–ø–ø–∞: CAN
+(long)(&co2_vars.co_compatEntry),	//[1803h.04h], –ù–∞–∑–≤–∞–Ω–∏–µ: Compatibility Entry, –¢–µ–∫—Å—Ç–ü–£: CompEn, –ì—Ä—É–ø–ø–∞: CAN
+(long)(&co2_vars.co_TPDO4EventTimer),	//[1803h.05h], –ù–∞–∑–≤–∞–Ω–∏–µ: Event Timer 4, –¢–µ–∫—Å—Ç–ü–£: EvTmr4, –ì—Ä—É–ø–ø–∞: CAN
+(long)(&co2_vars.co_TPDO5COBID),	//[1804h.01h], –ù–∞–∑–≤–∞–Ω–∏–µ: COB-ID for TPDO5, –¢–µ–∫—Å—Ç–ü–£: ITPDO5, –ì—Ä—É–ø–ø–∞: CAN
+(long)(&co2_vars.co_transType),	//[1804h.02h], –ù–∞–∑–≤–∞–Ω–∏–µ: –¢–∏–ø –ø–µ—Ä–µ–¥–∞—á–∏, –¢–µ–∫—Å—Ç–ü–£: TransT, –ì—Ä—É–ø–ø–∞: CAN
+(long)(&co2_vars.co_TPDO5ITime),	//[1804h.03h], –ù–∞–∑–≤–∞–Ω–∏–µ: Inhibit Time 5, –¢–µ–∫—Å—Ç–ü–£: ITime5, –ì—Ä—É–ø–ø–∞: CAN
+(long)(&co2_vars.co_compatEntry),	//[1804h.04h], –ù–∞–∑–≤–∞–Ω–∏–µ: Compatibility Entry, –¢–µ–∫—Å—Ç–ü–£: CompEn, –ì—Ä—É–ø–ø–∞: CAN
+(long)(&co2_vars.co_TPDO5EventTimer),	//[1804h.05h], –ù–∞–∑–≤–∞–Ω–∏–µ: Event Timer 5, –¢–µ–∫—Å—Ç–ü–£: EvTmr5, –ì—Ä—É–ø–ø–∞: CAN
+(long)(&co2_vars.co_TPDO6COBID),	//[1805h.01h], –ù–∞–∑–≤–∞–Ω–∏–µ: COB-ID for TPDO6, –¢–µ–∫—Å—Ç–ü–£: ITPDO6, –ì—Ä—É–ø–ø–∞: CAN
+(long)(&co2_vars.co_transType),	//[1805h.02h], –ù–∞–∑–≤–∞–Ω–∏–µ: –¢–∏–ø –ø–µ—Ä–µ–¥–∞—á–∏, –¢–µ–∫—Å—Ç–ü–£: TransT, –ì—Ä—É–ø–ø–∞: CAN
+(long)(&co2_vars.co_TPDO6ITime),	//[1805h.03h], –ù–∞–∑–≤–∞–Ω–∏–µ: Inhibit Time 6, –¢–µ–∫—Å—Ç–ü–£: ITime6, –ì—Ä—É–ø–ø–∞: CAN
+(long)(&co2_vars.co_compatEntry),	//[1805h.04h], –ù–∞–∑–≤–∞–Ω–∏–µ: Compatibility Entry, –¢–µ–∫—Å—Ç–ü–£: CompEn, –ì—Ä—É–ø–ø–∞: CAN
+(long)(&co2_vars.co_TPDO6EventTimer),	//[1805h.05h], –ù–∞–∑–≤–∞–Ω–∏–µ: Event Timer 6, –¢–µ–∫—Å—Ç–ü–£: EvTmr6, –ì—Ä—É–ø–ø–∞: CAN
+(long)(&co2_vars.co_TPDO7COBID),	//[1806h.01h], –ù–∞–∑–≤–∞–Ω–∏–µ: COB-ID for TPDO7, –¢–µ–∫—Å—Ç–ü–£: ITPDO7, –ì—Ä—É–ø–ø–∞: CAN
+(long)(&co2_vars.co_transType),	//[1806h.02h], –ù–∞–∑–≤–∞–Ω–∏–µ: –¢–∏–ø –ø–µ—Ä–µ–¥–∞—á–∏, –¢–µ–∫—Å—Ç–ü–£: TransT, –ì—Ä—É–ø–ø–∞: CAN
+(long)(&co2_vars.co_TPDO7ITime),	//[1806h.03h], –ù–∞–∑–≤–∞–Ω–∏–µ: Inhibit Time 7, –¢–µ–∫—Å—Ç–ü–£: ITime7, –ì—Ä—É–ø–ø–∞: CAN
+(long)(&co2_vars.co_compatEntry),	//[1806h.04h], –ù–∞–∑–≤–∞–Ω–∏–µ: Compatibility Entry, –¢–µ–∫—Å—Ç–ü–£: CompEn, –ì—Ä—É–ø–ø–∞: CAN
+(long)(&co2_vars.co_TPDO7EventTimer),	//[1806h.05h], –ù–∞–∑–≤–∞–Ω–∏–µ: Event Timer 7, –¢–µ–∫—Å—Ç–ü–£: EvTmr7, –ì—Ä—É–ø–ø–∞: CAN
+(long)(&co2_vars.co_TPDO8COBID),	//[1807h.01h], –ù–∞–∑–≤–∞–Ω–∏–µ: COB-ID for TPDO8, –¢–µ–∫—Å—Ç–ü–£: ITPDO8, –ì—Ä—É–ø–ø–∞: CAN
+(long)(&co2_vars.co_transType),	//[1807h.02h], –ù–∞–∑–≤–∞–Ω–∏–µ: –¢–∏–ø –ø–µ—Ä–µ–¥–∞—á–∏, –¢–µ–∫—Å—Ç–ü–£: TransT, –ì—Ä—É–ø–ø–∞: CAN
+(long)(&co2_vars.co_TPDO8ITime),	//[1807h.03h], –ù–∞–∑–≤–∞–Ω–∏–µ: Inhibit Time 8, –¢–µ–∫—Å—Ç–ü–£: ITime8, –ì—Ä—É–ø–ø–∞: CAN
+(long)(&co2_vars.co_compatEntry),	//[1807h.04h], –ù–∞–∑–≤–∞–Ω–∏–µ: Compatibility Entry, –¢–µ–∫—Å—Ç–ü–£: CompEn, –ì—Ä—É–ø–ø–∞: CAN
+(long)(&co2_vars.co_TPDO8EventTimer),	//[1807h.05h], –ù–∞–∑–≤–∞–Ω–∏–µ: Event Timer 8, –¢–µ–∫—Å—Ç–ü–£: EvTmr8, –ì—Ä—É–ø–ø–∞: CAN
+(long)(&co2_vars.co_TPDO1_1Mapping),	//[1A00h.01h], –ù–∞–∑–≤–∞–Ω–∏–µ: TPDO1-1 Mapping, –¢–µ–∫—Å—Ç–ü–£: TPM11, –ì—Ä—É–ø–ø–∞: CAN
+(long)(&co2_vars.co_TPDO1_2Mapping),	//[1A00h.02h], –ù–∞–∑–≤–∞–Ω–∏–µ: TPDO1-2 Mapping, –¢–µ–∫—Å—Ç–ü–£: TPM12, –ì—Ä—É–ø–ø–∞: CAN
+(long)(&co2_vars.co_TPDO1_3Mapping),	//[1A00h.03h], –ù–∞–∑–≤–∞–Ω–∏–µ: TPDO1-3 Mapping, –¢–µ–∫—Å—Ç–ü–£: TPM13, –ì—Ä—É–ø–ø–∞: CAN
+(long)(&co2_vars.co_TPDO1_4Mapping),	//[1A00h.04h], –ù–∞–∑–≤–∞–Ω–∏–µ: TPDO1-4 Mapping, –¢–µ–∫—Å—Ç–ü–£: TPM14, –ì—Ä—É–ø–ø–∞: CAN
+(long)(&co2_vars.co_TPDO2_1Mapping),	//[1A01h.01h], –ù–∞–∑–≤–∞–Ω–∏–µ: TPDO2-1 Mapping, –¢–µ–∫—Å—Ç–ü–£: TPM21, –ì—Ä—É–ø–ø–∞: CAN
+(long)(&co2_vars.co_TPDO2_2Mapping),	//[1A01h.02h], –ù–∞–∑–≤–∞–Ω–∏–µ: TPDO2-2 Mapping, –¢–µ–∫—Å—Ç–ü–£: TPM22, –ì—Ä—É–ø–ø–∞: CAN
+(long)(&co2_vars.co_TPDO2_3Mapping),	//[1A01h.03h], –ù–∞–∑–≤–∞–Ω–∏–µ: TPDO2-3 Mapping, –¢–µ–∫—Å—Ç–ü–£: TPM23, –ì—Ä—É–ø–ø–∞: CAN
+(long)(&co2_vars.co_TPDO2_4Mapping),	//[1A01h.04h], –ù–∞–∑–≤–∞–Ω–∏–µ: TPDO2-4 Mapping, –¢–µ–∫—Å—Ç–ü–£: TPM24, –ì—Ä—É–ø–ø–∞: CAN
+(long)(&co2_vars.co_TPDO3_1Mapping),	//[1A02h.01h], –ù–∞–∑–≤–∞–Ω–∏–µ: TPDO3-1 Mapping, –¢–µ–∫—Å—Ç–ü–£: TPM31, –ì—Ä—É–ø–ø–∞: CAN
+(long)(&co2_vars.co_TPDO3_2Mapping),	//[1A02h.02h], –ù–∞–∑–≤–∞–Ω–∏–µ: TPDO3-2 Mapping, –¢–µ–∫—Å—Ç–ü–£: TPM32, –ì—Ä—É–ø–ø–∞: CAN
+(long)(&co2_vars.co_TPDO3_3Mapping),	//[1A02h.03h], –ù–∞–∑–≤–∞–Ω–∏–µ: TPDO3-3 Mapping, –¢–µ–∫—Å—Ç–ü–£: TPM33, –ì—Ä—É–ø–ø–∞: CAN
+(long)(&co2_vars.co_TPDO3_4Mapping),	//[1A02h.04h], –ù–∞–∑–≤–∞–Ω–∏–µ: TPDO3-4 Mapping, –¢–µ–∫—Å—Ç–ü–£: TPM34, –ì—Ä—É–ø–ø–∞: CAN
+(long)(&co2_vars.co_TPDO4_1Mapping),	//[1A03h.01h], –ù–∞–∑–≤–∞–Ω–∏–µ: TPDO4-1 Mapping, –¢–µ–∫—Å—Ç–ü–£: TPM41, –ì—Ä—É–ø–ø–∞: CAN
+(long)(&co2_vars.co_TPDO4_2Mapping),	//[1A03h.02h], –ù–∞–∑–≤–∞–Ω–∏–µ: TPDO4-2 Mapping, –¢–µ–∫—Å—Ç–ü–£: TPM42, –ì—Ä—É–ø–ø–∞: CAN
+(long)(&co2_vars.co_TPDO4_3Mapping),	//[1A03h.03h], –ù–∞–∑–≤–∞–Ω–∏–µ: TPDO4-3 Mapping, –¢–µ–∫—Å—Ç–ü–£: TPM43, –ì—Ä—É–ø–ø–∞: CAN
+(long)(&co2_vars.co_TPDO4_4Mapping),	//[1A03h.04h], –ù–∞–∑–≤–∞–Ω–∏–µ: TPDO4-4 Mapping, –¢–µ–∫—Å—Ç–ü–£: TPM44, –ì—Ä—É–ø–ø–∞: CAN
+(long)(&co2_vars.co_TPDO5_1Mapping),	//[1A04h.01h], –ù–∞–∑–≤–∞–Ω–∏–µ: TPDO5-1 Mapping, –¢–µ–∫—Å—Ç–ü–£: TPM51, –ì—Ä—É–ø–ø–∞: CAN
+(long)(&co2_vars.co_TPDO5_2Mapping),	//[1A04h.02h], –ù–∞–∑–≤–∞–Ω–∏–µ: TPDO5-2 Mapping, –¢–µ–∫—Å—Ç–ü–£: TPM52, –ì—Ä—É–ø–ø–∞: CAN
+(long)(&co2_vars.co_TPDO5_3Mapping),	//[1A04h.03h], –ù–∞–∑–≤–∞–Ω–∏–µ: TPDO5-3 Mapping, –¢–µ–∫—Å—Ç–ü–£: TPM53, –ì—Ä—É–ø–ø–∞: CAN
+(long)(&co2_vars.co_TPDO5_4Mapping),	//[1A04h.04h], –ù–∞–∑–≤–∞–Ω–∏–µ: TPDO5-4 Mapping, –¢–µ–∫—Å—Ç–ü–£: TPM54, –ì—Ä—É–ø–ø–∞: CAN
+(long)(&co2_vars.co_TPDO6_1Mapping),	//[1A05h.01h], –ù–∞–∑–≤–∞–Ω–∏–µ: TPDO6-1 Mapping, –¢–µ–∫—Å—Ç–ü–£: TPM61, –ì—Ä—É–ø–ø–∞: CAN
+(long)(&co2_vars.co_TPDO6_2Mapping),	//[1A05h.02h], –ù–∞–∑–≤–∞–Ω–∏–µ: TPDO6-2 Mapping, –¢–µ–∫—Å—Ç–ü–£: TPM62, –ì—Ä—É–ø–ø–∞: CAN
+(long)(&co2_vars.co_TPDO6_3Mapping),	//[1A05h.03h], –ù–∞–∑–≤–∞–Ω–∏–µ: TPDO6-3 Mapping, –¢–µ–∫—Å—Ç–ü–£: TPM63, –ì—Ä—É–ø–ø–∞: CAN
+(long)(&co2_vars.co_TPDO6_4Mapping),	//[1A05h.04h], –ù–∞–∑–≤–∞–Ω–∏–µ: TPDO6-4 Mapping, –¢–µ–∫—Å—Ç–ü–£: TPM64, –ì—Ä—É–ø–ø–∞: CAN
+(long)(&co2_vars.co_TPDO7_1Mapping),	//[1A06h.01h], –ù–∞–∑–≤–∞–Ω–∏–µ: TPDO7-1 Mapping, –¢–µ–∫—Å—Ç–ü–£: TPM71, –ì—Ä—É–ø–ø–∞: CAN
+(long)(&co2_vars.co_TPDO7_2Mapping),	//[1A06h.02h], –ù–∞–∑–≤–∞–Ω–∏–µ: TPDO7-2 Mapping, –¢–µ–∫—Å—Ç–ü–£: TPM72, –ì—Ä—É–ø–ø–∞: CAN
+(long)(&co2_vars.co_TPDO7_3Mapping),	//[1A06h.03h], –ù–∞–∑–≤–∞–Ω–∏–µ: TPDO7-3 Mapping, –¢–µ–∫—Å—Ç–ü–£: TPM73, –ì—Ä—É–ø–ø–∞: CAN
+(long)(&co2_vars.co_TPDO7_4Mapping),	//[1A06h.04h], –ù–∞–∑–≤–∞–Ω–∏–µ: TPDO7-4 Mapping, –¢–µ–∫—Å—Ç–ü–£: TPM74, –ì—Ä—É–ø–ø–∞: CAN
+(long)(&co2_vars.co_TPDO8_1Mapping),	//[1A07h.01h], –ù–∞–∑–≤–∞–Ω–∏–µ: TPDO8-1 Mapping, –¢–µ–∫—Å—Ç–ü–£: TPM81, –ì—Ä—É–ø–ø–∞: CAN
+(long)(&co2_vars.co_TPDO8_2Mapping),	//[1A07h.02h], –ù–∞–∑–≤–∞–Ω–∏–µ: TPDO8-2 Mapping, –¢–µ–∫—Å—Ç–ü–£: TPM82, –ì—Ä—É–ø–ø–∞: CAN
+(long)(&co2_vars.co_TPDO8_3Mapping),	//[1A07h.03h], –ù–∞–∑–≤–∞–Ω–∏–µ: TPDO8-3 Mapping, –¢–µ–∫—Å—Ç–ü–£: TPM83, –ì—Ä—É–ø–ø–∞: CAN
+(long)(&co2_vars.co_TPDO8_4Mapping),	//[1A07h.04h], –ù–∞–∑–≤–∞–Ω–∏–µ: TPDO8-4 Mapping, –¢–µ–∫—Å—Ç–ü–£: TPM84, –ì—Ä—É–ø–ø–∞: CAN
+(long)(&co2_vars.co_nodeID),	//[2000h.00h], –ù–∞–∑–≤–∞–Ω–∏–µ: CAN NODE-ID, –¢–µ–∫—Å—Ç–ü–£: NodeID, –ì—Ä—É–ø–ø–∞: CAN
+(long)(&co2_vars.co_bitRate),	//[2001h.00h], –ù–∞–∑–≤–∞–Ω–∏–µ: CAN Bit Rate, –¢–µ–∫—Å—Ç–ü–£: CANBR, –ì—Ä—É–ø–ø–∞: CAN, –±–∏—Ç—ã —Å 0 –ø–æ 2: 0000000000000111b
+(long)(&co2_vars.co_vendorID),	//[2002h.01h], –ù–∞–∑–≤–∞–Ω–∏–µ: –ö–æ–¥ –ø—Ä–æ–∏–∑–≤–æ–¥–∏—Ç–µ–ª—è, –¢–µ–∫—Å—Ç–ü–£: VendID, –ì—Ä—É–ø–ø–∞: CAN
+(long)(&co2_vars.co_productCode),	//[2002h.02h], –ù–∞–∑–≤–∞–Ω–∏–µ: –ö–æ–¥ –ø—Ä–æ–¥—É–∫—Ç–∞, –¢–µ–∫—Å—Ç–ü–£: PrCode, –ì—Ä—É–ø–ø–∞: CAN
+(long)(&co2_vars.co_revisionNumber),	//[2002h.03h], –ù–∞–∑–≤–∞–Ω–∏–µ: –ù–æ–º–µ—Ä —Ä–µ–≤–∏–∑–∏–∏, –¢–µ–∫—Å—Ç–ü–£: RevNum, –ì—Ä—É–ø–ø–∞: CAN
+(long)(&co2_vars.co_serialNumber),	//[2002h.04h], –ù–∞–∑–≤–∞–Ω–∏–µ: –°–µ—Ä–∏–π–Ω—ã–π –Ω–æ–º–µ—Ä, –¢–µ–∫—Å—Ç–ü–£: SerNum, –ì—Ä—É–ø–ø–∞: CAN
+(long)(&co2_vars.co_specialData1),	//[2003h.01h], –ù–∞–∑–≤–∞–Ω–∏–µ: Special Data 1, –¢–µ–∫—Å—Ç–ü–£: SpDat1, –ì—Ä—É–ø–ø–∞: CAN
+(long)(&co2_vars.co_specialData2),	//[2003h.02h], –ù–∞–∑–≤–∞–Ω–∏–µ: Special Data 2, –¢–µ–∫—Å—Ç–ü–£: SpDat2, –ì—Ä—É–ø–ø–∞: CAN
+(long)(&co2_vars.co_specialData3),	//[2003h.03h], –ù–∞–∑–≤–∞–Ω–∏–µ: Special Data 3, –¢–µ–∫—Å—Ç–ü–£: SpDat3, –ì—Ä—É–ø–ø–∞: CAN
+(long)(&co2_vars.co_specialData4),	//[2003h.04h], –ù–∞–∑–≤–∞–Ω–∏–µ: Special Data 4, –¢–µ–∫—Å—Ç–ü–£: SpDat4, –ì—Ä—É–ø–ø–∞: CAN
+(long)(&co2_vars.co_secretCode),	//[2004h.00h], –ù–∞–∑–≤–∞–Ω–∏–µ: Secret Code, –¢–µ–∫—Å—Ç–ü–£: Secret, –ì—Ä—É–ø–ø–∞: CAN
+(long)(&co2_vars.co_protectBit),	//[2005h.00h], –ù–∞–∑–≤–∞–Ω–∏–µ: Protect Bit, –¢–µ–∫—Å—Ç–ü–£: ProtBt, –ì—Ä—É–ø–ø–∞: CAN, –±–∏—Ç—ã —Å 0 –ø–æ 0: 0000000000000001b
+(long)(&co2_odHash[0]),	//[2007h.01h], –ù–∞–∑–≤–∞–Ω–∏–µ: md5_hash_0, –¢–µ–∫—Å—Ç–ü–£: md5_hash_0, –ì—Ä—É–ø–ø–∞: CAN
+(long)(&co2_odHash[1]),	//[2007h.02h], –ù–∞–∑–≤–∞–Ω–∏–µ: md5_hash_1, –¢–µ–∫—Å—Ç–ü–£: md5_hash_1, –ì—Ä—É–ø–ø–∞: CAN
+(long)(&co2_odHash[2]),	//[2007h.03h], –ù–∞–∑–≤–∞–Ω–∏–µ: md5_hash_2, –¢–µ–∫—Å—Ç–ü–£: md5_hash_2, –ì—Ä—É–ø–ø–∞: CAN
+(long)(&co2_odHash[3]),	//[2007h.04h], –ù–∞–∑–≤–∞–Ω–∏–µ: md5_hash_3, –¢–µ–∫—Å—Ç–ü–£: md5_hash_3, –ì—Ä—É–ø–ø–∞: CAN
+(long)(&co2_vars.co_heartbeatFlag0),	//[2010h.01h], –ù–∞–∑–≤–∞–Ω–∏–µ: Heartbeat Flag 0-31, –¢–µ–∫—Å—Ç–ü–£: HFlag0, –ì—Ä—É–ø–ø–∞: CAN
+(long)(&co2_vars.co_heartbeatFlag1),	//[2010h.02h], –ù–∞–∑–≤–∞–Ω–∏–µ: Heartbeat Flag 32-63, –¢–µ–∫—Å—Ç–ü–£: HFlag1, –ì—Ä—É–ø–ø–∞: CAN
+(long)(&co2_vars.co_heartbeatFlag2),	//[2010h.03h], –ù–∞–∑–≤–∞–Ω–∏–µ: Heartbeat Flag 64-95, –¢–µ–∫—Å—Ç–ü–£: HFlag2, –ì—Ä—É–ø–ø–∞: CAN
+(long)(&co2_vars.co_heartbeatFlag3),	//[2010h.04h], –ù–∞–∑–≤–∞–Ω–∏–µ: Heartbeat Flag 96-127, –¢–µ–∫—Å—Ç–ü–£: HFlag3, –ì—Ä—É–ø–ø–∞: CAN
+(long)(&co2_vars.co_heartbeatMask0),	//[2011h.01h], –ù–∞–∑–≤–∞–Ω–∏–µ: Heartbeat Mask 0-31, –¢–µ–∫—Å—Ç–ü–£: HMask0, –ì—Ä—É–ø–ø–∞: CAN
+(long)(&co2_vars.co_heartbeatMask1),	//[2011h.02h], –ù–∞–∑–≤–∞–Ω–∏–µ: Heartbeat Mask 32-63, –¢–µ–∫—Å—Ç–ü–£: HMask1, –ì—Ä—É–ø–ø–∞: CAN
+(long)(&co2_vars.co_heartbeatMask2),	//[2011h.03h], –ù–∞–∑–≤–∞–Ω–∏–µ: Heartbeat Mask 64-95, –¢–µ–∫—Å—Ç–ü–£: HMask2, –ì—Ä—É–ø–ø–∞: CAN
+(long)(&co2_vars.co_heartbeatMask3),	//[2011h.04h], –ù–∞–∑–≤–∞–Ω–∏–µ: Heartbeat Mask 96-127, –¢–µ–∫—Å—Ç–ü–£: HMask3, –ì—Ä—É–ø–ø–∞: CAN
+(long)(&co2_vars.co_heartbeatAutoStart),	//[2012h.00h], –ù–∞–∑–≤–∞–Ω–∏–µ: Heartbeat Autostart, –¢–µ–∫—Å—Ç–ü–£: HBASta, –ì—Ä—É–ø–ø–∞: CAN, –±–∏—Ç—ã —Å 0 –ø–æ 0: 0000000000000001b
+(long)(&co2_vars.co_heartbeatAutoRecovery),	//[2014h.00h], –ù–∞–∑–≤–∞–Ω–∏–µ: Heartbeat Autorecovery, –¢–µ–∫—Å—Ç–ü–£: HBARec, –ì—Ä—É–ø–ø–∞: CAN, –±–∏—Ç—ã —Å 0 –ø–æ 0: 0000000000000001b
+(long)(&co2_vars.co_nodeState),	//[2015h.00h], –ù–∞–∑–≤–∞–Ω–∏–µ: –°–æ—Å—Ç–æ—è–Ω–∏–µ –¥—Ä–∞–π–≤–µ—Ä–∞ CAN-Open, –¢–µ–∫—Å—Ç–ü–£: State, –ì—Ä—É–ø–ø–∞: CAN
+(long)(&co2_vars.co_emergencyErrorCode),	//[2016h.00h], –ù–∞–∑–≤–∞–Ω–∏–µ: Emergency Error Code, –¢–µ–∫—Å—Ç–ü–£: EmErCo, –ì—Ä—É–ø–ø–∞: CAN
+(long)(&co2_vars.co_deviceErrorState),	//[2017h.00h], –ù–∞–∑–≤–∞–Ω–∏–µ: Device Error State, –¢–µ–∫—Å—Ç–ü–£: DeErSt, –ì—Ä—É–ø–ø–∞: CAN
+(long)(&co2_vars.co_ODCommand),	//[2080h.01h], –ù–∞–∑–≤–∞–Ω–∏–µ: Object Dictionary Command, –¢–µ–∫—Å—Ç–ü–£: ODComm, –ì—Ä—É–ø–ø–∞: CAN
+(long)(&co2_vars.co_currentODIndex),	//[2080h.02h], –ù–∞–∑–≤–∞–Ω–∏–µ: Current OD Index, –¢–µ–∫—Å—Ç–ü–£: ODCInd, –ì—Ä—É–ø–ø–∞: CAN
+(long)(&co2_vars.co_currentODSubIndex),	//[2080h.03h], –ù–∞–∑–≤–∞–Ω–∏–µ: Current OD Sub-Index, –¢–µ–∫—Å—Ç–ü–£: ODCSub, –ì—Ä—É–ø–ø–∞: CAN
+(long)(&co2_vars.co_currentODEText),	//[2080h.04h], –ù–∞–∑–≤–∞–Ω–∏–µ: Current OD Element Text, –¢–µ–∫—Å—Ç–ü–£: ODCTxt, –ì—Ä—É–ø–ø–∞: CAN
+(long)(&co2_vars.co_currentODEFormat),	//[2080h.05h], –ù–∞–∑–≤–∞–Ω–∏–µ: Current OD Element Format, –¢–µ–∫—Å—Ç–ü–£: ODCFrm, –ì—Ä—É–ø–ø–∞: CAN
+(long)(&co2_vars.co_currentODEMin),	//[2080h.06h], –ù–∞–∑–≤–∞–Ω–∏–µ: Current OD Element Min, –¢–µ–∫—Å—Ç–ü–£: ODCMin, –ì—Ä—É–ø–ø–∞: CAN
+(long)(&co2_vars.co_currentODEMax),	//[2080h.07h], –ù–∞–∑–≤–∞–Ω–∏–µ: Current OD Element Max, –¢–µ–∫—Å—Ç–ü–£: ODCMax, –ì—Ä—É–ø–ø–∞: CAN
+(long)(&co2_vars.co_currentODEDefault),	//[2080h.08h], –ù–∞–∑–≤–∞–Ω–∏–µ: Current OD Element Default, –¢–µ–∫—Å—Ç–ü–£: ODCDef, –ì—Ä—É–ø–ø–∞: CAN
+(long)(&co2_vars.co_currentODEMinLow),	//[2080h.09h], –ù–∞–∑–≤–∞–Ω–∏–µ: Current OD Element MinLow, –¢–µ–∫—Å—Ç–ü–£: ODCMiL, –ì—Ä—É–ø–ø–∞: CAN
+(long)(&co2_vars.co_currentODEMaxLow),	//[2080h.0Ah], –ù–∞–∑–≤–∞–Ω–∏–µ: Current OD Element MaxLow, –¢–µ–∫—Å—Ç–ü–£: ODCMaL, –ì—Ä—É–ø–ø–∞: CAN
+(long)(&co2_vars.co_currentODEDefaultLow),	//[2080h.0Bh], –ù–∞–∑–≤–∞–Ω–∏–µ: Current OD Element Default Low, –¢–µ–∫—Å—Ç–ü–£: ODCDeL, –ì—Ä—É–ø–ø–∞: CAN
+(long)(&co2_vars.co_currentODEAddrLow),	//[2080h.0Ch], –ù–∞–∑–≤–∞–Ω–∏–µ: Current OD Element Address, –¢–µ–∫—Å—Ç–ü–£: ODCAdr, –ì—Ä—É–ø–ø–∞: CAN
+(long)(&co2_vars.co_currentODEAddrLow),	//[2080h.0Dh], –ù–∞–∑–≤–∞–Ω–∏–µ: Current OD Element Address, –¢–µ–∫—Å—Ç–ü–£: ODCAdr, –ì—Ä—É–ø–ø–∞: CAN
+(long)(&co2_vars.co_currentODEType),	//[2080h.0Eh], –ù–∞–∑–≤–∞–Ω–∏–µ: –ì—Ä—É–ø–ø–∞ –ø–∞—Ä–∞–º–µ—Ç—Ä–æ–≤, –¢–µ–∫—Å—Ç–ü–£: –ì—Ä—É–ø–ø–∞, –ì—Ä—É–ø–ø–∞: CAN
+(long)(&co2_vars.co_odIndexSize),	//[2081h.00h], –ù–∞–∑–≤–∞–Ω–∏–µ: –ö–æ–ª–∏—á–µ—Å—Ç–≤–æ –∏–Ω–¥–µ–∫—Å–æ–≤, –¢–µ–∫—Å—Ç–ü–£: –ö–æ–ª–ò–Ω–¥, –ì—Ä—É–ø–ø–∞: CAN
+(long)(&co2_vars.co_defaultIndex1),	//[2082h.01h], –ù–∞–∑–≤–∞–Ω–∏–µ: Default Index 1, –¢–µ–∫—Å—Ç–ü–£: DfInd1, –ì—Ä—É–ø–ø–∞: CAN
+(long)(&co2_vars.co_defaultIndex2),	//[2082h.02h], –ù–∞–∑–≤–∞–Ω–∏–µ: Default Index 2, –¢–µ–∫—Å—Ç–ü–£: DfInd2, –ì—Ä—É–ø–ø–∞: CAN
+(long)(&co2_vars.co_maskElement01),	//[2083h.01h], –ù–∞–∑–≤–∞–Ω–∏–µ: Mask Element, –¢–µ–∫—Å—Ç–ü–£: MskEl0, –ì—Ä—É–ø–ø–∞: CAN, –±–∏—Ç—ã —Å 0 –ø–æ 7: 0000000011111111b
+(long)(&co2_vars.co_maskElement01),	//[2083h.02h], –ù–∞–∑–≤–∞–Ω–∏–µ: Mask Element, –¢–µ–∫—Å—Ç–ü–£: MskEl1, –ì—Ä—É–ø–ø–∞: CAN, –±–∏—Ç—ã —Å 8 –ø–æ 15: 1111111100000000b
+(long)(&co2_vars.co_maskElement23),	//[2083h.03h], –ù–∞–∑–≤–∞–Ω–∏–µ: Mask Element, –¢–µ–∫—Å—Ç–ü–£: MskEl2, –ì—Ä—É–ø–ø–∞: CAN, –±–∏—Ç—ã —Å 0 –ø–æ 7: 0000000011111111b
+(long)(&co2_vars.co_maskElement23),	//[2083h.04h], –ù–∞–∑–≤–∞–Ω–∏–µ: Mask Element, –¢–µ–∫—Å—Ç–ü–£: MskEl3, –ì—Ä—É–ø–ø–∞: CAN, –±–∏—Ç—ã —Å 8 –ø–æ 15: 1111111100000000b
+(long)(&co2_vars.co_maskElement45),	//[2083h.05h], –ù–∞–∑–≤–∞–Ω–∏–µ: Mask Element, –¢–µ–∫—Å—Ç–ü–£: MskEl4, –ì—Ä—É–ø–ø–∞: CAN, –±–∏—Ç—ã —Å 0 –ø–æ 7: 0000000011111111b
+(long)(&co2_vars.co_maskElement45),	//[2083h.06h], –ù–∞–∑–≤–∞–Ω–∏–µ: Mask Element, –¢–µ–∫—Å—Ç–ü–£: MskEl5, –ì—Ä—É–ø–ø–∞: CAN, –±–∏—Ç—ã —Å 8 –ø–æ 15: 1111111100000000b
+(long)(&co2_vars.co_maskElement67),	//[2083h.07h], –ù–∞–∑–≤–∞–Ω–∏–µ: Mask Element, –¢–µ–∫—Å—Ç–ü–£: MskEl6, –ì—Ä—É–ø–ø–∞: CAN, –±–∏—Ç—ã —Å 0 –ø–æ 7: 0000000011111111b
+(long)(&co2_vars.co_maskElement67),	//[2083h.08h], –ù–∞–∑–≤–∞–Ω–∏–µ: Mask Element, –¢–µ–∫—Å—Ç–ü–£: MskEl7, –ì—Ä—É–ø–ø–∞: CAN, –±–∏—Ç—ã —Å 8 –ø–æ 15: 1111111100000000b
+(long)(&co2_vars.co_maskElement89),	//[2083h.09h], –ù–∞–∑–≤–∞–Ω–∏–µ: Mask Element, –¢–µ–∫—Å—Ç–ü–£: MskEl8, –ì—Ä—É–ø–ø–∞: CAN, –±–∏—Ç—ã —Å 0 –ø–æ 7: 0000000011111111b
+(long)(&co2_vars.co_maskElement89),	//[2083h.0Ah], –ù–∞–∑–≤–∞–Ω–∏–µ: Mask Element, –¢–µ–∫—Å—Ç–ü–£: MskEl9, –ì—Ä—É–ø–ø–∞: CAN, –±–∏—Ç—ã —Å 8 –ø–æ 15: 1111111100000000b
+(long)(&co2_vars.co_maskElementAB),	//[2083h.0Bh], –ù–∞–∑–≤–∞–Ω–∏–µ: Mask Element, –¢–µ–∫—Å—Ç–ü–£: MskElA, –ì—Ä—É–ø–ø–∞: CAN, –±–∏—Ç—ã —Å 0 –ø–æ 7: 0000000011111111b
+(long)(&co2_vars.co_maskElementAB),	//[2083h.0Ch], –ù–∞–∑–≤–∞–Ω–∏–µ: Mask Element, –¢–µ–∫—Å—Ç–ü–£: MskElB, –ì—Ä—É–ø–ø–∞: CAN, –±–∏—Ç—ã —Å 8 –ø–æ 15: 1111111100000000b
+(long)(&co2_vars.co_maskElementCD),	//[2083h.0Dh], –ù–∞–∑–≤–∞–Ω–∏–µ: Mask Element, –¢–µ–∫—Å—Ç–ü–£: MskElC, –ì—Ä—É–ø–ø–∞: CAN, –±–∏—Ç—ã —Å 0 –ø–æ 7: 0000000011111111b
+(long)(&co2_vars.co_maskElementCD),	//[2083h.0Eh], –ù–∞–∑–≤–∞–Ω–∏–µ: Mask Element, –¢–µ–∫—Å—Ç–ü–£: MskElD, –ì—Ä—É–ø–ø–∞: CAN, –±–∏—Ç—ã —Å 8 –ø–æ 15: 1111111100000000b
+(long)(&co2_vars.co_maskElementEF),	//[2083h.0Fh], –ù–∞–∑–≤–∞–Ω–∏–µ: Mask Element, –¢–µ–∫—Å—Ç–ü–£: MskElE, –ì—Ä—É–ø–ø–∞: CAN, –±–∏—Ç—ã —Å 0 –ø–æ 7: 0000000011111111b
+(long)(&co2_vars.co_maskElementEF),	//[2083h.10h], –ù–∞–∑–≤–∞–Ω–∏–µ: Mask Element, –¢–µ–∫—Å—Ç–ü–£: MskElF, –ì—Ä—É–ø–ø–∞: CAN, –±–∏—Ç—ã —Å 8 –ø–æ 15: 1111111100000000b
+(long)(&co2_vars.co_scaleNum0),	//[2100h.01h], –ù–∞–∑–≤–∞–Ω–∏–µ: Scale Number 0, –¢–µ–∫—Å—Ç–ü–£: SN0, –ì—Ä—É–ø–ø–∞: CAN
+(long)(&co2_vars.co_scaleNum0Format),	//[2100h.02h], –ù–∞–∑–≤–∞–Ω–∏–µ: Scale Number 0 Format, –¢–µ–∫—Å—Ç–ü–£: S0Fmt, –ì—Ä—É–ø–ø–∞: CAN
+(long)(&co2_vars.co_scaleNum0Format),	//[2100h.03h], –ù–∞–∑–≤–∞–Ω–∏–µ: Scale Number Format Q, –¢–µ–∫—Å—Ç–ü–£: Q-type, –ì—Ä—É–ø–ø–∞: CAN, –±–∏—Ç—ã —Å 0 –ø–æ 4: 0000000000011111b
+(long)(&co2_vars.co_scaleNum0Format),	//[2100h.04h], –ù–∞–∑–≤–∞–Ω–∏–µ: Scale Number Format NumOfFloat, –¢–µ–∫—Å—Ç–ü–£: NFloat, –ì—Ä—É–ø–ø–∞: CAN, –±–∏—Ç—ã —Å 5 –ø–æ 6: 0000000001100000b
+(long)(&co2_vars.co_scaleNum0Format),	//[2100h.05h], –ù–∞–∑–≤–∞–Ω–∏–µ: Scale Number Format Prefix, –¢–µ–∫—Å—Ç–ü–£: Prefix, –ì—Ä—É–ø–ø–∞: CAN, –±–∏—Ç—ã —Å 7 –ø–æ 9: 0000001110000000b
+(long)(&co2_vars.co_scaleNum0Format),	//[2100h.06h], –ù–∞–∑–≤–∞–Ω–∏–µ: Scale Number Format Units, –¢–µ–∫—Å—Ç–ü–£: Units, –ì—Ä—É–ø–ø–∞: CAN, –±–∏—Ç—ã —Å 10 –ø–æ 15: 1111110000000000b
+(long)(&co2_vars.co_scaleNum1),	//[2101h.01h], –ù–∞–∑–≤–∞–Ω–∏–µ: Scale Number 1, –¢–µ–∫—Å—Ç–ü–£: SN1, –ì—Ä—É–ø–ø–∞: CAN
+(long)(&co2_vars.co_scaleNum1Format),	//[2101h.02h], –ù–∞–∑–≤–∞–Ω–∏–µ: Scale Number 1 Format, –¢–µ–∫—Å—Ç–ü–£: S1Fmt, –ì—Ä—É–ø–ø–∞: CAN
+(long)(&co2_vars.co_scaleNum1Format),	//[2101h.03h], –ù–∞–∑–≤–∞–Ω–∏–µ: Scale Number Format Q, –¢–µ–∫—Å—Ç–ü–£: Q-type, –ì—Ä—É–ø–ø–∞: CAN, –±–∏—Ç—ã —Å 0 –ø–æ 4: 0000000000011111b
+(long)(&co2_vars.co_scaleNum1Format),	//[2101h.04h], –ù–∞–∑–≤–∞–Ω–∏–µ: Scale Number Format NumOfFloat, –¢–µ–∫—Å—Ç–ü–£: NFloat, –ì—Ä—É–ø–ø–∞: CAN, –±–∏—Ç—ã —Å 5 –ø–æ 6: 0000000001100000b
+(long)(&co2_vars.co_scaleNum1Format),	//[2101h.05h], –ù–∞–∑–≤–∞–Ω–∏–µ: Scale Number Format Prefix, –¢–µ–∫—Å—Ç–ü–£: Prefix, –ì—Ä—É–ø–ø–∞: CAN, –±–∏—Ç—ã —Å 7 –ø–æ 9: 0000001110000000b
+(long)(&co2_vars.co_scaleNum1Format),	//[2101h.06h], –ù–∞–∑–≤–∞–Ω–∏–µ: Scale Number Format Units, –¢–µ–∫—Å—Ç–ü–£: Units, –ì—Ä—É–ø–ø–∞: CAN, –±–∏—Ç—ã —Å 10 –ø–æ 15: 1111110000000000b
+(long)(&co2_vars.co_scaleNum2),	//[2102h.01h], –ù–∞–∑–≤–∞–Ω–∏–µ: Scale Number 2, –¢–µ–∫—Å—Ç–ü–£: SN2, –ì—Ä—É–ø–ø–∞: CAN
+(long)(&co2_vars.co_scaleNum2Format),	//[2102h.02h], –ù–∞–∑–≤–∞–Ω–∏–µ: Scale Number 2 Format, –¢–µ–∫—Å—Ç–ü–£: S2Fmt, –ì—Ä—É–ø–ø–∞: CAN
+(long)(&co2_vars.co_scaleNum2Format),	//[2102h.03h], –ù–∞–∑–≤–∞–Ω–∏–µ: Scale Number Format Q, –¢–µ–∫—Å—Ç–ü–£: Q-type, –ì—Ä—É–ø–ø–∞: CAN, –±–∏—Ç—ã —Å 0 –ø–æ 4: 0000000000011111b
+(long)(&co2_vars.co_scaleNum2Format),	//[2102h.04h], –ù–∞–∑–≤–∞–Ω–∏–µ: Scale Number Format NumOfFloat, –¢–µ–∫—Å—Ç–ü–£: NFloat, –ì—Ä—É–ø–ø–∞: CAN, –±–∏—Ç—ã —Å 5 –ø–æ 6: 0000000001100000b
+(long)(&co2_vars.co_scaleNum2Format),	//[2102h.05h], –ù–∞–∑–≤–∞–Ω–∏–µ: Scale Number Format Prefix, –¢–µ–∫—Å—Ç–ü–£: Prefix, –ì—Ä—É–ø–ø–∞: CAN, –±–∏—Ç—ã —Å 7 –ø–æ 9: 0000001110000000b
+(long)(&co2_vars.co_scaleNum2Format),	//[2102h.06h], –ù–∞–∑–≤–∞–Ω–∏–µ: Scale Number Format Units, –¢–µ–∫—Å—Ç–ü–£: Units, –ì—Ä—É–ø–ø–∞: CAN, –±–∏—Ç—ã —Å 10 –ø–æ 15: 1111110000000000b
+(long)(&co2_vars.co_scaleNum3),	//[2103h.01h], –ù–∞–∑–≤–∞–Ω–∏–µ: Scale Number 3, –¢–µ–∫—Å—Ç–ü–£: SN3, –ì—Ä—É–ø–ø–∞: CAN
+(long)(&co2_vars.co_scaleNum3Format),	//[2103h.02h], –ù–∞–∑–≤–∞–Ω–∏–µ: Scale Number 3 Format, –¢–µ–∫—Å—Ç–ü–£: S3Fmt, –ì—Ä—É–ø–ø–∞: CAN
+(long)(&co2_vars.co_scaleNum3Format),	//[2103h.03h], –ù–∞–∑–≤–∞–Ω–∏–µ: Scale Number Format Q, –¢–µ–∫—Å—Ç–ü–£: Q-type, –ì—Ä—É–ø–ø–∞: CAN, –±–∏—Ç—ã —Å 0 –ø–æ 4: 0000000000011111b
+(long)(&co2_vars.co_scaleNum3Format),	//[2103h.04h], –ù–∞–∑–≤–∞–Ω–∏–µ: Scale Number Format NumOfFloat, –¢–µ–∫—Å—Ç–ü–£: NFloat, –ì—Ä—É–ø–ø–∞: CAN, –±–∏—Ç—ã —Å 5 –ø–æ 6: 0000000001100000b
+(long)(&co2_vars.co_scaleNum3Format),	//[2103h.05h], –ù–∞–∑–≤–∞–Ω–∏–µ: Scale Number Format Prefix, –¢–µ–∫—Å—Ç–ü–£: Prefix, –ì—Ä—É–ø–ø–∞: CAN, –±–∏—Ç—ã —Å 7 –ø–æ 9: 0000001110000000b
+(long)(&co2_vars.co_scaleNum3Format),	//[2103h.06h], –ù–∞–∑–≤–∞–Ω–∏–µ: Scale Number Format Units, –¢–µ–∫—Å—Ç–ü–£: Units, –ì—Ä—É–ø–ø–∞: CAN, –±–∏—Ç—ã —Å 10 –ø–æ 15: 1111110000000000b
+(long)(&co2_vars.co_scaleNum4),	//[2104h.01h], –ù–∞–∑–≤–∞–Ω–∏–µ: Scale Number 4, –¢–µ–∫—Å—Ç–ü–£: SN4, –ì—Ä—É–ø–ø–∞: CAN
+(long)(&co2_vars.co_scaleNum4Format),	//[2104h.02h], –ù–∞–∑–≤–∞–Ω–∏–µ: Scale Number 4 Format, –¢–µ–∫—Å—Ç–ü–£: S4Fmt, –ì—Ä—É–ø–ø–∞: CAN
+(long)(&co2_vars.co_scaleNum4Format),	//[2104h.03h], –ù–∞–∑–≤–∞–Ω–∏–µ: Scale Number Format Q, –¢–µ–∫—Å—Ç–ü–£: Q-type, –ì—Ä—É–ø–ø–∞: CAN, –±–∏—Ç—ã —Å 0 –ø–æ 4: 0000000000011111b
+(long)(&co2_vars.co_scaleNum4Format),	//[2104h.04h], –ù–∞–∑–≤–∞–Ω–∏–µ: Scale Number Format NumOfFloat, –¢–µ–∫—Å—Ç–ü–£: NFloat, –ì—Ä—É–ø–ø–∞: CAN, –±–∏—Ç—ã —Å 5 –ø–æ 6: 0000000001100000b
+(long)(&co2_vars.co_scaleNum4Format),	//[2104h.05h], –ù–∞–∑–≤–∞–Ω–∏–µ: Scale Number Format Prefix, –¢–µ–∫—Å—Ç–ü–£: Prefix, –ì—Ä—É–ø–ø–∞: CAN, –±–∏—Ç—ã —Å 7 –ø–æ 9: 0000001110000000b
+(long)(&co2_vars.co_scaleNum4Format),	//[2104h.06h], –ù–∞–∑–≤–∞–Ω–∏–µ: Scale Number Format Units, –¢–µ–∫—Å—Ç–ü–£: Units, –ì—Ä—É–ø–ø–∞: CAN, –±–∏—Ç—ã —Å 10 –ø–æ 15: 1111110000000000b
+(long)(&co2_vars.co_scaleNum5),	//[2105h.01h], –ù–∞–∑–≤–∞–Ω–∏–µ: Scale Number 5, –¢–µ–∫—Å—Ç–ü–£: SN5, –ì—Ä—É–ø–ø–∞: CAN
+(long)(&co2_vars.co_scaleNum5Format),	//[2105h.02h], –ù–∞–∑–≤–∞–Ω–∏–µ: Scale Number 5 Format, –¢–µ–∫—Å—Ç–ü–£: S5Fmt, –ì—Ä—É–ø–ø–∞: CAN
+(long)(&co2_vars.co_scaleNum5Format),	//[2105h.03h], –ù–∞–∑–≤–∞–Ω–∏–µ: Scale Number Format Q, –¢–µ–∫—Å—Ç–ü–£: Q-type, –ì—Ä—É–ø–ø–∞: CAN, –±–∏—Ç—ã —Å 0 –ø–æ 4: 0000000000011111b
+(long)(&co2_vars.co_scaleNum5Format),	//[2105h.04h], –ù–∞–∑–≤–∞–Ω–∏–µ: Scale Number Format NumOfFloat, –¢–µ–∫—Å—Ç–ü–£: NFloat, –ì—Ä—É–ø–ø–∞: CAN, –±–∏—Ç—ã —Å 5 –ø–æ 6: 0000000001100000b
+(long)(&co2_vars.co_scaleNum5Format),	//[2105h.05h], –ù–∞–∑–≤–∞–Ω–∏–µ: Scale Number Format Prefix, –¢–µ–∫—Å—Ç–ü–£: Prefix, –ì—Ä—É–ø–ø–∞: CAN, –±–∏—Ç—ã —Å 7 –ø–æ 9: 0000001110000000b
+(long)(&co2_vars.co_scaleNum5Format),	//[2105h.06h], –ù–∞–∑–≤–∞–Ω–∏–µ: Scale Number Format Units, –¢–µ–∫—Å—Ç–ü–£: Units, –ì—Ä—É–ø–ø–∞: CAN, –±–∏—Ç—ã —Å 10 –ø–æ 15: 1111110000000000b
+(long)(&co2_vars.co_scaleNum6),	//[2106h.01h], –ù–∞–∑–≤–∞–Ω–∏–µ: Scale Number 6, –¢–µ–∫—Å—Ç–ü–£: SN6, –ì—Ä—É–ø–ø–∞: CAN
+(long)(&co2_vars.co_scaleNum6Format),	//[2106h.02h], –ù–∞–∑–≤–∞–Ω–∏–µ: Scale Number 6 Format, –¢–µ–∫—Å—Ç–ü–£: S6Fmt, –ì—Ä—É–ø–ø–∞: CAN
+(long)(&co2_vars.co_scaleNum6Format),	//[2106h.03h], –ù–∞–∑–≤–∞–Ω–∏–µ: Scale Number Format Q, –¢–µ–∫—Å—Ç–ü–£: Q-type, –ì—Ä—É–ø–ø–∞: CAN, –±–∏—Ç—ã —Å 0 –ø–æ 4: 0000000000011111b
+(long)(&co2_vars.co_scaleNum6Format),	//[2106h.04h], –ù–∞–∑–≤–∞–Ω–∏–µ: Scale Number Format NumOfFloat, –¢–µ–∫—Å—Ç–ü–£: NFloat, –ì—Ä—É–ø–ø–∞: CAN, –±–∏—Ç—ã —Å 5 –ø–æ 6: 0000000001100000b
+(long)(&co2_vars.co_scaleNum6Format),	//[2106h.05h], –ù–∞–∑–≤–∞–Ω–∏–µ: Scale Number Format Prefix, –¢–µ–∫—Å—Ç–ü–£: Prefix, –ì—Ä—É–ø–ø–∞: CAN, –±–∏—Ç—ã —Å 7 –ø–æ 9: 0000001110000000b
+(long)(&co2_vars.co_scaleNum6Format),	//[2106h.06h], –ù–∞–∑–≤–∞–Ω–∏–µ: Scale Number Format Units, –¢–µ–∫—Å—Ç–ü–£: Units, –ì—Ä—É–ø–ø–∞: CAN, –±–∏—Ç—ã —Å 10 –ø–æ 15: 1111110000000000b
+(long)(&co2_vars.co_scaleNum7),	//[2107h.01h], –ù–∞–∑–≤–∞–Ω–∏–µ: Scale Number 7, –¢–µ–∫—Å—Ç–ü–£: SN7, –ì—Ä—É–ø–ø–∞: CAN
+(long)(&co2_vars.co_scaleNum7Format),	//[2107h.02h], –ù–∞–∑–≤–∞–Ω–∏–µ: Scale Number 7 Format, –¢–µ–∫—Å—Ç–ü–£: S7Fmt, –ì—Ä—É–ø–ø–∞: CAN
+(long)(&co2_vars.co_scaleNum7Format),	//[2107h.03h], –ù–∞–∑–≤–∞–Ω–∏–µ: Scale Number Format Q, –¢–µ–∫—Å—Ç–ü–£: Q-type, –ì—Ä—É–ø–ø–∞: CAN, –±–∏—Ç—ã —Å 0 –ø–æ 4: 0000000000011111b
+(long)(&co2_vars.co_scaleNum7Format),	//[2107h.04h], –ù–∞–∑–≤–∞–Ω–∏–µ: Scale Number Format NumOfFloat, –¢–µ–∫—Å—Ç–ü–£: NFloat, –ì—Ä—É–ø–ø–∞: CAN, –±–∏—Ç—ã —Å 5 –ø–æ 6: 0000000001100000b
+(long)(&co2_vars.co_scaleNum7Format),	//[2107h.05h], –ù–∞–∑–≤–∞–Ω–∏–µ: Scale Number Format Prefix, –¢–µ–∫—Å—Ç–ü–£: Prefix, –ì—Ä—É–ø–ø–∞: CAN, –±–∏—Ç—ã —Å 7 –ø–æ 9: 0000001110000000b
+(long)(&co2_vars.co_scaleNum7Format),	//[2107h.06h], –ù–∞–∑–≤–∞–Ω–∏–µ: Scale Number Format Units, –¢–µ–∫—Å—Ç–ü–£: Units, –ì—Ä—É–ø–ø–∞: CAN, –±–∏—Ç—ã —Å 10 –ø–æ 15: 1111110000000000b
+(long)(&co2_vars.co_scaleNum8),	//[2108h.01h], –ù–∞–∑–≤–∞–Ω–∏–µ: Scale Number 8, –¢–µ–∫—Å—Ç–ü–£: SN8, –ì—Ä—É–ø–ø–∞: CAN
+(long)(&co2_vars.co_scaleNum8Format),	//[2108h.02h], –ù–∞–∑–≤–∞–Ω–∏–µ: Scale Number 8 Format, –¢–µ–∫—Å—Ç–ü–£: S8Fmt, –ì—Ä—É–ø–ø–∞: CAN
+(long)(&co2_vars.co_scaleNum8Format),	//[2108h.03h], –ù–∞–∑–≤–∞–Ω–∏–µ: Scale Number Format Q, –¢–µ–∫—Å—Ç–ü–£: Q-type, –ì—Ä—É–ø–ø–∞: CAN, –±–∏—Ç—ã —Å 0 –ø–æ 4: 0000000000011111b
+(long)(&co2_vars.co_scaleNum8Format),	//[2108h.04h], –ù–∞–∑–≤–∞–Ω–∏–µ: Scale Number Format NumOfFloat, –¢–µ–∫—Å—Ç–ü–£: NFloat, –ì—Ä—É–ø–ø–∞: CAN, –±–∏—Ç—ã —Å 5 –ø–æ 6: 0000000001100000b
+(long)(&co2_vars.co_scaleNum8Format),	//[2108h.05h], –ù–∞–∑–≤–∞–Ω–∏–µ: Scale Number Format Prefix, –¢–µ–∫—Å—Ç–ü–£: Prefix, –ì—Ä—É–ø–ø–∞: CAN, –±–∏—Ç—ã —Å 7 –ø–æ 9: 0000001110000000b
+(long)(&co2_vars.co_scaleNum8Format),	//[2108h.06h], –ù–∞–∑–≤–∞–Ω–∏–µ: Scale Number Format Units, –¢–µ–∫—Å—Ç–ü–£: Units, –ì—Ä—É–ø–ø–∞: CAN, –±–∏—Ç—ã —Å 10 –ø–æ 15: 1111110000000000b
+(long)(&co2_vars.co_scaleNum9),	//[2109h.01h], –ù–∞–∑–≤–∞–Ω–∏–µ: Scale Number 9, –¢–µ–∫—Å—Ç–ü–£: SN9, –ì—Ä—É–ø–ø–∞: CAN
+(long)(&co2_vars.co_scaleNum9Format),	//[2109h.02h], –ù–∞–∑–≤–∞–Ω–∏–µ: Scale Number 9 Format, –¢–µ–∫—Å—Ç–ü–£: S9Fmt, –ì—Ä—É–ø–ø–∞: CAN
+(long)(&co2_vars.co_scaleNum9Format),	//[2109h.03h], –ù–∞–∑–≤–∞–Ω–∏–µ: Scale Number Format Q, –¢–µ–∫—Å—Ç–ü–£: Q-type, –ì—Ä—É–ø–ø–∞: CAN, –±–∏—Ç—ã —Å 0 –ø–æ 4: 0000000000011111b
+(long)(&co2_vars.co_scaleNum9Format),	//[2109h.04h], –ù–∞–∑–≤–∞–Ω–∏–µ: Scale Number Format NumOfFloat, –¢–µ–∫—Å—Ç–ü–£: NFloat, –ì—Ä—É–ø–ø–∞: CAN, –±–∏—Ç—ã —Å 5 –ø–æ 6: 0000000001100000b
+(long)(&co2_vars.co_scaleNum9Format),	//[2109h.05h], –ù–∞–∑–≤–∞–Ω–∏–µ: Scale Number Format Prefix, –¢–µ–∫—Å—Ç–ü–£: Prefix, –ì—Ä—É–ø–ø–∞: CAN, –±–∏—Ç—ã —Å 7 –ø–æ 9: 0000001110000000b
+(long)(&co2_vars.co_scaleNum9Format),	//[2109h.06h], –ù–∞–∑–≤–∞–Ω–∏–µ: Scale Number Format Units, –¢–µ–∫—Å—Ç–ü–£: Units, –ì—Ä—É–ø–ø–∞: CAN, –±–∏—Ç—ã —Å 10 –ø–æ 15: 1111110000000000b
+(long)(&co2_vars.co_scaleNumA),	//[210Ah.01h], –ù–∞–∑–≤–∞–Ω–∏–µ: Scale Number A, –¢–µ–∫—Å—Ç–ü–£: SNA, –ì—Ä—É–ø–ø–∞: CAN
+(long)(&co2_vars.co_scaleNumAFormat),	//[210Ah.02h], –ù–∞–∑–≤–∞–Ω–∏–µ: Scale Number A Format, –¢–µ–∫—Å—Ç–ü–£: SAFmt, –ì—Ä—É–ø–ø–∞: CAN
+(long)(&co2_vars.co_scaleNumAFormat),	//[210Ah.03h], –ù–∞–∑–≤–∞–Ω–∏–µ: Scale Number Format Q, –¢–µ–∫—Å—Ç–ü–£: Q-type, –ì—Ä—É–ø–ø–∞: CAN, –±–∏—Ç—ã —Å 0 –ø–æ 4: 0000000000011111b
+(long)(&co2_vars.co_scaleNumAFormat),	//[210Ah.04h], –ù–∞–∑–≤–∞–Ω–∏–µ: Scale Number Format NumOfFloat, –¢–µ–∫—Å—Ç–ü–£: NFloat, –ì—Ä—É–ø–ø–∞: CAN, –±–∏—Ç—ã —Å 5 –ø–æ 6: 0000000001100000b
+(long)(&co2_vars.co_scaleNumAFormat),	//[210Ah.05h], –ù–∞–∑–≤–∞–Ω–∏–µ: Scale Number Format Prefix, –¢–µ–∫—Å—Ç–ü–£: Prefix, –ì—Ä—É–ø–ø–∞: CAN, –±–∏—Ç—ã —Å 7 –ø–æ 9: 0000001110000000b
+(long)(&co2_vars.co_scaleNumAFormat),	//[210Ah.06h], –ù–∞–∑–≤–∞–Ω–∏–µ: Scale Number Format Units, –¢–µ–∫—Å—Ç–ü–£: Units, –ì—Ä—É–ø–ø–∞: CAN, –±–∏—Ç—ã —Å 10 –ø–æ 15: 1111110000000000b
+(long)(&co2_vars.co_scaleNumB),	//[210Bh.01h], –ù–∞–∑–≤–∞–Ω–∏–µ: Scale Number B, –¢–µ–∫—Å—Ç–ü–£: SNB, –ì—Ä—É–ø–ø–∞: CAN
+(long)(&co2_vars.co_scaleNumBFormat),	//[210Bh.02h], –ù–∞–∑–≤–∞–Ω–∏–µ: Scale Number B Format, –¢–µ–∫—Å—Ç–ü–£: SBFmt, –ì—Ä—É–ø–ø–∞: CAN
+(long)(&co2_vars.co_scaleNumBFormat),	//[210Bh.03h], –ù–∞–∑–≤–∞–Ω–∏–µ: Scale Number Format Q, –¢–µ–∫—Å—Ç–ü–£: Q-type, –ì—Ä—É–ø–ø–∞: CAN, –±–∏—Ç—ã —Å 0 –ø–æ 4: 0000000000011111b
+(long)(&co2_vars.co_scaleNumBFormat),	//[210Bh.04h], –ù–∞–∑–≤–∞–Ω–∏–µ: Scale Number Format NumOfFloat, –¢–µ–∫—Å—Ç–ü–£: NFloat, –ì—Ä—É–ø–ø–∞: CAN, –±–∏—Ç—ã —Å 5 –ø–æ 6: 0000000001100000b
+(long)(&co2_vars.co_scaleNumBFormat),	//[210Bh.05h], –ù–∞–∑–≤–∞–Ω–∏–µ: Scale Number Format Prefix, –¢–µ–∫—Å—Ç–ü–£: Prefix, –ì—Ä—É–ø–ø–∞: CAN, –±–∏—Ç—ã —Å 7 –ø–æ 9: 0000001110000000b
+(long)(&co2_vars.co_scaleNumBFormat),	//[210Bh.06h], –ù–∞–∑–≤–∞–Ω–∏–µ: Scale Number Format Units, –¢–µ–∫—Å—Ç–ü–£: Units, –ì—Ä—É–ø–ø–∞: CAN, –±–∏—Ç—ã —Å 10 –ø–æ 15: 1111110000000000b
+(long)(&co2_vars.co_scaleNumC),	//[210Ch.01h], –ù–∞–∑–≤–∞–Ω–∏–µ: Scale Number C, –¢–µ–∫—Å—Ç–ü–£: SNC, –ì—Ä—É–ø–ø–∞: CAN
+(long)(&co2_vars.co_scaleNumCFormat),	//[210Ch.02h], –ù–∞–∑–≤–∞–Ω–∏–µ: Scale Number C Format, –¢–µ–∫—Å—Ç–ü–£: SCFmt, –ì—Ä—É–ø–ø–∞: CAN
+(long)(&co2_vars.co_scaleNumCFormat),	//[210Ch.03h], –ù–∞–∑–≤–∞–Ω–∏–µ: Scale Number Format Q, –¢–µ–∫—Å—Ç–ü–£: Q-type, –ì—Ä—É–ø–ø–∞: CAN, –±–∏—Ç—ã —Å 0 –ø–æ 4: 0000000000011111b
+(long)(&co2_vars.co_scaleNumCFormat),	//[210Ch.04h], –ù–∞–∑–≤–∞–Ω–∏–µ: Scale Number Format NumOfFloat, –¢–µ–∫—Å—Ç–ü–£: NFloat, –ì—Ä—É–ø–ø–∞: CAN, –±–∏—Ç—ã —Å 5 –ø–æ 6: 0000000001100000b
+(long)(&co2_vars.co_scaleNumCFormat),	//[210Ch.05h], –ù–∞–∑–≤–∞–Ω–∏–µ: Scale Number Format Prefix, –¢–µ–∫—Å—Ç–ü–£: Prefix, –ì—Ä—É–ø–ø–∞: CAN, –±–∏—Ç—ã —Å 7 –ø–æ 9: 0000001110000000b
+(long)(&co2_vars.co_scaleNumCFormat),	//[210Ch.06h], –ù–∞–∑–≤–∞–Ω–∏–µ: Scale Number Format Units, –¢–µ–∫—Å—Ç–ü–£: Units, –ì—Ä—É–ø–ø–∞: CAN, –±–∏—Ç—ã —Å 10 –ø–æ 15: 1111110000000000b
+(long)(&co2_vars.co_scaleNumD),	//[210Dh.01h], –ù–∞–∑–≤–∞–Ω–∏–µ: Scale Number D, –¢–µ–∫—Å—Ç–ü–£: SND, –ì—Ä—É–ø–ø–∞: CAN
+(long)(&co2_vars.co_scaleNumDFormat),	//[210Dh.02h], –ù–∞–∑–≤–∞–Ω–∏–µ: Scale Number D Format, –¢–µ–∫—Å—Ç–ü–£: SDFmt, –ì—Ä—É–ø–ø–∞: CAN
+(long)(&co2_vars.co_scaleNumDFormat),	//[210Dh.03h], –ù–∞–∑–≤–∞–Ω–∏–µ: Scale Number Format Q, –¢–µ–∫—Å—Ç–ü–£: Q-type, –ì—Ä—É–ø–ø–∞: CAN, –±–∏—Ç—ã —Å 0 –ø–æ 4: 0000000000011111b
+(long)(&co2_vars.co_scaleNumDFormat),	//[210Dh.04h], –ù–∞–∑–≤–∞–Ω–∏–µ: Scale Number Format NumOfFloat, –¢–µ–∫—Å—Ç–ü–£: NFloat, –ì—Ä—É–ø–ø–∞: CAN, –±–∏—Ç—ã —Å 5 –ø–æ 6: 0000000001100000b
+(long)(&co2_vars.co_scaleNumDFormat),	//[210Dh.05h], –ù–∞–∑–≤–∞–Ω–∏–µ: Scale Number Format Prefix, –¢–µ–∫—Å—Ç–ü–£: Prefix, –ì—Ä—É–ø–ø–∞: CAN, –±–∏—Ç—ã —Å 7 –ø–æ 9: 0000001110000000b
+(long)(&co2_vars.co_scaleNumDFormat),	//[210Dh.06h], –ù–∞–∑–≤–∞–Ω–∏–µ: Scale Number Format Units, –¢–µ–∫—Å—Ç–ü–£: Units, –ì—Ä—É–ø–ø–∞: CAN, –±–∏—Ç—ã —Å 10 –ø–æ 15: 1111110000000000b
+(long)(&co2_vars.co_scaleNumE),	//[210Eh.01h], –ù–∞–∑–≤–∞–Ω–∏–µ: Scale Number E, –¢–µ–∫—Å—Ç–ü–£: SNE, –ì—Ä—É–ø–ø–∞: CAN
+(long)(&co2_vars.co_scaleNumEFormat),	//[210Eh.02h], –ù–∞–∑–≤–∞–Ω–∏–µ: Scale Number E Format, –¢–µ–∫—Å—Ç–ü–£: SEFmt, –ì—Ä—É–ø–ø–∞: CAN
+(long)(&co2_vars.co_scaleNumEFormat),	//[210Eh.03h], –ù–∞–∑–≤–∞–Ω–∏–µ: Scale Number Format Q, –¢–µ–∫—Å—Ç–ü–£: Q-type, –ì—Ä—É–ø–ø–∞: CAN, –±–∏—Ç—ã —Å 0 –ø–æ 4: 0000000000011111b
+(long)(&co2_vars.co_scaleNumEFormat),	//[210Eh.04h], –ù–∞–∑–≤–∞–Ω–∏–µ: Scale Number Format NumOfFloat, –¢–µ–∫—Å—Ç–ü–£: NFloat, –ì—Ä—É–ø–ø–∞: CAN, –±–∏—Ç—ã —Å 5 –ø–æ 6: 0000000001100000b
+(long)(&co2_vars.co_scaleNumEFormat),	//[210Eh.05h], –ù–∞–∑–≤–∞–Ω–∏–µ: Scale Number Format Prefix, –¢–µ–∫—Å—Ç–ü–£: Prefix, –ì—Ä—É–ø–ø–∞: CAN, –±–∏—Ç—ã —Å 7 –ø–æ 9: 0000001110000000b
+(long)(&co2_vars.co_scaleNumEFormat),	//[210Eh.06h], –ù–∞–∑–≤–∞–Ω–∏–µ: Scale Number Format Units, –¢–µ–∫—Å—Ç–ü–£: Units, –ì—Ä—É–ø–ø–∞: CAN, –±–∏—Ç—ã —Å 10 –ø–æ 15: 1111110000000000b
+(long)(&co2_vars.co_scaleNumF),	//[210Fh.01h], –ù–∞–∑–≤–∞–Ω–∏–µ: Scale Number F, –¢–µ–∫—Å—Ç–ü–£: SNF, –ì—Ä—É–ø–ø–∞: CAN
+(long)(&co2_vars.co_scaleNumFFormat),	//[210Fh.02h], –ù–∞–∑–≤–∞–Ω–∏–µ: Scale Number F Format, –¢–µ–∫—Å—Ç–ü–£: SFFmt, –ì—Ä—É–ø–ø–∞: CAN
+(long)(&co2_vars.co_scaleNumFFormat),	//[210Fh.03h], –ù–∞–∑–≤–∞–Ω–∏–µ: Scale Number Format Q, –¢–µ–∫—Å—Ç–ü–£: Q-type, –ì—Ä—É–ø–ø–∞: CAN, –±–∏—Ç—ã —Å 0 –ø–æ 4: 0000000000011111b
+(long)(&co2_vars.co_scaleNumFFormat),	//[210Fh.04h], –ù–∞–∑–≤–∞–Ω–∏–µ: Scale Number Format NumOfFloat, –¢–µ–∫—Å—Ç–ü–£: NFloat, –ì—Ä—É–ø–ø–∞: CAN, –±–∏—Ç—ã —Å 5 –ø–æ 6: 0000000001100000b
+(long)(&co2_vars.co_scaleNumFFormat),	//[210Fh.05h], –ù–∞–∑–≤–∞–Ω–∏–µ: Scale Number Format Prefix, –¢–µ–∫—Å—Ç–ü–£: Prefix, –ì—Ä—É–ø–ø–∞: CAN, –±–∏—Ç—ã —Å 7 –ø–æ 9: 0000001110000000b
+(long)(&co2_vars.co_scaleNumFFormat),	//[210Fh.06h], –ù–∞–∑–≤–∞–Ω–∏–µ: Scale Number Format Units, –¢–µ–∫—Å—Ç–ü–£: Units, –ì—Ä—É–ø–ø–∞: CAN, –±–∏—Ç—ã —Å 10 –ø–æ 15: 1111110000000000b
+(long)(&co2_vars.co_scaleNum10),	//[2110h.01h], –ù–∞–∑–≤–∞–Ω–∏–µ: Scale Number 10, –¢–µ–∫—Å—Ç–ü–£: SN10, –ì—Ä—É–ø–ø–∞: CAN
+(long)(&co2_vars.co_scaleNum10Format),	//[2110h.02h], –ù–∞–∑–≤–∞–Ω–∏–µ: Scale Number 10 Format, –¢–µ–∫—Å—Ç–ü–£: S10Fmt, –ì—Ä—É–ø–ø–∞: CAN
+(long)(&co2_vars.co_scaleNum10Format),	//[2110h.03h], –ù–∞–∑–≤–∞–Ω–∏–µ: Scale Number Format Q, –¢–µ–∫—Å—Ç–ü–£: Q-type, –ì—Ä—É–ø–ø–∞: CAN, –±–∏—Ç—ã —Å 0 –ø–æ 4: 0000000000011111b
+(long)(&co2_vars.co_scaleNum10Format),	//[2110h.04h], –ù–∞–∑–≤–∞–Ω–∏–µ: Scale Number Format NumOfFloat, –¢–µ–∫—Å—Ç–ü–£: NFloat, –ì—Ä—É–ø–ø–∞: CAN, –±–∏—Ç—ã —Å 5 –ø–æ 6: 0000000001100000b
+(long)(&co2_vars.co_scaleNum10Format),	//[2110h.05h], –ù–∞–∑–≤–∞–Ω–∏–µ: Scale Number Format Prefix, –¢–µ–∫—Å—Ç–ü–£: Prefix, –ì—Ä—É–ø–ø–∞: CAN, –±–∏—Ç—ã —Å 7 –ø–æ 9: 0000001110000000b
+(long)(&co2_vars.co_scaleNum10Format),	//[2110h.06h], –ù–∞–∑–≤–∞–Ω–∏–µ: Scale Number Format Units, –¢–µ–∫—Å—Ç–ü–£: Units, –ì—Ä—É–ø–ø–∞: CAN, –±–∏—Ç—ã —Å 10 –ø–æ 15: 1111110000000000b
+(long)(&co2_vars.co_scaleNum11),	//[2111h.01h], –ù–∞–∑–≤–∞–Ω–∏–µ: Scale Number 11, –¢–µ–∫—Å—Ç–ü–£: SN11, –ì—Ä—É–ø–ø–∞: CAN
+(long)(&co2_vars.co_scaleNum11Format),	//[2111h.02h], –ù–∞–∑–≤–∞–Ω–∏–µ: Scale Number 11 Format, –¢–µ–∫—Å—Ç–ü–£: S11Fmt, –ì—Ä—É–ø–ø–∞: CAN
+(long)(&co2_vars.co_scaleNum11Format),	//[2111h.03h], –ù–∞–∑–≤–∞–Ω–∏–µ: Scale Number Format Q, –¢–µ–∫—Å—Ç–ü–£: Q-type, –ì—Ä—É–ø–ø–∞: CAN, –±–∏—Ç—ã —Å 0 –ø–æ 4: 0000000000011111b
+(long)(&co2_vars.co_scaleNum11Format),	//[2111h.04h], –ù–∞–∑–≤–∞–Ω–∏–µ: Scale Number Format NumOfFloat, –¢–µ–∫—Å—Ç–ü–£: NFloat, –ì—Ä—É–ø–ø–∞: CAN, –±–∏—Ç—ã —Å 5 –ø–æ 6: 0000000001100000b
+(long)(&co2_vars.co_scaleNum11Format),	//[2111h.05h], –ù–∞–∑–≤–∞–Ω–∏–µ: Scale Number Format Prefix, –¢–µ–∫—Å—Ç–ü–£: Prefix, –ì—Ä—É–ø–ø–∞: CAN, –±–∏—Ç—ã —Å 7 –ø–æ 9: 0000001110000000b
+(long)(&co2_vars.co_scaleNum11Format),	//[2111h.06h], –ù–∞–∑–≤–∞–Ω–∏–µ: Scale Number Format Units, –¢–µ–∫—Å—Ç–ü–£: Units, –ì—Ä—É–ø–ø–∞: CAN, –±–∏—Ç—ã —Å 10 –ø–æ 15: 1111110000000000b
+(long)(&co2_vars.co_scaleNum12),	//[2112h.01h], –ù–∞–∑–≤–∞–Ω–∏–µ: Scale Number 12, –¢–µ–∫—Å—Ç–ü–£: SN12, –ì—Ä—É–ø–ø–∞: CAN
+(long)(&co2_vars.co_scaleNum12Format),	//[2112h.02h], –ù–∞–∑–≤–∞–Ω–∏–µ: Scale Number 12 Format, –¢–µ–∫—Å—Ç–ü–£: S12Fmt, –ì—Ä—É–ø–ø–∞: CAN
+(long)(&co2_vars.co_scaleNum12Format),	//[2112h.03h], –ù–∞–∑–≤–∞–Ω–∏–µ: Scale Number Format Q, –¢–µ–∫—Å—Ç–ü–£: Q-type, –ì—Ä—É–ø–ø–∞: CAN, –±–∏—Ç—ã —Å 0 –ø–æ 4: 0000000000011111b
+(long)(&co2_vars.co_scaleNum12Format),	//[2112h.04h], –ù–∞–∑–≤–∞–Ω–∏–µ: Scale Number Format NumOfFloat, –¢–µ–∫—Å—Ç–ü–£: NFloat, –ì—Ä—É–ø–ø–∞: CAN, –±–∏—Ç—ã —Å 5 –ø–æ 6: 0000000001100000b
+(long)(&co2_vars.co_scaleNum12Format),	//[2112h.05h], –ù–∞–∑–≤–∞–Ω–∏–µ: Scale Number Format Prefix, –¢–µ–∫—Å—Ç–ü–£: Prefix, –ì—Ä—É–ø–ø–∞: CAN, –±–∏—Ç—ã —Å 7 –ø–æ 9: 0000001110000000b
+(long)(&co2_vars.co_scaleNum12Format),	//[2112h.06h], –ù–∞–∑–≤–∞–Ω–∏–µ: Scale Number Format Units, –¢–µ–∫—Å—Ç–ü–£: Units, –ì—Ä—É–ø–ø–∞: CAN, –±–∏—Ç—ã —Å 10 –ø–æ 15: 1111110000000000b
+(long)(&co2_vars.co_scaleNum13),	//[2113h.01h], –ù–∞–∑–≤–∞–Ω–∏–µ: Scale Number 13, –¢–µ–∫—Å—Ç–ü–£: SN13, –ì—Ä—É–ø–ø–∞: CAN
+(long)(&co2_vars.co_scaleNum13Format),	//[2113h.02h], –ù–∞–∑–≤–∞–Ω–∏–µ: Scale Number 13 Format, –¢–µ–∫—Å—Ç–ü–£: S13Fmt, –ì—Ä—É–ø–ø–∞: CAN
+(long)(&co2_vars.co_scaleNum13Format),	//[2113h.03h], –ù–∞–∑–≤–∞–Ω–∏–µ: Scale Number Format Q, –¢–µ–∫—Å—Ç–ü–£: Q-type, –ì—Ä—É–ø–ø–∞: CAN, –±–∏—Ç—ã —Å 0 –ø–æ 4: 0000000000011111b
+(long)(&co2_vars.co_scaleNum13Format),	//[2113h.04h], –ù–∞–∑–≤–∞–Ω–∏–µ: Scale Number Format NumOfFloat, –¢–µ–∫—Å—Ç–ü–£: NFloat, –ì—Ä—É–ø–ø–∞: CAN, –±–∏—Ç—ã —Å 5 –ø–æ 6: 0000000001100000b
+(long)(&co2_vars.co_scaleNum13Format),	//[2113h.05h], –ù–∞–∑–≤–∞–Ω–∏–µ: Scale Number Format Prefix, –¢–µ–∫—Å—Ç–ü–£: Prefix, –ì—Ä—É–ø–ø–∞: CAN, –±–∏—Ç—ã —Å 7 –ø–æ 9: 0000001110000000b
+(long)(&co2_vars.co_scaleNum13Format),	//[2113h.06h], –ù–∞–∑–≤–∞–Ω–∏–µ: Scale Number Format Units, –¢–µ–∫—Å—Ç–ü–£: Units, –ì—Ä—É–ø–ø–∞: CAN, –±–∏—Ç—ã —Å 10 –ø–æ 15: 1111110000000000b
+(long)(&co2_vars.co_scaleNum14),	//[2114h.01h], –ù–∞–∑–≤–∞–Ω–∏–µ: Scale Number 14, –¢–µ–∫—Å—Ç–ü–£: SN14, –ì—Ä—É–ø–ø–∞: CAN
+(long)(&co2_vars.co_scaleNum14Format),	//[2114h.02h], –ù–∞–∑–≤–∞–Ω–∏–µ: Scale Number 14 Format, –¢–µ–∫—Å—Ç–ü–£: S14Fmt, –ì—Ä—É–ø–ø–∞: CAN
+(long)(&co2_vars.co_scaleNum14Format),	//[2114h.03h], –ù–∞–∑–≤–∞–Ω–∏–µ: Scale Number Format Q, –¢–µ–∫—Å—Ç–ü–£: Q-type, –ì—Ä—É–ø–ø–∞: CAN, –±–∏—Ç—ã —Å 0 –ø–æ 4: 0000000000011111b
+(long)(&co2_vars.co_scaleNum14Format),	//[2114h.04h], –ù–∞–∑–≤–∞–Ω–∏–µ: Scale Number Format NumOfFloat, –¢–µ–∫—Å—Ç–ü–£: NFloat, –ì—Ä—É–ø–ø–∞: CAN, –±–∏—Ç—ã —Å 5 –ø–æ 6: 0000000001100000b
+(long)(&co2_vars.co_scaleNum14Format),	//[2114h.05h], –ù–∞–∑–≤–∞–Ω–∏–µ: Scale Number Format Prefix, –¢–µ–∫—Å—Ç–ü–£: Prefix, –ì—Ä—É–ø–ø–∞: CAN, –±–∏—Ç—ã —Å 7 –ø–æ 9: 0000001110000000b
+(long)(&co2_vars.co_scaleNum14Format),	//[2114h.06h], –ù–∞–∑–≤–∞–Ω–∏–µ: Scale Number Format Units, –¢–µ–∫—Å—Ç–ü–£: Units, –ì—Ä—É–ø–ø–∞: CAN, –±–∏—Ç—ã —Å 10 –ø–æ 15: 1111110000000000b
+(long)(&co2_vars.co_scaleNum15),	//[2115h.01h], –ù–∞–∑–≤–∞–Ω–∏–µ: Scale Number 15, –¢–µ–∫—Å—Ç–ü–£: SN15, –ì—Ä—É–ø–ø–∞: CAN
+(long)(&co2_vars.co_scaleNum15Format),	//[2115h.02h], –ù–∞–∑–≤–∞–Ω–∏–µ: Scale Number 15Format, –¢–µ–∫—Å—Ç–ü–£: S15Fmt, –ì—Ä—É–ø–ø–∞: CAN
+(long)(&co2_vars.co_scaleNum15Format),	//[2115h.03h], –ù–∞–∑–≤–∞–Ω–∏–µ: Scale Number Format Q, –¢–µ–∫—Å—Ç–ü–£: Q-type, –ì—Ä—É–ø–ø–∞: CAN, –±–∏—Ç—ã —Å 0 –ø–æ 4: 0000000000011111b
+(long)(&co2_vars.co_scaleNum15Format),	//[2115h.04h], –ù–∞–∑–≤–∞–Ω–∏–µ: Scale Number Format NumOfFloat, –¢–µ–∫—Å—Ç–ü–£: NFloat, –ì—Ä—É–ø–ø–∞: CAN, –±–∏—Ç—ã —Å 5 –ø–æ 6: 0000000001100000b
+(long)(&co2_vars.co_scaleNum15Format),	//[2115h.05h], –ù–∞–∑–≤–∞–Ω–∏–µ: Scale Number Format Prefix, –¢–µ–∫—Å—Ç–ü–£: Prefix, –ì—Ä—É–ø–ø–∞: CAN, –±–∏—Ç—ã —Å 7 –ø–æ 9: 0000001110000000b
+(long)(&co2_vars.co_scaleNum15Format),	//[2115h.06h], –ù–∞–∑–≤–∞–Ω–∏–µ: Scale Number Format Units, –¢–µ–∫—Å—Ç–ü–£: Units, –ì—Ä—É–ø–ø–∞: CAN, –±–∏—Ç—ã —Å 10 –ø–æ 15: 1111110000000000b
+(long)(&co2_vars.co_scaleNum16),	//[2116h.01h], –ù–∞–∑–≤–∞–Ω–∏–µ: Scale Number 16, –¢–µ–∫—Å—Ç–ü–£: SN16, –ì—Ä—É–ø–ø–∞: CAN
+(long)(&co2_vars.co_scaleNum16Format),	//[2116h.02h], –ù–∞–∑–≤–∞–Ω–∏–µ: Scale Number 16Format, –¢–µ–∫—Å—Ç–ü–£: S16Fmt, –ì—Ä—É–ø–ø–∞: CAN
+(long)(&co2_vars.co_scaleNum16Format),	//[2116h.03h], –ù–∞–∑–≤–∞–Ω–∏–µ: Scale Number Format Q, –¢–µ–∫—Å—Ç–ü–£: Q-type, –ì—Ä—É–ø–ø–∞: CAN, –±–∏—Ç—ã —Å 0 –ø–æ 4: 0000000000011111b
+(long)(&co2_vars.co_scaleNum16Format),	//[2116h.04h], –ù–∞–∑–≤–∞–Ω–∏–µ: Scale Number Format NumOfFloat, –¢–µ–∫—Å—Ç–ü–£: NFloat, –ì—Ä—É–ø–ø–∞: CAN, –±–∏—Ç—ã —Å 5 –ø–æ 6: 0000000001100000b
+(long)(&co2_vars.co_scaleNum16Format),	//[2116h.05h], –ù–∞–∑–≤–∞–Ω–∏–µ: Scale Number Format Prefix, –¢–µ–∫—Å—Ç–ü–£: Prefix, –ì—Ä—É–ø–ø–∞: CAN, –±–∏—Ç—ã —Å 7 –ø–æ 9: 0000001110000000b
+(long)(&co2_vars.co_scaleNum16Format),	//[2116h.06h], –ù–∞–∑–≤–∞–Ω–∏–µ: Scale Number Format Units, –¢–µ–∫—Å—Ç–ü–£: Units, –ì—Ä—É–ø–ø–∞: CAN, –±–∏—Ç—ã —Å 10 –ø–æ 15: 1111110000000000b
+(long)(&co2_vars.co_scaleNum17),	//[2117h.01h], –ù–∞–∑–≤–∞–Ω–∏–µ: Scale Number 17, –¢–µ–∫—Å—Ç–ü–£: SN17, –ì—Ä—É–ø–ø–∞: CAN
+(long)(&co2_vars.co_scaleNum17Format),	//[2117h.02h], –ù–∞–∑–≤–∞–Ω–∏–µ: Scale Number 17Format, –¢–µ–∫—Å—Ç–ü–£: S17Fmt, –ì—Ä—É–ø–ø–∞: CAN
+(long)(&co2_vars.co_scaleNum17Format),	//[2117h.03h], –ù–∞–∑–≤–∞–Ω–∏–µ: Scale Number Format Q, –¢–µ–∫—Å—Ç–ü–£: Q-type, –ì—Ä—É–ø–ø–∞: CAN, –±–∏—Ç—ã —Å 0 –ø–æ 4: 0000000000011111b
+(long)(&co2_vars.co_scaleNum17Format),	//[2117h.04h], –ù–∞–∑–≤–∞–Ω–∏–µ: Scale Number Format NumOfFloat, –¢–µ–∫—Å—Ç–ü–£: NFloat, –ì—Ä—É–ø–ø–∞: CAN, –±–∏—Ç—ã —Å 5 –ø–æ 6: 0000000001100000b
+(long)(&co2_vars.co_scaleNum17Format),	//[2117h.05h], –ù–∞–∑–≤–∞–Ω–∏–µ: Scale Number Format Prefix, –¢–µ–∫—Å—Ç–ü–£: Prefix, –ì—Ä—É–ø–ø–∞: CAN, –±–∏—Ç—ã —Å 7 –ø–æ 9: 0000001110000000b
+(long)(&co2_vars.co_scaleNum17Format),	//[2117h.06h], –ù–∞–∑–≤–∞–Ω–∏–µ: Scale Number Format Units, –¢–µ–∫—Å—Ç–ü–£: Units, –ì—Ä—É–ø–ø–∞: CAN, –±–∏—Ç—ã —Å 10 –ø–æ 15: 1111110000000000b
+(long)(&co2_vars.co_scaleNum18),	//[2118h.01h], –ù–∞–∑–≤–∞–Ω–∏–µ: Scale Number 18, –¢–µ–∫—Å—Ç–ü–£: SN18, –ì—Ä—É–ø–ø–∞: CAN
+(long)(&co2_vars.co_scaleNum18Format),	//[2118h.02h], –ù–∞–∑–≤–∞–Ω–∏–µ: Scale Number 18Format, –¢–µ–∫—Å—Ç–ü–£: S18Fmt, –ì—Ä—É–ø–ø–∞: CAN
+(long)(&co2_vars.co_scaleNum18Format),	//[2118h.03h], –ù–∞–∑–≤–∞–Ω–∏–µ: Scale Number Format Q, –¢–µ–∫—Å—Ç–ü–£: Q-type, –ì—Ä—É–ø–ø–∞: CAN, –±–∏—Ç—ã —Å 0 –ø–æ 4: 0000000000011111b
+(long)(&co2_vars.co_scaleNum18Format),	//[2118h.04h], –ù–∞–∑–≤–∞–Ω–∏–µ: Scale Number Format NumOfFloat, –¢–µ–∫—Å—Ç–ü–£: NFloat, –ì—Ä—É–ø–ø–∞: CAN, –±–∏—Ç—ã —Å 5 –ø–æ 6: 0000000001100000b
+(long)(&co2_vars.co_scaleNum18Format),	//[2118h.05h], –ù–∞–∑–≤–∞–Ω–∏–µ: Scale Number Format Prefix, –¢–µ–∫—Å—Ç–ü–£: Prefix, –ì—Ä—É–ø–ø–∞: CAN, –±–∏—Ç—ã —Å 7 –ø–æ 9: 0000001110000000b
+(long)(&co2_vars.co_scaleNum18Format),	//[2118h.06h], –ù–∞–∑–≤–∞–Ω–∏–µ: Scale Number Format Units, –¢–µ–∫—Å—Ç–ü–£: Units, –ì—Ä—É–ø–ø–∞: CAN, –±–∏—Ç—ã —Å 10 –ø–æ 15: 1111110000000000b
+(long)(&co2_vars.co_scaleNum19),	//[2119h.01h], –ù–∞–∑–≤–∞–Ω–∏–µ: Scale Number 19, –¢–µ–∫—Å—Ç–ü–£: SN19, –ì—Ä—É–ø–ø–∞: CAN
+(long)(&co2_vars.co_scaleNum19Format),	//[2119h.02h], –ù–∞–∑–≤–∞–Ω–∏–µ: Scale Number 19Format, –¢–µ–∫—Å—Ç–ü–£: S19Fmt, –ì—Ä—É–ø–ø–∞: CAN
+(long)(&co2_vars.co_scaleNum19Format),	//[2119h.03h], –ù–∞–∑–≤–∞–Ω–∏–µ: Scale Number Format Q, –¢–µ–∫—Å—Ç–ü–£: Q-type, –ì—Ä—É–ø–ø–∞: CAN, –±–∏—Ç—ã —Å 0 –ø–æ 4: 0000000000011111b
+(long)(&co2_vars.co_scaleNum19Format),	//[2119h.04h], –ù–∞–∑–≤–∞–Ω–∏–µ: Scale Number Format NumOfFloat, –¢–µ–∫—Å—Ç–ü–£: NFloat, –ì—Ä—É–ø–ø–∞: CAN, –±–∏—Ç—ã —Å 5 –ø–æ 6: 0000000001100000b
+(long)(&co2_vars.co_scaleNum19Format),	//[2119h.05h], –ù–∞–∑–≤–∞–Ω–∏–µ: Scale Number Format Prefix, –¢–µ–∫—Å—Ç–ü–£: Prefix, –ì—Ä—É–ø–ø–∞: CAN, –±–∏—Ç—ã —Å 7 –ø–æ 9: 0000001110000000b
+(long)(&co2_vars.co_scaleNum19Format),	//[2119h.06h], –ù–∞–∑–≤–∞–Ω–∏–µ: Scale Number Format Units, –¢–µ–∫—Å—Ç–ü–£: Units, –ì—Ä—É–ø–ø–∞: CAN, –±–∏—Ç—ã —Å 10 –ø–æ 15: 1111110000000000b
+(long)(&co2_vars.co_scaleNum1A),	//[211Ah.01h], –ù–∞–∑–≤–∞–Ω–∏–µ: Scale Number 1A, –¢–µ–∫—Å—Ç–ü–£: SN1A, –ì—Ä—É–ø–ø–∞: CAN
+(long)(&co2_vars.co_scaleNum1AFormat),	//[211Ah.02h], –ù–∞–∑–≤–∞–Ω–∏–µ: Scale Number 1AFormat, –¢–µ–∫—Å—Ç–ü–£: S1AFmt, –ì—Ä—É–ø–ø–∞: CAN
+(long)(&co2_vars.co_scaleNum1AFormat),	//[211Ah.03h], –ù–∞–∑–≤–∞–Ω–∏–µ: Scale Number Format Q, –¢–µ–∫—Å—Ç–ü–£: Q-type, –ì—Ä—É–ø–ø–∞: CAN, –±–∏—Ç—ã —Å 0 –ø–æ 4: 0000000000011111b
+(long)(&co2_vars.co_scaleNum1AFormat),	//[211Ah.04h], –ù–∞–∑–≤–∞–Ω–∏–µ: Scale Number Format NumOfFloat, –¢–µ–∫—Å—Ç–ü–£: NFloat, –ì—Ä—É–ø–ø–∞: CAN, –±–∏—Ç—ã —Å 5 –ø–æ 6: 0000000001100000b
+(long)(&co2_vars.co_scaleNum1AFormat),	//[211Ah.05h], –ù–∞–∑–≤–∞–Ω–∏–µ: Scale Number Format Prefix, –¢–µ–∫—Å—Ç–ü–£: Prefix, –ì—Ä—É–ø–ø–∞: CAN, –±–∏—Ç—ã —Å 7 –ø–æ 9: 0000001110000000b
+(long)(&co2_vars.co_scaleNum1AFormat),	//[211Ah.06h], –ù–∞–∑–≤–∞–Ω–∏–µ: Scale Number Format Units, –¢–µ–∫—Å—Ç–ü–£: Units, –ì—Ä—É–ø–ø–∞: CAN, –±–∏—Ç—ã —Å 10 –ø–æ 15: 1111110000000000b
+(long)(&co2_vars.co_scaleNum1B),	//[211Bh.01h], –ù–∞–∑–≤–∞–Ω–∏–µ: Scale Number 1B, –¢–µ–∫—Å—Ç–ü–£: SN1B, –ì—Ä—É–ø–ø–∞: CAN
+(long)(&co2_vars.co_scaleNum1BFormat),	//[211Bh.02h], –ù–∞–∑–≤–∞–Ω–∏–µ: Scale Number 1BFormat, –¢–µ–∫—Å—Ç–ü–£: S1BFmt, –ì—Ä—É–ø–ø–∞: CAN
+(long)(&co2_vars.co_scaleNum1BFormat),	//[211Bh.03h], –ù–∞–∑–≤–∞–Ω–∏–µ: Scale Number Format Q, –¢–µ–∫—Å—Ç–ü–£: Q-type, –ì—Ä—É–ø–ø–∞: CAN, –±–∏—Ç—ã —Å 0 –ø–æ 4: 0000000000011111b
+(long)(&co2_vars.co_scaleNum1BFormat),	//[211Bh.04h], –ù–∞–∑–≤–∞–Ω–∏–µ: Scale Number Format NumOfFloat, –¢–µ–∫—Å—Ç–ü–£: NFloat, –ì—Ä—É–ø–ø–∞: CAN, –±–∏—Ç—ã —Å 5 –ø–æ 6: 0000000001100000b
+(long)(&co2_vars.co_scaleNum1BFormat),	//[211Bh.05h], –ù–∞–∑–≤–∞–Ω–∏–µ: Scale Number Format Prefix, –¢–µ–∫—Å—Ç–ü–£: Prefix, –ì—Ä—É–ø–ø–∞: CAN, –±–∏—Ç—ã —Å 7 –ø–æ 9: 0000001110000000b
+(long)(&co2_vars.co_scaleNum1BFormat),	//[211Bh.06h], –ù–∞–∑–≤–∞–Ω–∏–µ: Scale Number Format Units, –¢–µ–∫—Å—Ç–ü–£: Units, –ì—Ä—É–ø–ø–∞: CAN, –±–∏—Ç—ã —Å 10 –ø–æ 15: 1111110000000000b
+(long)(&co2_vars.co_scaleNum1C),	//[211Ch.01h], –ù–∞–∑–≤–∞–Ω–∏–µ: Scale Number 1C, –¢–µ–∫—Å—Ç–ü–£: SN1C, –ì—Ä—É–ø–ø–∞: CAN
+(long)(&co2_vars.co_scaleNum1CFormat),	//[211Ch.02h], –ù–∞–∑–≤–∞–Ω–∏–µ: Scale Number 1C Format, –¢–µ–∫—Å—Ç–ü–£: S1CFmt, –ì—Ä—É–ø–ø–∞: CAN
+(long)(&co2_vars.co_scaleNum1CFormat),	//[211Ch.03h], –ù–∞–∑–≤–∞–Ω–∏–µ: Scale Number Format Q, –¢–µ–∫—Å—Ç–ü–£: Q-type, –ì—Ä—É–ø–ø–∞: CAN, –±–∏—Ç—ã —Å 0 –ø–æ 4: 0000000000011111b
+(long)(&co2_vars.co_scaleNum1CFormat),	//[211Ch.04h], –ù–∞–∑–≤–∞–Ω–∏–µ: Scale Number Format NumOfFloat, –¢–µ–∫—Å—Ç–ü–£: NFloat, –ì—Ä—É–ø–ø–∞: CAN, –±–∏—Ç—ã —Å 5 –ø–æ 6: 0000000001100000b
+(long)(&co2_vars.co_scaleNum1CFormat),	//[211Ch.05h], –ù–∞–∑–≤–∞–Ω–∏–µ: Scale Number Format Prefix, –¢–µ–∫—Å—Ç–ü–£: Prefix, –ì—Ä—É–ø–ø–∞: CAN, –±–∏—Ç—ã —Å 7 –ø–æ 9: 0000001110000000b
+(long)(&co2_vars.co_scaleNum1CFormat),	//[211Ch.06h], –ù–∞–∑–≤–∞–Ω–∏–µ: Scale Number Format Units, –¢–µ–∫—Å—Ç–ü–£: Units, –ì—Ä—É–ø–ø–∞: CAN, –±–∏—Ç—ã —Å 10 –ø–æ 15: 1111110000000000b
+(long)(&co2_vars.co_scaleNum1D),	//[211Dh.01h], –ù–∞–∑–≤–∞–Ω–∏–µ: Scale Number 1D, –¢–µ–∫—Å—Ç–ü–£: SN1D, –ì—Ä—É–ø–ø–∞: CAN
+(long)(&co2_vars.co_scaleNum1DFormat),	//[211Dh.02h], –ù–∞–∑–≤–∞–Ω–∏–µ: Scale Number 1D Format, –¢–µ–∫—Å—Ç–ü–£: S1DFmt, –ì—Ä—É–ø–ø–∞: CAN
+(long)(&co2_vars.co_scaleNum1DFormat),	//[211Dh.03h], –ù–∞–∑–≤–∞–Ω–∏–µ: Scale Number Format Q, –¢–µ–∫—Å—Ç–ü–£: Q-type, –ì—Ä—É–ø–ø–∞: CAN, –±–∏—Ç—ã —Å 0 –ø–æ 4: 0000000000011111b
+(long)(&co2_vars.co_scaleNum1DFormat),	//[211Dh.04h], –ù–∞–∑–≤–∞–Ω–∏–µ: Scale Number Format NumOfFloat, –¢–µ–∫—Å—Ç–ü–£: NFloat, –ì—Ä—É–ø–ø–∞: CAN, –±–∏—Ç—ã —Å 5 –ø–æ 6: 0000000001100000b
+(long)(&co2_vars.co_scaleNum1DFormat),	//[211Dh.05h], –ù–∞–∑–≤–∞–Ω–∏–µ: Scale Number Format Prefix, –¢–µ–∫—Å—Ç–ü–£: Prefix, –ì—Ä—É–ø–ø–∞: CAN, –±–∏—Ç—ã —Å 7 –ø–æ 9: 0000001110000000b
+(long)(&co2_vars.co_scaleNum1DFormat),	//[211Dh.06h], –ù–∞–∑–≤–∞–Ω–∏–µ: Scale Number Format Units, –¢–µ–∫—Å—Ç–ü–£: Units, –ì—Ä—É–ø–ø–∞: CAN, –±–∏—Ç—ã —Å 10 –ø–æ 15: 1111110000000000b
+(long)(&cmd.all),	//[2502h.01h], –ù–∞–∑–≤–∞–Ω–∏–µ: –ü—É—Å–∫, –¢–µ–∫—Å—Ç–ü–£: –ü—É—Å–∫, –ì—Ä—É–ø–ø–∞: –°–ª–æ–≤–æ —É–ø—Ä–∞–≤–ª–µ–Ω–∏—è, –±–∏—Ç—ã —Å 0 –ø–æ 0: 0000000000000001b
+(long)(&cmd.all),	//[2502h.02h], –ù–∞–∑–≤–∞–Ω–∏–µ: –°—Ç–æ–ø, –¢–µ–∫—Å—Ç–ü–£: –°—Ç–æ–ø, –ì—Ä—É–ø–ø–∞: –°–ª–æ–≤–æ —É–ø—Ä–∞–≤–ª–µ–Ω–∏—è, –±–∏—Ç—ã —Å 1 –ø–æ 1: 0000000000000010b
+(long)(&cmd.all),	//[2502h.03h], –ù–∞–∑–≤–∞–Ω–∏–µ: –°–±—Ä–æ—Å–∏—Ç—å —Å–æ—Å—Ç–æ—è–Ω–∏–µ –ê–≤–∞—Ä–∏–∏, –¢–µ–∫—Å—Ç–ü–£: –°–±—Ä–ê–≤—Ä, –ì—Ä—É–ø–ø–∞: –°–ª–æ–≤–æ —É–ø—Ä–∞–≤–ª–µ–Ω–∏—è, –±–∏—Ç—ã —Å 2 –ø–æ 2: 0000000000000100b
+(long)(&cmd.all),	//[2502h.04h], –ù–∞–∑–≤–∞–Ω–∏–µ: –°–ª–æ–≤–æ —É–ø—Ä–∞–≤–ª–µ–Ω–∏—è CAN, –¢–µ–∫—Å—Ç–ü–£: –ö–º–¥CAN, –ì—Ä—É–ø–ø–∞: –°–ª–æ–≤–æ —É–ø—Ä–∞–≤–ª–µ–Ω–∏—è
+(long)(&drv_interface.req_data),	//[2506h.01h], –ù–∞–∑–≤–∞–Ω–∏–µ: –¢–∞–π–º–∞—É—Ç –ø–æ—Ç–µ—Ä–∏ —Å–≤—è–∑–∏, –¢–µ–∫—Å—Ç–ü–£: OfflineCounterMax, –ì—Ä—É–ø–ø–∞: –í–ù–ï –ì–†–£–ü–ü
+(long)(&drv_interface.ans_data),	//[2506h.02h], –ù–∞–∑–≤–∞–Ω–∏–µ: –°—á–µ—Ç—á–∏–∫ –ø–æ—Ç–µ—Ä–∏ —Å–≤—è–∑–∏, –¢–µ–∫—Å—Ç–ü–£: OfflineCounter, –ì—Ä—É–ø–ø–∞: –í–ù–ï –ì–†–£–ü–ü
+(long)(&drv_interface.data_Low),	//[2506h.03h], –ù–∞–∑–≤–∞–Ω–∏–µ: data_Low, –¢–µ–∫—Å—Ç–ü–£: data_L, –ì—Ä—É–ø–ø–∞: –í–ù–ï –ì–†–£–ü–ü
+(long)(&drv_interface.data_High),	//[2506h.04h], –ù–∞–∑–≤–∞–Ω–∏–µ: data_High, –¢–µ–∫—Å—Ç–ü–£: data_H, –ì—Ä—É–ø–ø–∞: –í–ù–ï –ì–†–£–ü–ü
+(long)(&RTCclock.packed_time),	//[250Fh.00h], –ù–∞–∑–≤–∞–Ω–∏–µ: –ß–∞—Å—ã —Ä–µ–∞–ª—å–Ω–æ–≥–æ –≤—Ä–µ–º–µ–Ω–∏, –¢–µ–∫—Å—Ç–ü–£: RTC, –ì—Ä—É–ø–ø–∞: –ù–∞–±–ª—é–¥–∞–µ–º—ã–µ
+(long)(&sm_prot.Main_ErrorCode),	//[2532h.01h], –ù–∞–∑–≤–∞–Ω–∏–µ: –ö–æ–¥ –∞–≤–∞—Ä–∏–∏ ARM, –¢–µ–∫—Å—Ç–ü–£: –ö–æ–¥ –∞–≤–∞—Ä–∏–∏ ARM, –ì—Ä—É–ø–ø–∞: –†–µ–≥. —Ç–æ–∫–∞ —è–∫–æ—Ä—è, –±–∏—Ç—ã —Å 0 –ø–æ 7: 0000000011111111b
+(long)(&sm_prot.Main_ErrorCode),	//[2532h.02h], –ù–∞–∑–≤–∞–Ω–∏–µ: –†–∞—Å—à–∏—Ä–µ–Ω–∏–µ –∫–æ–¥–∞ –∞–≤–∞—Ä–∏–∏, –¢–µ–∫—Å—Ç–ü–£: –ê–≤—Ä+, –ì—Ä—É–ø–ø–∞: –†–µ–≥. —Ç–æ–∫–∞ —è–∫–æ—Ä—è, –±–∏—Ç—ã —Å 8 –ø–æ 15: 1111111100000000b
+(long)(&sm_prot.Main_Flags),	//[2532h.03h], –ù–∞–∑–≤–∞–Ω–∏–µ: –°–∏—Å—Ç–µ–º–Ω—ã–π –æ–±—ä–µ–∫—Ç, –¢–µ–∫—Å—Ç–ü–£: System, –ì—Ä—É–ø–ø–∞: –†–µ–≥. —Ç–æ–∫–∞ —è–∫–æ—Ä—è, –±–∏—Ç—ã —Å 0 –ø–æ 0: 0000000000000001b
+(long)(&disp_group_number),	//[2534h.01h], –ù–∞–∑–≤–∞–Ω–∏–µ: –ù–æ–º–µ—Ä –≥—Ä—É–ø –¥–ª—è –ø—É–ª—å—Ç–∞ —É–ø—Ä–∞–≤–ª–µ–Ω–∏—è, –¢–µ–∫—Å—Ç–ü–£: ‚Ññ –≥—Ä –ü–£, –ì—Ä—É–ø–ø–∞: CAN
+(long)(&VendorToken),	//[2600h.01h], –ù–∞–∑–≤–∞–Ω–∏–µ: VendorToken, –¢–µ–∫—Å—Ç–ü–£: VendorToken, –ì—Ä—É–ø–ø–∞: –í–ù–ï –ì–†–£–ü–ü
+(long)(&co2_vars.co_blockTransferCommand),	//[2700h.00h], –ù–∞–∑–≤–∞–Ω–∏–µ: Block Transfer Interpreter, –¢–µ–∫—Å—Ç–ü–£: BT Interpreter, –ì—Ä—É–ø–ø–∞: –°–ª–æ–≤–æ —É–ø—Ä–∞–≤–ª–µ–Ω–∏—è
+(long)(&swu_vars),	//[2701h.01h], –ù–∞–∑–≤–∞–Ω–∏–µ: cmd, –¢–µ–∫—Å—Ç–ü–£: cmd, –ì—Ä—É–ø–ø–∞: –°–ª–æ–≤–æ —É–ø—Ä–∞–≤–ª–µ–Ω–∏—è
+(long)(&swu_vars),	//[2701h.02h], –ù–∞–∑–≤–∞–Ω–∏–µ: status, –¢–µ–∫—Å—Ç–ü–£: status, –ì—Ä—É–ø–ø–∞: –°–ª–æ–≤–æ —É–ø—Ä–∞–≤–ª–µ–Ω–∏—è
+(long)(&swu_vars),	//[2701h.03h], –ù–∞–∑–≤–∞–Ω–∏–µ: quest1, –¢–µ–∫—Å—Ç–ü–£: quest1, –ì—Ä—É–ø–ø–∞: –°–ª–æ–≤–æ —É–ø—Ä–∞–≤–ª–µ–Ω–∏—è
+(long)(&swu_vars),	//[2701h.04h], –ù–∞–∑–≤–∞–Ω–∏–µ: quest2, –¢–µ–∫—Å—Ç–ü–£: quest2, –ì—Ä—É–ø–ø–∞: –°–ª–æ–≤–æ —É–ø—Ä–∞–≤–ª–µ–Ω–∏—è
+(long)(&swu_vars),	//[2701h.05h], –ù–∞–∑–≤–∞–Ω–∏–µ: quest3, –¢–µ–∫—Å—Ç–ü–£: quest3, –ì—Ä—É–ø–ø–∞: –°–ª–æ–≤–æ —É–ø—Ä–∞–≤–ª–µ–Ω–∏—è
+(long)(&swu_vars),	//[2701h.06h], –ù–∞–∑–≤–∞–Ω–∏–µ: quest4, –¢–µ–∫—Å—Ç–ü–£: quest4, –ì—Ä—É–ø–ø–∞: –°–ª–æ–≤–æ —É–ø—Ä–∞–≤–ª–µ–Ω–∏—è
+(long)(&swu_vars),	//[2701h.07h], –ù–∞–∑–≤–∞–Ω–∏–µ: ans1, –¢–µ–∫—Å—Ç–ü–£: ans1, –ì—Ä—É–ø–ø–∞: –°–ª–æ–≤–æ —É–ø—Ä–∞–≤–ª–µ–Ω–∏—è
+(long)(&swu_vars),	//[2701h.08h], –ù–∞–∑–≤–∞–Ω–∏–µ: ans2, –¢–µ–∫—Å—Ç–ü–£: ans2, –ì—Ä—É–ø–ø–∞: –°–ª–æ–≤–æ —É–ø—Ä–∞–≤–ª–µ–Ω–∏—è
+(long)(&swu_vars),	//[2701h.09h], –ù–∞–∑–≤–∞–Ω–∏–µ: ans3, –¢–µ–∫—Å—Ç–ü–£: ans3, –ì—Ä—É–ø–ø–∞: –°–ª–æ–≤–æ —É–ø—Ä–∞–≤–ª–µ–Ω–∏—è
+(long)(&swu_vars),	//[2701h.0Ah], –ù–∞–∑–≤–∞–Ω–∏–µ: ans4, –¢–µ–∫—Å—Ç–ü–£: ans4, –ì—Ä—É–ø–ø–∞: –°–ª–æ–≤–æ —É–ø—Ä–∞–≤–ª–µ–Ω–∏—è
+(long)(&swu_vars),	//[2701h.0Bh], –ù–∞–∑–≤–∞–Ω–∏–µ: addr, –¢–µ–∫—Å—Ç–ü–£: addr, –ì—Ä—É–ø–ø–∞: –°–ª–æ–≤–æ —É–ø—Ä–∞–≤–ª–µ–Ω–∏—è
+(long)(&swu_vars),	//[2701h.0Ch], –ù–∞–∑–≤–∞–Ω–∏–µ: CPU_ID, –¢–µ–∫—Å—Ç–ü–£: CPU_ID, –ì—Ä—É–ø–ø–∞: –°–ª–æ–≤–æ —É–ø—Ä–∞–≤–ª–µ–Ω–∏—è
+(long)(&swu_vars),	//[2701h.0Dh], –ù–∞–∑–≤–∞–Ω–∏–µ: sector_mask, –¢–µ–∫—Å—Ç–ü–£: sector_mask, –ì—Ä—É–ø–ø–∞: –°–ª–æ–≤–æ —É–ø—Ä–∞–≤–ª–µ–Ω–∏—è
+(long)(&swu_vars),	//[2701h.0Eh], –ù–∞–∑–≤–∞–Ω–∏–µ: version, –¢–µ–∫—Å—Ç–ü–£: version, –ì—Ä—É–ø–ø–∞: –°–ª–æ–≤–æ —É–ø—Ä–∞–≤–ª–µ–Ω–∏—è
+(long)(&swu_vars),	//[2701h.0Fh], –ù–∞–∑–≤–∞–Ω–∏–µ: CRC, –¢–µ–∫—Å—Ç–ü–£: CRC, –ì—Ä—É–ø–ø–∞: –°–ª–æ–≤–æ —É–ø—Ä–∞–≤–ª–µ–Ω–∏—è
+(long)(&drv_status.all),	//[3000h.00h], –ù–∞–∑–≤–∞–Ω–∏–µ: –°—Ç–∞—Ç—É—Å –ø—Ä–µ–æ–±—Ä–∞–∑–æ–≤–∞—Ç–µ–ª—è, –¢–µ–∫—Å—Ç–ü–£: –°—Ç–∞—Ç—É—Å, –ì—Ä—É–ø–ø–∞: –í–ù–ï –ì–†–£–ü–ü, –±–∏—Ç—ã —Å 0 –ø–æ 5: 0000000000111111b
+(long)(&msCounter),	//[3100h.01h], –ù–∞–∑–≤–∞–Ω–∏–µ: –°—á—ë—Ç—á–∏–∫ –ø—Ä–µ—Ä—ã–≤–∞–Ω–∏–π 1 –∫–ì—Ü, –¢–µ–∫—Å—Ç–ü–£: –°—á.–ø—Ä–µ—Ä—ã–≤.1 –∫–ì—Ü, –ì—Ä—É–ø–ø–∞: –°—á–µ—Ç—á–∏–∫–∏
+(long)(&FastCounter),	//[3100h.02h], –ù–∞–∑–≤–∞–Ω–∏–µ: –°—á—ë—Ç—á–∏–∫ –ø—Ä–µ—Ä—ã–≤–∞–Ω–∏–π 10 –∫–ì—Ü, –¢–µ–∫—Å—Ç–ü–£: –°—á.–ø—Ä–µ—Ä—ã–≤.10 –∫–ì—Ü, –ì—Ä—É–ø–ø–∞: –°—á–µ—Ç—á–∏–∫–∏
+(long)(&LoopCounter),	//[3100h.03h], –ù–∞–∑–≤–∞–Ω–∏–µ: BackgroundCounter, –¢–µ–∫—Å—Ç–ü–£: BackgroundCounter, –ì—Ä—É–ø–ø–∞: –°—á–µ—Ç—á–∏–∫–∏
+(long)(&TIsr10),	//[3100h.04h], –ù–∞–∑–≤–∞–Ω–∏–µ: T_10–∫–ì—Ü, –¢–µ–∫—Å—Ç–ü–£: T_10–∫–ì—Ü, –ì—Ä—É–ø–ø–∞: –°—á–µ—Ç—á–∏–∫–∏
+(long)(&TIsr1),	//[3100h.05h], –ù–∞–∑–≤–∞–Ω–∏–µ: T_1–∫–ì—Ü, –¢–µ–∫—Å—Ç–ü–£: T_1–∫–ì—Ü, –ì—Ä—É–ø–ø–∞: –°—á–µ—Ç—á–∏–∫–∏
+(long)(&rmp.T),	//[5000h.01h], –ù–∞–∑–≤–∞–Ω–∏–µ: T —Ä–∞–∑–≥–æ–Ω–∞ –¥–æ –Ω–æ–º–∏–Ω–∞–ª–∞, –¢–µ–∫—Å—Ç–ü–£: rmpT, –ì—Ä—É–ø–ø–∞: –ó–ò
+(long)(&rmp.input),	//[5000h.02h], –ù–∞–∑–≤–∞–Ω–∏–µ: –í—Ö–æ–¥ –ó–ò, –¢–µ–∫—Å—Ç–ü–£: –í—Ö–æ–¥–ó–ò, –ì—Ä—É–ø–ø–∞: –ó–ò
+(long)(&rmp.output),	//[5000h.03h], –ù–∞–∑–≤–∞–Ω–∏–µ: –í—ã—Ö–æ–¥ –ó–ò, –¢–µ–∫—Å—Ç–ü–£: –í—ã—Ö–æ–¥–ó–ò, –ì—Ä—É–ø–ø–∞: –ó–ò
+(long)(&pid_id.pid_ref_reg3),	//[5100h.01h], –ù–∞–∑–≤–∞–Ω–∏–µ: –ó–∞–¥–∞–Ω–∏–µ, –¢–µ–∫—Å—Ç–ü–£: –ó–∞–¥-–µ, –ì—Ä—É–ø–ø–∞: –†–µ–≥. —Ç–æ–∫–∞ Id
+(long)(&pid_id.pid_fdb_reg3),	//[5100h.02h], –ù–∞–∑–≤–∞–Ω–∏–µ: –û–±—Ä–∞—Ç–Ω–∞—è —Å–≤—è–∑—å, –¢–µ–∫—Å—Ç–ü–£: –û–±—Ä.–°–≤, –ì—Ä—É–ø–ø–∞: –†–µ–≥. —Ç–æ–∫–∞ Id
+(long)(&pid_id.Kp_reg3),	//[5100h.03h], –ù–∞–∑–≤–∞–Ω–∏–µ: –ü—Ä–æ–ø–æ—Ä—Ü. –∫–æ—ç—Ñ—Ñ. Kp, –¢–µ–∫—Å—Ç–ü–£: Kp, –ì—Ä—É–ø–ø–∞: –†–µ–≥. —Ç–æ–∫–∞ Id
+(long)(&pid_id.pid_out_max),	//[5100h.04h], –ù–∞–∑–≤–∞–Ω–∏–µ: –ú–∞–∫—Å–∏–º—É–º –≤—ã—Ö–æ–¥–∞, –¢–µ–∫—Å—Ç–ü–£: Max, –ì—Ä—É–ø–ø–∞: –†–µ–≥. —Ç–æ–∫–∞ Id
+(long)(&pid_id.pid_out_min),	//[5100h.05h], –ù–∞–∑–≤–∞–Ω–∏–µ: –ú–∏–Ω–∏–º—É–º –≤—ã—Ö–æ–¥–∞, –¢–µ–∫—Å—Ç–ü–£: Min, –ì—Ä—É–ø–ø–∞: –†–µ–≥. —Ç–æ–∫–∞ Id
+(long)(&pid_id.Ki_reg3),	//[5100h.06h], –ù–∞–∑–≤–∞–Ω–∏–µ: –ò–Ω—Ç–µ–≥—Ä–∞–ª—å–Ω—ã–π –∫–æ—ç—Ñ—Ñ. Ki, –¢–µ–∫—Å—Ç–ü–£: Ki, –ì—Ä—É–ø–ø–∞: –†–µ–≥. —Ç–æ–∫–∞ Id
+(long)(&pid_id.Kd_reg3),	//[5100h.07h], –ù–∞–∑–≤–∞–Ω–∏–µ: –î–∏—Ñ—Ñ. –∫–æ—ç—Ñ—Ñ. Kd, –¢–µ–∫—Å—Ç–ü–£: Kd, –ì—Ä—É–ø–ø–∞: –†–µ–≥. —Ç–æ–∫–∞ Id
+(long)(&pid_id.Kc_reg3),	//[5100h.08h], –ù–∞–∑–≤–∞–Ω–∏–µ: –ò–Ω—Ç–µ–≥—Ä.–∫–æ—Ä—Ä–µ–∫—Ç–∏—Ä.–∫–æ—ç—Ñ—Ñ–∏—Ü–∏–µ–Ω—Ç, –¢–µ–∫—Å—Ç–ü–£: Kc, –ì—Ä—É–ø–ø–∞: –†–µ–≥. —Ç–æ–∫–∞ Id
+(long)(&pid_id.e_reg3),	//[5100h.09h], –ù–∞–∑–≤–∞–Ω–∏–µ: –û—à–∏–±–∫–∞ —Ä–∞—Å—Å–æ–≥–ª–∞—Å–æ–≤–∞–Ω–∏—è —Å–∏–≥–Ω–∞–ª–æ–≤, –¢–µ–∫—Å—Ç–ü–£: –û—à–∏–±–∫–∞, –ì—Ä—É–ø–ø–∞: –†–µ–≥. —Ç–æ–∫–∞ Id
+(long)(&pid_id.pid_out_reg3),	//[5100h.0Ah], –ù–∞–∑–≤–∞–Ω–∏–µ: –í—ã—Ö–æ–¥ —Ä–µ–≥—É–ª—è—Ç–æ—Ä–∞, –¢–µ–∫—Å—Ç–ü–£: –í—ã—Ö–æ–¥, –ì—Ä—É–ø–ø–∞: –†–µ–≥. —Ç–æ–∫–∞ Id
+(long)(&pid_id.up_reg3),	//[5100h.0Bh], –ù–∞–∑–≤–∞–Ω–∏–µ: –í—ã—Ö.–ü—Ä–æ–ø–æ—Ä—Ü., –¢–µ–∫—Å—Ç–ü–£: –í—ã—Ö.–ü—Ä–æ–ø–æ—Ä—Ü., –ì—Ä—É–ø–ø–∞: –†–µ–≥. —Ç–æ–∫–∞ Id
+(long)(&pid_id.ui_reg3),	//[5100h.0Ch], –ù–∞–∑–≤–∞–Ω–∏–µ: –í—ã—Ö.–ò–Ω—Ç–µ–≥—Ä., –¢–µ–∫—Å—Ç–ü–£: –í—ã—Ö.–ò–Ω—Ç–µ–≥—Ä., –ì—Ä—É–ø–ø–∞: –†–µ–≥. —Ç–æ–∫–∞ Id
+(long)(&pid_id.ud_reg3),	//[5100h.0Dh], –ù–∞–∑–≤–∞–Ω–∏–µ: –í—ã—Ö.–î–∏—Ñ—Ñ–µ—Ä., –¢–µ–∫—Å—Ç–ü–£: –í—ã—Ö.–î–∏—Ñ—Ñ–µ—Ä., –ì—Ä—É–ø–ø–∞: –†–µ–≥. —Ç–æ–∫–∞ Id
+(long)(&pid_spd.pid_ref_reg3),	//[5101h.01h], –ù–∞–∑–≤–∞–Ω–∏–µ: –ó–∞–¥–∞–Ω–∏–µ, –¢–µ–∫—Å—Ç–ü–£: pisref, –ì—Ä—É–ø–ø–∞: –†–µ–≥. —Å–∫–æ—Ä–æ—Å—Ç–∏
+(long)(&pid_spd.pid_fdb_reg3),	//[5101h.02h], –ù–∞–∑–≤–∞–Ω–∏–µ: –û–±—Ä–∞—Ç–Ω–∞—è —Å–≤—è–∑—å, –¢–µ–∫—Å—Ç–ü–£: pisfbd, –ì—Ä—É–ø–ø–∞: –†–µ–≥. —Å–∫–æ—Ä–æ—Å—Ç–∏
+(long)(&pid_spd.Kp_reg3),	//[5101h.03h], –ù–∞–∑–≤–∞–Ω–∏–µ: –ü—Ä–æ–ø–æ—Ä—Ü. –∫–æ—ç—Ñ—Ñ. Kp, –¢–µ–∫—Å—Ç–ü–£: Kp, –ì—Ä—É–ø–ø–∞: –†–µ–≥. —Å–∫–æ—Ä–æ—Å—Ç–∏
+(long)(&pid_spd.pid_out_max),	//[5101h.04h], –ù–∞–∑–≤–∞–Ω–∏–µ: –ú–∞–∫—Å–∏–º—É–º –≤—ã—Ö–æ–¥–∞, –¢–µ–∫—Å—Ç–ü–£: Max, –ì—Ä—É–ø–ø–∞: –†–µ–≥. —Å–∫–æ—Ä–æ—Å—Ç–∏
+(long)(&pid_spd.pid_out_min),	//[5101h.05h], –ù–∞–∑–≤–∞–Ω–∏–µ: –ú–∏–Ω–∏–º—É–º –≤—ã—Ö–æ–¥–∞, –¢–µ–∫—Å—Ç–ü–£: Min, –ì—Ä—É–ø–ø–∞: –†–µ–≥. —Å–∫–æ—Ä–æ—Å—Ç–∏
+(long)(&pid_spd.Ki_reg3),	//[5101h.06h], –ù–∞–∑–≤–∞–Ω–∏–µ: –ò–Ω—Ç–µ–≥—Ä–∞–ª—å–Ω—ã–π –∫–æ—ç—Ñ—Ñ. Ki, –¢–µ–∫—Å—Ç–ü–£: Ki, –ì—Ä—É–ø–ø–∞: –†–µ–≥. —Å–∫–æ—Ä–æ—Å—Ç–∏
+(long)(&pid_spd.Kd_reg3),	//[5101h.07h], –ù–∞–∑–≤–∞–Ω–∏–µ: –î–∏—Ñ—Ñ. –∫–æ—ç—Ñ—Ñ. Kd, –¢–µ–∫—Å—Ç–ü–£: pisKd, –ì—Ä—É–ø–ø–∞: –†–µ–≥. —Å–∫–æ—Ä–æ—Å—Ç–∏
+(long)(&pid_spd.Kc_reg3),	//[5101h.08h], –ù–∞–∑–≤–∞–Ω–∏–µ: –ò–Ω—Ç–µ–≥—Ä.–∫–æ—Ä—Ä–µ–∫—Ç–∏—Ä.–∫–æ—ç—Ñ—Ñ–∏—Ü–∏–µ–Ω—Ç, –¢–µ–∫—Å—Ç–ü–£: Kc, –ì—Ä—É–ø–ø–∞: –†–µ–≥. —Å–∫–æ—Ä–æ—Å—Ç–∏
+(long)(&pid_spd.e_reg3),	//[5101h.09h], –ù–∞–∑–≤–∞–Ω–∏–µ: –û—à–∏–±–∫–∞ —Ä–∞—Å—Å–æ–≥–ª–∞—Å–æ–≤–∞–Ω–∏—è —Å–∏–≥–Ω–∞–ª–æ–≤, –¢–µ–∫—Å—Ç–ü–£: –û—à–∏–±–∫–∞, –ì—Ä—É–ø–ø–∞: –†–µ–≥. —Å–∫–æ—Ä–æ—Å—Ç–∏
+(long)(&pid_spd.pid_out_reg3),	//[5101h.0Ah], –ù–∞–∑–≤–∞–Ω–∏–µ: –í—ã—Ö–æ–¥ —Ä–µ–≥—É–ª—è—Ç–æ—Ä–∞, –¢–µ–∫—Å—Ç–ü–£: pisout, –ì—Ä—É–ø–ø–∞: –†–µ–≥. —Å–∫–æ—Ä–æ—Å—Ç–∏
+(long)(&pid_spd.up_reg3),	//[5101h.0Bh], –ù–∞–∑–≤–∞–Ω–∏–µ: –í—ã—Ö.–ü—Ä–æ–ø–æ—Ä—Ü., –¢–µ–∫—Å—Ç–ü–£: –í—ã—Ö.–ü—Ä–æ–ø–æ—Ä—Ü., –ì—Ä—É–ø–ø–∞: –†–µ–≥. —Å–∫–æ—Ä–æ—Å—Ç–∏
+(long)(&pid_spd.ui_reg3),	//[5101h.0Ch], –ù–∞–∑–≤–∞–Ω–∏–µ: –í—ã—Ö.–ò–Ω—Ç–µ–≥—Ä., –¢–µ–∫—Å—Ç–ü–£: –í—ã—Ö.–ò–Ω—Ç–µ–≥—Ä., –ì—Ä—É–ø–ø–∞: –†–µ–≥. —Å–∫–æ—Ä–æ—Å—Ç–∏
+(long)(&pid_spd.ud_reg3),	//[5101h.0Dh], –ù–∞–∑–≤–∞–Ω–∏–µ: –í—ã—Ö.–î–∏—Ñ—Ñ–µ—Ä., –¢–µ–∫—Å—Ç–ü–£: –í—ã—Ö.–î–∏—Ñ—Ñ–µ—Ä., –ì—Ä—É–ø–ø–∞: –†–µ–≥. —Å–∫–æ—Ä–æ—Å—Ç–∏
+(long)(&pid_spd.saterr_reg3),	//[5101h.0Eh], –ù–∞–∑–≤–∞–Ω–∏–µ: –ü—Ä–µ–≤—ã—à–µ–Ω–∏–µ –Ω–∞—Å—ã—â–µ–Ω–∏—è, –¢–µ–∫—Å—Ç–ü–£: –ü—Ä–µ–≤. –Ω–∞—Å—ã—â, –ì—Ä—É–ø–ø–∞: –†–µ–≥. —Å–∫–æ—Ä–æ—Å—Ç–∏
+(long)(&pid_iq.pid_ref_reg3),	//[5102h.01h], –ù–∞–∑–≤–∞–Ω–∏–µ: –ó–∞–¥–∞–Ω–∏–µ, –¢–µ–∫—Å—Ç–ü–£: –ó–∞–¥-–∏–µ, –ì—Ä—É–ø–ø–∞: –†–µ–≥. —Ç–æ–∫–∞ Iq
+(long)(&pid_iq.pid_fdb_reg3),	//[5102h.02h], –ù–∞–∑–≤–∞–Ω–∏–µ: –û–±—Ä–∞—Ç–Ω–∞—è —Å–≤—è–∑—å, –¢–µ–∫—Å—Ç–ü–£: –û–±—Ä.–°–≤, –ì—Ä—É–ø–ø–∞: –†–µ–≥. —Ç–æ–∫–∞ Iq
+(long)(&pid_iq.Kp_reg3),	//[5102h.03h], –ù–∞–∑–≤–∞–Ω–∏–µ: –ü—Ä–æ–ø–æ—Ä—Ü. –∫–æ—ç—Ñ—Ñ. Kp, –¢–µ–∫—Å—Ç–ü–£: Kp, –ì—Ä—É–ø–ø–∞: –†–µ–≥. —Ç–æ–∫–∞ Iq
+(long)(&pid_iq.pid_out_max),	//[5102h.04h], –ù–∞–∑–≤–∞–Ω–∏–µ: –ú–∞–∫—Å–∏–º—É–º –≤—ã—Ö–æ–¥–∞, –¢–µ–∫—Å—Ç–ü–£: Max, –ì—Ä—É–ø–ø–∞: –†–µ–≥. —Ç–æ–∫–∞ Iq
+(long)(&pid_iq.pid_out_min),	//[5102h.05h], –ù–∞–∑–≤–∞–Ω–∏–µ: –ú–∏–Ω–∏–º—É–º –≤—ã—Ö–æ–¥–∞, –¢–µ–∫—Å—Ç–ü–£: Min, –ì—Ä—É–ø–ø–∞: –†–µ–≥. —Ç–æ–∫–∞ Iq
+(long)(&pid_iq.Ki_reg3),	//[5102h.06h], –ù–∞–∑–≤–∞–Ω–∏–µ: –ò–Ω—Ç–µ–≥—Ä–∞–ª—å–Ω—ã–π –∫–æ—ç—Ñ—Ñ. Ki, –¢–µ–∫—Å—Ç–ü–£: Ki, –ì—Ä—É–ø–ø–∞: –†–µ–≥. —Ç–æ–∫–∞ Iq
+(long)(&pid_iq.Kd_reg3),	//[5102h.07h], –ù–∞–∑–≤–∞–Ω–∏–µ: –î–∏—Ñ—Ñ. –∫–æ—ç—Ñ—Ñ. Kd, –¢–µ–∫—Å—Ç–ü–£: Kd, –ì—Ä—É–ø–ø–∞: –†–µ–≥. —Ç–æ–∫–∞ Iq
+(long)(&pid_iq.Kc_reg3),	//[5102h.08h], –ù–∞–∑–≤–∞–Ω–∏–µ: –ò–Ω—Ç–µ–≥—Ä.–∫–æ—Ä—Ä–µ–∫—Ç–∏—Ä.–∫–æ—ç—Ñ—Ñ–∏—Ü–∏–µ–Ω—Ç, –¢–µ–∫—Å—Ç–ü–£: Kc, –ì—Ä—É–ø–ø–∞: –†–µ–≥. —Ç–æ–∫–∞ Iq
+(long)(&pid_iq.e_reg3),	//[5102h.09h], –ù–∞–∑–≤–∞–Ω–∏–µ: –û—à–∏–±–∫–∞ —Ä–∞—Å—Å–æ–≥–ª–∞—Å–æ–≤–∞–Ω–∏—è —Å–∏–≥–Ω–∞–ª–æ–≤, –¢–µ–∫—Å—Ç–ü–£: –û—à–∏–±–∫–∞, –ì—Ä—É–ø–ø–∞: –†–µ–≥. —Ç–æ–∫–∞ Iq
+(long)(&pid_iq.pid_out_reg3),	//[5102h.0Ah], –ù–∞–∑–≤–∞–Ω–∏–µ: –í—ã—Ö–æ–¥ —Ä–µ–≥—É–ª—è—Ç–æ—Ä–∞, –¢–µ–∫—Å—Ç–ü–£: –í—ã—Ö–æ–¥, –ì—Ä—É–ø–ø–∞: –†–µ–≥. —Ç–æ–∫–∞ Iq
+(long)(&pid_iq.up_reg3),	//[5102h.0Bh], –ù–∞–∑–≤–∞–Ω–∏–µ: –í—ã—Ö.–ü—Ä–æ–ø–æ—Ä—Ü., –¢–µ–∫—Å—Ç–ü–£: –í—ã—Ö.–ü—Ä–æ–ø–æ—Ä—Ü., –ì—Ä—É–ø–ø–∞: –†–µ–≥. —Ç–æ–∫–∞ Iq
+(long)(&pid_iq.ui_reg3),	//[5102h.0Ch], –ù–∞–∑–≤–∞–Ω–∏–µ: –í—ã—Ö.–ò–Ω—Ç–µ–≥—Ä., –¢–µ–∫—Å—Ç–ü–£: –í—ã—Ö.–ò–Ω—Ç–µ–≥—Ä., –ì—Ä—É–ø–ø–∞: –†–µ–≥. —Ç–æ–∫–∞ Iq
+(long)(&pid_iq.ud_reg3),	//[5102h.0Dh], –ù–∞–∑–≤–∞–Ω–∏–µ: –í—ã—Ö.–î–∏—Ñ—Ñ–µ—Ä., –¢–µ–∫—Å—Ç–ü–£: –í—ã—Ö.–î–∏—Ñ—Ñ–µ—Ä., –ì—Ä—É–ø–ø–∞: –†–µ–≥. —Ç–æ–∫–∞ Iq
+(long)(&pid_pos.pid_ref_reg3),	//[5103h.01h], –ù–∞–∑–≤–∞–Ω–∏–µ: –ó–∞–¥–∞–Ω–∏–µ, –¢–µ–∫—Å—Ç–ü–£: pisref, –ì—Ä—É–ø–ø–∞: –†–µ–≥. –ø–æ–ª–æ–∂–µ–Ω–∏—è
+(long)(&pid_pos.pid_ref_reg3),	//[5103h.02h], –ù–∞–∑–≤–∞–Ω–∏–µ: –ó–∞–¥–∞–Ω–∏–µ, –¢–µ–∫—Å—Ç–ü–£: pisref, –ì—Ä—É–ø–ø–∞: –†–µ–≥. –ø–æ–ª–æ–∂–µ–Ω–∏—è
+(long)(&pid_pos.pid_fdb_reg3),	//[5103h.03h], –ù–∞–∑–≤–∞–Ω–∏–µ: –û–±—Ä–∞—Ç–Ω–∞—è —Å–≤—è–∑—å, –¢–µ–∫—Å—Ç–ü–£: pisfbd, –ì—Ä—É–ø–ø–∞: –†–µ–≥. –ø–æ–ª–æ–∂–µ–Ω–∏—è
+(long)(&pid_pos.pid_fdb_reg3),	//[5103h.04h], –ù–∞–∑–≤–∞–Ω–∏–µ: –û–±—Ä–∞—Ç–Ω–∞—è —Å–≤—è–∑—å, –¢–µ–∫—Å—Ç–ü–£: pisfbd, –ì—Ä—É–ø–ø–∞: –†–µ–≥. –ø–æ–ª–æ–∂–µ–Ω–∏—è
+(long)(&pid_pos.Kp_reg3),	//[5103h.05h], –ù–∞–∑–≤–∞–Ω–∏–µ: –ü—Ä–æ–ø–æ—Ä—Ü. –∫–æ—ç—Ñ—Ñ. Kp, –¢–µ–∫—Å—Ç–ü–£: Kp, –ì—Ä—É–ø–ø–∞: –†–µ–≥. –ø–æ–ª–æ–∂–µ–Ω–∏—è
+(long)(&pid_pos.pid_out_max),	//[5103h.06h], –ù–∞–∑–≤–∞–Ω–∏–µ: –ú–∞–∫—Å–∏–º—É–º –≤—ã—Ö–æ–¥–∞, –¢–µ–∫—Å—Ç–ü–£: Max, –ì—Ä—É–ø–ø–∞: –†–µ–≥. –ø–æ–ª–æ–∂–µ–Ω–∏—è
+(long)(&pid_pos.pid_out_min),	//[5103h.07h], –ù–∞–∑–≤–∞–Ω–∏–µ: –ú–∏–Ω–∏–º—É–º –≤—ã—Ö–æ–¥–∞, –¢–µ–∫—Å—Ç–ü–£: Min, –ì—Ä—É–ø–ø–∞: –†–µ–≥. –ø–æ–ª–æ–∂–µ–Ω–∏—è
+(long)(&pid_pos.Ki_reg3),	//[5103h.08h], –ù–∞–∑–≤–∞–Ω–∏–µ: –ò–Ω—Ç–µ–≥—Ä–∞–ª—å–Ω—ã–π –∫–æ—ç—Ñ—Ñ. Ki, –¢–µ–∫—Å—Ç–ü–£: Ki, –ì—Ä—É–ø–ø–∞: –†–µ–≥. –ø–æ–ª–æ–∂–µ–Ω–∏—è
+(long)(&pid_pos.Kd_reg3),	//[5103h.09h], –ù–∞–∑–≤–∞–Ω–∏–µ: –î–∏—Ñ—Ñ. –∫–æ—ç—Ñ—Ñ. Kd, –¢–µ–∫—Å—Ç–ü–£: pisKd, –ì—Ä—É–ø–ø–∞: –†–µ–≥. –ø–æ–ª–æ–∂–µ–Ω–∏—è
+(long)(&pid_pos.DiffDelim),	//[5103h.0Ah], –ù–∞–∑–≤–∞–Ω–∏–µ: –î–µ–ª–∏—Ç. –¥–∏—Ñ—Ñ. —á–∞—Å—Ç–∏, –¢–µ–∫—Å—Ç–ü–£: –î–µ–ª–∏—Ç. –¥–∏—Ñ—Ñ. —á–∞—Å—Ç–∏, –ì—Ä—É–ø–ø–∞: –†–µ–≥. –ø–æ–ª–æ–∂–µ–Ω–∏—è
+(long)(&pid_pos.Kf_d),	//[5103h.0Bh], –ù–∞–∑–≤–∞–Ω–∏–µ: –ö–æ—ç—Ñ. —Ñ–∏–ª—å—Ç—Ä–∞, –¢–µ–∫—Å—Ç–ü–£: –ö–æ—ç—Ñ. —Ñ–∏–ª—å—Ç—Ä–∞, –ì—Ä—É–ø–ø–∞: –†–µ–≥. –ø–æ–ª–æ–∂–µ–Ω–∏—è
+(long)(&pid_pos.Kc_reg3),	//[5103h.0Ch], –ù–∞–∑–≤–∞–Ω–∏–µ: –ò–Ω—Ç–µ–≥—Ä.–∫–æ—Ä—Ä–µ–∫—Ç–∏—Ä.–∫–æ—ç—Ñ—Ñ–∏—Ü–∏–µ–Ω—Ç, –¢–µ–∫—Å—Ç–ü–£: Kc, –ì—Ä—É–ø–ø–∞: –†–µ–≥. –ø–æ–ª–æ–∂–µ–Ω–∏—è
+(long)(&pid_pos.DeadZone),	//[5103h.0Dh], –ù–∞–∑–≤–∞–Ω–∏–µ: –ú–µ—Ä—Ç–≤–∞—è –∑–æ–Ω–∞, –¢–µ–∫—Å—Ç–ü–£: –ú–µ—Ä—Ç–≤–∞—è –∑–æ–Ω–∞, –ì—Ä—É–ø–ø–∞: –†–µ–≥. –ø–æ–ª–æ–∂–µ–Ω–∏—è
+(long)(&pid_pos.e_reg3),	//[5103h.0Eh], –ù–∞–∑–≤–∞–Ω–∏–µ: –û—à–∏–±–∫–∞ —Ä–∞—Å—Å–æ–≥–ª–∞—Å–æ–≤–∞–Ω–∏—è —Å–∏–≥–Ω–∞–ª–æ–≤, –¢–µ–∫—Å—Ç–ü–£: –û—à–∏–±–∫–∞, –ì—Ä—É–ø–ø–∞: –†–µ–≥. –ø–æ–ª–æ–∂–µ–Ω–∏—è
+(long)(&pid_spd.saterr_reg3),	//[5103h.0Fh], –ù–∞–∑–≤–∞–Ω–∏–µ: –ü—Ä–µ–≤—ã—à–µ–Ω–∏–µ –Ω–∞—Å—ã—â–µ–Ω–∏—è, –¢–µ–∫—Å—Ç–ü–£: –ü—Ä–µ–≤. –Ω–∞—Å—ã—â, –ì—Ä—É–ø–ø–∞: –†–µ–≥. –ø–æ–ª–æ–∂–µ–Ω–∏—è
+(long)(&pid_pos.pid_out_reg3),	//[5103h.10h], –ù–∞–∑–≤–∞–Ω–∏–µ: –í—ã—Ö–æ–¥ —Ä–µ–≥—É–ª—è—Ç–æ—Ä–∞, –¢–µ–∫—Å—Ç–ü–£: pisout, –ì—Ä—É–ø–ø–∞: –†–µ–≥. –ø–æ–ª–æ–∂–µ–Ω–∏—è
+(long)(&pid_pos.up_reg3),	//[5103h.11h], –ù–∞–∑–≤–∞–Ω–∏–µ: –í—ã—Ö.–ü—Ä–æ–ø–æ—Ä—Ü., –¢–µ–∫—Å—Ç–ü–£: –í—ã—Ö.–ü—Ä–æ–ø–æ—Ä—Ü., –ì—Ä—É–ø–ø–∞: –†–µ–≥. –ø–æ–ª–æ–∂–µ–Ω–∏—è
+(long)(&pid_pos.ui_reg3),	//[5103h.12h], –ù–∞–∑–≤–∞–Ω–∏–µ: –í—ã—Ö.–ò–Ω—Ç–µ–≥—Ä., –¢–µ–∫—Å—Ç–ü–£: –í—ã—Ö.–ò–Ω—Ç–µ–≥—Ä., –ì—Ä—É–ø–ø–∞: –†–µ–≥. –ø–æ–ª–æ–∂–µ–Ω–∏—è
+(long)(&pid_pos.ud_reg3),	//[5103h.13h], –ù–∞–∑–≤–∞–Ω–∏–µ: –í—ã—Ö.–î–∏—Ñ—Ñ–µ—Ä., –¢–µ–∫—Å—Ç–ü–£: –í—ã—Ö.–î–∏—Ñ—Ñ–µ—Ä., –ì—Ä—É–ø–ø–∞: –†–µ–≥. –ø–æ–ª–æ–∂–µ–Ω–∏—è
+(long)(&pid_pos.e_reg3_filterOut),	//[5103h.14h], –ù–∞–∑–≤–∞–Ω–∏–µ: –§–∏–ª—å—Ç—Ä –æ—à–∏–±–∫–∏, –¢–µ–∫—Å—Ç–ü–£: –§–∏–ª—å—Ç—Ä –æ—à–∏–±–∫–∏, –ì—Ä—É–ø–ø–∞: –†–µ–≥. –ø–æ–ª–æ–∂–µ–Ω–∏—è
+(long)(&pid_ia.pid_ref_reg3),	//[5104h.01h], –ù–∞–∑–≤–∞–Ω–∏–µ: –ó–∞–¥–∞–Ω–∏–µ, –¢–µ–∫—Å—Ç–ü–£: –ó–∞–¥-–∏–µ, –ì—Ä—É–ø–ø–∞: –†–µ–≥. —Ç–æ–∫–∞ —è–∫–æ—Ä—è
+(long)(&pid_ia.pid_fdb_reg3),	//[5104h.02h], –ù–∞–∑–≤–∞–Ω–∏–µ: –û–±—Ä–∞—Ç–Ω–∞—è —Å–≤—è–∑—å, –¢–µ–∫—Å—Ç–ü–£: –û–±—Ä.–°–≤, –ì—Ä—É–ø–ø–∞: –†–µ–≥. —Ç–æ–∫–∞ —è–∫–æ—Ä—è
+(long)(&pid_ia.Kp_reg3),	//[5104h.03h], –ù–∞–∑–≤–∞–Ω–∏–µ: –ü—Ä–æ–ø–æ—Ä—Ü. –∫–æ—ç—Ñ—Ñ. Kp, –¢–µ–∫—Å—Ç–ü–£: Kp, –ì—Ä—É–ø–ø–∞: –†–µ–≥. —Ç–æ–∫–∞ —è–∫–æ—Ä—è
+(long)(&pid_ia.pid_out_max),	//[5104h.04h], –ù–∞–∑–≤–∞–Ω–∏–µ: –ú–∞–∫—Å–∏–º—É–º –≤—ã—Ö–æ–¥–∞, –¢–µ–∫—Å—Ç–ü–£: Max, –ì—Ä—É–ø–ø–∞: –†–µ–≥. —Ç–æ–∫–∞ —è–∫–æ—Ä—è
+(long)(&pid_ia.pid_out_min),	//[5104h.05h], –ù–∞–∑–≤–∞–Ω–∏–µ: –ú–∏–Ω–∏–º—É–º –≤—ã—Ö–æ–¥–∞, –¢–µ–∫—Å—Ç–ü–£: Min, –ì—Ä—É–ø–ø–∞: –†–µ–≥. —Ç–æ–∫–∞ —è–∫–æ—Ä—è
+(long)(&pid_ia.Ki_reg3),	//[5104h.06h], –ù–∞–∑–≤–∞–Ω–∏–µ: –ò–Ω—Ç–µ–≥—Ä–∞–ª—å–Ω—ã–π –∫–æ—ç—Ñ—Ñ. Ki, –¢–µ–∫—Å—Ç–ü–£: Ki, –ì—Ä—É–ø–ø–∞: –†–µ–≥. —Ç–æ–∫–∞ —è–∫–æ—Ä—è
+(long)(&pid_ia.Kd_reg3),	//[5104h.07h], –ù–∞–∑–≤–∞–Ω–∏–µ: –î–∏—Ñ—Ñ. –∫–æ—ç—Ñ—Ñ. Kd, –¢–µ–∫—Å—Ç–ü–£: Kd, –ì—Ä—É–ø–ø–∞: –†–µ–≥. —Ç–æ–∫–∞ —è–∫–æ—Ä—è
+(long)(&pid_ia.Kc_reg3),	//[5104h.08h], –ù–∞–∑–≤–∞–Ω–∏–µ: –ò–Ω—Ç–µ–≥—Ä.–∫–æ—Ä—Ä–µ–∫—Ç–∏—Ä.–∫–æ—ç—Ñ—Ñ–∏—Ü–∏–µ–Ω—Ç, –¢–µ–∫—Å—Ç–ü–£: Kc, –ì—Ä—É–ø–ø–∞: –†–µ–≥. —Ç–æ–∫–∞ —è–∫–æ—Ä—è
+(long)(&pid_ia.e_reg3),	//[5104h.09h], –ù–∞–∑–≤–∞–Ω–∏–µ: –û—à–∏–±–∫–∞ —Ä–∞—Å—Å–æ–≥–ª–∞—Å–æ–≤–∞–Ω–∏—è —Å–∏–≥–Ω–∞–ª–æ–≤, –¢–µ–∫—Å—Ç–ü–£: –û—à–∏–±–∫–∞, –ì—Ä—É–ø–ø–∞: –†–µ–≥. —Ç–æ–∫–∞ —è–∫–æ—Ä—è
+(long)(&pid_ia.pid_out_reg3),	//[5104h.0Ah], –ù–∞–∑–≤–∞–Ω–∏–µ: –í—ã—Ö–æ–¥ —Ä–µ–≥—É–ª—è—Ç–æ—Ä–∞, –¢–µ–∫—Å—Ç–ü–£: –í—ã—Ö–æ–¥, –ì—Ä—É–ø–ø–∞: –†–µ–≥. —Ç–æ–∫–∞ —è–∫–æ—Ä—è
+(long)(&pid_ia.up_reg3),	//[5104h.0Bh], –ù–∞–∑–≤–∞–Ω–∏–µ: –í—ã—Ö.–ü—Ä–æ–ø–æ—Ä—Ü., –¢–µ–∫—Å—Ç–ü–£: –í—ã—Ö.–ü—Ä–æ–ø–æ—Ä—Ü., –ì—Ä—É–ø–ø–∞: –†–µ–≥. —Ç–æ–∫–∞ —è–∫–æ—Ä—è
+(long)(&pid_ia.ui_reg3),	//[5104h.0Ch], –ù–∞–∑–≤–∞–Ω–∏–µ: –í—ã—Ö.–ò–Ω—Ç–µ–≥—Ä., –¢–µ–∫—Å—Ç–ü–£: –í—ã—Ö.–ò–Ω—Ç–µ–≥—Ä., –ì—Ä—É–ø–ø–∞: –†–µ–≥. —Ç–æ–∫–∞ —è–∫–æ—Ä—è
+(long)(&pid_ia.ud_reg3),	//[5104h.0Dh], –ù–∞–∑–≤–∞–Ω–∏–µ: –í—ã—Ö.–î–∏—Ñ—Ñ–µ—Ä., –¢–µ–∫—Å—Ç–ü–£: –í—ã—Ö.–î–∏—Ñ—Ñ–µ—Ä., –ì—Ä—É–ø–ø–∞: –†–µ–≥. —Ç–æ–∫–∞ —è–∫–æ—Ä—è
+(long)(&pwm.UalphaRef),	//[5105h.01h], –ù–∞–∑–≤–∞–Ω–∏–µ: Ua–ó–∞–¥, –¢–µ–∫—Å—Ç–ü–£: Ua–ó–∞–¥, –ì—Ä—É–ø–ø–∞: –®–ò–ú
+(long)(&pwm.UbetaRef),	//[5105h.02h], –ù–∞–∑–≤–∞–Ω–∏–µ: Ub–ó–∞–¥, –¢–µ–∫—Å—Ç–ü–£: Ub–ó–∞–¥, –ì—Ä—É–ø–ø–∞: –®–ò–ú
+(long)(&pwm.U_lim),	//[5105h.03h], –ù–∞–∑–≤–∞–Ω–∏–µ: U_–æ–≥—Ä, –¢–µ–∫—Å—Ç–ü–£: U_–æ–≥—Ä, –ì—Ä—É–ø–ø–∞: –®–ò–ú
+(long)(&pwm.GammaA),	//[5105h.04h], –ù–∞–∑–≤–∞–Ω–∏–µ: GammaA, –¢–µ–∫—Å—Ç–ü–£: GmA, –ì—Ä—É–ø–ø–∞: –®–ò–ú
+(long)(&pwm.GammaB),	//[5105h.05h], –ù–∞–∑–≤–∞–Ω–∏–µ: GammaB, –¢–µ–∫—Å—Ç–ü–£: GmB, –ì—Ä—É–ø–ø–∞: –®–ò–ú
+(long)(&pwm.GammaC),	//[5105h.06h], –ù–∞–∑–≤–∞–Ω–∏–µ: GammaC, –¢–µ–∫—Å—Ç–ü–£: GmC, –ì—Ä—É–ø–ø–∞: –®–ò–ú
+(long)(&pwm.k_pwm),	//[5105h.07h], –ù–∞–∑–≤–∞–Ω–∏–µ: TPWM, –¢–µ–∫—Å—Ç–ü–£: TPWM, –ì—Ä—É–ø–ø–∞: –®–ò–ú
+(long)(&pwm.DeadBand),	//[5105h.08h], –ù–∞–∑–≤–∞–Ω–∏–µ: –ú–µ—Ä—Ç–≤–æ–µ –≤—Ä–µ–º—è (–º–∫—Å), –¢–µ–∫—Å—Ç–ü–£: –ú–µ—Ä—Ç. –≤—Ä–µ–º—è, –ì—Ä—É–ø–ø–∞: –®–ò–ú
+(long)(&pwm.MinGammaLimit),	//[5105h.09h], –ù–∞–∑–≤–∞–Ω–∏–µ: –û–≥—Ä–∞–Ω–∏—á–µ–Ω–∏–µ –º–∏–Ω. —Å–∫–≤–∞–∂–Ω., –¢–µ–∫—Å—Ç–ü–£: GamLim, –ì—Ä—É–ø–ø–∞: –®–ò–ú
+(long)(&pwm.UdCompK),	//[5105h.0Ah], –ù–∞–∑–≤–∞–Ω–∏–µ: –ö–æ—ç—Ñ. –∫–æ–º–ø–µ–Ω—Å–∞—Ü–∏–∏ Ud, –¢–µ–∫—Å—Ç–ü–£: Ud–ö–æ–º–øK, –ì—Ä—É–ø–ø–∞: –®–ò–ú
+(long)(&pwm.UdCompEnable),	//[5105h.0Bh], –ù–∞–∑–≤–∞–Ω–∏–µ: –ö–æ–º–ø–µ–Ω—Å–∞—Ü–∏—è Ud, –¢–µ–∫—Å—Ç–ü–£: Ud–ö–æ–º–ø, –ì—Ä—É–ø–ø–∞: –®–ò–ú, –±–∏—Ç—ã —Å 0 –ø–æ 0: 0000000000000001b
+(long)(&pwm.PWM_type),	//[5105h.0Ch], –ù–∞–∑–≤–∞–Ω–∏–µ: –¢–∏–ø –®–ò–ú, –¢–µ–∫—Å—Ç–ü–£: –¢–∏–ø–®–ò–ú, –ì—Ä—É–ø–ø–∞: –®–ò–ú
+(long)(&pwm.ULimitation),	//[5105h.0Dh], –ù–∞–∑–≤–∞–Ω–∏–µ: ULimitation, –¢–µ–∫—Å—Ç–ü–£: ULimitation, –ì—Ä—É–ø–ø–∞: –®–ò–ú
+(long)(&pwm.Frequency),	//[5105h.0Eh], –ù–∞–∑–≤–∞–Ω–∏–µ: –ß–∞—Å—Ç–æ—Ç–∞ –®–ò–ú, –¢–µ–∫—Å—Ç–ü–£: F—à–∏–º, –ì—Ä—É–ø–ø–∞: –®–ò–ú
+(long)(&pwm.sector),	//[5105h.0Fh], –ù–∞–∑–≤–∞–Ω–∏–µ: –°–µ–∫—Ç–æ—Ä, –¢–µ–∫—Å—Ç–ü–£: –°–µ–∫—Ç–æ—Ä, –ì—Ä—É–ø–ø–∞: –®–ò–ú
+(long)(&pwm.U_mag),	//[5105h.10h], –ù–∞–∑–≤–∞–Ω–∏–µ: U_–∞–º–ø–ª, –¢–µ–∫—Å—Ç–ü–£: U_–∞–º–ø–ª, –ì—Ä—É–ø–ø–∞: –®–ò–ú
+(long)(&pwm.PDP_Fault),	//[5105h.11h], –ù–∞–∑–≤–∞–Ω–∏–µ: –§–ª–∞–≥–∏ –∞–≤–∞—Ä–∏–π, –¢–µ–∫—Å—Ç–ü–£: F_bits, –ì—Ä—É–ø–ø–∞: –®–ò–ú
+(long)(&sm_ctrl.state),	//[510Bh.01h], –ù–∞–∑–≤–∞–Ω–∏–µ: sm_state, –¢–µ–∫—Å—Ç–ü–£: smstat, –ì—Ä—É–ø–ø–∞: –î–ê sm_ctrl
+(long)(&drv_status_code),	//[510Bh.02h], –ù–∞–∑–≤–∞–Ω–∏–µ: drv_status_code, –¢–µ–∫—Å—Ç–ü–£: stcode, –ì—Ä—É–ø–ø–∞: –î–ê sm_ctrl, –±–∏—Ç—ã —Å 0 –ø–æ 7: 0000000011111111b
+(long)(&sm_prot.bit_fault1),	//[510Eh.01h], –ù–∞–∑–≤–∞–Ω–∏–µ: –§–ª–∞–≥–∏ –∞–≤–∞—Ä–∏–π 1, –¢–µ–∫—Å—Ç–ü–£: bitF_1, –ì—Ä—É–ø–ø–∞: –ó–∞—â–∏—Ç—ã
+(long)(&sm_prot.bit_fault2),	//[510Eh.02h], –ù–∞–∑–≤–∞–Ω–∏–µ: –§–ª–∞–≥–∏ –∞–≤–∞—Ä–∏–π 2, –¢–µ–∫—Å—Ç–ü–£: bitF_2, –ì—Ä—É–ø–ø–∞: –ó–∞—â–∏—Ç—ã
+(long)(&sm_prot.mask_fault1),	//[510Eh.03h], –ù–∞–∑–≤–∞–Ω–∏–µ: –ú–∞—Å–∫–∞ –∞–≤–∞—Ä–∏–π 1L, –¢–µ–∫—Å—Ç–ü–£: mask1L, –ì—Ä—É–ø–ø–∞: –ó–∞—â–∏—Ç—ã, –±–∏—Ç—ã —Å 0 –ø–æ 7: 0000000011111111b
+(long)(&sm_prot.mask_fault1),	//[510Eh.04h], –ù–∞–∑–≤–∞–Ω–∏–µ: –ú–∞—Å–∫–∞ –∞–≤–∞—Ä–∏–π 1H, –¢–µ–∫—Å—Ç–ü–£: mask1H, –ì—Ä—É–ø–ø–∞: –ó–∞—â–∏—Ç—ã, –±–∏—Ç—ã —Å 8 –ø–æ 15: 1111111100000000b
+(long)(&sm_prot.mask_fault2),	//[510Eh.05h], –ù–∞–∑–≤–∞–Ω–∏–µ: –ú–∞—Å–∫–∞ –∞–≤–∞—Ä–∏–π 2L, –¢–µ–∫—Å—Ç–ü–£: mask2L, –ì—Ä—É–ø–ø–∞: –ó–∞—â–∏—Ç—ã, –±–∏—Ç—ã —Å 0 –ø–æ 7: 0000000011111111b
+(long)(&sm_prot.mask_fault2),	//[510Eh.06h], –ù–∞–∑–≤–∞–Ω–∏–µ: –ú–∞—Å–∫–∞ –∞–≤–∞—Ä–∏–π  2H, –¢–µ–∫—Å—Ç–ü–£: mask2H, –ì—Ä—É–ø–ø–∞: –ó–∞—â–∏—Ç—ã, –±–∏—Ç—ã —Å 8 –ø–æ 15: 1111111100000000b
+(long)(&sm_prot.Imax_protect),	//[510Eh.07h], –ù–∞–∑–≤–∞–Ω–∏–µ: –ú–∞–∫—Å–∏–º–∞–ª—å–Ω—ã–π —Ç–æ–∫, –¢–µ–∫—Å—Ç–ü–£: –ú–∞–∫—Å.–¢–æ–∫, –ì—Ä—É–ø–ø–∞: –ó–∞—â–∏—Ç—ã
+(long)(&sm_prot.Umax_protect),	//[510Eh.08h], –ù–∞–∑–≤–∞–Ω–∏–µ: –ú–∞–∫—Å–∏–º–∞–ª—å–Ω–æ–µ –Ω–∞–ø—Ä—è–∂–µ–Ω–∏–µ, –¢–µ–∫—Å—Ç–ü–£: Ud_max, –ì—Ä—É–ø–ø–∞: –ó–∞—â–∏—Ç—ã
+(long)(&sm_prot.Umin_protect),	//[510Eh.09h], –ù–∞–∑–≤–∞–Ω–∏–µ: –ú–∏–Ω–∏–º–∞–ª—å–Ω–æ–µ –Ω–∞–ø—Ä—è–∂–µ–Ω–∏–µ, –¢–µ–∫—Å—Ç–ü–£: Ud_min, –ì—Ä—É–ø–ø–∞: –ó–∞—â–∏—Ç—ã
+(long)(&sm_prot.speed_max),	//[510Eh.0Ah], –ù–∞–∑–≤–∞–Ω–∏–µ: –ú–∞–∫—Å–∏–º–∞–ª—å–Ω–∞—è —Å–∫–æ—Ä–æ—Å—Ç—å, –¢–µ–∫—Å—Ç–ü–£: speed_max, –ì—Ä—É–ø–ø–∞: –ó–∞—â–∏—Ç—ã
+(long)(&sm_prot.T_max),	//[510Eh.0Bh], –ù–∞–∑–≤–∞–Ω–∏–µ: –ú–∞–∫—Å–∏–º–∞–ª—å–Ω–∞—è —Ç–µ–º–ø–µ—Ä–∞—Ç—É—Ä–∞, –¢–µ–∫—Å—Ç–ü–£: t_max, –ì—Ä—É–ø–ø–∞: –ó–∞—â–∏—Ç—ã
+(long)(&refs.speed_ref),	//[5112h.01h], –ù–∞–∑–≤–∞–Ω–∏–µ: –°–∫–æ—Ä–æ—Å—Ç—å, –¢–µ–∫—Å—Ç–ü–£: –°–∫–æ—Ä_–∑, –ì—Ä—É–ø–ø–∞: –ó–∞–¥–∞–Ω–∏—è
+(long)(&refs.Iq_ref),	//[5112h.02h], –ù–∞–∑–≤–∞–Ω–∏–µ: –ú–∞–∫—Å. —Ç–æ–∫ –í–£, –¢–µ–∫—Å—Ç–ü–£: –¢–æ–∫–°–¢–∑, –ì—Ä—É–ø–ø–∞: –ó–∞–¥–∞–Ω–∏—è
+(long)(&refs.i_flux_ref),	//[5112h.03h], –ù–∞–∑–≤–∞–Ω–∏–µ: –¢–æ–∫ —É–¥–µ—Ä–∂–∞–Ω–∏—è, –¢–µ–∫—Å—Ç–ü–£: –¢–æ–∫–£–ü–∑, –ì—Ä—É–ø–ø–∞: –ó–∞–¥–∞–Ω–∏—è
+(long)(&refs.theta_elec),	//[5112h.04h], –ù–∞–∑–≤–∞–Ω–∏–µ: theta_elec, –¢–µ–∫—Å—Ç–ü–£: —ç–ª–µ–∫–£–≥, –ì—Ä—É–ø–ø–∞: –ó–∞–¥–∞–Ω–∏—è
+(long)(&refs.uf_ref),	//[5112h.05h], –ù–∞–∑–≤–∞–Ω–∏–µ: –ó–∞–¥–∞–Ω–Ω–æ–µ –Ω–∞–ø—Ä—è–∂–µ–Ω–∏–µ –û–í, –¢–µ–∫—Å—Ç–ü–£: Uf_ref, –ì—Ä—É–ø–ø–∞: –ó–∞–¥–∞–Ω–∏—è
+(long)(&drv_params.p),	//[5113h.01h], –ù–∞–∑–≤–∞–Ω–∏–µ: –ß–∏—Å–ª–æ –ø–∞—Ä –ø–æ–ª—é—Å–æ–≤, –¢–µ–∫—Å—Ç–ü–£: –ü–∞—Ä–ü–æ–ª, –ì—Ä—É–ø–ø–∞: –ë–∞–∑–æ–≤. –ø–∞—Ä–∞–º
+(long)(&drv_params.I_nom),	//[5113h.02h], –ù–∞–∑–≤–∞–Ω–∏–µ: –ù–æ–º–∏–Ω–∞–ª—å–Ω—ã–π —Ç–æ–∫, –¢–µ–∫—Å—Ç–ü–£: I–ø—á–ù–æ–º, –ì—Ä—É–ø–ø–∞: –ë–∞–∑–æ–≤. –ø–∞—Ä–∞–º
+(long)(&drv_params.U_nom),	//[5113h.03h], –ù–∞–∑–≤–∞–Ω–∏–µ: –ù–æ–º–∏–Ω–∞–ª—å–Ω–æ–µ –Ω–∞–ø—Ä—è–∂–µ–Ω–∏–µ —Ñ–∞–∑–Ω., –¢–µ–∫—Å—Ç–ü–£: U—Ñ_–Ω–æ–º, –ì—Ä—É–ø–ø–∞: –ë–∞–∑–æ–≤. –ø–∞—Ä–∞–º
+(long)(&drv_params.speed_nom),	//[5113h.04h], –ù–∞–∑–≤–∞–Ω–∏–µ: –ù–æ–º–∏–Ω–∞–ª—å–Ω–∞—è —Å–∫–æ—Ä–æ—Å—Ç—å, –¢–µ–∫—Å—Ç–ü–£: –°–∫–æ—Ä–æ—Å—Ç—å–ù–æ–º, –ì—Ä—É–ø–ø–∞: –ë–∞–∑–æ–≤. –ø–∞—Ä–∞–º
+(long)(&drv_params.Udc_nom),	//[5113h.05h], –ù–∞–∑–≤–∞–Ω–∏–µ: –ù–æ–º–∏–Ω–∞–ª—å–Ω–æ–µ –Ω–∞–ø—Ä—è–∂–µ–Ω–∏–µ –ó–ü–¢, –¢–µ–∫—Å—Ç–ü–£: Udc–ù–æ–º, –ì—Ä—É–ø–ø–∞: –ë–∞–∑–æ–≤. –ø–∞—Ä–∞–º
+(long)(&drv_params.Rs),	//[5113h.06h], –ù–∞–∑–≤–∞–Ω–∏–µ: Rs, –¢–µ–∫—Å—Ç–ü–£: Rs, –ì—Ä—É–ø–ø–∞: –ë–∞–∑–æ–≤. –ø–∞—Ä–∞–º
+(long)(&drv_params.Ls),	//[5113h.07h], –ù–∞–∑–≤–∞–Ω–∏–µ: Ls, –¢–µ–∫—Å—Ç–ü–£: Ls, –ì—Ä—É–ø–ø–∞: –ë–∞–∑–æ–≤. –ø–∞—Ä–∞–º
+(long)(&drv_params.freq_nom),	//[5113h.08h], –ù–∞–∑–≤–∞–Ω–∏–µ: –ù–æ–º–∏–Ω–∞–ª—å–Ω–∞—è —á–∞—Å—Ç–æ—Ç–∞, –¢–µ–∫—Å—Ç–ü–£: –ù–æ–º.—á–∞—Å—Ç., –ì—Ä—É–ø–ø–∞: –ë–∞–∑–æ–≤. –ø–∞—Ä–∞–º
+(long)(&drv_params.sens_type),	//[5113h.09h], –ù–∞–∑–≤–∞–Ω–∏–µ: –¢–∏–ø –¥–∞—Ç—á–∏–∫–∞ –ø–æ–ª–æ–∂–µ–Ω–∏—è, –¢–µ–∫—Å—Ç–ü–£: Sens_type, –ì—Ä—É–ø–ø–∞: –ë–∞–∑–æ–≤. –ø–∞—Ä–∞–º, –±–∏—Ç—ã —Å 0 –ø–æ 2: 0000000000000111b
+(long)(&sw.HardwareType),	//[5114h.01h], –ù–∞–∑–≤–∞–Ω–∏–µ: –¢–∏–ø –∞–ø–ø–∞—Ä–∞—Ç–Ω–æ–π —á–∞—Å—Ç–∏, –¢–µ–∫—Å—Ç–ü–£: HardwareType, –ì—Ä—É–ø–ø–∞: –ù–∞—Å—Ç—Ä–æ–π–∫–∏ –°–£, –±–∏—Ç—ã —Å 0 –ø–æ 7: 0000000011111111b
+(long)(&sm_ctrl.run_mode),	//[5114h.02h], –ù–∞–∑–≤–∞–Ω–∏–µ: –†–µ–∂–∏–º —Ä–∞–±–æ—Ç—ã, –¢–µ–∫—Å—Ç–ü–£: –†–µ–∂–†–∞–±, –ì—Ä—É–ø–ø–∞: –ù–∞—Å—Ç—Ä–æ–π–∫–∏ –°–£
+(long)(&sw.recuperation_ena),	//[5114h.03h], –ù–∞–∑–≤–∞–Ω–∏–µ: –†–µ–∫—É–ø–µ—Ä–∞—Ü–∏—è, –¢–µ–∫—Å—Ç–ü–£: –†–µ–∫—É–ø—Ä, –ì—Ä—É–ø–ø–∞: –ù–∞—Å—Ç—Ä–æ–π–∫–∏ –°–£
+(long)(&sw.AutoOffset),	//[5114h.04h], –ù–∞–∑–≤–∞–Ω–∏–µ: –ê–¶–ü –∞–≤—Ç–æ —Å–º–µ—â., –¢–µ–∫—Å—Ç–ü–£: –ê–¶–ü—Å–º–µ—â, –ì—Ä—É–ø–ø–∞: –ù–∞—Å—Ç—Ä–æ–π–∫–∏ –°–£
+(long)(&sw.Reboot),	//[5114h.05h], –ù–∞–∑–≤–∞–Ω–∏–µ: –ü–µ—Ä–µ–∑–∞–≥—Ä—É–∑–∫–∞, –¢–µ–∫—Å—Ç–ü–£: –ü–µ—Ä–µ–∑–∞–≥—Ä—É–∑–∫–∞, –ì—Ä—É–ø–ø–∞: –ù–∞—Å—Ç—Ä–æ–π–∫–∏ –°–£
+(long)(&sw.excitation_ena),	//[5114h.06h], –ù–∞–∑–≤–∞–Ω–∏–µ: –í–æ–∑–±—É–¥–∏—Ç–µ–ª—å, –¢–µ–∫—Å—Ç–ü–£: –í–æ–∑–±, –ì—Ä—É–ø–ø–∞: –ù–∞—Å—Ç—Ä–æ–π–∫–∏ –°–£
+(long)(&adc.Imeas_a_gain),	//[5116h.01h], –ù–∞–∑–≤–∞–Ω–∏–µ: –ö–æ—ç—Ñ—Ñ–∏—Ü–∏–µ–Ω—Ç —Ç–æ–∫–∞ —Ñ–∞–∑—ã –ê, –¢–µ–∫—Å—Ç–ü–£: Ia–£—Å–∏–ª, –ì—Ä—É–ø–ø–∞: –ê–¶–ü
+(long)(&adc.Imeas_a_offset),	//[5116h.02h], –ù–∞–∑–≤–∞–Ω–∏–µ: –°–º–µ—â–µ–Ω–∏–µ —Ç–æ–∫–∞ —Ñ–∞–∑—ã –ê, –¢–µ–∫—Å—Ç–ü–£: Ia–°–º–µ—â, –ì—Ä—É–ø–ø–∞: –ê–¶–ü
+(long)(&adc.Imeas_a),	//[5116h.03h], –ù–∞–∑–≤–∞–Ω–∏–µ: –¢–æ–∫ —Ñ–∞–∑—ã –ê, –¢–µ–∫—Å—Ç–ü–£: Ia_–º–≥–Ω, –ì—Ä—É–ø–ø–∞: –ê–¶–ü
+(long)(&adc.Imeas_b_gain),	//[5116h.04h], –ù–∞–∑–≤–∞–Ω–∏–µ: –ö–æ—ç—Ñ—Ñ–∏—Ü–∏–µ–Ω—Ç —Ç–æ–∫–∞ —Ñ–∞–∑—ã –í, –¢–µ–∫—Å—Ç–ü–£: Ib–£—Å–∏–ª, –ì—Ä—É–ø–ø–∞: –ê–¶–ü
+(long)(&adc.Imeas_b_offset),	//[5116h.05h], –ù–∞–∑–≤–∞–Ω–∏–µ: –°–º–µ—â–µ–Ω–∏–µ —Ç–æ–∫–∞ —Ñ–∞–∑—ã –í, –¢–µ–∫—Å—Ç–ü–£: Ib–°–º–µ—â, –ì—Ä—É–ø–ø–∞: –ê–¶–ü
+(long)(&adc.Imeas_b),	//[5116h.06h], –ù–∞–∑–≤–∞–Ω–∏–µ: –¢–æ–∫ —Ñ–∞–∑—ã –í, –¢–µ–∫—Å—Ç–ü–£: Ib_–º–≥–Ω, –ì—Ä—É–ø–ø–∞: –ê–¶–ü
+(long)(&adc.Imeas_c_gain),	//[5116h.07h], –ù–∞–∑–≤–∞–Ω–∏–µ: –ö–æ—ç—Ñ—Ñ–∏—Ü–∏–µ–Ω—Ç —Ç–æ–∫–∞ —Ñ–∞–∑—ã C, –¢–µ–∫—Å—Ç–ü–£: Ic–£—Å–∏–ª, –ì—Ä—É–ø–ø–∞: –ê–¶–ü
+(long)(&adc.Imeas_c_offset),	//[5116h.08h], –ù–∞–∑–≤–∞–Ω–∏–µ: –°–º–µ—â–µ–Ω–∏–µ —Ç–æ–∫–∞ —Ñ–∞–∑—ã C, –¢–µ–∫—Å—Ç–ü–£: Ic–°–º–µ—â, –ì—Ä—É–ø–ø–∞: –ê–¶–ü
+(long)(&adc.Imeas_c),	//[5116h.09h], –ù–∞–∑–≤–∞–Ω–∏–µ: –¢–æ–∫ —Ñ–∞–∑—ã –°, –¢–µ–∫—Å—Ç–ü–£: Ic_–º–≥–Ω, –ì—Ä—É–ø–ø–∞: –ê–¶–ü
+(long)(&adc.Imeas_d_gain),	//[5116h.0Ah], –ù–∞–∑–≤–∞–Ω–∏–µ: –ö–æ—ç—Ñ—Ñ–∏—Ü–∏–µ–Ω—Ç —Ç–æ–∫–∞ —Ñ–∞–∑—ã D, –¢–µ–∫—Å—Ç–ü–£: Id–£—Å–∏–ª, –ì—Ä—É–ø–ø–∞: –ê–¶–ü
+(long)(&adc.Imeas_d_offset),	//[5116h.0Bh], –ù–∞–∑–≤–∞–Ω–∏–µ: –°–º–µ—â–µ–Ω–∏–µ —Ç–æ–∫–∞ —Ñ–∞–∑—ã D, –¢–µ–∫—Å—Ç–ü–£: Id–°–º–µ—â, –ì—Ä—É–ø–ø–∞: –ê–¶–ü
+(long)(&adc.Imeas_d),	//[5116h.0Ch], –ù–∞–∑–≤–∞–Ω–∏–µ: –¢–æ–∫ —Ñ–∞–∑—ã D, –¢–µ–∫—Å—Ç–ü–£: Id_–º–≥–Ω, –ì—Ä—É–ø–ø–∞: –ê–¶–ü
+(long)(&adc.Udc_meas_gain),	//[5116h.0Dh], –ù–∞–∑–≤–∞–Ω–∏–µ: –ö–æ—ç—Ñ—Ñ–∏—Ü–∏–µ–Ω—Ç –Ω–∞–ø—Ä—è–∂–µ–Ω–∏—è –ó–ü–¢, –¢–µ–∫—Å—Ç–ü–£: Ud–£—Å–∏–ª, –ì—Ä—É–ø–ø–∞: –ê–¶–ü
+(long)(&adc.Udc_meas_offset),	//[5116h.0Eh], –ù–∞–∑–≤–∞–Ω–∏–µ: –°–º–µ—â–µ–Ω–∏–µ –Ω–∞–ø—Ä—è–∂. –ó–ü–¢, –¢–µ–∫—Å—Ç–ü–£: Ud—Å–º–µ—â, –ì—Ä—É–ø–ø–∞: –ê–¶–ü
+(long)(&adc.Udc_meas),	//[5116h.0Fh], –ù–∞–∑–≤–∞–Ω–∏–µ: –ù–∞–ø—Ä—è–∂–µ–Ω–∏–µ –ó–ü–¢, –¢–µ–∫—Å—Ç–ü–£: Ud, –ì—Ä—É–ø–ø–∞: –ê–¶–ü
+(long)(&adc.T_meas_gain),	//[5116h.10h], –ù–∞–∑–≤–∞–Ω–∏–µ: –ö–æ—ç—Ñ—Ñ–∏—Ü–∏–µ–Ω—Ç —Ç–µ–º–ø–µ—Ä–∞—Ç—É—Ä—ã, –¢–µ–∫—Å—Ç–ü–£: t_gain, –ì—Ä—É–ø–ø–∞: –ê–¶–ü
+(long)(&adc.T_meas),	//[5116h.11h], –ù–∞–∑–≤–∞–Ω–∏–µ: –¢–µ–º–ø–µ—Ä–∞—Ç—É—Ä–∞, –¢–µ–∫—Å—Ç–ü–£: t, –ì—Ä—É–ø–ø–∞: –ê–¶–ü
+(long)(&adc.ref_meas_gain),	//[5116h.12h], –ù–∞–∑–≤–∞–Ω–∏–µ: –ö–æ—ç—Ñ—Ñ–∏—Ü–∏–µ–Ω—Ç –≤–Ω–µ—à–Ω–µ–≥–æ –≤—Ö–æ–¥–∞, –¢–µ–∫—Å—Ç–ü–£: ADC_ext_gain, –ì—Ä—É–ø–ø–∞: –ê–¶–ü
+(long)(&adc.ref_meas_offset),	//[5116h.13h], –ù–∞–∑–≤–∞–Ω–∏–µ: –°–º–µ—â–µ–Ω–∏–µ –≤–Ω–µ—à–Ω–µ–≥–æ –≤—Ö–æ–¥–∞, –¢–µ–∫—Å—Ç–ü–£: ADC_ext_offset, –ì—Ä—É–ø–ø–∞: –ê–¶–ü
+(long)(&adc.ref_meas),	//[5116h.14h], –ù–∞–∑–≤–∞–Ω–∏–µ: –í–Ω–µ—à–Ω–∏–π –∞–Ω–∞–ª–æ–≥–æ–≤—ã–π –≤—Ö–æ–¥ 1, –¢–µ–∫—Å—Ç–ü–£: ADC_ext1, –ì—Ä—É–ø–ø–∞: –ê–¶–ü
+(long)(&vhz.freq),	//[511Ah.01h], –ù–∞–∑–≤–∞–Ω–∏–µ: –í—ã—Ö–æ–¥–Ω–∞—è —á–∞—Å—Ç–æ—Ç–∞, –¢–µ–∫—Å—Ç–ü–£: F_–≤—ã—Ö, –ì—Ä—É–ø–ø–∞: –ö—Ä–∏–≤–∞—è U-f
+(long)(&vhz.vout),	//[511Ah.02h], –ù–∞–∑–≤–∞–Ω–∏–µ: –í—ã—Ö–æ–¥–Ω–æ–µ –Ω–∞–ø—Ä—è–∂–µ–Ω–∏–µ, –¢–µ–∫—Å—Ç–ü–£: U_–≤—ã—Ö, –ì—Ä—É–ø–ø–∞: –ö—Ä–∏–≤–∞—è U-f
+(long)(&vhz.FL),	//[511Ah.03h], –ù–∞–∑–≤–∞–Ω–∏–µ: –ù—É–ª–µ–≤–∞—è –æ–ø—Ä–æ–Ω–∞—è —á–∞—Å—Ç–æ—Ç–∞, –¢–µ–∫—Å—Ç–ü–£: f [0], –ì—Ä—É–ø–ø–∞: –ö—Ä–∏–≤–∞—è U-f
+(long)(&vhz.Vmin),	//[511Ah.04h], –ù–∞–∑–≤–∞–Ω–∏–µ: –ù—É–ª–µ–≤–æ–µ –æ–ø–æ—Ä–Ω–æ–µ –Ω–∞–ø—Ä—è–∂–µ–Ω–∏–µ, –¢–µ–∫—Å—Ç–ü–£: U [0], –ì—Ä—É–ø–ø–∞: –ö—Ä–∏–≤–∞—è U-f
+(long)(&vhz.FH),	//[511Ah.05h], –ù–∞–∑–≤–∞–Ω–∏–µ: –ü–µ—Ä–≤–∞—è –æ–ø–æ—Ä–Ω–∞—è —á–∞—Å—Ç–æ—Ç–∞, –¢–µ–∫—Å—Ç–ü–£: f [1], –ì—Ä—É–ø–ø–∞: –ö—Ä–∏–≤–∞—è U-f
+(long)(&vhz.Vmax),	//[511Ah.06h], –ù–∞–∑–≤–∞–Ω–∏–µ: –ü–µ—Ä–≤–æ–µ –æ–ø–æ—Ä–Ω–æ–µ –Ω–∞–ø—Ä—è–∂–µ–Ω–∏–µ, –¢–µ–∫—Å—Ç–ü–£: U [1], –ì—Ä—É–ø–ø–∞: –ö—Ä–∏–≤–∞—è U-f
+(long)(&vhz.Fmax),	//[511Ah.07h], –ù–∞–∑–≤–∞–Ω–∏–µ: –ú–∞–∫—Å–∏–º–∞–ª—å–Ω–∞—è —á–∞—Å—Ç–æ—Ç–∞, –¢–µ–∫—Å—Ç–ü–£: f max, –ì—Ä—É–ø–ø–∞: –ö—Ä–∏–≤–∞—è U-f
+(long)(&cur_par.speed),	//[5138h.01h], –ù–∞–∑–≤–∞–Ω–∏–µ: –°–∫–æ—Ä–æ—Å—Ç—å, –¢–µ–∫—Å—Ç–ü–£: —Å–∫–æ—Ä, –ì—Ä—É–ø–ø–∞: –ù–∞–±–ª—é–¥–∞–µ–º—ã–µ
+(long)(&cur_par.power),	//[5138h.02h], –ù–∞–∑–≤–∞–Ω–∏–µ: –ê–∫—Ç. –º–æ—â–Ω–æ—Å—Ç—å, –¢–µ–∫—Å—Ç–ü–£: –ê–∫—Ç–ú–æ—â, –ì—Ä—É–ø–ø–∞: –ù–∞–±–ª—é–¥–∞–µ–º—ã–µ
+(long)(&cur_par.Is),	//[5138h.03h], –ù–∞–∑–≤–∞–Ω–∏–µ: –¢–æ–∫ —Å—Ç–∞—Ç–æ—Ä–∞, –¢–µ–∫—Å—Ç–ü–£: –¢–æ–∫–°—Ç, –ì—Ä—É–ø–ø–∞: –ù–∞–±–ª—é–¥–∞–µ–º—ã–µ
+(long)(&cur_par.ThetaRefCurr),	//[5138h.04h], –ù–∞–∑–≤–∞–Ω–∏–µ: –≠–ª–£–≥–æ–ª–ó–∞–¥, –¢–µ–∫—Å—Ç–ü–£: –≠–ª–£–≥–æ–ª–ó–∞–¥, –ì—Ä—É–ø–ø–∞: –ù–∞–±–ª—é–¥–∞–µ–º—ã–µ
+(long)(&cur_par.ThetaCurr),	//[5138h.05h], –ù–∞–∑–≤–∞–Ω–∏–µ: –≠–ª–£–≥–æ–ª, –¢–µ–∫—Å—Ç–ü–£: –≠–ª–£–≥–æ–ª, –ì—Ä—É–ø–ø–∞: –ù–∞–±–ª—é–¥–∞–µ–º—ã–µ
+(long)(&cur_par.IsRef),	//[5138h.06h], –ù–∞–∑–≤–∞–Ω–∏–µ: –¢–æ–∫ —Å—Ç–∞—Ç–æ—Ä–∞ –∑–∞–¥, –¢–µ–∫—Å—Ç–ü–£: –¢–æ–∫–°—Ç–ó–∞–¥, –ì—Ä—É–ø–ø–∞: –ù–∞–±–ª—é–¥–∞–µ–º—ã–µ
+(long)(&global_time.PowerOn_time_min),	//[5138h.07h], –ù–∞–∑–≤–∞–Ω–∏–µ: –í—Ä–µ–º—è –∑–∞–ø–∏—Ç–∞–Ω–Ω–æ–≥–æ —Å–æ—Å—Ç–æ—è–Ω–∏—è, –º–∏–Ω, –¢–µ–∫—Å—Ç–ü–£: Power On Time, –ì—Ä—É–ø–ø–∞: –ù–∞–±–ª—é–¥–∞–µ–º—ã–µ
+(long)(&global_time.operational_time_min),	//[5138h.08h], –ù–∞–∑–≤–∞–Ω–∏–µ: –í—Ä–µ—Ä—è —Ä–∞–±–æ—Ç—ã –ø—Ä–∏–≤–æ–¥–∞, –º–∏–Ω, –¢–µ–∫—Å—Ç–ü–£: Work Time, –ì—Ä—É–ø–ø–∞: –ù–∞–±–ª—é–¥–∞–µ–º—ã–µ
+(long)(&dlog.mode_reset),	//[5150h.01h], –ù–∞–∑–≤–∞–Ω–∏–µ: dlog.mode_reset, –¢–µ–∫—Å—Ç–ü–£: mode, –ì—Ä—É–ø–ø–∞: dlog
+(long)(&dlog.control),	//[5150h.02h], –ù–∞–∑–≤–∞–Ω–∏–µ: dlog.control, –¢–µ–∫—Å—Ç–ü–£: dlcont, –ì—Ä—É–ø–ø–∞: dlog
+(long)(&dlog.ind_subind1),	//[5150h.03h], –ù–∞–∑–≤–∞–Ω–∏–µ: dlog.ind_subind1, –¢–µ–∫—Å—Ç–ü–£: dlisi1, –ì—Ä—É–ø–ø–∞: dlog
+(long)(&dlog.ind_subind2),	//[5150h.04h], –ù–∞–∑–≤–∞–Ω–∏–µ: dlog.ind_subind2, –¢–µ–∫—Å—Ç–ü–£: dlisi2, –ì—Ä—É–ø–ø–∞: dlog
+(long)(&dlog.ind_subind3),	//[5150h.05h], –ù–∞–∑–≤–∞–Ω–∏–µ: dlog.ind_subind3, –¢–µ–∫—Å—Ç–ü–£: dlisi3, –ì—Ä—É–ø–ø–∞: dlog
+(long)(&dlog.ind_subind4),	//[5150h.06h], –ù–∞–∑–≤–∞–Ω–∏–µ: dlog.ind_subind4, –¢–µ–∫—Å—Ç–ü–£: dlisi4, –ì—Ä—É–ø–ø–∞: dlog
+(long)(&dlog.StartBits),	//[5150h.07h], –ù–∞–∑–≤–∞–Ω–∏–µ: StartBitL, –¢–µ–∫—Å—Ç–ü–£: StrtBL, –ì—Ä—É–ø–ø–∞: dlog, –±–∏—Ç—ã —Å 0 –ø–æ 7: 0000000011111111b
+(long)(&dlog.StartBits),	//[5150h.08h], –ù–∞–∑–≤–∞–Ω–∏–µ: StartBitH, –¢–µ–∫—Å—Ç–ü–£: StrtBH, –ì—Ä—É–ø–ø–∞: dlog, –±–∏—Ç—ã —Å 8 –ø–æ 15: 1111111100000000b
+(long)(&dlog.OneShotOperation),	//[5150h.09h], –ù–∞–∑–≤–∞–Ω–∏–µ: OneShotOperation, –¢–µ–∫—Å—Ç–ü–£: OneShotOp, –ì—Ä—É–ø–ø–∞: dlog, –±–∏—Ç—ã —Å 0 –ø–æ 0: 0000000000000001b
+(long)(&dlog.trig_shift),	//[5150h.0Ah], –ù–∞–∑–≤–∞–Ω–∏–µ: –ö–æ–ª–∏—á–µ—Å—Ç–≤–æ —Ç–æ—á–µ–∫ –ø—Ä–µ–¥—ã—Å—Ç–æ—Ä–∏–∏, –¢–µ–∫—Å—Ç–ü–£: N –ø—Ä–µ–¥—ã—Å—Ç., –ì—Ä—É–ø–ø–∞: dlog
+(long)(&dlog.sampling_rate),	//[5150h.0Bh], –ù–∞–∑–≤–∞–Ω–∏–µ: –ß–∞—Å—Ç–æ—Ç–∞ –¥–∞—Ç–∞–ª–æ–≥–µ—Ä–∞, –¢–µ–∫—Å—Ç–ü–£: dlogFreq, –ì—Ä—É–ø–ø–∞: dlog
+(long)(&dlog.next_value_var),	//[5151h.00h], –ù–∞–∑–≤–∞–Ω–∏–µ: dlog.next_value_var, –¢–µ–∫—Å—Ç–ü–£: dlnval, –ì—Ä—É–ø–ø–∞: –í–ù–ï –ì–†–£–ü–ü
+(long)(&posspeedEqep.resol),	//[5152h.01h], –ù–∞–∑–≤–∞–Ω–∏–µ: –ö–æ–ª-–≤–æ –ø–µ—Ä–∏–æ–¥–æ–≤, –¢–µ–∫—Å—Ç–ü–£: –ö–æ–ª-–≤–æ –ø–µ—Ä–∏–æ–¥–æ–≤, –ì—Ä—É–ø–ø–∞: –î–ü–†-–≠–Ω–∫–æ–¥–µ—Ä
+(long)(&posspeedEqep.Posspeed_CTL.all),	//[5152h.02h], –ù–∞–∑–≤–∞–Ω–∏–µ: –ù–∞–ª–∏—á–∏–µ —Ä–µ–ø–µ—Ä–∞, –¢–µ–∫—Å—Ç–ü–£: –ù–∞–ª–∏—á–∏–µ —Ä–µ–ø–µ—Ä–∞, –ì—Ä—É–ø–ø–∞: –î–ü–†-–≠–Ω–∫–æ–¥–µ—Ä, –±–∏—Ç—ã —Å 2 –ø–æ 2: 0000000000000100b
+(long)(&posspeedEqep.SpeedCalcType),	//[5152h.03h], –ù–∞–∑–≤–∞–Ω–∏–µ: –†–∞—Å—Å—á–∏—Ç—ã–≤–∞—Ç—å —Å–∫–æ—Ä–æ—Å—Ç—å –ø—Ä–æ–≥—Ä–∞–º–º–Ω–æ, –¢–µ–∫—Å—Ç–ü–£: SpeedCalcType, –ì—Ä—É–ø–ø–∞: –î–ü–†-–≠–Ω–∫–æ–¥–µ—Ä
+(long)(&posspeedEqep.AngleOffset),	//[5152h.04h], –ù–∞–∑–≤–∞–Ω–∏–µ: –°–º–µ—â–£–≥–æ–ª, –¢–µ–∫—Å—Ç–ü–£: –°–º–µ—â–£–≥, –ì—Ä—É–ø–ø–∞: –î–ü–†-–≠–Ω–∫–æ–¥–µ—Ä
+(long)(&posspeedEqep.Poscnt_res),	//[5152h.05h], –ù–∞–∑–≤–∞–Ω–∏–µ: –ú–µ—Ö–∞–Ω–∏—á–µ—Å–∫.—É–≥–æ–ª –≤ –º–µ—Ç–∫–∞—Ö, –¢–µ–∫—Å—Ç–ü–£: –ú–µ—Ö–∞–Ω–∏—á–µ—Å–∫.—É–≥–æ–ª –≤ –º–µ, –ì—Ä—É–ø–ø–∞: –î–ü–†-–≠–Ω–∫–æ–¥–µ—Ä
+(long)(&posspeedEqep.Poscnt_res16),	//[5152h.06h], –ù–∞–∑–≤–∞–Ω–∏–µ: –ú–µ—Ö–∞–Ω–∏—á–µ—Å–∫.—É–≥–æ–ª –≤ –º–µ—Ç–∫–∞—Ö, –¢–µ–∫—Å—Ç–ü–£: –ú–µ—Ö–∞–Ω–∏—á–µ—Å–∫.—É–≥–æ–ª –≤ –º–µ, –ì—Ä—É–ø–ø–∞: –î–ü–†-–≠–Ω–∫–æ–¥–µ—Ä
+(long)(&posspeedEqep.speed_elec),	//[5152h.07h], –ù–∞–∑–≤–∞–Ω–∏–µ: –°–∫–æ—Ä–æ—Å—Ç—å , –¢–µ–∫—Å—Ç–ü–£: –°–∫–æ—Ä–æ—Å—Ç—å, –ì—Ä—É–ø–ø–∞: –î–ü–†-–≠–Ω–∫–æ–¥–µ—Ä
+(long)(&posspeedEqep.theta_elec),	//[5152h.08h], –ù–∞–∑–≤–∞–Ω–∏–µ: –£–≥–æ–ª. —ç–ª–µ–∫—Ç—Ä., –¢–µ–∫—Å—Ç–ü–£: –£–≥–æ–ª. —ç–ª–µ–∫—Ç—Ä., –ì—Ä—É–ø–ø–∞: –î–ü–†-–≠–Ω–∫–æ–¥–µ—Ä
+(long)(&posspeedEqep.theta_mech),	//[5152h.09h], –ù–∞–∑–≤–∞–Ω–∏–µ: –£–≥–æ–ª –º–µ—Ö., –¢–µ–∫—Å—Ç–ü–£: –£–≥–æ–ª –º–µ—Ö., –ì—Ä—É–ø–ø–∞: –î–ü–†-–≠–Ω–∫–æ–¥–µ—Ä
+(long)(&posspeedEqep.Posspeed_CTL.all),	//[5152h.0Ah], –ù–∞–∑–≤–∞–Ω–∏–µ: –ö–æ–º–∞–Ω–¥–∞ –∏–Ω–∏—Ü., –¢–µ–∫—Å—Ç–ü–£: –ö–æ–º–∞–Ω–¥–∞ –∏–Ω–∏—Ü., –ì—Ä—É–ø–ø–∞: –î–ü–†-–≠–Ω–∫–æ–¥–µ—Ä, –±–∏—Ç—ã —Å 4 –ø–æ 4: 0000000000010000b
+(long)(&posspeedEqep.speed_filter.T),	//[5152h.0Bh], –ù–∞–∑–≤–∞–Ω–∏–µ: –ö –±—ã—Å—Ç—Ä–æ–¥–µ–π—Å—Ç–≤–∏—è —Ñ–∏–ª—å—Ç—Ä–∞ —Å–∫–æ—Ä–æ—Å—Ç–∏, –¢–µ–∫—Å—Ç–ü–£: –ö—Ñ. —Å–∫–æ—Ä–æ—Å—Ç–∏, –ì—Ä—É–ø–ø–∞: –î–ü–†-–≠–Ω–∫–æ–¥–µ—Ä
+(long)(&posspeedEqep.Posspeed_FLG1.all),	//[5152h.0Ch], –ù–∞–∑–≤–∞–Ω–∏–µ: Posspeed_FLG1, –¢–µ–∫—Å—Ç–ü–£: Posspeed_FLG1, –ì—Ä—É–ø–ø–∞: –î–ü–†-–≠–Ω–∫–æ–¥–µ—Ä
+(long)(&posspeedEqep.GPIOsValue),	//[5152h.0Dh], –ù–∞–∑–≤–∞–Ω–∏–µ: GPIOsValue, –¢–µ–∫—Å—Ç–ü–£: GPIOsValue, –ì—Ä—É–ø–ø–∞: –î–ü–†-–≠–Ω–∫–æ–¥–µ—Ä
+(long)(&posspeedEqep.UPPS_forWatch),	//[5152h.0Eh], –ù–∞–∑–≤–∞–Ω–∏–µ: UPPS, –¢–µ–∫—Å—Ç–ü–£: UPPS, –ì—Ä—É–ø–ø–∞: –î–ü–†-–≠–Ω–∫–æ–¥–µ—Ä
+(long)(&posspeedEqep.Qcprdlat_tmp),	//[5152h.0Fh], –ù–∞–∑–≤–∞–Ω–∏–µ: QCPRD, –¢–µ–∫—Å—Ç–ü–£: QCPRD, –ì—Ä—É–ø–ø–∞: –î–ü–†-–≠–Ω–∫–æ–¥–µ—Ä
+(long)(&posspeedEqep.Qcprdlat16_tmp),	//[5152h.10h], –ù–∞–∑–≤–∞–Ω–∏–µ: QCPRD, –¢–µ–∫—Å—Ç–ü–£: QCPRD, –ì—Ä—É–ø–ø–∞: –î–ü–†-–≠–Ω–∫–æ–¥–µ—Ä
+(long)(&posspeedEqep.QEPSTS),	//[5152h.11h], –ù–∞–∑–≤–∞–Ω–∏–µ: QEPSTS, –¢–µ–∫—Å—Ç–ü–£: QEPSTS, –ì—Ä—É–ø–ø–∞: –î–ü–†-–≠–Ω–∫–æ–¥–µ—Ä
+(long)(&posspeedEqep.RevolutionCounter),	//[5152h.12h], –ù–∞–∑–≤–∞–Ω–∏–µ: –ß–∏—Å–ª–æ –æ–±–æ—Ä–æ—Ç–æ–≤, –¢–µ–∫—Å—Ç–ü–£: revolCounter, –ì—Ä—É–ø–ø–∞: –î–ü–†-–≠–Ω–∫–æ–¥–µ—Ä
+(long)(&posspeedEqep.Poscnt_resContinouosInt8),	//[5152h.13h], –ù–∞–∑–≤–∞–Ω–∏–µ: –ê–±—Å. –ø–æ–ª–æ–∂–µ–Ω–∏–µ –≤ –º–µ—Ç–∫–∞—Ö, –¢–µ–∫—Å—Ç–ü–£: qcAbsPos, –ì—Ä—É–ø–ø–∞: –î–ü–†-–≠–Ω–∫–æ–¥–µ—Ä
+(long)(&posspeedEqep.Poscnt_resContinouosInt),	//[5152h.14h], –ù–∞–∑–≤–∞–Ω–∏–µ: –ê–±—Å. –ø–æ–ª–æ–∂–µ–Ω–∏–µ –≤ –º–µ—Ç–∫–∞—Ö, –¢–µ–∫—Å—Ç–ü–£: qcAbsPos, –ì—Ä—É–ø–ø–∞: –î–ü–†-–≠–Ω–∫–æ–¥–µ—Ä
+(long)(&posspeedEqep.Poscnt_resContinouosLong),	//[5152h.15h], –ù–∞–∑–≤–∞–Ω–∏–µ: –ê–±—Å. –ø–æ–ª–æ–∂–µ–Ω–∏–µ –≤ –º–µ—Ç–∫–∞—Ö, –¢–µ–∫—Å—Ç–ü–£: qcAbsPos, –ì—Ä—É–ø–ø–∞: –î–ü–†-–≠–Ω–∫–æ–¥–µ—Ä
+(long)(&posspeedEqep.theta_mechContinouos),	//[5152h.16h], –ù–∞–∑–≤–∞–Ω–∏–µ: –£–≥–æ–ª –º–µ—Ö–∞–Ω–∏—á–µ—Å–∫–∏–π –Ω–µ –æ–≥—Ä–∞–Ω–∏—á., –¢–µ–∫—Å—Ç–ü–£: –£–≥.–º–µ—Ö.–Ω–µ_–æ–≥—Ä, –ì—Ä—É–ø–ø–∞: –î–ü–†-–≠–Ω–∫–æ–¥–µ—Ä
+(long)(&posspeedEqep.theta_elecContinouos),	//[5152h.17h], –ù–∞–∑–≤–∞–Ω–∏–µ: –£–≥–æ–ª —ç–ª–µ–∫—Ç—Ä–∏—á–µ—Å–∫–∏–π –Ω–µ –æ–≥—Ä–∞–Ω–∏—á., –¢–µ–∫—Å—Ç–ü–£: –£–≥.—ç–ª.–Ω–µ_–æ–≥—Ä, –ì—Ä—É–ø–ø–∞: –î–ü–†-–≠–Ω–∫–æ–¥–µ—Ä
+(long)(&DPReCAP.Angle),	//[5155h.01h], –ù–∞–∑–≤–∞–Ω–∏–µ: –≠–ª–£–≥–æ–ª, –¢–µ–∫—Å—Ç–ü–£: –≠–ª–£–≥–æ–ª, –ì—Ä—É–ø–ø–∞: –î–ü–†-–•–æ–ª–ª
+(long)(&DPReCAP.speed),	//[5155h.02h], –ù–∞–∑–≤–∞–Ω–∏–µ: –°–∫–æ—Ä–æ—Å—Ç—å , –¢–µ–∫—Å—Ç–ü–£: –°–∫–æ—Ä–æ—Å—Ç—å, –ì—Ä—É–ø–ø–∞: –î–ü–†-–•–æ–ª–ª
+(long)(&DPReCAP.speedMIN),	//[5155h.03h], –ù–∞–∑–≤–∞–Ω–∏–µ: –£—Å—Ç–∞–≤–∫–∞ –°–∫–æ—Ä–æ—Å—Ç–∏, –¢–µ–∫—Å—Ç–ü–£: –£—Å—Ç–∞–≤–∫–∞ –°–∫–æ—Ä–æ—Å—Ç–∏, –ì—Ä—É–ø–ø–∞: –î–ü–†-–•–æ–ª–ª
+(long)(&DPReCAP.Angle6),	//[5155h.04h], –ù–∞–∑–≤–∞–Ω–∏–µ: –≠–ª–£–≥–æ–ª6, –¢–µ–∫—Å—Ç–ü–£: –≠–ª–£–≥–æ–ª6, –ì—Ä—É–ø–ø–∞: –î–ü–†-–•–æ–ª–ª
+(long)(&DPReCAP.DPReCAP_FLG1.all),	//[5155h.05h], –ù–∞–∑–≤–∞–Ω–∏–µ: –ò–Ω—Ç-–ø–æ–ª—è—Ç–æ—Ä –≤–∫–ª, –¢–µ–∫—Å—Ç–ü–£: –ò–Ω—Ç-–ø–æ–ª—è—Ç–æ—Ä –≤–∫–ª, –ì—Ä—É–ø–ø–∞: –î–ü–†-–•–æ–ª–ª, –±–∏—Ç—ã —Å 0 –ø–æ 0: 0000000000000001b
+(long)(&DPReCAP.milsecREF),	//[5155h.06h], –ù–∞–∑–≤–∞–Ω–∏–µ: –£—Å—Ç–∞–≤–∫–∞ –æ–±–Ω—É–ª–µ–Ω–∏—è —Å–∫–æ—Ä–æ—Å—Ç–∏, –¢–µ–∫—Å—Ç–ü–£: –£—Å—Ç–∞–≤–∫–∞ –æ–±–Ω—É–ª–µ–Ω–∏—è —Å–∫, –ì—Ä—É–ø–ø–∞: –î–ü–†-–•–æ–ª–ª
+(long)(&DPReCAP.speedMinREF),	//[5155h.07h], –ù–∞–∑–≤–∞–Ω–∏–µ: –°–∫–æ—Ä–æ—Å—Ç—å –ú–∏–Ω., –¢–µ–∫—Å—Ç–ü–£: –°–∫–æ—Ä–æ—Å—Ç—å –ú–∏–Ω., –ì—Ä—É–ø–ø–∞: –î–ü–†-–•–æ–ª–ª
+(long)(&DPReCAP.CAP_WrongEdgeCnt),	//[5155h.08h], –ù–∞–∑–≤–∞–Ω–∏–µ: –õ–æ–∂–Ω—ã–µ —Ñ—Ä–æ–Ω—Ç—ã, –¢–µ–∫—Å—Ç–ü–£: –õ–æ–∂–Ω—ã–µ —Ñ—Ä–æ–Ω—Ç—ã, –ì—Ä—É–ø–ø–∞: –î–ü–†-–•–æ–ª–ª
+(long)(&DPReCAP.HallCode),	//[5155h.09h], –ù–∞–∑–≤–∞–Ω–∏–µ: –î–∏—Å–∫—Ä–µ—Ç–Ω—ã–µ –≤—Ö–æ–¥—ã, –¢–µ–∫—Å—Ç–ü–£: –í—Ö–æ–¥—ã, –ì—Ä—É–ø–ø–∞: –î–ü–†-–•–æ–ª–ª, –±–∏—Ç—ã —Å 0 –ø–æ 2: 0000000000000111b
+(long)(&DPReCAP.AngleOffset),	//[5155h.0Ah], –ù–∞–∑–≤–∞–Ω–∏–µ: –°–º–µ—â–£–≥–æ–ª, –¢–µ–∫—Å—Ç–ü–£: –°–º–µ—â–£–≥, –ì—Ä—É–ø–ø–∞: –î–ü–†-–•–æ–ª–ª
+(long)(&DPReCAP.ErrorLevel),	//[5155h.0Bh], –ù–∞–∑–≤–∞–Ω–∏–µ: –£—Ä–æ–≤–µ–Ω—å –ø–æ–º–µ—Ö, –¢–µ–∫—Å—Ç–ü–£: –£—Ä–æ–≤–µ–Ω—å –ø–æ–º–µ—Ö, –ì—Ä—É–ø–ø–∞: –î–ü–†-–•–æ–ª–ª
+(long)(&DPReCAP.CAP_WrongEdgeCnt1),	//[5155h.0Ch], –ù–∞–∑–≤–∞–Ω–∏–µ: –û—à–∏–±–∫–∞ 1 –∫–∞–Ω–∞–ª–∞, –¢–µ–∫—Å—Ç–ü–£: –û—à–∏–±_1_–∫., –ì—Ä—É–ø–ø–∞: –î–ü–†-–•–æ–ª–ª
+(long)(&DPReCAP.CAP_WrongEdgeCnt2),	//[5155h.0Dh], –ù–∞–∑–≤–∞–Ω–∏–µ: –û—à–∏–±–∫–∞ 2 –∫–∞–Ω–∞–ª–∞, –¢–µ–∫—Å—Ç–ü–£: –û—à–∏–±_2_–∫., –ì—Ä—É–ø–ø–∞: –î–ü–†-–•–æ–ª–ª
+(long)(&DPReCAP.CAP_WrongEdgeCnt3),	//[5155h.0Eh], –ù–∞–∑–≤–∞–Ω–∏–µ: –û—à–∏–±–∫–∞ 3 –∫–∞–Ω–∞–ª–∞, –¢–µ–∫—Å—Ç–ü–£: –û—à–∏–±_3_–∫., –ì—Ä—É–ø–ø–∞: –î–ü–†-–•–æ–ª–ª
+(long)(&DPReCAP.UserDirection),	//[5155h.0Fh], –ù–∞–∑–≤–∞–Ω–∏–µ: –ù–∞–ø—Ä–∞–≤–ª–µ–Ω–∏–µ –≤—Ä–∞—â–µ–Ω–∏—è, –¢–µ–∫—Å—Ç–ü–£: –ù–∞–ø—Ä–í—Ä, –ì—Ä—É–ø–ø–∞: –î–ü–†-–•–æ–ª–ª, –±–∏—Ç—ã —Å 2 –ø–æ 2: 0000000000000100b
+(long)(&DPReCAP.WrongCodeCounterLimitPerSec),	//[5155h.10h], –ù–∞–∑–≤–∞–Ω–∏–µ: –ú–∞–∫—Å.—á–∏—Å–ª–æ –æ—à–∏–±–æ–∫ –î–ü–†, –¢–µ–∫—Å—Ç–ü–£: –ú–∞–∫—Å.–æ—à.–î–ü–†, –ì—Ä—É–ø–ø–∞: –î–ü–†-–•–æ–ª–ª
+(long)(&DPReCAP.WrongCodeCounter),	//[5155h.11h], –ù–∞–∑–≤–∞–Ω–∏–µ: –ö–æ–ª-–≤–æ –æ—à–∏–±–æ–∫ –Ω–µ–≤–µ—Ä–Ω–æ–π –ø–æ—Å–ª–µ–¥–æ–≤–∞—Ç–µ–ª—å–Ω–æ—Å—Ç–∏ , –¢–µ–∫—Å—Ç–ü–£: –û—à–∏–±–∫–∏ –ø–æ—Å–ª–µ–¥–æ–≤–∞—Ç., –ì—Ä—É–ø–ø–∞: –î–ü–†-–•–æ–ª–ª
+(long)(&CounterCAP_isr),	//[5155h.12h], –ù–∞–∑–≤–∞–Ω–∏–µ: –°—á—ë—Ç—á–∏–∫ –ø—Ä–µ—Ä—ã–≤–∞–Ω–∏–π –ø–æ –ø—Ä–∏–µ–º—É, –¢–µ–∫—Å—Ç–ü–£: –°—á—ë—Ç.Rx.Int., –ì—Ä—É–ø–ø–∞: –î–ü–†-–•–æ–ª–ª
+(long)(&cap0_counter),	//[5155h.13h], –ù–∞–∑–≤–∞–Ω–∏–µ: –°—á—ë—Ç—á–∏–∫ –ø—Ä–µ—Ä—ã–≤–∞–Ω–∏–π CAP1, –¢–µ–∫—Å—Ç–ü–£: –°—á.–ø—Ä–µ—Ä—ã–≤.CAP1, –ì—Ä—É–ø–ø–∞: –î–ü–†-–•–æ–ª–ª
+(long)(&cap1_counter),	//[5155h.14h], –ù–∞–∑–≤–∞–Ω–∏–µ: –°—á—ë—Ç—á–∏–∫ –ø—Ä–µ—Ä—ã–≤–∞–Ω–∏–π CAP2, –¢–µ–∫—Å—Ç–ü–£: –°—á.–ø—Ä–µ—Ä—ã–≤.CAP2, –ì—Ä—É–ø–ø–∞: –î–ü–†-–•–æ–ª–ª
+(long)(&cap2_counter),	//[5155h.15h], –ù–∞–∑–≤–∞–Ω–∏–µ: –°—á—ë—Ç—á–∏–∫ –ø—Ä–µ—Ä—ã–≤–∞–Ω–∏–π CAP3, –¢–µ–∫—Å—Ç–ü–£: –°—á.–ø—Ä–µ—Ä—ã–≤.CAP3, –ì—Ä—É–ø–ø–∞: –î–ü–†-–•–æ–ª–ª
+(long)(&SSI_Encoder.resol),	//[5157h.01h], –ù–∞–∑–≤–∞–Ω–∏–µ: –ö–æ–ª–∏—á–µ—Å—Ç–≤–æ –∏–º–ø—É–ª—å—Å–æ–≤ –Ω–∞ –æ–±–æ—Ä–æ—Ç, –¢–µ–∫—Å—Ç–ü–£: qepTik, –ì—Ä—É–ø–ø–∞: –î–ü–†-SSI —ç–Ω–∫–æ–¥–µ—Ä
+(long)(&SSI_Encoder.AngleOffset),	//[5157h.02h], –ù–∞–∑–≤–∞–Ω–∏–µ: –°–º–µ—â–£–≥–æ–ª, –¢–µ–∫—Å—Ç–ü–£: –°–º–µ—â–£–≥, –ì—Ä—É–ø–ø–∞: –î–ü–†-SSI —ç–Ω–∫–æ–¥–µ—Ä
+(long)(&SSI_Encoder.Poscnt_res),	//[5157h.03h], –ù–∞–∑–≤–∞–Ω–∏–µ: –ú–µ—Ö–∞–Ω–∏—á–µ—Å–∫.—É–≥–æ–ª –≤ –º–µ—Ç–∫–∞—Ö, –¢–µ–∫—Å—Ç–ü–£: –ú–µ—Ö–∞–Ω–∏—á–µ—Å–∫.—É–≥–æ–ª –≤ –º–µ, –ì—Ä—É–ø–ø–∞: –î–ü–†-SSI —ç–Ω–∫–æ–¥–µ—Ä
+(long)(&SSI_Encoder.speed_elec),	//[5157h.04h], –ù–∞–∑–≤–∞–Ω–∏–µ: –°–∫–æ—Ä–æ—Å—Ç—å , –¢–µ–∫—Å—Ç–ü–£: –°–∫–æ—Ä–æ—Å—Ç—å, –ì—Ä—É–ø–ø–∞: –î–ü–†-SSI —ç–Ω–∫–æ–¥–µ—Ä
+(long)(&SSI_Encoder.theta_elec),	//[5157h.05h], –ù–∞–∑–≤–∞–Ω–∏–µ: –£–≥–æ–ª. —ç–ª–µ–∫—Ç—Ä., –¢–µ–∫—Å—Ç–ü–£: –£–≥–æ–ª. —ç–ª–µ–∫—Ç—Ä., –ì—Ä—É–ø–ø–∞: –î–ü–†-SSI —ç–Ω–∫–æ–¥–µ—Ä
+(long)(&SSI_Encoder.theta_mech),	//[5157h.06h], –ù–∞–∑–≤–∞–Ω–∏–µ: –£–≥–æ–ª –º–µ—Ö., –¢–µ–∫—Å—Ç–ü–£: –£–≥–æ–ª –º–µ—Ö., –ì—Ä—É–ø–ø–∞: –î–ü–†-SSI —ç–Ω–∫–æ–¥–µ—Ä
+(long)(&SSI_Encoder.theta_mech_filtered),	//[5157h.07h], –ù–∞–∑–≤–∞–Ω–∏–µ: –£–≥–æ–ª –º–µ—Ö. —Ñ–∏–ª—å—Ç—Ä–æ–≤–∞–Ω–Ω—ã–π, –¢–µ–∫—Å—Ç–ü–£: theta_mech_filtered, –ì—Ä—É–ø–ø–∞: –î–ü–†-SSI —ç–Ω–∫–æ–¥–µ—Ä
+(long)(&SSI_Encoder.theta_mech_filterK),	//[5157h.08h], –ù–∞–∑–≤–∞–Ω–∏–µ: –ö –±—ã—Å—Ç—Ä–æ–¥–µ–π—Å—Ç–≤–∏—è —Ñ–∏–ª—å—Ç—Ä–∞ —É–≥–ª–∞, –¢–µ–∫—Å—Ç–ü–£: –ö—Ñ. —É–≥–ª–∞, –ì—Ä—É–ø–ø–∞: –î–ü–†-SSI —ç–Ω–∫–æ–¥–µ—Ä
+(long)(&SSI_Encoder.RevolutionCounter),	//[5157h.09h], –ù–∞–∑–≤–∞–Ω–∏–µ: –ß–∏—Å–ª–æ –æ–±–æ—Ä–æ—Ç–æ–≤, –¢–µ–∫—Å—Ç–ü–£: revolCounter, –ì—Ä—É–ø–ø–∞: –î–ü–†-SSI —ç–Ω–∫–æ–¥–µ—Ä
+(long)(&SSI_Encoder.Poscnt_resContinouosLong),	//[5157h.0Ah], –ù–∞–∑–≤–∞–Ω–∏–µ: –ê–±—Å. –ø–æ–ª–æ–∂–µ–Ω–∏–µ –≤ –º–µ—Ç–∫–∞—Ö, –¢–µ–∫—Å—Ç–ü–£: qcAbsPos, –ì—Ä—É–ø–ø–∞: –î–ü–†-SSI —ç–Ω–∫–æ–¥–µ—Ä
+(long)(&SSI_Encoder.Poscnt_resContinouosInt8),	//[5157h.0Bh], –ù–∞–∑–≤–∞–Ω–∏–µ: –ê–±—Å. –ø–æ–ª–æ–∂–µ–Ω–∏–µ –≤ –º–µ—Ç–∫–∞—Ö, –¢–µ–∫—Å—Ç–ü–£: qcAbsPos, –ì—Ä—É–ø–ø–∞: –î–ü–†-SSI —ç–Ω–∫–æ–¥–µ—Ä
+(long)(&SSI_Encoder.Poscnt_resContinouosInt),	//[5157h.0Ch], –ù–∞–∑–≤–∞–Ω–∏–µ: –ê–±—Å. –ø–æ–ª–æ–∂–µ–Ω–∏–µ –≤ –º–µ—Ç–∫–∞—Ö, –¢–µ–∫—Å—Ç–ü–£: qcAbsPos, –ì—Ä—É–ø–ø–∞: –î–ü–†-SSI —ç–Ω–∫–æ–¥–µ—Ä
+(long)(&SSI_Encoder.theta_mechContinouos),	//[5157h.0Dh], –ù–∞–∑–≤–∞–Ω–∏–µ: –£–≥–æ–ª –º–µ—Ö–∞–Ω–∏—á–µ—Å–∫–∏–π –Ω–µ –æ–≥—Ä–∞–Ω–∏—á., –¢–µ–∫—Å—Ç–ü–£: –£–≥.–º–µ—Ö.–Ω–µ_–æ–≥—Ä, –ì—Ä—É–ø–ø–∞: –î–ü–†-SSI —ç–Ω–∫–æ–¥–µ—Ä
+(long)(&SSI_Encoder.theta_elecContinouos),	//[5157h.0Eh], –ù–∞–∑–≤–∞–Ω–∏–µ: –£–≥–æ–ª —ç–ª–µ–∫—Ç—Ä–∏—á–µ—Å–∫–∏–π –Ω–µ –æ–≥—Ä–∞–Ω–∏—á., –¢–µ–∫—Å—Ç–ü–£: –£–≥.—ç–ª.–Ω–µ_–æ–≥—Ä, –ì—Ä—É–ø–ø–∞: –î–ü–†-SSI —ç–Ω–∫–æ–¥–µ—Ä
+(long)(&Debug1),	//[5174h.01h], –ù–∞–∑–≤–∞–Ω–∏–µ: DebugL1, –¢–µ–∫—Å—Ç–ü–£: DebugL1, –ì—Ä—É–ø–ø–∞: –î–ª—è –æ—Ç–ª–∞–¥–∫–∏
+(long)(&Debug1),	//[5174h.02h], –ù–∞–∑–≤–∞–Ω–∏–µ: DebugL1, –¢–µ–∫—Å—Ç–ü–£: DebugL1, –ì—Ä—É–ø–ø–∞: –î–ª—è –æ—Ç–ª–∞–¥–∫–∏
+(long)(&Debug2),	//[5174h.03h], –ù–∞–∑–≤–∞–Ω–∏–µ: DebugL2, –¢–µ–∫—Å—Ç–ü–£: DebugL2, –ì—Ä—É–ø–ø–∞: –î–ª—è –æ—Ç–ª–∞–¥–∫–∏
+(long)(&Debug2),	//[5174h.04h], –ù–∞–∑–≤–∞–Ω–∏–µ: DebugL2, –¢–µ–∫—Å—Ç–ü–£: DebugL2, –ì—Ä—É–ø–ø–∞: –î–ª—è –æ—Ç–ª–∞–¥–∫–∏
+(long)(&Debug3),	//[5174h.05h], –ù–∞–∑–≤–∞–Ω–∏–µ: DebugI3, –¢–µ–∫—Å—Ç–ü–£: DebugI3, –ì—Ä—É–ø–ø–∞: –î–ª—è –æ—Ç–ª–∞–¥–∫–∏
+(long)(&Debug3),	//[5174h.06h], –ù–∞–∑–≤–∞–Ω–∏–µ: DebugI3, –¢–µ–∫—Å—Ç–ü–£: DebugI3, –ì—Ä—É–ø–ø–∞: –î–ª—è –æ—Ç–ª–∞–¥–∫–∏
+(long)(&Debug4),	//[5174h.07h], –ù–∞–∑–≤–∞–Ω–∏–µ: DebugI4, –¢–µ–∫—Å—Ç–ü–£: DebugI4, –ì—Ä—É–ø–ø–∞: –î–ª—è –æ—Ç–ª–∞–¥–∫–∏
+(long)(&Debug4),	//[5174h.08h], –ù–∞–∑–≤–∞–Ω–∏–µ: DebugI4, –¢–µ–∫—Å—Ç–ü–£: DebugI4, –ì—Ä—É–ø–ø–∞: –î–ª—è –æ—Ç–ª–∞–¥–∫–∏
+(long)(&DebugW1),	//[5174h.09h], –ù–∞–∑–≤–∞–Ω–∏–µ: DebugW1, –¢–µ–∫—Å—Ç–ü–£: DebugW1, –ì—Ä—É–ø–ø–∞: –î–ª—è –æ—Ç–ª–∞–¥–∫–∏
+(long)(&DebugW1),	//[5174h.0Ah], –ù–∞–∑–≤–∞–Ω–∏–µ: DebugW1, –¢–µ–∫—Å—Ç–ü–£: DebugW1, –ì—Ä—É–ø–ø–∞: –î–ª—è –æ—Ç–ª–∞–¥–∫–∏
+(long)(&DebugW2),	//[5174h.0Bh], –ù–∞–∑–≤–∞–Ω–∏–µ: DebugW2, –¢–µ–∫—Å—Ç–ü–£: DebugW2, –ì—Ä—É–ø–ø–∞: –î–ª—è –æ—Ç–ª–∞–¥–∫–∏
+(long)(&DebugW2),	//[5174h.0Ch], –ù–∞–∑–≤–∞–Ω–∏–µ: DebugW2, –¢–µ–∫—Å—Ç–ü–£: DebugW2, –ì—Ä—É–ø–ø–∞: –î–ª—è –æ—Ç–ª–∞–¥–∫–∏
+(long)(&DebugW3),	//[5174h.0Dh], –ù–∞–∑–≤–∞–Ω–∏–µ: DebugW3, –¢–µ–∫—Å—Ç–ü–£: DebugW3, –ì—Ä—É–ø–ø–∞: –î–ª—è –æ—Ç–ª–∞–¥–∫–∏
+(long)(&DebugW3),	//[5174h.0Eh], –ù–∞–∑–≤–∞–Ω–∏–µ: DebugW3, –¢–µ–∫—Å—Ç–ü–£: DebugW3, –ì—Ä—É–ø–ø–∞: –î–ª—è –æ—Ç–ª–∞–¥–∫–∏
+(long)(&DebugW4),	//[5174h.0Fh], –ù–∞–∑–≤–∞–Ω–∏–µ: DebugW4, –¢–µ–∫—Å—Ç–ü–£: DebugW4, –ì—Ä—É–ø–ø–∞: –î–ª—è –æ—Ç–ª–∞–¥–∫–∏
+(long)(&DebugW4),	//[5174h.10h], –ù–∞–∑–≤–∞–Ω–∏–µ: DebugW4, –¢–µ–∫—Å—Ç–ü–£: DebugW4, –ì—Ä—É–ø–ø–∞: –î–ª—è –æ—Ç–ª–∞–¥–∫–∏
+(long)(&DebugF1),	//[5174h.11h], –ù–∞–∑–≤–∞–Ω–∏–µ: DebugF1, –¢–µ–∫—Å—Ç–ü–£: DebugF1, –ì—Ä—É–ø–ø–∞: –î–ª—è –æ—Ç–ª–∞–¥–∫–∏
+(long)(&DebugF2),	//[5174h.12h], –ù–∞–∑–≤–∞–Ω–∏–µ: DebugF2, –¢–µ–∫—Å—Ç–ü–£: DebugF2, –ì—Ä—É–ø–ø–∞: –î–ª—è –æ—Ç–ª–∞–¥–∫–∏
+(long)(&DebugF3),	//[5174h.13h], –ù–∞–∑–≤–∞–Ω–∏–µ: DebugF3, –¢–µ–∫—Å—Ç–ü–£: DebugF3, –ì—Ä—É–ø–ø–∞: –î–ª—è –æ—Ç–ª–∞–¥–∫–∏
+(long)(&DebugF4),	//[5174h.14h], –ù–∞–∑–≤–∞–Ω–∏–µ: DebugF4, –¢–µ–∫—Å—Ç–ü–£: DebugF4, –ì—Ä—É–ø–ø–∞: –î–ª—è –æ—Ç–ª–∞–¥–∫–∏
+(long)(&model.MotorType),	//[5181h.01h], –ù–∞–∑–≤–∞–Ω–∏–µ: –¢–∏–ø –¥–≤–∏–≥–∞—Ç–µ–ª—è –º–æ–¥–µ–ª–∏, –¢–µ–∫—Å—Ç–ü–£: ModelMotorType, –ì—Ä—É–ø–ø–∞: –ú–æ–¥–µ–ª—å –æ–±—â–∏–µ –¥–∞–Ω–Ω—ã–µ, –±–∏—Ç—ã —Å 0 –ø–æ 7: 0000000011111111b
+(long)(&model.MotorParametersNum),	//[5181h.02h], –ù–∞–∑–≤–∞–Ω–∏–µ: –ü–∞—Ä–∞–º–µ—Ç—Ä—ã –¥–≤–∏–≥–∞—Ç–µ–ª—è, –¢–µ–∫—Å—Ç–ü–£: –ü–∞—Ä–î–≤, –ì—Ä—É–ø–ø–∞: –ú–æ–¥–µ–ª—å –æ–±—â–∏–µ –¥–∞–Ω–Ω—ã–µ
+(long)(&model.load),	//[5181h.03h], –ù–∞–∑–≤–∞–Ω–∏–µ: –°–∏–º—É–ª–∏—Ä—É–µ–º—ã–π –º–æ–º–µ–Ω—Ç –Ω–∞–≥—Ä—É–∑–∫–∏, –¢–µ–∫—Å—Ç–ü–£: –ú–Ω–∞–≥—Ä —Å–∏–º., –ì—Ä—É–ø–ø–∞: –ú–æ–¥–µ–ª—å –æ–±—â–∏–µ –¥–∞–Ω–Ω—ã–µ
+(long)(&model.motorInternals.udc),	//[5181h.04h], –ù–∞–∑–≤–∞–Ω–∏–µ: –ù–∞–ø—Ä—è–∂–µ–Ω–∏–µ –ó–ü–¢, –¢–µ–∫—Å—Ç–ü–£: Ud, –ì—Ä—É–ø–ø–∞: –ú–æ–¥–µ–ª—å –æ–±—â–∏–µ –¥–∞–Ω–Ω—ã–µ
+(long)(&model.motorInternals.torque),	//[5181h.05h], –ù–∞–∑–≤–∞–Ω–∏–µ: –†–µ–∞–ª–∏–∑–æ–≤–∞–Ω–Ω—ã–π —ç–ª–µ–∫—Ç—Ä–∏—á–µ—Å–∫–∏–π –º–æ–º–µ–Ω—Ç, –¢–µ–∫—Å—Ç–ü–£: –†–µ–∞–ª.–≠–ª.–ú–æ–º, –ì—Ä—É–ø–ø–∞: –ú–æ–¥–µ–ª—å –æ–±—â–∏–µ –¥–∞–Ω–Ω—ã–µ
+(long)(&model.motorInternals.omega),	//[5181h.06h], –ù–∞–∑–≤–∞–Ω–∏–µ: –°–∫–æ—Ä–æ—Å—Ç—å, –¢–µ–∫—Å—Ç–ü–£: qepspd, –ì—Ä—É–ø–ø–∞: –ú–æ–¥–µ–ª—å –æ–±—â–∏–µ –¥–∞–Ω–Ω—ã–µ
+(long)(&model.motorInternals.omega_rpm),	//[5181h.07h], –ù–∞–∑–≤–∞–Ω–∏–µ: –°–∫–æ—Ä–æ—Å—Ç—å, –¢–µ–∫—Å—Ç–ü–£: qepspd, –ì—Ä—É–ø–ø–∞: –ú–æ–¥–µ–ª—å –æ–±—â–∏–µ –¥–∞–Ω–Ω—ã–µ
+(long)(&model.motorInternals.tetaRM),	//[5181h.08h], –ù–∞–∑–≤–∞–Ω–∏–µ: –ú–µ—Ö–∞–Ω–∏—á–µ—Å–∫–∏–π —É–≥–æ–ª, –¢–µ–∫—Å—Ç–ü–£: qeptm, –ì—Ä—É–ø–ø–∞: –ú–æ–¥–µ–ª—å –æ–±—â–∏–µ –¥–∞–Ω–Ω—ã–µ
+(long)(&model.qepCounter),	//[5181h.09h], –ù–∞–∑–≤–∞–Ω–∏–µ: EncoderIncrements, –¢–µ–∫—Å—Ç–ü–£: EncoderIncrements, –ì—Ä—É–ø–ø–∞: –ú–æ–¥–µ–ª—å –æ–±—â–∏–µ –¥–∞–Ω–Ω—ã–µ
+(long)(&model.motorInternals.isa),	//[5181h.0Ah], –ù–∞–∑–≤–∞–Ω–∏–µ: –¢–æ–∫ —Å—Ç–∞—Ç–æ—Ä–∞ –ø–æ –æ—Å–∏ Alpha, –¢–µ–∫—Å—Ç–ü–£: IsAlpha, –ì—Ä—É–ø–ø–∞: –ú–æ–¥–µ–ª—å –æ–±—â–∏–µ –¥–∞–Ω–Ω—ã–µ
+(long)(&model.motorInternals.isb),	//[5181h.0Bh], –ù–∞–∑–≤–∞–Ω–∏–µ: –¢–æ–∫ —Å—Ç–∞—Ç–æ—Ä–∞ –ø–æ –æ—Å–∏ Beta, –¢–µ–∫—Å—Ç–ü–£: IsBeta, –ì—Ä—É–ø–ø–∞: –ú–æ–¥–µ–ª—å –æ–±—â–∏–µ –¥–∞–Ω–Ω—ã–µ
+(long)(&model.motorInternals.isPhaseA),	//[5181h.0Ch], –ù–∞–∑–≤–∞–Ω–∏–µ: –¢–æ–∫ —Ñ–∞–∑—ã –ê, –¢–µ–∫—Å—Ç–ü–£: Ia, –ì—Ä—É–ø–ø–∞: –ú–æ–¥–µ–ª—å –æ–±—â–∏–µ –¥–∞–Ω–Ω—ã–µ
+(long)(&model.motorInternals.isPhaseB),	//[5181h.0Dh], –ù–∞–∑–≤–∞–Ω–∏–µ: –¢–æ–∫ —Ñ–∞–∑—ã –í, –¢–µ–∫—Å—Ç–ü–£: Ib_–º–≥–Ω, –ì—Ä—É–ø–ø–∞: –ú–æ–¥–µ–ª—å –æ–±—â–∏–µ –¥–∞–Ω–Ω—ã–µ
+(long)(&model.motorInternals.isPhaseC),	//[5181h.0Eh], –ù–∞–∑–≤–∞–Ω–∏–µ: –¢–æ–∫ —Ñ–∞–∑—ã C, –¢–µ–∫—Å—Ç–ü–£: Ic, –ì—Ä—É–ø–ø–∞: –ú–æ–¥–µ–ª—å –æ–±—â–∏–µ –¥–∞–Ω–Ω—ã–µ
+(long)(&model.motorInternals.isPhaseD),	//[5181h.0Fh], –ù–∞–∑–≤–∞–Ω–∏–µ: –¢–æ–∫ —Ñ–∞–∑—ã D, –¢–µ–∫—Å—Ç–ü–£: Id, –ì—Ä—É–ø–ø–∞: –ú–æ–¥–µ–ª—å –æ–±—â–∏–µ –¥–∞–Ω–Ω—ã–µ
+(long)(&model.motorInternals.ua),	//[5181h.10h], –ù–∞–∑–≤–∞–Ω–∏–µ: –ù–∞–ø—Ä—è–∂–µ–Ω–∏–µ —Ñ–∞–∑—ã A, –¢–µ–∫—Å—Ç–ü–£: Ua, –ì—Ä—É–ø–ø–∞: –ú–æ–¥–µ–ª—å –æ–±—â–∏–µ –¥–∞–Ω–Ω—ã–µ
+(long)(&model.motorInternals.ub),	//[5181h.11h], –ù–∞–∑–≤–∞–Ω–∏–µ: –ù–∞–ø—Ä—è–∂–µ–Ω–∏–µ —Ñ–∞–∑—ã B, –¢–µ–∫—Å—Ç–ü–£: Ub, –ì—Ä—É–ø–ø–∞: –ú–æ–¥–µ–ª—å –æ–±—â–∏–µ –¥–∞–Ω–Ω—ã–µ
+(long)(&model.motorInternals.uc),	//[5181h.12h], –ù–∞–∑–≤–∞–Ω–∏–µ: –ù–∞–ø—Ä—è–∂–µ–Ω–∏–µ —Ñ–∞–∑—ã C, –¢–µ–∫—Å—Ç–ü–£: Uc, –ì—Ä—É–ø–ø–∞: –ú–æ–¥–µ–ª—å –æ–±—â–∏–µ –¥–∞–Ω–Ω—ã–µ
+(long)(&model.motorInternals.power),	//[5181h.13h], –ù–∞–∑–≤–∞–Ω–∏–µ: –ú–æ—â–Ω–æ—Å—Ç—å, –¢–µ–∫—Å—Ç–ü–£: –ú–æ—â-—Ç—å, –ì—Ä—É–ø–ø–∞: –ú–æ–¥–µ–ª—å –æ–±—â–∏–µ –¥–∞–Ω–Ω—ã–µ
+(long)(&model.fault),	//[5181h.14h], –ù–∞–∑–≤–∞–Ω–∏–µ: –ö–æ–¥ –∞–≤–∞—Ä–∏–∏, –¢–µ–∫—Å—Ç–ü–£: –ö–æ–¥–ê–≤—Ä, –ì—Ä—É–ø–ø–∞: –ú–æ–¥–µ–ª—å –æ–±—â–∏–µ –¥–∞–Ω–Ω—ã–µ
+(long)(&model.motorInternals.lm),	//[5182h.01h], –ù–∞–∑–≤–∞–Ω–∏–µ: –í–∑–∞–∏–º–Ω–∞—è –∏–Ω–¥—É–∫—Ç–∏–≤–Ω–æ—Å—Ç—å Lm, –¢–µ–∫—Å—Ç–ü–£: Lm, –ì—Ä—É–ø–ø–∞: –ú–æ–¥–µ–ª—å (–∞—Å–∏–Ω—Ö—Ä–æ–Ω–Ω—ã–π)
+(long)(&model.motorInternals.ls),	//[5182h.02h], –ù–∞–∑–≤–∞–Ω–∏–µ: –ò–Ω–¥—É–∫—Ç–∏–≤–Ω–æ—Å—Ç—å —Å—Ç–∞—Ç–æ—Ä–∞ Ls, –¢–µ–∫—Å—Ç–ü–£: Ls, –ì—Ä—É–ø–ø–∞: –ú–æ–¥–µ–ª—å (–∞—Å–∏–Ω—Ö—Ä–æ–Ω–Ω—ã–π)
+(long)(&model.motorInternals.lr),	//[5182h.03h], –ù–∞–∑–≤–∞–Ω–∏–µ: –ò–Ω–¥—É–∫—Ç–∏–≤–Ω–æ—Å—Ç—å —Ä–æ—Ç–æ—Ä–∞ Lr, –¢–µ–∫—Å—Ç–ü–£: Lr, –ì—Ä—É–ø–ø–∞: –ú–æ–¥–µ–ª—å (–∞—Å–∏–Ω—Ö—Ä–æ–Ω–Ω—ã–π)
+(long)(&model.motorInternals.rs),	//[5182h.04h], –ù–∞–∑–≤–∞–Ω–∏–µ: –°–æ–ø—Ä–æ—Ç–∏–≤–ª–µ–Ω–∏–µ —Å—Ç–∞—Ç–æ—Ä–∞ Rs, –¢–µ–∫—Å—Ç–ü–£: Rs, –ì—Ä—É–ø–ø–∞: –ú–æ–¥–µ–ª—å (–∞—Å–∏–Ω—Ö—Ä–æ–Ω–Ω—ã–π)
+(long)(&model.motorInternals.rr),	//[5182h.05h], –ù–∞–∑–≤–∞–Ω–∏–µ: –°–æ–ø—Ä–æ—Ç–∏–≤–ª–µ–Ω–∏–µ —Ä–æ—Ç–æ—Ä–∞ Rr, –¢–µ–∫—Å—Ç–ü–£: Rr, –ì—Ä—É–ø–ø–∞: –ú–æ–¥–µ–ª—å (–∞—Å–∏–Ω—Ö—Ä–æ–Ω–Ω—ã–π)
+(long)(&model.motorInternals.pp),	//[5182h.06h], –ù–∞–∑–≤–∞–Ω–∏–µ: –ß–∏—Å–ª–æ –ø–∞—Ä –ø–æ–ª—é—Å–æ–≤, –¢–µ–∫—Å—Ç–ü–£: –ü–∞—Ä–ü–æ–ª, –ì—Ä—É–ø–ø–∞: –ú–æ–¥–µ–ª—å (–∞—Å–∏–Ω—Ö—Ä–æ–Ω–Ω—ã–π)
+(long)(&model.motorInternals.j),	//[5182h.07h], –ù–∞–∑–≤–∞–Ω–∏–µ: –°–∏–º—É–ª–∏—Ä—É–µ–º—ã–π –º–æ–º–µ–Ω—Ç –∏–Ω–µ—Ä—Ü–∏–∏, –¢–µ–∫—Å—Ç–ü–£: –ò–Ω–µ—Ä—Ü–∏—è —Å–∏–º., –ì—Ä—É–ø–ø–∞: –ú–æ–¥–µ–ª—å (–∞—Å–∏–Ω—Ö—Ä–æ–Ω–Ω—ã–π)
+(long)(&model.motorInternals.MechLoss),	//[5182h.08h], –ù–∞–∑–≤–∞–Ω–∏–µ: –¢–æ—Ä–º–æ–∑–Ω–æ–π –º–æ–º–µ–Ω—Ç –¥–ª—è –≤—ã–±–µ–≥–∞, –¢–µ–∫—Å—Ç–ü–£: –¢–æ—Ä–º.–ú–æ–º.–í—ã–±–µ–≥, –ì—Ä—É–ø–ø–∞: –ú–æ–¥–µ–ª—å (–∞—Å–∏–Ω—Ö—Ä–æ–Ω–Ω—ã–π)
+(long)(&model.motorInternals.QEPResolution),	//[5182h.09h], –ù–∞–∑–≤–∞–Ω–∏–µ: –ß–∏—Å–ª–æ –ø–µ—Ä–∏–æ–¥–æ–≤ –∫–≤–∞–¥—Ä–∞—Ç—É—Ä–Ω–æ–≥–æ –¥–∞—Ç—á–∏–∫–∞, –¢–µ–∫—Å—Ç–ü–£: QEPResolution, –ì—Ä—É–ø–ø–∞: –ú–æ–¥–µ–ª—å (–∞—Å–∏–Ω—Ö—Ä–æ–Ω–Ω—ã–π)
+(long)(&model.motorInternals.RatedCurrent),	//[5182h.0Ah], –ù–∞–∑–≤–∞–Ω–∏–µ: –ù–æ–º–∏–Ω–∞–ª—å–Ω—ã–π –¥–µ–π—Å—Ç–≤—É—é—â–∏–π —Ç–æ–∫, –¢–µ–∫—Å—Ç–ü–£: RatedCurrent, –ì—Ä—É–ø–ø–∞: –ú–æ–¥–µ–ª—å (–∞—Å–∏–Ω—Ö—Ä–æ–Ω–Ω—ã–π)
+(long)(&model.motorInternals.RatedPower),	//[5182h.0Bh], –ù–∞–∑–≤–∞–Ω–∏–µ: –ù–æ–º–∏–Ω–∞–ª—å–Ω–∞—è –º–æ—â–Ω–æ—Å—Ç—å, –¢–µ–∫—Å—Ç–ü–£: RatedPower, –ì—Ä—É–ø–ø–∞: –ú–æ–¥–µ–ª—å (–∞—Å–∏–Ω—Ö—Ä–æ–Ω–Ω—ã–π)
+(long)(&model.motorInternals.RatedSpeed),	//[5182h.0Ch], –ù–∞–∑–≤–∞–Ω–∏–µ: –ù–æ–º–∏–Ω–∞–ª—å–Ω–∞—è —Å–∫–æ—Ä–æ—Å—Ç—å, –¢–µ–∫—Å—Ç–ü–£: –°–∫–æ—Ä–æ—Å—Ç—å–ù–æ–º, –ì—Ä—É–ø–ø–∞: –ú–æ–¥–µ–ª—å (–∞—Å–∏–Ω—Ö—Ä–æ–Ω–Ω—ã–π)
+(long)(&model.motorInternals.iADCk),	//[5182h.0Dh], –ù–∞–∑–≤–∞–Ω–∏–µ: –ö–æ—ç—Ñ—Ñ–∏—Ü–∏–µ–Ω—Ç –ê–¶–ü —Ç–æ–∫–∞ —Ñ–∞–∑, –¢–µ–∫—Å—Ç–ü–£: –ö–æ—ç—Ñ. –ê–¶–ü —Ç–æ–∫–∞, –ì—Ä—É–ø–ø–∞: –ú–æ–¥–µ–ª—å (–∞—Å–∏–Ω—Ö—Ä–æ–Ω–Ω—ã–π)
+(long)(&model.motorInternals.isa),	//[5182h.0Eh], –ù–∞–∑–≤–∞–Ω–∏–µ: –¢–æ–∫ —Å—Ç–∞—Ç–æ—Ä–∞ –ø–æ –æ—Å–∏ Alpha, –¢–µ–∫—Å—Ç–ü–£: IsAlpha, –ì—Ä—É–ø–ø–∞: –ú–æ–¥–µ–ª—å (–∞—Å–∏–Ω—Ö—Ä–æ–Ω–Ω—ã–π)
+(long)(&model.motorInternals.isb),	//[5182h.0Fh], –ù–∞–∑–≤–∞–Ω–∏–µ: –¢–æ–∫ —Å—Ç–∞—Ç–æ—Ä–∞ –ø–æ –æ—Å–∏ Beta, –¢–µ–∫—Å—Ç–ü–£: IsBeta, –ì—Ä—É–ø–ø–∞: –ú–æ–¥–µ–ª—å (–∞—Å–∏–Ω—Ö—Ä–æ–Ω–Ω—ã–π)
+(long)(&model.motorInternals.prd),	//[5182h.10h], –ù–∞–∑–≤–∞–Ω–∏–µ: –ü–æ—Ç–æ–∫ —Ä–æ—Ç–æ—Ä–∞ –ø–æ –æ—Å–∏ D, –¢–µ–∫—Å—Ç–ü–£: PsiRD, –ì—Ä—É–ø–ø–∞: –ú–æ–¥–µ–ª—å (–∞—Å–∏–Ω—Ö—Ä–æ–Ω–Ω—ã–π)
+(long)(&model.motorInternals.prq),	//[5182h.11h], –ù–∞–∑–≤–∞–Ω–∏–µ: –ü–æ—Ç–æ–∫ —Ä–æ—Ç–æ—Ä–∞ –ø–æ –æ—Å–∏ Q, –¢–µ–∫—Å—Ç–ü–£: PsiRQ, –ì—Ä—É–ø–ø–∞: –ú–æ–¥–µ–ª—å (–∞—Å–∏–Ω—Ö—Ä–æ–Ω–Ω—ã–π)
+(long)(&model.motorInternals.pra),	//[5182h.12h], –ù–∞–∑–≤–∞–Ω–∏–µ: –ü–æ—Ç–æ–∫ —Ä–æ—Ç–æ—Ä–∞ –ø–æ –æ—Å–∏ Alpha, –¢–µ–∫—Å—Ç–ü–£: PsiRAlfa, –ì—Ä—É–ø–ø–∞: –ú–æ–¥–µ–ª—å (–∞—Å–∏–Ω—Ö—Ä–æ–Ω–Ω—ã–π)
+(long)(&model.motorInternals.prb),	//[5182h.13h], –ù–∞–∑–≤–∞–Ω–∏–µ: –ü–æ—Ç–æ–∫ —Ä–æ—Ç–æ—Ä–∞ –ø–æ –æ—Å–∏ Beta, –¢–µ–∫—Å—Ç–ü–£: PsiRBeta, –ì—Ä—É–ø–ø–∞: –ú–æ–¥–µ–ª—å (–∞—Å–∏–Ω—Ö—Ä–æ–Ω–Ω—ã–π)
+(long)(&model.motorInternals.m),	//[5183h.01h], –ù–∞–∑–≤–∞–Ω–∏–µ: –ü–æ—Ç–æ–∫–æ—Å—Ü–µ–ø–ª–µ–Ω–∏–µ –º–∞–≥–Ω–∏—Ç–æ–≤, –¢–µ–∫—Å—Ç–ü–£: m, –ì—Ä—É–ø–ø–∞: –ú–æ–¥–µ–ª—å (—Å–∏–Ω—Ö—Ä–æ–Ω–Ω—ã–π)
+(long)(&model.motorInternals.lsd),	//[5183h.02h], –ù–∞–∑–≤–∞–Ω–∏–µ: –ò–Ω–¥—É–∫—Ç–∏–≤–Ω–æ—Å—Ç—å —Å—Ç–∞—Ç–æ—Ä–∞ Lsd, –¢–µ–∫—Å—Ç–ü–£: Lsd, –ì—Ä—É–ø–ø–∞: –ú–æ–¥–µ–ª—å (—Å–∏–Ω—Ö—Ä–æ–Ω–Ω—ã–π)
+(long)(&model.motorInternals.lsq),	//[5183h.03h], –ù–∞–∑–≤–∞–Ω–∏–µ: –ò–Ω–¥—É–∫—Ç–∏–≤–Ω–æ—Å—Ç—å —Å—Ç–∞—Ç–æ—Ä–∞ Lsq, –¢–µ–∫—Å—Ç–ü–£: Lsq, –ì—Ä—É–ø–ø–∞: –ú–æ–¥–µ–ª—å (—Å–∏–Ω—Ö—Ä–æ–Ω–Ω—ã–π)
+(long)(&model.motorInternals.rs),	//[5183h.04h], –ù–∞–∑–≤–∞–Ω–∏–µ: –°–æ–ø—Ä–æ—Ç–∏–≤–ª–µ–Ω–∏–µ —Å—Ç–∞—Ç–æ—Ä–∞ Rs, –¢–µ–∫—Å—Ç–ü–£: Rs, –ì—Ä—É–ø–ø–∞: –ú–æ–¥–µ–ª—å (—Å–∏–Ω—Ö—Ä–æ–Ω–Ω—ã–π)
+(long)(&model.motorInternals.pp),	//[5183h.05h], –ù–∞–∑–≤–∞–Ω–∏–µ: –ß–∏—Å–ª–æ –ø–∞—Ä –ø–æ–ª—é—Å–æ–≤, –¢–µ–∫—Å—Ç–ü–£: –ü–∞—Ä–ü–æ–ª, –ì—Ä—É–ø–ø–∞: –ú–æ–¥–µ–ª—å (—Å–∏–Ω—Ö—Ä–æ–Ω–Ω—ã–π)
+(long)(&model.motorInternals.j),	//[5183h.06h], –ù–∞–∑–≤–∞–Ω–∏–µ: –°–∏–º—É–ª–∏—Ä—É–µ–º—ã–π –º–æ–º–µ–Ω—Ç –∏–Ω–µ—Ä—Ü–∏–∏, –¢–µ–∫—Å—Ç–ü–£: –ò–Ω–µ—Ä—Ü–∏—è —Å–∏–º., –ì—Ä—É–ø–ø–∞: –ú–æ–¥–µ–ª—å (—Å–∏–Ω—Ö—Ä–æ–Ω–Ω—ã–π)
+(long)(&model.motorInternals.MechLoss),	//[5183h.07h], –ù–∞–∑–≤–∞–Ω–∏–µ: –¢–æ—Ä–º–æ–∑–Ω–æ–π –º–æ–º–µ–Ω—Ç –¥–ª—è –≤—ã–±–µ–≥–∞, –¢–µ–∫—Å—Ç–ü–£: –¢–æ—Ä–º.–ú–æ–º.–í—ã–±–µ–≥, –ì—Ä—É–ø–ø–∞: –ú–æ–¥–µ–ª—å (—Å–∏–Ω—Ö—Ä–æ–Ω–Ω—ã–π)
+(long)(&model.motorInternals.QEPResolution),	//[5183h.08h], –ù–∞–∑–≤–∞–Ω–∏–µ: –ß–∏—Å–ª–æ –ø–µ—Ä–∏–æ–¥–æ–≤ –∫–≤–∞–¥—Ä–∞—Ç—É—Ä–Ω–æ–≥–æ –¥–∞—Ç—á–∏–∫–∞, –¢–µ–∫—Å—Ç–ü–£: QEPResolution, –ì—Ä—É–ø–ø–∞: –ú–æ–¥–µ–ª—å (—Å–∏–Ω—Ö—Ä–æ–Ω–Ω—ã–π)
+(long)(&model.motorInternals.iADCk),	//[5183h.09h], –ù–∞–∑–≤–∞–Ω–∏–µ: –ö–æ—ç—Ñ—Ñ–∏—Ü–∏–µ–Ω—Ç –ê–¶–ü —Ç–æ–∫–∞ —Ñ–∞–∑, –¢–µ–∫—Å—Ç–ü–£: –ö–æ—ç—Ñ. –ê–¶–ü —Ç–æ–∫–∞, –ì—Ä—É–ø–ø–∞: –ú–æ–¥–µ–ª—å (—Å–∏–Ω—Ö—Ä–æ–Ω–Ω—ã–π)
+(long)(&model.motorInternals.ifADCk),	//[5183h.0Ah], –ù–∞–∑–≤–∞–Ω–∏–µ: –ö–æ—ç—Ñ—Ñ–∏—Ü–∏–µ–Ω—Ç –ê–¶–ü —Ç–æ–∫–∞ –û–í, –¢–µ–∫—Å—Ç–ü–£: –ö–æ—ç—Ñ. –ê–¶–ü —Ç–æ–∫ –û–í, –ì—Ä—É–ø–ø–∞: –ú–æ–¥–µ–ª—å (—Å–∏–Ω—Ö—Ä–æ–Ω–Ω—ã–π)
+(long)(&model.motorInternals.RatedCurrent),	//[5183h.0Bh], –ù–∞–∑–≤–∞–Ω–∏–µ: –ù–æ–º–∏–Ω–∞–ª—å–Ω—ã–π –¥–µ–π—Å—Ç–≤—É—é—â–∏–π —Ç–æ–∫, –¢–µ–∫—Å—Ç–ü–£: RatedCurrent, –ì—Ä—É–ø–ø–∞: –ú–æ–¥–µ–ª—å (—Å–∏–Ω—Ö—Ä–æ–Ω–Ω—ã–π)
+(long)(&model.motorInternals.RatedPower),	//[5183h.0Ch], –ù–∞–∑–≤–∞–Ω–∏–µ: –ù–æ–º–∏–Ω–∞–ª—å–Ω–∞—è –º–æ—â–Ω–æ—Å—Ç—å, –¢–µ–∫—Å—Ç–ü–£: RatedPower, –ì—Ä—É–ø–ø–∞: –ú–æ–¥–µ–ª—å (—Å–∏–Ω—Ö—Ä–æ–Ω–Ω—ã–π)
+(long)(&model.motorInternals.RatedSpeed),	//[5183h.0Dh], –ù–∞–∑–≤–∞–Ω–∏–µ: –ù–æ–º–∏–Ω–∞–ª—å–Ω–∞—è —Å–∫–æ—Ä–æ—Å—Ç—å, –¢–µ–∫—Å—Ç–ü–£: –°–∫–æ—Ä–æ—Å—Ç—å–ù–æ–º, –ì—Ä—É–ø–ø–∞: –ú–æ–¥–µ–ª—å (—Å–∏–Ω—Ö—Ä–æ–Ω–Ω—ã–π)
+(long)(&model.motorInternals.RatedFluxCurrent),	//[5183h.0Eh], –ù–∞–∑–≤–∞–Ω–∏–µ: –ù–æ–º–∏–Ω–∞–ª—å–Ω—ã–π —Ç–æ–∫ –û–í, –¢–µ–∫—Å—Ç–ü–£: RatedFluxCurrent, –ì—Ä—É–ø–ø–∞: –ú–æ–¥–µ–ª—å (—Å–∏–Ω—Ö—Ä–æ–Ω–Ω—ã–π)
+(long)(&model.motorInternals.u_f),	//[5183h.0Fh], –ù–∞–∑–≤–∞–Ω–∏–µ: –†–∞–∑–Ω–æ—Å—Ç—å –ø–æ—Ç–µ–Ω—Ü–∏–∞–ª–æ–≤ –û–í, –¢–µ–∫—Å—Ç–ü–£: Uf, –ì—Ä—É–ø–ø–∞: –ú–æ–¥–µ–ª—å (—Å–∏–Ω—Ö—Ä–æ–Ω–Ω—ã–π)
+(long)(&model.motorInternals.i_f),	//[5183h.10h], –ù–∞–∑–≤–∞–Ω–∏–µ: –¢–æ–∫ –û–í, –¢–µ–∫—Å—Ç–ü–£: –¢–æ–∫ –û–í, –ì—Ä—É–ø–ø–∞: –ú–æ–¥–µ–ª—å (—Å–∏–Ω—Ö—Ä–æ–Ω–Ω—ã–π)
+(long)(&model.motorInternals.m),	//[5183h.11h], –ù–∞–∑–≤–∞–Ω–∏–µ: –ü–æ—Ç–æ–∫ –≤–æ–∑–±—É–∂–¥–µ–Ω–∏—è, –¢–µ–∫—Å—Ç–ü–£: Psi –≤–æ–∑–±, –ì—Ä—É–ø–ø–∞: –ú–æ–¥–µ–ª—å (—Å–∏–Ω—Ö—Ä–æ–Ω–Ω—ã–π)
+(long)(&model.motorInternals.l_a),	//[5184h.01h], –ù–∞–∑–≤–∞–Ω–∏–µ: –ò–Ω–¥—É–∫—Ç–∏–≤–Ω–æ—Å—Ç—å —è–∫–æ—Ä—è, –¢–µ–∫—Å—Ç–ü–£: La, –ì—Ä—É–ø–ø–∞: –ú–æ–¥–µ–ª—å (–î–ü–¢)
+(long)(&model.motorInternals.l_f),	//[5184h.02h], –ù–∞–∑–≤–∞–Ω–∏–µ: –ò–Ω–¥—É–∫—Ç–∏–≤–Ω–æ—Å—Ç—å –û–í, –¢–µ–∫—Å—Ç–ü–£: Lf, –ì—Ä—É–ø–ø–∞: –ú–æ–¥–µ–ª—å (–î–ü–¢)
+(long)(&model.motorInternals.r_a),	//[5184h.03h], –ù–∞–∑–≤–∞–Ω–∏–µ: –°–æ–ø—Ä–æ—Ç–∏–≤–ª–µ–Ω–∏–µ —è–∫–æ—Ä—è, –¢–µ–∫—Å—Ç–ü–£: Ra, –ì—Ä—É–ø–ø–∞: –ú–æ–¥–µ–ª—å (–î–ü–¢)
+(long)(&model.motorInternals.r_f),	//[5184h.04h], –ù–∞–∑–≤–∞–Ω–∏–µ: –°–æ–ø—Ä–æ—Ç–∏–≤–ª–µ–Ω–∏–µ –û–í, –¢–µ–∫—Å—Ç–ü–£: Rf, –ì—Ä—É–ø–ø–∞: –ú–æ–¥–µ–ª—å (–î–ü–¢)
+(long)(&model.motorInternals.j),	//[5184h.05h], –ù–∞–∑–≤–∞–Ω–∏–µ: –°–∏–º—É–ª–∏—Ä—É–µ–º—ã–π –º–æ–º–µ–Ω—Ç –∏–Ω–µ—Ä—Ü–∏–∏, –¢–µ–∫—Å—Ç–ü–£: –ò–Ω–µ—Ä—Ü–∏—è —Å–∏–º., –ì—Ä—É–ø–ø–∞: –ú–æ–¥–µ–ª—å (–î–ü–¢)
+(long)(&model.motorInternals.MechLoss),	//[5184h.06h], –ù–∞–∑–≤–∞–Ω–∏–µ: –¢–æ—Ä–º–æ–∑–Ω–æ–π –º–æ–º–µ–Ω—Ç –¥–ª—è –≤—ã–±–µ–≥–∞, –¢–µ–∫—Å—Ç–ü–£: –¢–æ—Ä–º.–ú–æ–º.–í—ã–±–µ–≥, –ì—Ä—É–ø–ø–∞: –ú–æ–¥–µ–ª—å (–î–ü–¢)
+(long)(&model.motorInternals.QEPResolution),	//[5184h.07h], –ù–∞–∑–≤–∞–Ω–∏–µ: –ß–∏—Å–ª–æ –ø–µ—Ä–∏–æ–¥–æ–≤ –∫–≤–∞–¥—Ä–∞—Ç—É—Ä–Ω–æ–≥–æ –¥–∞—Ç—á–∏–∫–∞, –¢–µ–∫—Å—Ç–ü–£: QEPResolution, –ì—Ä—É–ø–ø–∞: –ú–æ–¥–µ–ª—å (–î–ü–¢)
+(long)(&model.motorInternals.RatedCurrent),	//[5184h.08h], –ù–∞–∑–≤–∞–Ω–∏–µ: –ù–æ–º–∏–Ω–∞–ª—å–Ω—ã–π —Ç–æ–∫ —è–∫–æ—Ä—è, –¢–µ–∫—Å—Ç–ü–£: RatedCurrent, –ì—Ä—É–ø–ø–∞: –ú–æ–¥–µ–ª—å (–î–ü–¢)
+(long)(&model.motorInternals.RatedFluxCurrent),	//[5184h.09h], –ù–∞–∑–≤–∞–Ω–∏–µ: –ù–æ–º–∏–Ω–∞–ª—å–Ω—ã–π —Ç–æ–∫ –û–í, –¢–µ–∫—Å—Ç–ü–£: RatedFluxCurrent, –ì—Ä—É–ø–ø–∞: –ú–æ–¥–µ–ª—å (–î–ü–¢)
+(long)(&model.motorInternals.iADCk),	//[5184h.0Ah], –ù–∞–∑–≤–∞–Ω–∏–µ: –ö–æ—ç—Ñ—Ñ–∏—Ü–∏–µ–Ω—Ç –ê–¶–ü —Ç–æ–∫–∞ –û–Ø, –¢–µ–∫—Å—Ç–ü–£: –ö–æ—ç—Ñ. –ê–¶–ü —Ç–æ–∫ –û–Ø, –ì—Ä—É–ø–ø–∞: –ú–æ–¥–µ–ª—å (–î–ü–¢)
+(long)(&model.motorInternals.ifADCk),	//[5184h.0Bh], –ù–∞–∑–≤–∞–Ω–∏–µ: –ö–æ—ç—Ñ—Ñ–∏—Ü–∏–µ–Ω—Ç –ê–¶–ü —Ç–æ–∫–∞ –û–í, –¢–µ–∫—Å—Ç–ü–£: –ö–æ—ç—Ñ. –ê–¶–ü —Ç–æ–∫ –û–í, –ì—Ä—É–ø–ø–∞: –ú–æ–¥–µ–ª—å (–î–ü–¢)
+(long)(&model.motorInternals.RatedPower),	//[5184h.0Ch], –ù–∞–∑–≤–∞–Ω–∏–µ: –ù–æ–º–∏–Ω–∞–ª—å–Ω–∞—è –º–æ—â–Ω–æ—Å—Ç—å, –¢–µ–∫—Å—Ç–ü–£: RatedPower, –ì—Ä—É–ø–ø–∞: –ú–æ–¥–µ–ª—å (–î–ü–¢)
+(long)(&model.motorInternals.RatedSpeed),	//[5184h.0Dh], –ù–∞–∑–≤–∞–Ω–∏–µ: –ù–æ–º–∏–Ω–∞–ª—å–Ω–∞—è —Å–∫–æ—Ä–æ—Å—Ç—å, –¢–µ–∫—Å—Ç–ü–£: –°–∫–æ—Ä–æ—Å—Ç—å–ù–æ–º, –ì—Ä—É–ø–ø–∞: –ú–æ–¥–µ–ª—å (–î–ü–¢)
+(long)(&model.motorInternals.r_ad),	//[5184h.0Eh], –ù–∞–∑–≤–∞–Ω–∏–µ: –î–æ–±–∞–≤–æ—á–Ω–æ–µ —Å–æ–ø—Ä–æ—Ç–∏–≤–ª–µ–Ω–∏–µ, Rad, –¢–µ–∫—Å—Ç–ü–£: –î–æ–±.—Å–æ–ø—Ä–æ—Ç–∏–≤., –ì—Ä—É–ø–ø–∞: –ú–æ–¥–µ–ª—å (–î–ü–¢)
+(long)(&model.motorInternals.u_a),	//[5184h.0Fh], –ù–∞–∑–≤–∞–Ω–∏–µ: –†–∞–∑–Ω–æ—Å—Ç—å –ø–æ—Ç–µ–Ω—Ü–∏–∞–ª–æ–≤ –û–Ø, –¢–µ–∫—Å—Ç–ü–£: Ua, –ì—Ä—É–ø–ø–∞: –ú–æ–¥–µ–ª—å (–î–ü–¢)
+(long)(&model.motorInternals.u_f),	//[5184h.10h], –ù–∞–∑–≤–∞–Ω–∏–µ: –†–∞–∑–Ω–æ—Å—Ç—å –ø–æ—Ç–µ–Ω—Ü–∏–∞–ª–æ–≤ –û–í, –¢–µ–∫—Å—Ç–ü–£: Uf, –ì—Ä—É–ø–ø–∞: –ú–æ–¥–µ–ª—å (–î–ü–¢)
+(long)(&model.motorInternals.i_a),	//[5184h.11h], –ù–∞–∑–≤–∞–Ω–∏–µ: –¢–æ–∫ –û–Ø, –¢–µ–∫—Å—Ç–ü–£: Ia, –ì—Ä—É–ø–ø–∞: –ú–æ–¥–µ–ª—å (–î–ü–¢)
+(long)(&model.motorInternals.i_f),	//[5184h.12h], –ù–∞–∑–≤–∞–Ω–∏–µ: –¢–æ–∫ –û–í, –¢–µ–∫—Å—Ç–ü–£: –¢–æ–∫ –û–í, –ì—Ä—É–ø–ø–∞: –ú–æ–¥–µ–ª—å (–î–ü–¢)
+(long)(&refs.DCMspeed_ref),	//[5185h.01h], –ù–∞–∑–≤–∞–Ω–∏–µ: –ó–∞–¥–∞–Ω–∏–µ —Å–∫–æ—Ä–æ—Å—Ç–∏ (–ü–æ–¥—á. –†–µ–≥.), –¢–µ–∫—Å—Ç–ü–£: –ó–∞–¥. –°–∫–æ—Ä., –ì—Ä—É–ø–ø–∞: –î–ü–¢ –°–∏—Å—Ç. –£–ø—Ä.
+(long)(&refs.ua_ref),	//[5185h.02h], –ù–∞–∑–≤–∞–Ω–∏–µ: –ó–∞–¥–∞–Ω–Ω–æ–µ –Ω–∞–ø—Ä—è–∂–µ–Ω–∏–µ —è–∫–æ—Ä—è, –¢–µ–∫—Å—Ç–ü–£: Ua_ref, –ì—Ä—É–ø–ø–∞: –î–ü–¢ –°–∏—Å—Ç. –£–ø—Ä.
+(long)(&refs.uf_ref),	//[5185h.03h], –ù–∞–∑–≤–∞–Ω–∏–µ: –ó–∞–¥–∞–Ω–Ω–æ–µ –Ω–∞–ø—Ä—è–∂–µ–Ω–∏–µ –û–í, –¢–µ–∫—Å—Ç–ü–£: Uf_ref, –ì—Ä—É–ø–ø–∞: –î–ü–¢ –°–∏—Å—Ç. –£–ø—Ä.
+(long)(&model.motorInternals.j),	//[5186h.01h], –ù–∞–∑–≤–∞–Ω–∏–µ: –°–∏–º—É–ª–∏—Ä—É–µ–º—ã–π –º–æ–º–µ–Ω—Ç –∏–Ω–µ—Ä—Ü–∏–∏, –¢–µ–∫—Å—Ç–ü–£: –ò–Ω–µ—Ä—Ü–∏—è —Å–∏–º., –ì—Ä—É–ø–ø–∞: –ú–æ–¥–µ–ª—å (–í–ò–î)
+(long)(&model.motorInternals.MechLoss),	//[5186h.02h], –ù–∞–∑–≤–∞–Ω–∏–µ: –¢–æ—Ä–º–æ–∑–Ω–æ–π –º–æ–º–µ–Ω—Ç –¥–ª—è –≤—ã–±–µ–≥–∞, –¢–µ–∫—Å—Ç–ü–£: –¢–æ—Ä–º.–ú–æ–º.–í—ã–±–µ–≥, –ì—Ä—É–ø–ø–∞: –ú–æ–¥–µ–ª—å (–í–ò–î)
+(long)(&model.motorInternals.rs),	//[5186h.03h], –ù–∞–∑–≤–∞–Ω–∏–µ: –°–æ–ø—Ä–æ—Ç–∏–≤–ª–µ–Ω–∏–µ —Å—Ç–∞—Ç–æ—Ä–∞ Rs, –¢–µ–∫—Å—Ç–ü–£: Rs, –ì—Ä—É–ø–ø–∞: –ú–æ–¥–µ–ª—å (–í–ò–î)
+(long)(&model.motorInternals.pp),	//[5186h.04h], –ù–∞–∑–≤–∞–Ω–∏–µ: –ß–∏—Å–ª–æ –ø–∞—Ä –ø–æ–ª—é—Å–æ–≤, –¢–µ–∫—Å—Ç–ü–£: –ü–∞—Ä–ü–æ–ª, –ì—Ä—É–ø–ø–∞: –ú–æ–¥–µ–ª—å (–í–ò–î)
+(long)(&model.motorInternals.QEPResolution),	//[5186h.05h], –ù–∞–∑–≤–∞–Ω–∏–µ: –ß–∏—Å–ª–æ –ø–µ—Ä–∏–æ–¥–æ–≤ –∫–≤–∞–¥—Ä–∞—Ç—É—Ä–Ω–æ–≥–æ –¥–∞—Ç—á–∏–∫–∞, –¢–µ–∫—Å—Ç–ü–£: QEPResolution, –ì—Ä—É–ø–ø–∞: –ú–æ–¥–µ–ª—å (–í–ò–î)
+(long)(&model.motorInternals.iADCk),	//[5186h.06h], –ù–∞–∑–≤–∞–Ω–∏–µ: –ö–æ—ç—Ñ—Ñ–∏—Ü–∏–µ–Ω—Ç –ê–¶–ü —Ç–æ–∫–∞ —Ñ–∞–∑, –¢–µ–∫—Å—Ç–ü–£: –ö–æ—ç—Ñ. –ê–¶–ü —Ç–æ–∫–∞, –ì—Ä—É–ø–ø–∞: –ú–æ–¥–µ–ª—å (–í–ò–î)
+(long)(&model.motorInternals.RatedCurrent),	//[5186h.07h], –ù–∞–∑–≤–∞–Ω–∏–µ: –ù–æ–º–∏–Ω–∞–ª—å–Ω—ã–π –¥–µ–π—Å—Ç–≤—É—é—â–∏–π —Ç–æ–∫, –¢–µ–∫—Å—Ç–ü–£: RatedCurrent, –ì—Ä—É–ø–ø–∞: –ú–æ–¥–µ–ª—å (–í–ò–î)
+(long)(&model.motorInternals.RatedPower),	//[5186h.08h], –ù–∞–∑–≤–∞–Ω–∏–µ: –ù–æ–º–∏–Ω–∞–ª—å–Ω–∞—è –º–æ—â–Ω–æ—Å—Ç—å, –¢–µ–∫—Å—Ç–ü–£: RatedPower, –ì—Ä—É–ø–ø–∞: –ú–æ–¥–µ–ª—å (–í–ò–î)
+(long)(&model.motorInternals.RatedSpeed),	//[5186h.09h], –ù–∞–∑–≤–∞–Ω–∏–µ: –ù–æ–º–∏–Ω–∞–ª—å–Ω–∞—è —Å–∫–æ—Ä–æ—Å—Ç—å, –¢–µ–∫—Å—Ç–ü–£: –°–∫–æ—Ä–æ—Å—Ç—å–ù–æ–º, –ì—Ä—É–ø–ø–∞: –ú–æ–¥–µ–ª—å (–í–ò–î)
+(long)(&model.motorInternals.psa),	//[5186h.0Ah], –ù–∞–∑–≤–∞–Ω–∏–µ: –ü–æ—Ç–æ–∫ —Å—Ç–∞—Ç–æ—Ä–∞ —Ñ–∞–∑—ã A, –¢–µ–∫—Å—Ç–ü–£: –ü–æ—Ç–æ–∫ A, –ì—Ä—É–ø–ø–∞: –ú–æ–¥–µ–ª—å (–í–ò–î)
+(long)(&model.motorInternals.psb),	//[5186h.0Bh], –ù–∞–∑–≤–∞–Ω–∏–µ: –ü–æ—Ç–æ–∫ —Å—Ç–∞—Ç–æ—Ä–∞ —Ñ–∞–∑—ã B, –¢–µ–∫—Å—Ç–ü–£: –ü–æ—Ç–æ–∫ B, –ì—Ä—É–ø–ø–∞: –ú–æ–¥–µ–ª—å (–í–ò–î)
+(long)(&model.motorInternals.psc),	//[5186h.0Ch], –ù–∞–∑–≤–∞–Ω–∏–µ: –ü–æ—Ç–æ–∫ —Å—Ç–∞—Ç–æ—Ä–∞ —Ñ–∞–∑—ã C, –¢–µ–∫—Å—Ç–ü–£: –ü–æ—Ç–æ–∫ C, –ì—Ä—É–ø–ø–∞: –ú–æ–¥–µ–ª—å (–í–ò–î)
+(long)(&model.motorInternals.torque_a),	//[5186h.0Dh], –ù–∞–∑–≤–∞–Ω–∏–µ: –ú–æ–º–µ–Ω—Ç —Ñ–∞–∑—ã A, –¢–µ–∫—Å—Ç–ü–£: –ú–æ–º–µ–Ω—Ç A, –ì—Ä—É–ø–ø–∞: –ú–æ–¥–µ–ª—å (–í–ò–î)
+(long)(&model.motorInternals.torque_b),	//[5186h.0Eh], –ù–∞–∑–≤–∞–Ω–∏–µ: –ú–æ–º–µ–Ω—Ç —Ñ–∞–∑—ã B, –¢–µ–∫—Å—Ç–ü–£: –ú–æ–º–µ–Ω—Ç B, –ì—Ä—É–ø–ø–∞: –ú–æ–¥–µ–ª—å (–í–ò–î)
+(long)(&model.motorInternals.torque_c),	//[5186h.0Fh], –ù–∞–∑–≤–∞–Ω–∏–µ: –ú–æ–º–µ–Ω—Ç —Ñ–∞–∑—ã C, –¢–µ–∫—Å—Ç–ü–£: –ú–æ–º–µ–Ω—Ç C, –ì—Ä—É–ø–ø–∞: –ú–æ–¥–µ–ª—å (–í–ò–î)
+(long)(&ModBus.Enabled),	//[5A20h.01h], –ù–∞–∑–≤–∞–Ω–∏–µ: –í–∫–ª—é—á–µ–Ω, –¢–µ–∫—Å—Ç–ü–£: –í–∫–ª, –ì—Ä—É–ø–ø–∞: MODBUS
+(long)(&ModBus.RSNodeID),	//[5A20h.02h], –ù–∞–∑–≤–∞–Ω–∏–µ: –ù–æ–º–µ—Ä –≤ —Å–µ—Ç–∏ ModBus, –¢–µ–∫—Å—Ç–ü–£: ModBus_ID, –ì—Ä—É–ø–ø–∞: MODBUS
+(long)(&ModBus.BaudRate),	//[5A20h.03h], –ù–∞–∑–≤–∞–Ω–∏–µ: –°–∫–æ—Ä–æ—Å—Ç—å, –¢–µ–∫—Å—Ç–ü–£: —Å–∫–æ—Ä, –ì—Ä—É–ø–ø–∞: MODBUS
+(long)(&ModBus.OfflineCounterMax),	//[5A20h.04h], –ù–∞–∑–≤–∞–Ω–∏–µ: –¢–∞–π–º–∞—É—Ç –ø–æ—Ç–µ—Ä–∏ —Å–≤—è–∑–∏, –¢–µ–∫—Å—Ç–ü–£: OfflineCounterMax, –ì—Ä—É–ø–ø–∞: MODBUS
+(long)(&ModBus.AutoRestart),	//[5A20h.05h], –ù–∞–∑–≤–∞–Ω–∏–µ: –ü–µ—Ä–µ–∑–∞–ø—É—Å–∫ –ø—Ä–∏ —Å–±–æ—è—Ö –Ω–∞ –ª–∏–Ω–∏–∏, –¢–µ–∫—Å—Ç–ü–£: auto_res, –ì—Ä—É–ø–ø–∞: MODBUS
+(long)(&ModBus.OfflineCounter),	//[5A20h.06h], –ù–∞–∑–≤–∞–Ω–∏–µ: –°—á–µ—Ç—á–∏–∫ –ø–æ—Ç–µ—Ä–∏ —Å–≤—è–∑–∏, –¢–µ–∫—Å—Ç–ü–£: OfflineCounter, –ì—Ä—É–ø–ø–∞: MODBUS
+(long)(&ModBus.isOnline),	//[5A20h.07h], –ù–∞–∑–≤–∞–Ω–∏–µ: MODBUS online, –¢–µ–∫—Å—Ç–ü–£: MODBUS online, –ì—Ä—É–ø–ø–∞: MODBUS
+(long)(&ModBus.received_data),	//[5A20h.08h], –ù–∞–∑–≤–∞–Ω–∏–µ: rs485_last_received_data, –¢–µ–∫—Å—Ç–ü–£: 485_RD, –ì—Ä—É–ø–ø–∞: MODBUS
+(long)(&ModBus.MBInternals.TxState),	//[5A20h.09h], –ù–∞–∑–≤–∞–Ω–∏–µ: –°–æ—Å—Ç–æ—è–Ω–∏–µ –ø–µ—Ä–µ–¥–∞—á–∏ –ø–æ—Å—ã–ª–∫–∏, –¢–µ–∫—Å—Ç–ü–£: TXState, –ì—Ä—É–ø–ø–∞: MODBUS
+(long)(&ModBus.GPIOsValue),	//[5A20h.0Ah], –ù–∞–∑–≤–∞–Ω–∏–µ: GPIOsValue, –¢–µ–∫—Å—Ç–ü–£: GPIOsValue, –ì—Ä—É–ø–ø–∞: MODBUS
+(long)(&ModBus.ReceivePacketCounter),	//[5A20h.0Bh], –ù–∞–∑–≤–∞–Ω–∏–µ: –ü–∞–∫–µ—Ç–æ–≤ –ø—Ä–∏–Ω—è—Ç–æ, –¢–µ–∫—Å—Ç–ü–£: ReceivePacketCounte, –ì—Ä—É–ø–ø–∞: MODBUS
+(long)(&ModBus.ReceiveByteCounter),	//[5A20h.0Ch], –ù–∞–∑–≤–∞–Ω–∏–µ: –ë–∞–π—Ç –ø—Ä–∏–Ω—è—Ç–æ, –¢–µ–∫—Å—Ç–ü–£: ReceiveByteCounter, –ì—Ä—É–ø–ø–∞: MODBUS
+(long)(&RotorObserver.Tr),	//[5B04h.01h], –ù–∞–∑–≤–∞–Ω–∏–µ: –ü–æ—Å—Ç. –≤—Ä–µ–º–µ–Ω–∏ —Ä–æ—Ç–æ—Ä–∞, –¢–µ–∫—Å—Ç–ü–£: Tr, –ì—Ä—É–ø–ø–∞: –ù–∞–±–ª—é–¥–∞—Ç–µ–ª—å —Ä–æ—Ç–æ—Ä–∞ –ê–î
+(long)(&RotorObserver.FluxCurrentRatio),	//[5B04h.02h], –ù–∞–∑–≤–∞–Ω–∏–µ: –°–æ–æ—Ç–Ω–æ—à–µ–Ω–∏–µ —Ç–æ–∫–∞ –≤–æ–∑–±. X –∫ —Ç–æ–∫—É Y, –¢–µ–∫—Å—Ç–ü–£: FluxCurrentRatio, –ì—Ä—É–ø–ø–∞: –ù–∞–±–ª—é–¥–∞—Ç–µ–ª—å —Ä–æ—Ç–æ—Ä–∞ –ê–î
+(long)(&RotorObserver.FluxCurrentMin),	//[5B04h.03h], –ù–∞–∑–≤–∞–Ω–∏–µ: –ú–∏–Ω–∏–º–∞–ª—å–Ω—ã–π —Ç–æ–∫ –≤–æ–∑–±—É–∂–¥–µ–Ω–∏—è, –¢–µ–∫—Å—Ç–ü–£: FluxCurrentMin, –ì—Ä—É–ø–ø–∞: –ù–∞–±–ª—é–¥–∞—Ç–µ–ª—å —Ä–æ—Ç–æ—Ä–∞ –ê–î
+(long)(&RotorObserver.id),	//[5B04h.04h], –ù–∞–∑–≤–∞–Ω–∏–µ: –¢–æ–∫ —Å—Ç–∞—Ç–æ—Ä–∞ –ø–æ –æ—Å–∏ D, –¢–µ–∫—Å—Ç–ü–£: IsD, –ì—Ä—É–ø–ø–∞: –ù–∞–±–ª—é–¥–∞—Ç–µ–ª—å —Ä–æ—Ç–æ—Ä–∞ –ê–î
+(long)(&RotorObserver.iq),	//[5B04h.05h], –ù–∞–∑–≤–∞–Ω–∏–µ: –¢–æ–∫ —Å—Ç–∞—Ç–æ—Ä–∞ –ø–æ –æ—Å–∏ Q, –¢–µ–∫—Å—Ç–ü–£: IsQ, –ì—Ä—É–ø–ø–∞: –ù–∞–±–ª—é–¥–∞—Ç–µ–ª—å —Ä–æ—Ç–æ—Ä–∞ –ê–î
+(long)(&RotorObserver.psi_d),	//[5B04h.06h], –ù–∞–∑–≤–∞–Ω–∏–µ: –ü–æ—Ç–æ–∫ —Ä–æ—Ç–æ—Ä–∞ –ø–æ –æ—Å–∏ D, –¢–µ–∫—Å—Ç–ü–£: PsiRD, –ì—Ä—É–ø–ø–∞: –ù–∞–±–ª—é–¥–∞—Ç–µ–ª—å —Ä–æ—Ç–æ—Ä–∞ –ê–î
+(long)(&RotorObserver.psi_q),	//[5B04h.07h], –ù–∞–∑–≤–∞–Ω–∏–µ: –ü–æ—Ç–æ–∫ —Ä–æ—Ç–æ—Ä–∞ –ø–æ –æ—Å–∏ Q, –¢–µ–∫—Å—Ç–ü–£: PsiRQ, –ì—Ä—É–ø–ø–∞: –ù–∞–±–ª—é–¥–∞—Ç–µ–ª—å —Ä–æ—Ç–æ—Ä–∞ –ê–î
+(long)(&RotorObserver.theta_psi_elec),	//[5B04h.08h], –ù–∞–∑–≤–∞–Ω–∏–µ: –£–≥–æ–ª –ø–æ—Ç–æ–∫–∞ —Ä–æ—Ç–æ—Ä–∞, –¢–µ–∫—Å—Ç–ü–£: psiRalpha, –ì—Ä—É–ø–ø–∞: –ù–∞–±–ª—é–¥–∞—Ç–µ–ª—å —Ä–æ—Ç–æ—Ä–∞ –ê–î
+(long)(&udControl.StateOn),	//[5B05h.01h], –ù–∞–∑–≤–∞–Ω–∏–µ: –¢–µ–∫—É—â–µ–µ —Å–æ—Å—Ç–æ—è–Ω–∏–µ —Ä–µ–ª–µ, –¢–µ–∫—Å—Ç–ü–£: Relay_state, –ì—Ä—É–ø–ø–∞: –ü–ª–∞–≤–Ω—ã–π –∑–∞—Ä—è–¥ –ó–ü–¢
+(long)(&udControl.Timeout_on),	//[5B05h.02h], –ù–∞–∑–≤–∞–Ω–∏–µ: –ó–∞–¥–µ–∂–∫–∞ –≤–∫–ª—é—á–µ–Ω–∏—è —Ä–µ–ª–µ, –º—Å, –¢–µ–∫—Å—Ç–ü–£: relay on-delay, –ì—Ä—É–ø–ø–∞: –ü–ª–∞–≤–Ω—ã–π –∑–∞—Ä—è–¥ –ó–ü–¢
+(long)(&udControl.U_on),	//[5B05h.03h], –ù–∞–∑–≤–∞–Ω–∏–µ: –ù–∞–ø—Ä—è–∂–µ–Ω–∏–µ –≤–∫–ª—é—á–µ–Ω–∏—è, –í, –¢–µ–∫—Å—Ç–ü–£: on-voltage, –ì—Ä—É–ø–ø–∞: –ü–ª–∞–≤–Ω—ã–π –∑–∞—Ä—è–¥ –ó–ü–¢
+(long)(&udControl.U_off),	//[5B05h.04h], –ù–∞–∑–≤–∞–Ω–∏–µ: –ù–∞–ø—Ä—è–∂–µ–Ω–∏–µ –≤—ã–∫–ª—é—á–µ–Ω–∏—è, –í, –¢–µ–∫—Å—Ç–ü–£: off-voltage, –ì—Ä—É–ø–ø–∞: –ü–ª–∞–≤–Ω—ã–π –∑–∞—Ä—è–¥ –ó–ü–¢
+(long)(&udControl.deriv_time_ZPT),	//[5B05h.05h], –ù–∞–∑–≤–∞–Ω–∏–µ: –ü—Ä–æ–∏–∑–≤–æ–¥–Ω–∞—è –Ω–∞–ø—Ä—è–∂–µ–Ω–∏—è –ó–ü–¢, –¢–µ–∫—Å—Ç–ü–£: derivative_voltage, –ì—Ä—É–ø–ø–∞: –ü–ª–∞–≤–Ω—ã–π –∑–∞—Ä—è–¥ –ó–ü–¢
+(long)(&udControl.deriv_const),	//[5B05h.06h], –ù–∞–∑–≤–∞–Ω–∏–µ: –£—Å—Ç–∞–≤–∫–∞ –ø–æ –ø—Ä–æ–∏–∑–≤–æ–¥–Ω–æ–π –ó–ü–¢, –¢–µ–∫—Å—Ç–ü–£: derivative_const, –ì—Ä—É–ø–ø–∞: –ü–ª–∞–≤–Ω—ã–π –∑–∞—Ä—è–¥ –ó–ü–¢
+(long)(&FanControl.StateOn),	//[5B06h.01h], –ù–∞–∑–≤–∞–Ω–∏–µ: –¢–µ–∫—É—â–µ–µ —Å–æ—Å—Ç–æ—è–Ω–∏–µ –≤–µ–Ω—Ç–∏–ª—è—Ç–æ—Ä–∞, –¢–µ–∫—Å—Ç–ü–£: fan_state, –ì—Ä—É–ø–ø–∞: –°–∏—Å—Ç–µ–º–∞ –æ—Ö–ª–∞–∂–¥–µ–Ω–∏—è
+(long)(&FanControl.T_on),	//[5B06h.02h], –ù–∞–∑–≤–∞–Ω–∏–µ: –¢–µ–º–ø–µ—Ä–∞—Ç—É—Ä–∞ –≤–∫–ª—é—á–µ–Ω–∏—è –≤–µ–Ω—Ç–∏–ª—è—Ç–æ—Ä–∞, –¢–µ–∫—Å—Ç–ü–£: t_on, –ì—Ä—É–ø–ø–∞: –°–∏—Å—Ç–µ–º–∞ –æ—Ö–ª–∞–∂–¥–µ–Ω–∏—è
+(long)(&FanControl.T_off),	//[5B06h.03h], –ù–∞–∑–≤–∞–Ω–∏–µ: –¢–µ–º–ø–µ—Ä–∞—Ç—É—Ä–∞ –≤—ã–∫–ª—é—á–µ–Ω–∏—è –≤–µ–Ω—Ç–∏–ª—è—Ç–æ—Ä–∞, –¢–µ–∫—Å—Ç–ü–£: t_off, –ì—Ä—É–ø–ø–∞: –°–∏—Å—Ç–µ–º–∞ –æ—Ö–ª–∞–∂–¥–µ–Ω–∏—è
+(long)(&FanControl.T_alarm),	//[5B06h.04h], –ù–∞–∑–≤–∞–Ω–∏–µ: –¢–µ–º–ø–µ—Ä–∞—Ç—É—Ä–∞ –≤—ã–≤–æ–¥–∞ –ø—Ä–µ–¥—É–ø—Ä–µ–∂–¥–µ–Ω–∏—è –æ –ø–µ—Ä–µ–≥—Ä–µ–≤–µ, –¢–µ–∫—Å—Ç–ü–£: t_alarm, –ì—Ä—É–ø–ø–∞: –°–∏—Å—Ç–µ–º–∞ –æ—Ö–ª–∞–∂–¥–µ–Ω–∏—è
 };
 Uint16 const CO2_OD_TBL2[] = {
 32045, 1, 0,
@@ -4122,7 +4122,7 @@ Uint16 const co2_first2000 = 82;
 Uint16 const co2_first3000 = 194;
 Uint16 const co2_first4000 = 198;
 Uint16 const co2_first5000 = 198;
-// “‡·ÎËˆ‡ „ÛÔÔ
+// –¢–∞–±–ª–∏—Ü–∞ –≥—Ä—É–ø–ø
 Uint16 const CO2_TYPE_DEF_TABLE[] = {
     (Uint16)4,\
     (Uint16)4,\
@@ -4255,7 +4255,7 @@ Uint16 const CO2_TYPE_DEF_TABLE[] = {
     (Uint16)46,\
     (Uint16)45,\
 };
-// “‡·ÎËˆ‡ CALLBACK-ÙÛÌÍˆËÈ
+// –¢–∞–±–ª–∏—Ü–∞ CALLBACK-—Ñ—É–Ω–∫—Ü–∏–π
 //**************************************************************
 long const CO2_OD_CALLBACK_TBL[]={
 0, // 1000h.00h
@@ -4390,7 +4390,7 @@ long const CO2_OD_CALLBACK_TBL[]={
 0, // 5B06h.00h
 };
 
-// Ã‡ÒÒË‚ ÒÒ˚ÎÓÍ ‰Îˇ ‰‡È‚Â‡ CANopen ‰‚Ûıˇ‰ÂÌ˚ı ÔÓˆÂÒÒÓÓ‚
+// –ú–∞—Å—Å–∏–≤ —Å—Å—ã–ª–æ–∫ –¥–ª—è –¥—Ä–∞–π–≤–µ—Ä–∞ CANopen –¥–≤—É—Ö—è–¥–µ—Ä–Ω—ã—Ö –ø—Ä–æ—Ü–µ—Å—Å–æ—Ä–æ–≤
 #ifdef COOD_LINKS__5000
 long const CO2_LINKS[]={(long)&co2_numOfInd,
                         (long)&CO2_OD_TBL1,

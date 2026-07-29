@@ -1,5 +1,5 @@
 /*!
-    Copyright 2017 	ÀÎ "ÍÈÈÝÒ" è ÎÎÎ "ÍÏÔ ÂÅÊÒÎÐ"
+    Copyright 2017 	ÐÐž "ÐÐ˜Ð˜Ð­Ð¢" Ð¸ ÐžÐžÐž "ÐÐŸÐ¤ Ð’Ð•ÐšÐ¢ÐžÐ "
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -14,8 +14,8 @@
    limitations under the License.
 
  \file      v_rotor_observer.c
- \brief     Íàáëþäàòåëü ðîòîðà ÀÄ  (ñì. TRotorObserver)
- \author    ÎÎÎ "ÍÏÔ Âåêòîð". http://motorcontrol.ru
+ \brief     ÐÐ°Ð±Ð»ÑŽÐ´Ð°Ñ‚ÐµÐ»ÑŒ Ñ€Ð¾Ñ‚Ð¾Ñ€Ð° ÐÐ”  (ÑÐ¼. TRotorObserver)
+ \author    ÐžÐžÐž "ÐÐŸÐ¤ Ð’ÐµÐºÑ‚Ð¾Ñ€". http://motorcontrol.ru
  \version   v 1.0 28/06/2016
 
  */
@@ -33,7 +33,7 @@
 #endif
 
 void RotorObserver_calc(TRotorObserver *p) {
-	//èíåðöèîííîå çâåíî ñ ïàðàìåòðàìè ðîòîðà
+	//Ð¸Ð½ÐµÑ€Ñ†Ð¸Ð¾Ð½Ð½Ð¾Ðµ Ð·Ð²ÐµÐ½Ð¾ Ñ Ð¿Ð°Ñ€Ð°Ð¼ÐµÑ‚Ñ€Ð°Ð¼Ð¸ Ñ€Ð¾Ñ‚Ð¾Ñ€Ð°
 	p->psi_d = p->psi_d + _IQmpy(p->Ks,p->id - p->psi_d);
 	p->psi_q = p->psi_q + _IQmpy(p->Ks,p->iq - p->psi_q);
     p->theta_psi_elec = _IQatan2PU(p->psi_q ,p->psi_d);

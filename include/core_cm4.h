@@ -1050,7 +1050,7 @@ typedef struct
 
 /*@}*/ /* end of group CMSIS_TPI */
 
-//0 так как эти константы уже есть в заголовочнике K1921BK01T
+//0 С‚Р°Рє РєР°Рє СЌС‚Рё РєРѕРЅСЃС‚Р°РЅС‚С‹ СѓР¶Рµ РµСЃС‚СЊ РІ Р·Р°РіРѕР»РѕРІРѕС‡РЅРёРєРµ K1921BK01T
 #if (__MPU_PRESENT == 1) && 0
 /** \ingroup  CMSIS_core_register
     \defgroup CMSIS_MPU     Memory Protection Unit (MPU)
@@ -1143,7 +1143,7 @@ typedef struct
 /*@} end of group CMSIS_MPU */
 #endif
 
-//0 так как эти константы уже есть в заголовочнике K1921BK01T
+//0 С‚Р°Рє РєР°Рє СЌС‚Рё РєРѕРЅСЃС‚Р°РЅС‚С‹ СѓР¶Рµ РµСЃС‚СЊ РІ Р·Р°РіРѕР»РѕРІРѕС‡РЅРёРєРµ K1921BK01T
 #if (__FPU_PRESENT == 1) && 0
 /** \ingroup  CMSIS_core_register
     \defgroup CMSIS_FPU     Floating Point Unit (FPU)

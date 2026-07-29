@@ -1,6 +1,6 @@
 
 /*!
-     Copyright 2017 	АО "НИИЭТ" и ООО "НПФ ВЕКТОР"
+     Copyright 2017 	РђРћ "РќРРР­Рў" Рё РћРћРћ "РќРџР¤ Р’Р•РљРўРћР "
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -15,8 +15,8 @@
    limitations under the License.
 
  \file      Global_time.c
- \brief     Модуль работы со временем
- \author    ООО "НПФ Вектор". http://motorcontrol.ru
+ \brief     РњРѕРґСѓР»СЊ СЂР°Р±РѕС‚С‹ СЃРѕ РІСЂРµРјРµРЅРµРј
+ \author    РћРћРћ "РќРџР¤ Р’РµРєС‚РѕСЂ". http://motorcontrol.ru
  \version   v 1.2 2013_10_16
 
 */
@@ -32,10 +32,10 @@ extern "C" {
 #include <main.h>
 
 
-//!ИнициализациЯ модулЯ
+//!РРЅРёС†РёР°Р»РёР·Р°С†РёРЇ РјРѕРґСѓР»РЇ
 
-//!Если есть часы реального времени, считывает из них времЯ.
-//!Восстанавливает времЯ работы и времени включенного состоЯниЯ из SPI.
+//!Р•СЃР»Рё РµСЃС‚СЊ С‡Р°СЃС‹ СЂРµР°Р»СЊРЅРѕРіРѕ РІСЂРµРјРµРЅРё, СЃС‡РёС‚С‹РІР°РµС‚ РёР· РЅРёС… РІСЂРµРјРЇ.
+//!Р’РѕСЃСЃС‚Р°РЅР°РІР»РёРІР°РµС‚ РІСЂРµРјРЇ СЂР°Р±РѕС‚С‹ Рё РІСЂРµРјРµРЅРё РІРєР»СЋС‡РµРЅРЅРѕРіРѕ СЃРѕСЃС‚РѕРЇРЅРёРЇ РёР· SPI.
 
 //! \memberof TGlobalTime
 void GlobalTime_init(TGlobalTime *p)
@@ -45,10 +45,10 @@ void GlobalTime_init(TGlobalTime *p)
 
 
 	#ifdef USE_ABSOLUTE_TIME_CLOCK
-	//инициализациЯ абсолютного времени
+	//РёРЅРёС†РёР°Р»РёР·Р°С†РёРЇ Р°Р±СЃРѕР»СЋС‚РЅРѕРіРѕ РІСЂРµРјРµРЅРё
 	if (p->time_type == 1)
 	{
-		//инициализациЯ из часов реального времени
+		//РёРЅРёС†РёР°Р»РёР·Р°С†РёРЇ РёР· С‡Р°СЃРѕРІ СЂРµР°Р»СЊРЅРѕРіРѕ РІСЂРµРјРµРЅРё
 		p->absolute_time.day=spiclock.day;
 		p->absolute_time.hour=spiclock.hour;
 		p->absolute_time.minute=spiclock.minute;
@@ -56,8 +56,8 @@ void GlobalTime_init(TGlobalTime *p)
 		p->absolute_time.year=spiclock.year;
 	}
 	#endif
-	//инициализациЯ относительного времени
-	p->relative_time1.ON = 1;//т.к. 1-е времЯ ЯвлЯетсЯ обЯзательным
+	//РёРЅРёС†РёР°Р»РёР·Р°С†РёРЇ РѕС‚РЅРѕСЃРёС‚РµР»СЊРЅРѕРіРѕ РІСЂРµРјРµРЅРё
+	p->relative_time1.ON = 1;//С‚.Рє. 1-Рµ РІСЂРµРјРЇ РЇРІР»РЇРµС‚СЃРЇ РѕР±РЇР·Р°С‚РµР»СЊРЅС‹Рј
 
 	p->relative_time1.relative_date.hour = (p->PowerOn_time >> 6);
 	p->relative_time1.relative_date.minute = (p->PowerOn_time & 0x3f);
@@ -69,37 +69,37 @@ void GlobalTime_init(TGlobalTime *p)
 
 
 
-//!Расчет относительного времени.
+//!Р Р°СЃС‡РµС‚ РѕС‚РЅРѕСЃРёС‚РµР»СЊРЅРѕРіРѕ РІСЂРµРјРµРЅРё.
 
-//!Вызывает функции расчета относительно времени и, если есть, считывает времЯ
-//!с модулЯ часов реального вермени в абсолютное времЯ.
+//!Р’С‹Р·С‹РІР°РµС‚ С„СѓРЅРєС†РёРё СЂР°СЃС‡РµС‚Р° РѕС‚РЅРѕСЃРёС‚РµР»СЊРЅРѕ РІСЂРµРјРµРЅРё Рё, РµСЃР»Рё РµСЃС‚СЊ, СЃС‡РёС‚С‹РІР°РµС‚ РІСЂРµРјРЇ
+//!СЃ РјРѕРґСѓР»РЇ С‡Р°СЃРѕРІ СЂРµР°Р»СЊРЅРѕРіРѕ РІРµСЂРјРµРЅРё РІ Р°Р±СЃРѕР»СЋС‚РЅРѕРµ РІСЂРµРјРЇ.
 
 //! \memberof TGlobalTime
 void GlobalTime_calc(TGlobalTime *p)
 {
-	//счет относительных времен
+	//СЃС‡РµС‚ РѕС‚РЅРѕСЃРёС‚РµР»СЊРЅС‹С… РІСЂРµРјРµРЅ
 	GlobalTime_REL_TIME_calc(&p->relative_time1);
 	GlobalTime_REL_TIME_calc(&p->relative_time2);
 }
 
 
-//!Расчет относительного времени.
+//!Р Р°СЃС‡РµС‚ РѕС‚РЅРѕСЃРёС‚РµР»СЊРЅРѕРіРѕ РІСЂРµРјРµРЅРё.
 
-//!Вызывает функции расчета относительно времени и, если есть, считывает времЯ
-//!с модулЯ часов реального вермени в абсолютное времЯ.
+//!Р’С‹Р·С‹РІР°РµС‚ С„СѓРЅРєС†РёРё СЂР°СЃС‡РµС‚Р° РѕС‚РЅРѕСЃРёС‚РµР»СЊРЅРѕ РІСЂРµРјРµРЅРё Рё, РµСЃР»Рё РµСЃС‚СЊ, СЃС‡РёС‚С‹РІР°РµС‚ РІСЂРµРјРЇ
+//!СЃ РјРѕРґСѓР»РЇ С‡Р°СЃРѕРІ СЂРµР°Р»СЊРЅРѕРіРѕ РІРµСЂРјРµРЅРё РІ Р°Р±СЃРѕР»СЋС‚РЅРѕРµ РІСЂРµРјРЇ.
 
 //! \memberof TGlobalTime
 void GlobalTime_ms_calc(TGlobalTime *p) {
 
-	//управление счетом operational_time
-	if (sm_ctrl.state != 0) //Если в каком-то режиме работы
+	//СѓРїСЂР°РІР»РµРЅРёРµ СЃС‡РµС‚РѕРј operational_time
+	if (sm_ctrl.state != 0) //Р•СЃР»Рё РІ РєР°РєРѕРј-С‚Рѕ СЂРµР¶РёРјРµ СЂР°Р±РѕС‚С‹
 		global_time.relative_time2.ON = TRUE;
 	else
 		global_time.relative_time2.ON = FALSE;
 
-	//ВремЯ запитанного состоЯниЯ в минутах
+	//Р’СЂРµРјРЇ Р·Р°РїРёС‚Р°РЅРЅРѕРіРѕ СЃРѕСЃС‚РѕРЇРЅРёРЇ РІ РјРёРЅСѓС‚Р°С…
 	p->PowerOn_time = (global_time.relative_time1.relative_date.hour << 6) + (global_time.relative_time1.relative_date.minute & 0x3f);
-	//ВремЯ в работе, в минутах
+	//Р’СЂРµРјРЇ РІ СЂР°Р±РѕС‚Рµ, РІ РјРёРЅСѓС‚Р°С…
 	p->operational_time = (global_time.relative_time2.relative_date.hour << 6) + (global_time.relative_time2.relative_date.minute & 0x3f);
 
 	p->PowerOn_time_min = p->relative_time1.relative_date.hour*60 +p->relative_time1.relative_date.minute;
@@ -108,7 +108,7 @@ void GlobalTime_ms_calc(TGlobalTime *p) {
 
 #ifdef USE_ABSOLUTE_TIME_CLOCK
 	if (global_time.time_type == 1) {
-		//времЯ - из часов реального времени
+		//РІСЂРµРјРЇ - РёР· С‡Р°СЃРѕРІ СЂРµР°Р»СЊРЅРѕРіРѕ РІСЂРµРјРµРЅРё
 		global_time.absolute_time.day = spiclock.day;
 		global_time.absolute_time.hour = spiclock.hour;
 		global_time.absolute_time.minute = spiclock.minute;
@@ -118,10 +118,10 @@ void GlobalTime_ms_calc(TGlobalTime *p) {
 #endif
 }
 
-//!Расчет относительного времени
+//!Р Р°СЃС‡РµС‚ РѕС‚РЅРѕСЃРёС‚РµР»СЊРЅРѕРіРѕ РІСЂРµРјРµРЅРё
 
-//!УчитываЯ, что функциЯ вызываетсЯ с какой-то определенной дискретизацией,
-//!инкрементирует относительное времЯ, переденное ей в структуре типа RELATIVE_TIME
+//!РЈС‡РёС‚С‹РІР°РЇ, С‡С‚Рѕ С„СѓРЅРєС†РёРЇ РІС‹Р·С‹РІР°РµС‚СЃРЇ СЃ РєР°РєРѕР№-С‚Рѕ РѕРїСЂРµРґРµР»РµРЅРЅРѕР№ РґРёСЃРєСЂРµС‚РёР·Р°С†РёРµР№,
+//!РёРЅРєСЂРµРјРµРЅС‚РёСЂСѓРµС‚ РѕС‚РЅРѕСЃРёС‚РµР»СЊРЅРѕРµ РІСЂРµРјРЇ, РїРµСЂРµРґРµРЅРЅРѕРµ РµР№ РІ СЃС‚СЂСѓРєС‚СѓСЂРµ С‚РёРїР° RELATIVE_TIME
 //! \memberof TGlobalTime
 void GlobalTime_REL_TIME_calc(RELATIVE_TIME *p) {
 	if (p->ON == 0)
@@ -131,20 +131,20 @@ void GlobalTime_REL_TIME_calc(RELATIVE_TIME *p) {
 	p->delta_millisecond = 0;
 	p->delta_second = 0;
 	if (p->tic_isr == 0) {
-		//миллисекунда
+		//РјРёР»Р»РёСЃРµРєСѓРЅРґР°
 		p->tic_isr = GLOBAL_TIME_CALC_FREQ;
 		p->millisecond_counter++;
 		p->delta_millisecond = 1;
 		if (p->relative_date.millisecond == 999) {
-			//секунда
+			//СЃРµРєСѓРЅРґР°
 			p->relative_date.millisecond = 0;
 			p->second_counter++;
 			p->delta_second = 1;
 			if (p->relative_date.second == 59) {
-				//минута
+				//РјРёРЅСѓС‚Р°
 				p->relative_date.second = 0;
 				if (p->relative_date.minute == 59) {
-					//час
+					//С‡Р°СЃ
 					p->relative_date.minute = 0;
 					p->relative_date.hour++;
 				} else
@@ -157,10 +157,10 @@ void GlobalTime_REL_TIME_calc(RELATIVE_TIME *p) {
 }
 
 
-//!Читает времЯ наработки.
+//!Р§РёС‚Р°РµС‚ РІСЂРµРјРЇ РЅР°СЂР°Р±РѕС‚РєРё.
 
 //! \memberof TCurPar
-void GlobalTime_read_PowerOn_time(TGlobalTime *p) { //чтение work_time
+void GlobalTime_read_PowerOn_time(TGlobalTime *p) { //С‡С‚РµРЅРёРµ work_time
 	UserMem.MemStartAddr = GLOBAL_TIME_POWER_ON_TIME_ADDR;
 	UserMem.MCUStartAddr = (Uint16*) (&(p->PowerOn_time));
 	UserMem.data_length = 4;
@@ -168,28 +168,28 @@ void GlobalTime_read_PowerOn_time(TGlobalTime *p) { //чтение work_time
 }
 
 
-//!записывает времЯ наработки.
+//!Р·Р°РїРёСЃС‹РІР°РµС‚ РІСЂРµРјРЇ РЅР°СЂР°Р±РѕС‚РєРё.
 
 //! \memberof TCurPar
-void GlobalTime_write_PowerOn_time(TGlobalTime *p) { //запись work_time
+void GlobalTime_write_PowerOn_time(TGlobalTime *p) { //Р·Р°РїРёСЃСЊ work_time
 	UserMem.MemStartAddr = GLOBAL_TIME_POWER_ON_TIME_ADDR;
 	UserMem.MCUStartAddr = (Uint16*) (&(p->PowerOn_time));
 	UserMem.data_length = 4;
 	UserMem.write(&UserMem);
 }
 
-//!Читает времЯ включенного сосотЯниЯ.
+//!Р§РёС‚Р°РµС‚ РІСЂРµРјРЇ РІРєР»СЋС‡РµРЅРЅРѕРіРѕ СЃРѕСЃРѕС‚РЇРЅРёРЇ.
 //! \memberof TCurPar
-void GlobalTime_read_oper_time(TGlobalTime *p) { //чтение operational_time
+void GlobalTime_read_oper_time(TGlobalTime *p) { //С‡С‚РµРЅРёРµ operational_time
 	UserMem.MemStartAddr = GLOBAL_TIME_OPERATIONAL_TIME_ADDR;
 	UserMem.MCUStartAddr = (Uint16*) (&(p->operational_time));
 	UserMem.data_length = 4;
 	UserMem.read(&UserMem);
 }
 
-//!записывает времЯ включенного сосотЯниЯ.
+//!Р·Р°РїРёСЃС‹РІР°РµС‚ РІСЂРµРјРЇ РІРєР»СЋС‡РµРЅРЅРѕРіРѕ СЃРѕСЃРѕС‚РЇРЅРёРЇ.
 //! \memberof TCurPar
-void GlobalTime_write_oper_time(TGlobalTime *p) { //запись operational_time
+void GlobalTime_write_oper_time(TGlobalTime *p) { //Р·Р°РїРёСЃСЊ operational_time
 	UserMem.MemStartAddr = GLOBAL_TIME_OPERATIONAL_TIME_ADDR;
 	UserMem.MCUStartAddr = (Uint16*) (&(p->operational_time));
 	UserMem.data_length = 4;
@@ -198,11 +198,11 @@ void GlobalTime_write_oper_time(TGlobalTime *p) { //запись operational_time
 
 
 void GlobalTime_slow_calc(TGlobalTime*p) {
-	//если стоит флаг на сохранение времен в SPI или с момент прошлой записи прошел час
+	//РµСЃР»Рё СЃС‚РѕРёС‚ С„Р»Р°Рі РЅР° СЃРѕС…СЂР°РЅРµРЅРёРµ РІСЂРµРјРµРЅ РІ SPI РёР»Рё СЃ РјРѕРјРµРЅС‚ РїСЂРѕС€Р»РѕР№ Р·Р°РїРёСЃРё РїСЂРѕС€РµР» С‡Р°СЃ
 	if ((p->WtiteSPI_flag) || (p->PrevWriteSPIHour != global_time.relative_time1.relative_date.hour)) {
 
-		p->write_PowerOn_time(p); //запись времени вкл. состоЯниЯ
-		p->write_oper_time(p); //запись рабочего времени
+		p->write_PowerOn_time(p); //Р·Р°РїРёСЃСЊ РІСЂРµРјРµРЅРё РІРєР». СЃРѕСЃС‚РѕРЇРЅРёРЇ
+		p->write_oper_time(p); //Р·Р°РїРёСЃСЊ СЂР°Р±РѕС‡РµРіРѕ РІСЂРµРјРµРЅРё
 		p->PrevWriteSPIHour = global_time.relative_time1.relative_date.hour;
 		p->WtiteSPI_flag = 0;
 	}

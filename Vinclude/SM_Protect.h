@@ -1,5 +1,5 @@
 /*!
-    Copyright 2017 	ÀÎ "ÍÈÈÝÒ" è ÎÎÎ "ÍÏÔ ÂÅÊÒÎÐ"
+    Copyright 2017 	ÐÐž "ÐÐ˜Ð˜Ð­Ð¢" Ð¸ ÐžÐžÐž "ÐÐŸÐ¤ Ð’Ð•ÐšÐ¢ÐžÐ "
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -14,11 +14,11 @@
    limitations under the License.
 
  \file      SMProtect.h
- \brief     Ìîäóëü çàùèò. (ñì. TSM_Protect)
- \author    ÎÎÎ "ÍÏÔ Âåêòîð". http://motorcontrol.ru
+ \brief     ÐœÐ¾Ð´ÑƒÐ»ÑŒ Ð·Ð°Ñ‰Ð¸Ñ‚. (ÑÐ¼. TSM_Protect)
+ \author    ÐžÐžÐž "ÐÐŸÐ¤ Ð’ÐµÐºÑ‚Ð¾Ñ€". http://motorcontrol.ru
  \version   v 2.0 25/03/2016
 
- \defgroup  SMProtect Ìîäóëü çàùèò. (ñì. TSM_Protect)
+ \defgroup  SMProtect ÐœÐ¾Ð´ÑƒÐ»ÑŒ Ð·Ð°Ñ‰Ð¸Ñ‚. (ÑÐ¼. TSM_Protect)
  @{
 */
 #ifndef SM_Protect_H
@@ -31,81 +31,81 @@ extern "C"
 
 #include "build.h"
 
-//! Ìîäóëü àùèò âûêëþ÷åí
+//! ÐœÐ¾Ð´ÑƒÐ»ÑŒ Ð°Ñ‰Ð¸Ñ‚ Ð²Ñ‹ÐºÐ»ÑŽÑ‡ÐµÐ½
 #define PROT_OFF 			0
-//! Ìîäóëü çàùèò âêëþ÷åí
+//! ÐœÐ¾Ð´ÑƒÐ»ÑŒ Ð·Ð°Ñ‰Ð¸Ñ‚ Ð²ÐºÐ»ÑŽÑ‡ÐµÐ½
 #define PROT_ON_OK	 		1
-//! Ìîäóëü çàùèò â ñîñòîÿíèè àâàðèè (ñðàáîòàëà çàùèòà)
+//! ÐœÐ¾Ð´ÑƒÐ»ÑŒ Ð·Ð°Ñ‰Ð¸Ñ‚ Ð² ÑÐ¾ÑÑ‚Ð¾ÑÐ½Ð¸Ð¸ Ð°Ð²Ð°Ñ€Ð¸Ð¸ (ÑÑ€Ð°Ð±Ð¾Ñ‚Ð°Ð»Ð° Ð·Ð°Ñ‰Ð¸Ñ‚Ð°)
 #define PROT_FAIL 			2
 
-//Ìàêðîñ ïðèåìà (åñëè íîëü, òî àâàðèÿ) è ñáðîñà (åñëè 1, òî ñáðîñ) àïïàðàòíîé àâàðèè
+//ÐœÐ°ÐºÑ€Ð¾Ñ Ð¿Ñ€Ð¸ÐµÐ¼Ð° (ÐµÑÐ»Ð¸ Ð½Ð¾Ð»ÑŒ, Ñ‚Ð¾ Ð°Ð²Ð°Ñ€Ð¸Ñ) Ð¸ ÑÐ±Ñ€Ð¾ÑÐ° (ÐµÑÐ»Ð¸ 1, Ñ‚Ð¾ ÑÐ±Ñ€Ð¾Ñ) Ð°Ð¿Ð¿Ð°Ñ€Ð°Ñ‚Ð½Ð¾Ð¹ Ð°Ð²Ð°Ñ€Ð¸Ð¸
 #if defined HW_VECTOR_MK_40_4
 #define DRV_FAULT	(NT_GPIOA->DATA & (1 << 8))
-#define RESET_FAULT_BUTTON	0 //êíîïêà ñáðîñà àâàðèé íå ïðåäóñìîòðåíà
+#define RESET_FAULT_BUTTON	0 //ÐºÐ½Ð¾Ð¿ÐºÐ° ÑÐ±Ñ€Ð¾ÑÐ° Ð°Ð²Ð°Ñ€Ð¸Ð¹ Ð½Ðµ Ð¿Ñ€ÐµÐ´ÑƒÑÐ¼Ð¾Ñ‚Ñ€ÐµÐ½Ð°
 #endif
 
 #if defined (HW_VECTORCARD_DRV8301_EVM) || defined(HW_VECTORCARD_DRV8312_EVM)
 #define DRV_FAULT	(NT_GPIOC->DATA & (1 << 4))
-#define RESET_FAULT_BUTTON	0 //êíîïêà ñáðîñà àâàðèé íå ïðåäóñìîòðåíà
+#define RESET_FAULT_BUTTON	0 //ÐºÐ½Ð¾Ð¿ÐºÐ° ÑÐ±Ñ€Ð¾ÑÐ° Ð°Ð²Ð°Ñ€Ð¸Ð¹ Ð½Ðµ Ð¿Ñ€ÐµÐ´ÑƒÑÐ¼Ð¾Ñ‚Ñ€ÐµÐ½Ð°
 #endif
 
 #if defined (HW_VECTORCARD_SIMULATOR) || defined(HW_NIIET_BOARD_SIMULATOR) || defined(HW_MOTORCONTROLBOARD_SIMULATOR)
-#define DRV_FAULT	1 //àâàðèé êëþ÷à â ñèìóëÿòîðå íå ïðåäóñìîòðåíî
-#define RESET_FAULT_BUTTON	0 //êíîïêà ñáðîñà àâàðèé íå ïðåäóñìîòðåíà
+#define DRV_FAULT	1 //Ð°Ð²Ð°Ñ€Ð¸Ð¹ ÐºÐ»ÑŽÑ‡Ð° Ð² ÑÐ¸Ð¼ÑƒÐ»ÑÑ‚Ð¾Ñ€Ðµ Ð½Ðµ Ð¿Ñ€ÐµÐ´ÑƒÑÐ¼Ð¾Ñ‚Ñ€ÐµÐ½Ð¾
+#define RESET_FAULT_BUTTON	0 //ÐºÐ½Ð¾Ð¿ÐºÐ° ÑÐ±Ñ€Ð¾ÑÐ° Ð°Ð²Ð°Ñ€Ð¸Ð¹ Ð½Ðµ Ð¿Ñ€ÐµÐ´ÑƒÑÐ¼Ð¾Ñ‚Ñ€ÐµÐ½Ð°
 #endif
 
 #if defined (HW_MOTORCONTROLBOARD)
-#define DRV_FAULT	(NT_GPIOG->DATA & (1 << 13))	//Ïðèåì îáùåé àâàðèè
-#define DRV_FAULT1	(NT_GPIOA->DATA & (1 << 9))		//Àâàðèÿ êëþ÷à A0
-#define DRV_FAULT2	(NT_GPIOG->DATA & (1 << 15))	//Àâàðèÿ êëþ÷à A1
-#define DRV_FAULT3	(NT_GPIOE->DATA & (1 << 7))		//Àâàðèÿ êëþ÷à A2
-#define DRV_FAULT4	(NT_GPIOC->DATA & (1 << 8))		//Àâàðèÿ êëþ÷à B0 èëè B1 èëè B2
+#define DRV_FAULT	(NT_GPIOG->DATA & (1 << 13))	//ÐŸÑ€Ð¸ÐµÐ¼ Ð¾Ð±Ñ‰ÐµÐ¹ Ð°Ð²Ð°Ñ€Ð¸Ð¸
+#define DRV_FAULT1	(NT_GPIOA->DATA & (1 << 9))		//ÐÐ²Ð°Ñ€Ð¸Ñ ÐºÐ»ÑŽÑ‡Ð° A0
+#define DRV_FAULT2	(NT_GPIOG->DATA & (1 << 15))	//ÐÐ²Ð°Ñ€Ð¸Ñ ÐºÐ»ÑŽÑ‡Ð° A1
+#define DRV_FAULT3	(NT_GPIOE->DATA & (1 << 7))		//ÐÐ²Ð°Ñ€Ð¸Ñ ÐºÐ»ÑŽÑ‡Ð° A2
+#define DRV_FAULT4	(NT_GPIOC->DATA & (1 << 8))		//ÐÐ²Ð°Ñ€Ð¸Ñ ÐºÐ»ÑŽÑ‡Ð° B0 Ð¸Ð»Ð¸ B1 Ð¸Ð»Ð¸ B2
 
-//Äëÿ ñáðîñà àïïàðàòíîé àâàðèè â äàííîì êîíòðîëëåðå èñïîëüçóååòñÿ âíåøíèé äèñêðåòíûé ïîðò ââîäà
-#define RESET_FAULT_BUTTON	(BIT_IS_SET(input_vect, 2) ? 1 : 0) //Åñëè óñòàíîâëåí 3-é áèò â âåêòîðå äèñêðåòíûõ âõîäîâ
+//Ð”Ð»Ñ ÑÐ±Ñ€Ð¾ÑÐ° Ð°Ð¿Ð¿Ð°Ñ€Ð°Ñ‚Ð½Ð¾Ð¹ Ð°Ð²Ð°Ñ€Ð¸Ð¸ Ð² Ð´Ð°Ð½Ð½Ð¾Ð¼ ÐºÐ¾Ð½Ñ‚Ñ€Ð¾Ð»Ð»ÐµÑ€Ðµ Ð¸ÑÐ¿Ð¾Ð»ÑŒÐ·ÑƒÐµÐµÑ‚ÑÑ Ð²Ð½ÐµÑˆÐ½Ð¸Ð¹ Ð´Ð¸ÑÐºÑ€ÐµÑ‚Ð½Ñ‹Ð¹ Ð¿Ð¾Ñ€Ñ‚ Ð²Ð²Ð¾Ð´Ð°
+#define RESET_FAULT_BUTTON	(BIT_IS_SET(input_vect, 2) ? 1 : 0) //Ð•ÑÐ»Ð¸ ÑƒÑÑ‚Ð°Ð½Ð¾Ð²Ð»ÐµÐ½ 3-Ð¹ Ð±Ð¸Ñ‚ Ð² Ð²ÐµÐºÑ‚Ð¾Ñ€Ðµ Ð´Ð¸ÑÐºÑ€ÐµÑ‚Ð½Ñ‹Ñ… Ð²Ñ…Ð¾Ð´Ð¾Ð²
 #endif
 
 
 /*! \class TSM_Protect
-      \brief Ìîäóëü çàùèò.
+      \brief ÐœÐ¾Ð´ÑƒÐ»ÑŒ Ð·Ð°Ñ‰Ð¸Ñ‚.
 
-      Êëàññ \a TSM_Protect, îñíîâàííûé íà ñòðóêòóðå SSMProtect,
-      îáðàáàòûâàåò âñå âîçìîæíûå àâàðèéíûå ñèòóàöèè è âîçâîäèò ñîîòâåòñòâóþùèé ýòîé
-      àâàðèè áèò â îäíîì èç ñëîâ bit_fault 1-2. äàëåå ïðîèñõîäèò îáðàáîòêà ýòèõ ñëîâ, è,
-      åñëè ýòà àâàðèÿ íå çàìàñêèðîâàíà, ïðîèñõîäèò îñòàíîâ ïðèâîäà.
+      ÐšÐ»Ð°ÑÑ \a TSM_Protect, Ð¾ÑÐ½Ð¾Ð²Ð°Ð½Ð½Ñ‹Ð¹ Ð½Ð° ÑÑ‚Ñ€ÑƒÐºÑ‚ÑƒÑ€Ðµ SSMProtect,
+      Ð¾Ð±Ñ€Ð°Ð±Ð°Ñ‚Ñ‹Ð²Ð°ÐµÑ‚ Ð²ÑÐµ Ð²Ð¾Ð·Ð¼Ð¾Ð¶Ð½Ñ‹Ðµ Ð°Ð²Ð°Ñ€Ð¸Ð¹Ð½Ñ‹Ðµ ÑÐ¸Ñ‚ÑƒÐ°Ñ†Ð¸Ð¸ Ð¸ Ð²Ð¾Ð·Ð²Ð¾Ð´Ð¸Ñ‚ ÑÐ¾Ð¾Ñ‚Ð²ÐµÑ‚ÑÑ‚Ð²ÑƒÑŽÑ‰Ð¸Ð¹ ÑÑ‚Ð¾Ð¹
+      Ð°Ð²Ð°Ñ€Ð¸Ð¸ Ð±Ð¸Ñ‚ Ð² Ð¾Ð´Ð½Ð¾Ð¼ Ð¸Ð· ÑÐ»Ð¾Ð² bit_fault 1-2. Ð´Ð°Ð»ÐµÐµ Ð¿Ñ€Ð¾Ð¸ÑÑ…Ð¾Ð´Ð¸Ñ‚ Ð¾Ð±Ñ€Ð°Ð±Ð¾Ñ‚ÐºÐ° ÑÑ‚Ð¸Ñ… ÑÐ»Ð¾Ð², Ð¸,
+      ÐµÑÐ»Ð¸ ÑÑ‚Ð° Ð°Ð²Ð°Ñ€Ð¸Ñ Ð½Ðµ Ð·Ð°Ð¼Ð°ÑÐºÐ¸Ñ€Ð¾Ð²Ð°Ð½Ð°, Ð¿Ñ€Ð¾Ð¸ÑÑ…Ð¾Ð´Ð¸Ñ‚ Ð¾ÑÑ‚Ð°Ð½Ð¾Ð² Ð¿Ñ€Ð¸Ð²Ð¾Ð´Ð°.
 */
 
-//! ñì. TSM_Protect
+//! ÑÐ¼. TSM_Protect
   struct SSM_Protect
   {
-    Uint16 state;//!< Ñîñòîÿíèå
-    Uint16 state_prev;//!< Ñîñòîÿíèå ïðåäûäóùåå
+    Uint16 state;//!< Ð¡Ð¾ÑÑ‚Ð¾ÑÐ½Ð¸Ðµ
+    Uint16 state_prev;//!< Ð¡Ð¾ÑÑ‚Ð¾ÑÐ½Ð¸Ðµ Ð¿Ñ€ÐµÐ´Ñ‹Ð´ÑƒÑ‰ÐµÐµ
 
-    Uint16 readDrvSts; //!<Ôëàã çàïðîñà ÷òåíèÿ ñòàòóñà drv8301
-    Uint16 clearDrvFault; //!<Ôëàã çàïðîñà ñáðîñà àâàðèè drv8301
+    Uint16 readDrvSts; //!<Ð¤Ð»Ð°Ð³ Ð·Ð°Ð¿Ñ€Ð¾ÑÐ° Ñ‡Ñ‚ÐµÐ½Ð¸Ñ ÑÑ‚Ð°Ñ‚ÑƒÑÐ° drv8301
+    Uint16 clearDrvFault; //!<Ð¤Ð»Ð°Ð³ Ð·Ð°Ð¿Ñ€Ð¾ÑÐ° ÑÐ±Ñ€Ð¾ÑÐ° Ð°Ð²Ð°Ñ€Ð¸Ð¸ drv8301
 
-    Uint16 bit_fault1;//!<Ñëîâî àâàðèé 1
-    Uint16 bit_fault2;//!<Ñëîâî àâàðèé 2
+    Uint16 bit_fault1;//!<Ð¡Ð»Ð¾Ð²Ð¾ Ð°Ð²Ð°Ñ€Ð¸Ð¹ 1
+    Uint16 bit_fault2;//!<Ð¡Ð»Ð¾Ð²Ð¾ Ð°Ð²Ð°Ñ€Ð¸Ð¹ 2
 
-    Uint16 masked_bit_fault1;//!<Ñëîâî àâàðèé ïîñëå ìàñêèðîâàíèÿ
-    Uint16 masked_bit_fault2;//!<Ñëîâî àâàðèé ïîñëå ìàñêèðîâàíèÿ
+    Uint16 masked_bit_fault1;//!<Ð¡Ð»Ð¾Ð²Ð¾ Ð°Ð²Ð°Ñ€Ð¸Ð¹ Ð¿Ð¾ÑÐ»Ðµ Ð¼Ð°ÑÐºÐ¸Ñ€Ð¾Ð²Ð°Ð½Ð¸Ñ
+    Uint16 masked_bit_fault2;//!<Ð¡Ð»Ð¾Ð²Ð¾ Ð°Ð²Ð°Ñ€Ð¸Ð¹ Ð¿Ð¾ÑÐ»Ðµ Ð¼Ð°ÑÐºÐ¸Ñ€Ð¾Ð²Ð°Ð½Ð¸Ñ
 
-    Uint16 mask_fault1;//!<Ìàñêà àâàðèé 1
-    Uint16 mask_fault2;//!<Ìàñêà àâàðèé 2
+    Uint16 mask_fault1;//!<ÐœÐ°ÑÐºÐ° Ð°Ð²Ð°Ñ€Ð¸Ð¹ 1
+    Uint16 mask_fault2;//!<ÐœÐ°ÑÐºÐ° Ð°Ð²Ð°Ñ€Ð¸Ð¹ 2
     
     Uint16 bit_fault_written1;
     Uint16 bit_fault_written2;
 
-    long Imax_protect;	//!<Óñòàâêà ìàêñèìàëüíî-òîêîâîé çàùèòû
-    long Umax_protect; 	//!<Óñòàâêà çàùèòû max íàïðÿæåíèÿ íà ÇÏÒ
-    long Umin_protect;	//!<Óñòàâêà çàùèòû min íàïðÿæåíèÿ íà ÇÏÒ
-    long speed_max;		//!<Óñòàâêà ìàêñèìàëüíîé ñêîðîñòè
-    long T_max;			//!<Óñòàâêà ìàêñèìàëüíîé òåìïåðàòóðû
+    long Imax_protect;	//!<Ð£ÑÑ‚Ð°Ð²ÐºÐ° Ð¼Ð°ÐºÑÐ¸Ð¼Ð°Ð»ÑŒÐ½Ð¾-Ñ‚Ð¾ÐºÐ¾Ð²Ð¾Ð¹ Ð·Ð°Ñ‰Ð¸Ñ‚Ñ‹
+    long Umax_protect; 	//!<Ð£ÑÑ‚Ð°Ð²ÐºÐ° Ð·Ð°Ñ‰Ð¸Ñ‚Ñ‹ max Ð½Ð°Ð¿Ñ€ÑÐ¶ÐµÐ½Ð¸Ñ Ð½Ð° Ð—ÐŸÐ¢
+    long Umin_protect;	//!<Ð£ÑÑ‚Ð°Ð²ÐºÐ° Ð·Ð°Ñ‰Ð¸Ñ‚Ñ‹ min Ð½Ð°Ð¿Ñ€ÑÐ¶ÐµÐ½Ð¸Ñ Ð½Ð° Ð—ÐŸÐ¢
+    long speed_max;		//!<Ð£ÑÑ‚Ð°Ð²ÐºÐ° Ð¼Ð°ÐºÑÐ¸Ð¼Ð°Ð»ÑŒÐ½Ð¾Ð¹ ÑÐºÐ¾Ñ€Ð¾ÑÑ‚Ð¸
+    long T_max;			//!<Ð£ÑÑ‚Ð°Ð²ÐºÐ° Ð¼Ð°ÐºÑÐ¸Ð¼Ð°Ð»ÑŒÐ½Ð¾Ð¹ Ñ‚ÐµÐ¼Ð¿ÐµÑ€Ð°Ñ‚ÑƒÑ€Ñ‹
 
-    int E;//!<Ôëàã ïåðâîãî âõîæäåíèÿ
-    Uint16 Main_ErrorCode;//!< //ëèñòàþùèéñÿ êîä àâàðèè
-    Uint32 Main_Flags;//!< //Ôëàã àâàðèéíîé áëîêèðîâêè áëîêà
-    Uint16 powered_okCounter;//!< Ñ÷åò÷èê äëÿ îæèäàíèÿ âêëþ÷åíÿ ìîäóëÿ çàùèò ïîñëå èíåöèàëèçàöèè
+    int E;//!<Ð¤Ð»Ð°Ð³ Ð¿ÐµÑ€Ð²Ð¾Ð³Ð¾ Ð²Ñ…Ð¾Ð¶Ð´ÐµÐ½Ð¸Ñ
+    Uint16 Main_ErrorCode;//!< //Ð»Ð¸ÑÑ‚Ð°ÑŽÑ‰Ð¸Ð¹ÑÑ ÐºÐ¾Ð´ Ð°Ð²Ð°Ñ€Ð¸Ð¸
+    Uint32 Main_Flags;//!< //Ð¤Ð»Ð°Ð³ Ð°Ð²Ð°Ñ€Ð¸Ð¹Ð½Ð¾Ð¹ Ð±Ð»Ð¾ÐºÐ¸Ñ€Ð¾Ð²ÐºÐ¸ Ð±Ð»Ð¾ÐºÐ°
+    Uint16 powered_okCounter;//!< Ð¡Ñ‡ÐµÑ‚Ñ‡Ð¸Ðº Ð´Ð»Ñ Ð¾Ð¶Ð¸Ð´Ð°Ð½Ð¸Ñ Ð²ÐºÐ»ÑŽÑ‡ÐµÐ½Ñ Ð¼Ð¾Ð´ÑƒÐ»Ñ Ð·Ð°Ñ‰Ð¸Ñ‚ Ð¿Ð¾ÑÐ»Ðµ Ð¸Ð½ÐµÑ†Ð¸Ð°Ð»Ð¸Ð·Ð°Ñ†Ð¸Ð¸
     void (*init)(struct SSM_Protect*);     /* Pointer to the init funcion           */
     void (*slow_calc)(struct SSM_Protect*);     /* Pointer to the calc funtion           */
     void (*fast_calc)(struct SSM_Protect*);     /* Pointer to the calc funtion           */
@@ -113,7 +113,7 @@ extern "C"
   } ;
   typedef struct SSM_Protect TSM_Protect;
 
- //!Èíèöèàëèçàòîð ïî óìîë÷àíèþ
+ //!Ð˜Ð½Ð¸Ñ†Ð¸Ð°Ð»Ð¸Ð·Ð°Ñ‚Ð¾Ñ€ Ð¿Ð¾ ÑƒÐ¼Ð¾Ð»Ñ‡Ð°Ð½Ð¸ÑŽ
 #define SM_PROTECT_DEFAULTS { \
     .init = SM_Protect_Init, \
     .slow_calc = SM_Protect_Slow_Calc, \

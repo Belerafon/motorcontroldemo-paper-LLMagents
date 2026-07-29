@@ -1,5 +1,5 @@
 /*!
-    Copyright 2017 	АО "НИИЭТ" и ООО "НПФ ВЕКТОР"
+    Copyright 2017 	РђРћ "РќРРР­Рў" Рё РћРћРћ "РќРџР¤ Р’Р•РљРўРћР "
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -14,10 +14,10 @@
    limitations under the License.
 
  \file      V_fifo.c
- \brief     Кольцевой масив типа FIFO. Позволяет записывать данные типа "Uint8"
- пакетами произвольной длины.
+ \brief     РљРѕР»СЊС†РµРІРѕР№ РјР°СЃРёРІ С‚РёРїР° FIFO. РџРѕР·РІРѕР»СЏРµС‚ Р·Р°РїРёСЃС‹РІР°С‚СЊ РґР°РЅРЅС‹Рµ С‚РёРїР° "Uint8"
+ РїР°РєРµС‚Р°РјРё РїСЂРѕРёР·РІРѕР»СЊРЅРѕР№ РґР»РёРЅС‹.
 
- \author    ООО "НПФ Вектор". http://motorcontrol.ru
+ \author    РћРћРћ "РќРџР¤ Р’РµРєС‚РѕСЂ". http://motorcontrol.ru
  \version   v 1.0 08/08/2017
 
 */
@@ -27,23 +27,23 @@
 
 #define BUFFER_SIZE 64
 
-#define FIFO_BUSY				-1		// Фифо занят
-#define FIFO_NOT_ENOUGH_SPACE	2		// Не хватает места для записи
-#define FIFO_NOT_ENOUGH_DATA	3		// Нет столько данных, сколько хотят вычитать
-#define FIFO_OK					0		// Всё ок
+#define FIFO_BUSY				-1		// Р¤РёС„Рѕ Р·Р°РЅСЏС‚
+#define FIFO_NOT_ENOUGH_SPACE	2		// РќРµ С…РІР°С‚Р°РµС‚ РјРµСЃС‚Р° РґР»СЏ Р·Р°РїРёСЃРё
+#define FIFO_NOT_ENOUGH_DATA	3		// РќРµС‚ СЃС‚РѕР»СЊРєРѕ РґР°РЅРЅС‹С…, СЃРєРѕР»СЊРєРѕ С…РѕС‚СЏС‚ РІС‹С‡РёС‚Р°С‚СЊ
+#define FIFO_OK					0		// Р’СЃС‘ РѕРє
 
 
 struct Sfifo;
 typedef volatile struct Sfifo Tfifo;
 struct Sfifo {
 	Uint16 busy;
-	Uint16 size;		// Размер буфера (надо)
+	Uint16 size;		// Р Р°Р·РјРµСЂ Р±СѓС„РµСЂР° (РЅР°РґРѕ)
     Uint16 wp;		// Write pointer
 	Uint16 rp; 		// Read pointer
-	Uint8 wrapFlag;	// Взводится в 1, если wp перешёл за границы буфера;
-						// Сбрасывается, если rp  перешёл
-						// Помогает отследить ситуацию, когда буфера заполнен на 100%: rp == wp && wrap == 1
-						// Либо если буфер полностью пуст: rp == wp && wrap == 0
+	Uint8 wrapFlag;	// Р’Р·РІРѕРґРёС‚СЃСЏ РІ 1, РµСЃР»Рё wp РїРµСЂРµС€С‘Р» Р·Р° РіСЂР°РЅРёС†С‹ Р±СѓС„РµСЂР°;
+						// РЎР±СЂР°СЃС‹РІР°РµС‚СЃСЏ, РµСЃР»Рё rp  РїРµСЂРµС€С‘Р»
+						// РџРѕРјРѕРіР°РµС‚ РѕС‚СЃР»РµРґРёС‚СЊ СЃРёС‚СѓР°С†РёСЋ, РєРѕРіРґР° Р±СѓС„РµСЂР° Р·Р°РїРѕР»РЅРµРЅ РЅР° 100%: rp == wp && wrap == 1
+						// Р›РёР±Рѕ РµСЃР»Рё Р±СѓС„РµСЂ РїРѕР»РЅРѕСЃС‚СЊСЋ РїСѓСЃС‚: rp == wp && wrap == 0
     Uint8 buff[BUFFER_SIZE];
     int16 (*put)(Tfifo*, Uint16, Uint8*);
     int16 (*get)(Tfifo*, Uint16, Uint8*);

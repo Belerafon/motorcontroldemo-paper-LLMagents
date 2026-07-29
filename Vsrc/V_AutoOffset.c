@@ -1,5 +1,5 @@
 /*!
-    Copyright 2017 	ÀÎ "ÍÈÈÝÒ" è ÎÎÎ "ÍÏÔ ÂÅÊÒÎÐ"
+    Copyright 2017 	ÐÐž "ÐÐ˜Ð˜Ð­Ð¢" Ð¸ ÐžÐžÐž "ÐÐŸÐ¤ Ð’Ð•ÐšÐ¢ÐžÐ "
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -14,8 +14,8 @@
    limitations under the License.
 
  \file      V_AutoOffset.c
- \brief     Àâòîñìåùåíèå ÀÖÏ (ñì. TAutoOffset)
- \author    ÎÎÎ "ÍÏÔ Âåêòîð". http://motorcontrol.ru
+ \brief     ÐÐ²Ñ‚Ð¾ÑÐ¼ÐµÑ‰ÐµÐ½Ð¸Ðµ ÐÐ¦ÐŸ (ÑÐ¼. TAutoOffset)
+ \author    ÐžÐžÐž "ÐÐŸÐ¤ Ð’ÐµÐºÑ‚Ð¾Ñ€". http://motorcontrol.ru
  \version   v 2.0 25/03/2016
 
  @{
@@ -38,8 +38,8 @@ void AutoOffset_init(TAutoOffset *p) {
 }
 
 void AutoOffset_calc(TAutoOffset *p) {
-	//èíòåãðàòîðû äëÿ òîêîâ ôàç. Êîãäà ìîäóëü âûçûâàåòñÿ, òîêè äîëæíû áûòü íóëåâûìè.
-	//åñëè ýòî íå òàê, òî èíòåãðàòîðû ïîéäóò ñ÷èòàòü
+	//Ð¸Ð½Ñ‚ÐµÐ³Ñ€Ð°Ñ‚Ð¾Ñ€Ñ‹ Ð´Ð»Ñ Ñ‚Ð¾ÐºÐ¾Ð² Ñ„Ð°Ð·. ÐšÐ¾Ð³Ð´Ð° Ð¼Ð¾Ð´ÑƒÐ»ÑŒ Ð²Ñ‹Ð·Ñ‹Ð²Ð°ÐµÑ‚ÑÑ, Ñ‚Ð¾ÐºÐ¸ Ð´Ð¾Ð»Ð¶Ð½Ñ‹ Ð±Ñ‹Ñ‚ÑŒ Ð½ÑƒÐ»ÐµÐ²Ñ‹Ð¼Ð¸.
+	//ÐµÑÐ»Ð¸ ÑÑ‚Ð¾ Ð½Ðµ Ñ‚Ð°Ðº, Ñ‚Ð¾ Ð¸Ð½Ñ‚ÐµÐ³Ñ€Ð°Ñ‚Ð¾Ñ€Ñ‹ Ð¿Ð¾Ð¹Ð´ÑƒÑ‚ ÑÑ‡Ð¸Ñ‚Ð°Ñ‚ÑŒ
 	p->IA_int = p->IA_int + _IQmpy(p->FilterK, adc.Imeas_a);
 	p->IB_int = p->IB_int + _IQmpy(p->FilterK, adc.Imeas_b);
 	p->IC_int = p->IC_int + _IQmpy(p->FilterK, adc.Imeas_c);
@@ -51,8 +51,8 @@ void AutoOffset_slow_calc(TAutoOffset *p) {
 	long IB_pu;
 	long IC_pu;
 
-	if (p->Enabled){//åñëè ìîäóëü àâòîðàñ÷åòà ñìåùåíèÿ òîêîâ âêëþ÷åí
-		//ïåðåñ÷èòûâàåì èç î.å. îáðàòíî â çíà÷åíèÿ ÀÖÏ
+	if (p->Enabled){//ÐµÑÐ»Ð¸ Ð¼Ð¾Ð´ÑƒÐ»ÑŒ Ð°Ð²Ñ‚Ð¾Ñ€Ð°ÑÑ‡ÐµÑ‚Ð° ÑÐ¼ÐµÑ‰ÐµÐ½Ð¸Ñ Ñ‚Ð¾ÐºÐ¾Ð² Ð²ÐºÐ»ÑŽÑ‡ÐµÐ½
+		//Ð¿ÐµÑ€ÐµÑÑ‡Ð¸Ñ‚Ñ‹Ð²Ð°ÐµÐ¼ Ð¸Ð· Ð¾.Ðµ. Ð¾Ð±Ñ€Ð°Ñ‚Ð½Ð¾ Ð² Ð·Ð½Ð°Ñ‡ÐµÐ½Ð¸Ñ ÐÐ¦ÐŸ
 		IA_pu = -p->IA_int / (_IQ16mpy(adc.Imeas_a_gain, drv_params._1_I_nom));
 		adc.Imeas_a_offset  = IA_pu >> 1;
 
@@ -61,7 +61,7 @@ void AutoOffset_slow_calc(TAutoOffset *p) {
 
 		IC_pu = -p->IC_int / (_IQ16mpy(adc.Imeas_c_gain, drv_params._1_I_nom));
 		adc.Imeas_c_offset = IC_pu >> 1;
-	} else {//ìîäóëü âûêëþ÷åí, èíèöèàëèçèðóåì èíòåãðàòîðû òåêóùèìè çíà÷åíÿìè ñìåùåíèé
+	} else {//Ð¼Ð¾Ð´ÑƒÐ»ÑŒ Ð²Ñ‹ÐºÐ»ÑŽÑ‡ÐµÐ½, Ð¸Ð½Ð¸Ñ†Ð¸Ð°Ð»Ð¸Ð·Ð¸Ñ€ÑƒÐµÐ¼ Ð¸Ð½Ñ‚ÐµÐ³Ñ€Ð°Ñ‚Ð¾Ñ€Ñ‹ Ñ‚ÐµÐºÑƒÑ‰Ð¸Ð¼Ð¸ Ð·Ð½Ð°Ñ‡ÐµÐ½ÑÐ¼Ð¸ ÑÐ¼ÐµÑ‰ÐµÐ½Ð¸Ð¹
 		p->IA_int=-(((long)adc.Imeas_a_offset)<<1)*_IQ16mpy(adc.Imeas_a_gain, drv_params._1_I_nom);
 		p->IB_int=-(((long)adc.Imeas_b_offset)<<1)*_IQ16mpy(adc.Imeas_b_gain, drv_params._1_I_nom);
 		p->IC_int=-(((long)adc.Imeas_c_offset)<<1)*_IQ16mpy(adc.Imeas_c_gain, drv_params._1_I_nom);

@@ -1,5 +1,5 @@
 /*!
-    Copyright 2017 	АО "НИИЭТ" и ООО "НПФ ВЕКТОР"
+    Copyright 2017 	РђРћ "РќРРР­Рў" Рё РћРћРћ "РќРџР¤ Р’Р•РљРўРћР "
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -14,8 +14,8 @@
    limitations under the License.
 
  \file      V_UserMemory.c
- \brief     Работа с пользовательской энергонезависимой памятью 1921BK01 (см. TUserMemory)
- \author	Лашкевич М.М., Шпак Д.М.
+ \brief     Р Р°Р±РѕС‚Р° СЃ РїРѕР»СЊР·РѕРІР°С‚РµР»СЊСЃРєРѕР№ СЌРЅРµСЂРіРѕРЅРµР·Р°РІРёСЃРёРјРѕР№ РїР°РјСЏС‚СЊСЋ 1921BK01 (СЃРј. TUserMemory)
+ \author	Р›Р°С€РєРµРІРёС‡ Рњ.Рњ., РЁРїР°Рє Р”.Рњ.
  \version   v 1.0 18/12/2014
 */
 
@@ -28,215 +28,215 @@
 
 
 
-//!Инициализация
+//!РРЅРёС†РёР°Р»РёР·Р°С†РёСЏ
 
-//!Инициализация USERMEMORY
+//!РРЅРёС†РёР°Р»РёР·Р°С†РёСЏ USERMEMORY
 //! \memberof TUserMemory
 void  USERMEMORY_Init(TUserMemory *p)
 {
-	USERMEMORY_ReadToCache(p,0);//читаем в оперативку нулевой страницы (чтобы была текущая страница и все работало корректно дальше)
+	USERMEMORY_ReadToCache(p,0);//С‡РёС‚Р°РµРј РІ РѕРїРµСЂР°С‚РёРІРєСѓ РЅСѓР»РµРІРѕР№ СЃС‚СЂР°РЅРёС†С‹ (С‡С‚РѕР±С‹ Р±С‹Р»Р° С‚РµРєСѓС‰Р°СЏ СЃС‚СЂР°РЅРёС†Р° Рё РІСЃРµ СЂР°Р±РѕС‚Р°Р»Рѕ РєРѕСЂСЂРµРєС‚РЅРѕ РґР°Р»СЊС€Рµ)
 }
 
 
-//! Проверка, не нужно ли сменить страницу
+//! РџСЂРѕРІРµСЂРєР°, РЅРµ РЅСѓР¶РЅРѕ Р»Рё СЃРјРµРЅРёС‚СЊ СЃС‚СЂР°РЅРёС†Сѓ
 
-//! Проверяет текущий адрес на флешке, с которым работает пользователь. Если адрес вышел из текущей страницы, страница записывается на флеш и читается в RAM новый
+//! РџСЂРѕРІРµСЂСЏРµС‚ С‚РµРєСѓС‰РёР№ Р°РґСЂРµСЃ РЅР° С„Р»РµС€РєРµ, СЃ РєРѕС‚РѕСЂС‹Рј СЂР°Р±РѕС‚Р°РµС‚ РїРѕР»СЊР·РѕРІР°С‚РµР»СЊ. Р•СЃР»Рё Р°РґСЂРµСЃ РІС‹С€РµР» РёР· С‚РµРєСѓС‰РµР№ СЃС‚СЂР°РЅРёС†С‹, СЃС‚СЂР°РЅРёС†Р° Р·Р°РїРёСЃС‹РІР°РµС‚СЃСЏ РЅР° С„Р»РµС€ Рё С‡РёС‚Р°РµС‚СЃСЏ РІ RAM РЅРѕРІС‹Р№
 //! \memberof TUserMemory
 void USERMEMORY_UpdateCurrentPage(TUserMemory *p, Uint16 spiaddr)
 {
-	Uint16 newPage=spiaddr>>8;//номер страницы - это верхнее значение адреса, так как страница 256 байт
-	if (newPage!=p->PageInCache){//страница другая?
-		if (p->PageRAM_and_FLASH_IdenticalFlag==0)//и есть измененные данные в этой странице в оперативке в кеше?
-			USERMEMORY_Flush(p);//загоняем страницу на флеш
-		if (p->receivedCode!=USERMEMORY_OP_OK)//не вышло?
+	Uint16 newPage=spiaddr>>8;//РЅРѕРјРµСЂ СЃС‚СЂР°РЅРёС†С‹ - СЌС‚Рѕ РІРµСЂС…РЅРµРµ Р·РЅР°С‡РµРЅРёРµ Р°РґСЂРµСЃР°, С‚Р°Рє РєР°Рє СЃС‚СЂР°РЅРёС†Р° 256 Р±Р°Р№С‚
+	if (newPage!=p->PageInCache){//СЃС‚СЂР°РЅРёС†Р° РґСЂСѓРіР°СЏ?
+		if (p->PageRAM_and_FLASH_IdenticalFlag==0)//Рё РµСЃС‚СЊ РёР·РјРµРЅРµРЅРЅС‹Рµ РґР°РЅРЅС‹Рµ РІ СЌС‚РѕР№ СЃС‚СЂР°РЅРёС†Рµ РІ РѕРїРµСЂР°С‚РёРІРєРµ РІ РєРµС€Рµ?
+			USERMEMORY_Flush(p);//Р·Р°РіРѕРЅСЏРµРј СЃС‚СЂР°РЅРёС†Сѓ РЅР° С„Р»РµС€
+		if (p->receivedCode!=USERMEMORY_OP_OK)//РЅРµ РІС‹С€Р»Рѕ?
 			return;
-		//читаем в оперативку новую страницу
+		//С‡РёС‚Р°РµРј РІ РѕРїРµСЂР°С‚РёРІРєСѓ РЅРѕРІСѓСЋ СЃС‚СЂР°РЅРёС†Сѓ
 		USERMEMORY_ReadToCache(p,newPage);
-		if (p->receivedCode!=USERMEMORY_OP_OK)//не вышло?
+		if (p->receivedCode!=USERMEMORY_OP_OK)//РЅРµ РІС‹С€Р»Рѕ?
 			return;
 	}
 }
 
 
-//! Запись в память
+//! Р—Р°РїРёСЃСЊ РІ РїР°РјСЏС‚СЊ
 
-//!Медленная функция, записывающая на flash заданные данные.
-//!Работает с закешированными в оперативке данными, а физическ пишет на флеш только если адрес вылез за границы текущей страницы
+//!РњРµРґР»РµРЅРЅР°СЏ С„СѓРЅРєС†РёСЏ, Р·Р°РїРёСЃС‹РІР°СЋС‰Р°СЏ РЅР° flash Р·Р°РґР°РЅРЅС‹Рµ РґР°РЅРЅС‹Рµ.
+//!Р Р°Р±РѕС‚Р°РµС‚ СЃ Р·Р°РєРµС€РёСЂРѕРІР°РЅРЅС‹РјРё РІ РѕРїРµСЂР°С‚РёРІРєРµ РґР°РЅРЅС‹РјРё, Р° С„РёР·РёС‡РµСЃРє РїРёС€РµС‚ РЅР° С„Р»РµС€ С‚РѕР»СЊРєРѕ РµСЃР»Рё Р°РґСЂРµСЃ РІС‹Р»РµР· Р·Р° РіСЂР°РЅРёС†С‹ С‚РµРєСѓС‰РµР№ СЃС‚СЂР°РЅРёС†С‹
 
-//! Адрес во флеше spiaddr, адрес 16ти разрядных данных пользователя startaddr, размер data_length. Все в байтах
-//! При выполении операции startaddr инкрементируется, а spiaddr нет
+//! РђРґСЂРµСЃ РІРѕ С„Р»РµС€Рµ spiaddr, Р°РґСЂРµСЃ 16С‚Рё СЂР°Р·СЂСЏРґРЅС‹С… РґР°РЅРЅС‹С… РїРѕР»СЊР·РѕРІР°С‚РµР»СЏ startaddr, СЂР°Р·РјРµСЂ data_length. Р’СЃРµ РІ Р±Р°Р№С‚Р°С…
+//! РџСЂРё РІС‹РїРѕР»РµРЅРёРё РѕРїРµСЂР°С†РёРё startaddr РёРЅРєСЂРµРјРµРЅС‚РёСЂСѓРµС‚СЃСЏ, Р° spiaddr РЅРµС‚
 //! \memberof TUserMemory
 void USERMEMORY_Write(TUserMemory *p)
 {
 	Uint16 i = 0;
-	Uint16 spiaddrTmp=p->MemStartAddr;//адрес на флеше в байтах
-	p->MCUStartAddr8=(Uint8*)p->MCUStartAddr;//меняем указатель на данные - из указателя на 16ти разрядные данные на указатель на байты - так удобнее
-	for(i = 0; i < p->data_length; i++){//по всем данным, что хочет пользователь
-		USERMEMORY_UpdateCurrentPage(p,spiaddrTmp);//сменить и перечитать страницу, если она другая
-		Uint16 addrInPage=spiaddrTmp&0xFF;//адрес внутри страницы
-		if (p->cacheArr[addrInPage] != (*(p->MCUStartAddr8))){//данные на совпадают с тем, что уже в оперативке в этом месте?
-			p->cacheArr[addrInPage]=(*(p->MCUStartAddr8));//кладем данные в оперативку
-			p->PageRAM_and_FLASH_IdenticalFlag=0;//флаг, что данные в оперативке отличаются от записанных на флеше
+	Uint16 spiaddrTmp=p->MemStartAddr;//Р°РґСЂРµСЃ РЅР° С„Р»РµС€Рµ РІ Р±Р°Р№С‚Р°С…
+	p->MCUStartAddr8=(Uint8*)p->MCUStartAddr;//РјРµРЅСЏРµРј СѓРєР°Р·Р°С‚РµР»СЊ РЅР° РґР°РЅРЅС‹Рµ - РёР· СѓРєР°Р·Р°С‚РµР»СЏ РЅР° 16С‚Рё СЂР°Р·СЂСЏРґРЅС‹Рµ РґР°РЅРЅС‹Рµ РЅР° СѓРєР°Р·Р°С‚РµР»СЊ РЅР° Р±Р°Р№С‚С‹ - С‚Р°Рє СѓРґРѕР±РЅРµРµ
+	for(i = 0; i < p->data_length; i++){//РїРѕ РІСЃРµРј РґР°РЅРЅС‹Рј, С‡С‚Рѕ С…РѕС‡РµС‚ РїРѕР»СЊР·РѕРІР°С‚РµР»СЊ
+		USERMEMORY_UpdateCurrentPage(p,spiaddrTmp);//СЃРјРµРЅРёС‚СЊ Рё РїРµСЂРµС‡РёС‚Р°С‚СЊ СЃС‚СЂР°РЅРёС†Сѓ, РµСЃР»Рё РѕРЅР° РґСЂСѓРіР°СЏ
+		Uint16 addrInPage=spiaddrTmp&0xFF;//Р°РґСЂРµСЃ РІРЅСѓС‚СЂРё СЃС‚СЂР°РЅРёС†С‹
+		if (p->cacheArr[addrInPage] != (*(p->MCUStartAddr8))){//РґР°РЅРЅС‹Рµ РЅР° СЃРѕРІРїР°РґР°СЋС‚ СЃ С‚РµРј, С‡С‚Рѕ СѓР¶Рµ РІ РѕРїРµСЂР°С‚РёРІРєРµ РІ СЌС‚РѕРј РјРµСЃС‚Рµ?
+			p->cacheArr[addrInPage]=(*(p->MCUStartAddr8));//РєР»Р°РґРµРј РґР°РЅРЅС‹Рµ РІ РѕРїРµСЂР°С‚РёРІРєСѓ
+			p->PageRAM_and_FLASH_IdenticalFlag=0;//С„Р»Р°Рі, С‡С‚Рѕ РґР°РЅРЅС‹Рµ РІ РѕРїРµСЂР°С‚РёРІРєРµ РѕС‚Р»РёС‡Р°СЋС‚СЃСЏ РѕС‚ Р·Р°РїРёСЃР°РЅРЅС‹С… РЅР° С„Р»РµС€Рµ
 		}
 		spiaddrTmp++;
 		p->MCUStartAddr8++;
 	}
-	//p->MCUStartAddr=(Uint16*)p->MCUStartAddr8;//чтобы адрес на данные поменялся (не знаю, надо это кому или нет)
+	//p->MCUStartAddr=(Uint16*)p->MCUStartAddr8;//С‡С‚РѕР±С‹ Р°РґСЂРµСЃ РЅР° РґР°РЅРЅС‹Рµ РїРѕРјРµРЅСЏР»СЃСЏ (РЅРµ Р·РЅР°СЋ, РЅР°РґРѕ СЌС‚Рѕ РєРѕРјСѓ РёР»Рё РЅРµС‚)
 	p->receivedCode = USERMEMORY_OP_OK;
 }
 
 
-//! Чтение из памяти
+//! Р§С‚РµРЅРёРµ РёР· РїР°РјСЏС‚Рё
 
-//!Медленная функция, считывающая из flash заданные данные. Подробности см. TUserMemory.
+//!РњРµРґР»РµРЅРЅР°СЏ С„СѓРЅРєС†РёСЏ, СЃС‡РёС‚С‹РІР°СЋС‰Р°СЏ РёР· flash Р·Р°РґР°РЅРЅС‹Рµ РґР°РЅРЅС‹Рµ. РџРѕРґСЂРѕР±РЅРѕСЃС‚Рё СЃРј. TUserMemory.
 
-//! Адрес во флеше spiaddr, адрес адрес 16ти разрядных данных пользователя startaddr, размер data_length. Все в байтах.
-//! При выполении операции startaddr инкрементируется, а spiaddr нет
+//! РђРґСЂРµСЃ РІРѕ С„Р»РµС€Рµ spiaddr, Р°РґСЂРµСЃ Р°РґСЂРµСЃ 16С‚Рё СЂР°Р·СЂСЏРґРЅС‹С… РґР°РЅРЅС‹С… РїРѕР»СЊР·РѕРІР°С‚РµР»СЏ startaddr, СЂР°Р·РјРµСЂ data_length. Р’СЃРµ РІ Р±Р°Р№С‚Р°С….
+//! РџСЂРё РІС‹РїРѕР»РµРЅРёРё РѕРїРµСЂР°С†РёРё startaddr РёРЅРєСЂРµРјРµРЅС‚РёСЂСѓРµС‚СЃСЏ, Р° spiaddr РЅРµС‚
 //! \memberof TUserMemory
 void USERMEMORY_Read(TUserMemory *p)
 {
 	Uint16 i = 0;
 	Uint16 spiaddrTmp=p->MemStartAddr;
 	p->MCUStartAddr8=(Uint8*)p->MCUStartAddr;
-	for(i = 0; i < p->data_length; i++){//по всем данным, что хочет пользователь
-		USERMEMORY_UpdateCurrentPage(p,spiaddrTmp);//сменить и перечитать страницу, если она другая
-		Uint16 addrInPage=spiaddrTmp&0xFF;//адрес внутри страницы
-		*(p->MCUStartAddr8) = p->cacheArr[addrInPage];//отдаем данные из оперативки, они должны быть там актуальные после USERMEMORY_UpdateCurrentPage
+	for(i = 0; i < p->data_length; i++){//РїРѕ РІСЃРµРј РґР°РЅРЅС‹Рј, С‡С‚Рѕ С…РѕС‡РµС‚ РїРѕР»СЊР·РѕРІР°С‚РµР»СЊ
+		USERMEMORY_UpdateCurrentPage(p,spiaddrTmp);//СЃРјРµРЅРёС‚СЊ Рё РїРµСЂРµС‡РёС‚Р°С‚СЊ СЃС‚СЂР°РЅРёС†Сѓ, РµСЃР»Рё РѕРЅР° РґСЂСѓРіР°СЏ
+		Uint16 addrInPage=spiaddrTmp&0xFF;//Р°РґСЂРµСЃ РІРЅСѓС‚СЂРё СЃС‚СЂР°РЅРёС†С‹
+		*(p->MCUStartAddr8) = p->cacheArr[addrInPage];//РѕС‚РґР°РµРј РґР°РЅРЅС‹Рµ РёР· РѕРїРµСЂР°С‚РёРІРєРё, РѕРЅРё РґРѕР»Р¶РЅС‹ Р±С‹С‚СЊ С‚Р°Рј Р°РєС‚СѓР°Р»СЊРЅС‹Рµ РїРѕСЃР»Рµ USERMEMORY_UpdateCurrentPage
 		spiaddrTmp++;
 		p->MCUStartAddr8++;
 	}
-	p->MCUStartAddr=(Uint16*)p->MCUStartAddr8;//чтобы адрес на данные поменялся (не знаю, надо это кому или нет)
+	p->MCUStartAddr=(Uint16*)p->MCUStartAddr8;//С‡С‚РѕР±С‹ Р°РґСЂРµСЃ РЅР° РґР°РЅРЅС‹Рµ РїРѕРјРµРЅСЏР»СЃСЏ (РЅРµ Р·РЅР°СЋ, РЅР°РґРѕ СЌС‚Рѕ РєРѕРјСѓ РёР»Рё РЅРµС‚)
 	p->receivedCode = USERMEMORY_OP_OK;
 }
 
 
-//! Записывает страницу данные на флешку из кеша (из оперативки одну страницу)
+//! Р—Р°РїРёСЃС‹РІР°РµС‚ СЃС‚СЂР°РЅРёС†Сѓ РґР°РЅРЅС‹Рµ РЅР° С„Р»РµС€РєСѓ РёР· РєРµС€Р° (РёР· РѕРїРµСЂР°С‚РёРІРєРё РѕРґРЅСѓ СЃС‚СЂР°РЅРёС†Сѓ)
 
 //! \memberof TUserMemory
 void USERMEMORY_WriteFromCache(TUserMemory *p, int16 pageNum)
 {
 	int16 i = 0;
-	int16 addrOffset=pageNum*USERMEMORY_PAGE_SIZE;//начальный адрес на флешке (от начала страницы)
-	NT_USERFLASH->FCIC = 0x3;//сброс статуса
-	NT_USERFLASH->FMA = addrOffset;//адрес начала страницы
-	NT_USERFLASH->FMC = (USERMEMORY_USERFLASH_KEY | USERMEMORY_CMD_PAGE_ERASE);//стираем страницу
+	int16 addrOffset=pageNum*USERMEMORY_PAGE_SIZE;//РЅР°С‡Р°Р»СЊРЅС‹Р№ Р°РґСЂРµСЃ РЅР° С„Р»РµС€РєРµ (РѕС‚ РЅР°С‡Р°Р»Р° СЃС‚СЂР°РЅРёС†С‹)
+	NT_USERFLASH->FCIC = 0x3;//СЃР±СЂРѕСЃ СЃС‚Р°С‚СѓСЃР°
+	NT_USERFLASH->FMA = addrOffset;//Р°РґСЂРµСЃ РЅР°С‡Р°Р»Р° СЃС‚СЂР°РЅРёС†С‹
+	NT_USERFLASH->FMC = (USERMEMORY_USERFLASH_KEY | USERMEMORY_CMD_PAGE_ERASE);//СЃС‚РёСЂР°РµРј СЃС‚СЂР°РЅРёС†Сѓ
 	p->waitClocks = 0;
-	while(NT_USERFLASH->FCIS != 0x1){//ждем стирания
-		if (NT_USERFLASH->FCIS == 0x2){//не шмогла
+	while(NT_USERFLASH->FCIS != 0x1){//Р¶РґРµРј СЃС‚РёСЂР°РЅРёСЏ
+		if (NT_USERFLASH->FCIS == 0x2){//РЅРµ С€РјРѕРіР»Р°
 			NT_USERFLASH->FCIC = 0x3;
 			p->receivedCode = USERMEMORY_WRITE_HARDFAULT;
 			return;
 		}
-		p->waitClocks++;//тик-так
-		if (p->waitClocks > (256*USERMEMORY_MAX_WAITCLOCKS)){//устали ждать
+		p->waitClocks++;//С‚РёРє-С‚Р°Рє
+		if (p->waitClocks > (256*USERMEMORY_MAX_WAITCLOCKS)){//СѓСЃС‚Р°Р»Рё Р¶РґР°С‚СЊ
 			p->receivedCode = USERMEMORY_WRITE_TIMEOUT;
 			return;
 		}
 	}
 
-	for(i = 0; i < USERMEMORY_PAGE_SIZE; i++){//цикл по размеру страницы
-		NT_USERFLASH->FCIC = 0x3;//сброс статуса
-		NT_USERFLASH->FMA = addrOffset+i;//адрес
-		NT_USERFLASH->FMD = p->cacheArr[i];//данные из оперативки
-		NT_USERFLASH->FMC = (USERMEMORY_USERFLASH_KEY | USERMEMORY_CMD_WRITE);//команда на запись байта
+	for(i = 0; i < USERMEMORY_PAGE_SIZE; i++){//С†РёРєР» РїРѕ СЂР°Р·РјРµСЂСѓ СЃС‚СЂР°РЅРёС†С‹
+		NT_USERFLASH->FCIC = 0x3;//СЃР±СЂРѕСЃ СЃС‚Р°С‚СѓСЃР°
+		NT_USERFLASH->FMA = addrOffset+i;//Р°РґСЂРµСЃ
+		NT_USERFLASH->FMD = p->cacheArr[i];//РґР°РЅРЅС‹Рµ РёР· РѕРїРµСЂР°С‚РёРІРєРё
+		NT_USERFLASH->FMC = (USERMEMORY_USERFLASH_KEY | USERMEMORY_CMD_WRITE);//РєРѕРјР°РЅРґР° РЅР° Р·Р°РїРёСЃСЊ Р±Р°Р№С‚Р°
 
 		p->waitClocks = 0;
-		while(NT_USERFLASH->FCIS != 0x1){//ждем
+		while(NT_USERFLASH->FCIS != 0x1){//Р¶РґРµРј
 			if (NT_USERFLASH->FCIS == 0x2){
 				NT_USERFLASH->FCIC = 0x3;
-				p->receivedCode = USERMEMORY_WRITE_HARDFAULT;//ошибка
+				p->receivedCode = USERMEMORY_WRITE_HARDFAULT;//РѕС€РёР±РєР°
 				return;
 			}
-			p->waitClocks++;//как долго ждем?
-			if (p->waitClocks > USERMEMORY_MAX_WAITCLOCKS){//устали ждать
-				p->receivedCode = USERMEMORY_WRITE_TIMEOUT;//ошибка по таймауту
+			p->waitClocks++;//РєР°Рє РґРѕР»РіРѕ Р¶РґРµРј?
+			if (p->waitClocks > USERMEMORY_MAX_WAITCLOCKS){//СѓСЃС‚Р°Р»Рё Р¶РґР°С‚СЊ
+				p->receivedCode = USERMEMORY_WRITE_TIMEOUT;//РѕС€РёР±РєР° РїРѕ С‚Р°Р№РјР°СѓС‚Сѓ
 				return;
 			}
 		}
 	}
-	NT_USERFLASH->FCIC = 0x3;//сброс статуса
-	p->receivedCode = USERMEMORY_OP_OK;//все хорошо
-	p->PageRAM_and_FLASH_IdenticalFlag=1;//данные страницы в оперативке и во флеше теперь идентичны
+	NT_USERFLASH->FCIC = 0x3;//СЃР±СЂРѕСЃ СЃС‚Р°С‚СѓСЃР°
+	p->receivedCode = USERMEMORY_OP_OK;//РІСЃРµ С…РѕСЂРѕС€Рѕ
+	p->PageRAM_and_FLASH_IdenticalFlag=1;//РґР°РЅРЅС‹Рµ СЃС‚СЂР°РЅРёС†С‹ РІ РѕРїРµСЂР°С‚РёРІРєРµ Рё РІРѕ С„Р»РµС€Рµ С‚РµРїРµСЂСЊ РёРґРµРЅС‚РёС‡РЅС‹
 }
 
 
 
-//! Читает страницу данных из флеша в кеш (в оперативку)
+//! Р§РёС‚Р°РµС‚ СЃС‚СЂР°РЅРёС†Сѓ РґР°РЅРЅС‹С… РёР· С„Р»РµС€Р° РІ РєРµС€ (РІ РѕРїРµСЂР°С‚РёРІРєСѓ)
 
 //! \memberof TUserMemory
 void USERMEMORY_ReadToCache(TUserMemory *p, int16 pageNum)
 {
 	int16 i = 0;
-	int16 addrOffset=pageNum*USERMEMORY_PAGE_SIZE;//начальный адрес на флешке (от начала страницы)
+	int16 addrOffset=pageNum*USERMEMORY_PAGE_SIZE;//РЅР°С‡Р°Р»СЊРЅС‹Р№ Р°РґСЂРµСЃ РЅР° С„Р»РµС€РєРµ (РѕС‚ РЅР°С‡Р°Р»Р° СЃС‚СЂР°РЅРёС†С‹)
 
-	for(i = 0; i < USERMEMORY_PAGE_SIZE; i++){//цикл по размеру страницы
-		NT_USERFLASH->FCIC = 0x3;//сброс статуса
-		NT_USERFLASH->FMA = addrOffset+i;//адрес
-		NT_USERFLASH->FMC = (USERMEMORY_USERFLASH_KEY | USERMEMORY_CMD_READ);//команда на чтение байта
+	for(i = 0; i < USERMEMORY_PAGE_SIZE; i++){//С†РёРєР» РїРѕ СЂР°Р·РјРµСЂСѓ СЃС‚СЂР°РЅРёС†С‹
+		NT_USERFLASH->FCIC = 0x3;//СЃР±СЂРѕСЃ СЃС‚Р°С‚СѓСЃР°
+		NT_USERFLASH->FMA = addrOffset+i;//Р°РґСЂРµСЃ
+		NT_USERFLASH->FMC = (USERMEMORY_USERFLASH_KEY | USERMEMORY_CMD_READ);//РєРѕРјР°РЅРґР° РЅР° С‡С‚РµРЅРёРµ Р±Р°Р№С‚Р°
 
 		p->waitClocks = 0;
-		while(NT_USERFLASH->FCIS != 0x1){//ждем
+		while(NT_USERFLASH->FCIS != 0x1){//Р¶РґРµРј
 			if (NT_USERFLASH->FCIS == 0x2){
 				NT_USERFLASH->FCIC = 0x3;
 				p->receivedCode = USERMEMORY_READ_HARDFAULT;
 				return;
 			}
 			p->waitClocks++;
-			if (p->waitClocks > USERMEMORY_MAX_WAITCLOCKS){//устали ждать
+			if (p->waitClocks > USERMEMORY_MAX_WAITCLOCKS){//СѓСЃС‚Р°Р»Рё Р¶РґР°С‚СЊ
 				p->receivedCode = USERMEMORY_READ_TIMEOUT;
 				return;
 			}
 		}
-		p->cacheArr[i]=NT_USERFLASH->FMD;//данные (один байт) в оперативку
+		p->cacheArr[i]=NT_USERFLASH->FMD;//РґР°РЅРЅС‹Рµ (РѕРґРёРЅ Р±Р°Р№С‚) РІ РѕРїРµСЂР°С‚РёРІРєСѓ
 	}
-	NT_USERFLASH->FCIC = 0x3;//сброс статуса
+	NT_USERFLASH->FCIC = 0x3;//СЃР±СЂРѕСЃ СЃС‚Р°С‚СѓСЃР°
 	p->receivedCode = USERMEMORY_OP_OK;
-	p->PageInCache=pageNum;//какая страница теперь в кеше
-	p->PageRAM_and_FLASH_IdenticalFlag=1;//данные в оперативке (в кеше) идентичны с флешем
+	p->PageInCache=pageNum;//РєР°РєР°СЏ СЃС‚СЂР°РЅРёС†Р° С‚РµРїРµСЂСЊ РІ РєРµС€Рµ
+	p->PageRAM_and_FLASH_IdenticalFlag=1;//РґР°РЅРЅС‹Рµ РІ РѕРїРµСЂР°С‚РёРІРєРµ (РІ РєРµС€Рµ) РёРґРµРЅС‚РёС‡РЅС‹ СЃ С„Р»РµС€РµРј
 }
 
 
-//! Стереть всю флешку (будут FF)
+//! РЎС‚РµСЂРµС‚СЊ РІСЃСЋ С„Р»РµС€РєСѓ (Р±СѓРґСѓС‚ FF)
 
 //! \memberof TUserMemory
 void USERMEMORY_Full_Erase(TUserMemory *p){
-	NT_USERFLASH->FCIC = 0x3;//сброс статуса
-	NT_USERFLASH->FMC = (USERMEMORY_USERFLASH_KEY | USERMEMORY_CMD_FULL_ERASE);//команда на стирание фсей флеши
+	NT_USERFLASH->FCIC = 0x3;//СЃР±СЂРѕСЃ СЃС‚Р°С‚СѓСЃР°
+	NT_USERFLASH->FMC = (USERMEMORY_USERFLASH_KEY | USERMEMORY_CMD_FULL_ERASE);//РєРѕРјР°РЅРґР° РЅР° СЃС‚РёСЂР°РЅРёРµ С„СЃРµР№ С„Р»РµС€Рё
 	while(NT_USERFLASH->FCIS != 0x1){};
 
 }
 
 
-//! Сбросить кеш из оперативки на флешку
+//! РЎР±СЂРѕСЃРёС‚СЊ РєРµС€ РёР· РѕРїРµСЂР°С‚РёРІРєРё РЅР° С„Р»РµС€РєСѓ
 
 //! \memberof TUserMemory
 void USERMEMORY_Flush(TUserMemory *p){
 	USERMEMORY_WriteFromCache(p,p->PageInCache);
 }
 
-//! Медленный фоновый постоянный расчет - нужен пока для систематического сброса кеша на флешку по времени
+//! РњРµРґР»РµРЅРЅС‹Р№ С„РѕРЅРѕРІС‹Р№ РїРѕСЃС‚РѕСЏРЅРЅС‹Р№ СЂР°СЃС‡РµС‚ - РЅСѓР¶РµРЅ РїРѕРєР° РґР»СЏ СЃРёСЃС‚РµРјР°С‚РёС‡РµСЃРєРѕРіРѕ СЃР±СЂРѕСЃР° РєРµС€Р° РЅР° С„Р»РµС€РєСѓ РїРѕ РІСЂРµРјРµРЅРё
 
 //! \memberof TUserMemory
 void USERMEMORY_slow_calc(TUserMemory *p){
-	if (p->NeedFlushRequest){//надо флушить?
+	if (p->NeedFlushRequest){//РЅР°РґРѕ С„Р»СѓС€РёС‚СЊ?
 		USERMEMORY_Flush(p);
 		p->NeedFlushRequest=0;
 	}
 }
 
-//! Миллисекундный расчет - нужен пока для систематического сброса кеша на флешку по времени
+//! РњРёР»Р»РёСЃРµРєСѓРЅРґРЅС‹Р№ СЂР°СЃС‡РµС‚ - РЅСѓР¶РµРЅ РїРѕРєР° РґР»СЏ СЃРёСЃС‚РµРјР°С‚РёС‡РµСЃРєРѕРіРѕ СЃР±СЂРѕСЃР° РєРµС€Р° РЅР° С„Р»РµС€РєСѓ РїРѕ РІСЂРµРјРµРЅРё
 
 //! \memberof TUserMemory
 void USERMEMORY_ms_calc(TUserMemory *p){
 
-	if (!p->PageRAM_and_FLASH_IdenticalFlag)//данные на флешке и в оперативке не идентичны
+	if (!p->PageRAM_and_FLASH_IdenticalFlag)//РґР°РЅРЅС‹Рµ РЅР° С„Р»РµС€РєРµ Рё РІ РѕРїРµСЂР°С‚РёРІРєРµ РЅРµ РёРґРµРЅС‚РёС‡РЅС‹
 		p->autoFlushCounter++;
 
-	if (p->autoFlushCounter>10000) //зищита от переполнения
+	if (p->autoFlushCounter>10000) //Р·РёС‰РёС‚Р° РѕС‚ РїРµСЂРµРїРѕР»РЅРµРЅРёСЏ
 		p->autoFlushCounter=10000;
 
-	if (p->autoFlushCounter>500){//долго не сбрасывается на флешку
-		p->NeedFlushRequest=1;//надо флушить, но тут это делать нельзя, ибо прерывание, ставим реквест фону
+	if (p->autoFlushCounter>500){//РґРѕР»РіРѕ РЅРµ СЃР±СЂР°СЃС‹РІР°РµС‚СЃСЏ РЅР° С„Р»РµС€РєСѓ
+		p->NeedFlushRequest=1;//РЅР°РґРѕ С„Р»СѓС€РёС‚СЊ, РЅРѕ С‚СѓС‚ СЌС‚Рѕ РґРµР»Р°С‚СЊ РЅРµР»СЊР·СЏ, РёР±Рѕ РїСЂРµСЂС‹РІР°РЅРёРµ, СЃС‚Р°РІРёРј СЂРµРєРІРµСЃС‚ С„РѕРЅСѓ
 		p->autoFlushCounter=0;
 	}
 

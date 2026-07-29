@@ -1,5 +1,5 @@
 /*!
-    Copyright 2017 	АО "НИИЭТ" и ООО "НПФ ВЕКТОР"
+    Copyright 2017 	РђРћ "РќРРР­Рў" Рё РћРћРћ "РќРџР¤ Р’Р•РљРўРћР "
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -14,10 +14,10 @@
    limitations under the License.
 
  \file      V_ModBus.h
- \brief     Драйвер ModBus (см. TModBus)
+ \brief     Р”СЂР°Р№РІРµСЂ ModBus (СЃРј. TModBus)
  \author	Alecksey Anuchin
  \version   v 1.1 24/03/2017
- \defgroup  V_ModBus Драйвер ModBus (см. TModBus)
+ \defgroup  V_ModBus Р”СЂР°Р№РІРµСЂ ModBus (СЃРј. TModBus)
  @{
 */
 
@@ -34,41 +34,41 @@
 #define MODBUS_MAX_RX_COUNT 10
 
 /*! \class TModBus
-      \brief Драйвер ModBus
+      \brief Р”СЂР°Р№РІРµСЂ ModBus
 
-      Класс \a TModBus, основанный на структуре SModBus, обрабатывает
-      входящие посылки по RS-485 как посылки ModBus (RTU). */
+      РљР»Р°СЃСЃ \a TModBus, РѕСЃРЅРѕРІР°РЅРЅС‹Р№ РЅР° СЃС‚СЂСѓРєС‚СѓСЂРµ SModBus, РѕР±СЂР°Р±Р°С‚С‹РІР°РµС‚
+      РІС…РѕРґСЏС‰РёРµ РїРѕСЃС‹Р»РєРё РїРѕ RS-485 РєР°Рє РїРѕСЃС‹Р»РєРё ModBus (RTU). */
 
-//! см. TModBus
+//! СЃРј. TModBus
 
 
- //! Структура modbus для хранения внутренних данных
- typedef struct {volatile Uint16 In[MODBUS_MAX_RX_COUNT];//!<Массив для принятия данных
- 				volatile Uint16 InCount;//!<Счетчик для массива принятых данных
- 				volatile MB_Record /*const*/ *Addr;//!<Указатель на словарь
- 				volatile Uint16 TimeOut;//!<Текущий таймаут, который надо выдерживать
- 				volatile Uint16 TimeOut1_5;//!<Рассчитанный таймаут 1,5 длины переданного байта
- 				volatile Uint16 TimeOut2_5;//!<Рассчитанный таймаут 2,5 длины переданного байта
- 				volatile Uint16 ToSend;//!<Данные для отправки
- 				volatile Uint16 NumOfHRs;//!<Количество Holding Registers
- 				volatile Uint16 MiddleOfHRs;//!<Середина Holding Registers
- 				volatile Uint16 InitialStepOfHRs;//!<Шаг Holding Registers
- 				volatile Uint16 NumOfIRs;//!<Количество Input Registers
- 				volatile Uint16 MiddleOfIRs;//!<Середина Input Registers
- 				volatile Uint16 InitialStepOfIRs;//!<Шаг Input Registers
- 				volatile Uint16 NumOfCs;//!<Количество Coils
- 				volatile Uint16 MiddleOfCs;//!<Середина Coils
- 				volatile Uint16 InitialStepOfCs;//!<Шаг Coils
- 				volatile Uint16 NumOfDIs;//!<Количество Discrete Inputs
- 				volatile Uint16 MiddleOfDIs;//!<Середина Discrete Inputs
- 				volatile Uint16 InitialStepOfDIs;//!<Шаг Discrete Inputs
- 				volatile Uint16 RxCRC;//!<Принимаемая контрольная сумма
- 				volatile Uint16 TxCRC;//!<Передаваемая контрольная сумма
- 				volatile Uint16 MagicNumber;//!<Эм...
- 				volatile int16 TxState;//!<Состояние передачи
+ //! РЎС‚СЂСѓРєС‚СѓСЂР° modbus РґР»СЏ С…СЂР°РЅРµРЅРёСЏ РІРЅСѓС‚СЂРµРЅРЅРёС… РґР°РЅРЅС‹С…
+ typedef struct {volatile Uint16 In[MODBUS_MAX_RX_COUNT];//!<РњР°СЃСЃРёРІ РґР»СЏ РїСЂРёРЅСЏС‚РёСЏ РґР°РЅРЅС‹С…
+ 				volatile Uint16 InCount;//!<РЎС‡РµС‚С‡РёРє РґР»СЏ РјР°СЃСЃРёРІР° РїСЂРёРЅСЏС‚С‹С… РґР°РЅРЅС‹С…
+ 				volatile MB_Record /*const*/ *Addr;//!<РЈРєР°Р·Р°С‚РµР»СЊ РЅР° СЃР»РѕРІР°СЂСЊ
+ 				volatile Uint16 TimeOut;//!<РўРµРєСѓС‰РёР№ С‚Р°Р№РјР°СѓС‚, РєРѕС‚РѕСЂС‹Р№ РЅР°РґРѕ РІС‹РґРµСЂР¶РёРІР°С‚СЊ
+ 				volatile Uint16 TimeOut1_5;//!<Р Р°СЃСЃС‡РёС‚Р°РЅРЅС‹Р№ С‚Р°Р№РјР°СѓС‚ 1,5 РґР»РёРЅС‹ РїРµСЂРµРґР°РЅРЅРѕРіРѕ Р±Р°Р№С‚Р°
+ 				volatile Uint16 TimeOut2_5;//!<Р Р°СЃСЃС‡РёС‚Р°РЅРЅС‹Р№ С‚Р°Р№РјР°СѓС‚ 2,5 РґР»РёРЅС‹ РїРµСЂРµРґР°РЅРЅРѕРіРѕ Р±Р°Р№С‚Р°
+ 				volatile Uint16 ToSend;//!<Р”Р°РЅРЅС‹Рµ РґР»СЏ РѕС‚РїСЂР°РІРєРё
+ 				volatile Uint16 NumOfHRs;//!<РљРѕР»РёС‡РµСЃС‚РІРѕ Holding Registers
+ 				volatile Uint16 MiddleOfHRs;//!<РЎРµСЂРµРґРёРЅР° Holding Registers
+ 				volatile Uint16 InitialStepOfHRs;//!<РЁР°Рі Holding Registers
+ 				volatile Uint16 NumOfIRs;//!<РљРѕР»РёС‡РµСЃС‚РІРѕ Input Registers
+ 				volatile Uint16 MiddleOfIRs;//!<РЎРµСЂРµРґРёРЅР° Input Registers
+ 				volatile Uint16 InitialStepOfIRs;//!<РЁР°Рі Input Registers
+ 				volatile Uint16 NumOfCs;//!<РљРѕР»РёС‡РµСЃС‚РІРѕ Coils
+ 				volatile Uint16 MiddleOfCs;//!<РЎРµСЂРµРґРёРЅР° Coils
+ 				volatile Uint16 InitialStepOfCs;//!<РЁР°Рі Coils
+ 				volatile Uint16 NumOfDIs;//!<РљРѕР»РёС‡РµСЃС‚РІРѕ Discrete Inputs
+ 				volatile Uint16 MiddleOfDIs;//!<РЎРµСЂРµРґРёРЅР° Discrete Inputs
+ 				volatile Uint16 InitialStepOfDIs;//!<РЁР°Рі Discrete Inputs
+ 				volatile Uint16 RxCRC;//!<РџСЂРёРЅРёРјР°РµРјР°СЏ РєРѕРЅС‚СЂРѕР»СЊРЅР°СЏ СЃСѓРјРјР°
+ 				volatile Uint16 TxCRC;//!<РџРµСЂРµРґР°РІР°РµРјР°СЏ РєРѕРЅС‚СЂРѕР»СЊРЅР°СЏ СЃСѓРјРјР°
+ 				volatile Uint16 MagicNumber;//!<Р­Рј...
+ 				volatile int16 TxState;//!<РЎРѕСЃС‚РѕСЏРЅРёРµ РїРµСЂРµРґР°С‡Рё
  				volatile Uint16 temp;//!<
- 				volatile int16 RecievedCounter;//!<Счетчик для отсчиывания таймаута по приему
- 				NT_UART_TypeDef *NT_UART;//!Указатель на используемый модуль UART
+ 				volatile int16 RecievedCounter;//!<РЎС‡РµС‚С‡РёРє РґР»СЏ РѕС‚СЃС‡РёС‹РІР°РЅРёСЏ С‚Р°Р№РјР°СѓС‚Р° РїРѕ РїСЂРёРµРјСѓ
+ 				NT_UART_TypeDef *NT_UART;//!РЈРєР°Р·Р°С‚РµР»СЊ РЅР° РёСЃРїРѕР»СЊР·СѓРµРјС‹Р№ РјРѕРґСѓР»СЊ UART
  				} MODBUS_INT;
 
  #define MODBUS_INT_DEFAULTS { \
@@ -79,23 +79,23 @@
     .TxState = -1 \
 }
 
-struct SModBus{Uint32 BaudRate;//!<Скорость работы по RS
-				Uint16 ExecutionFreq;//!< Частота тактирования модуля
-				Uint16 RSNodeID; //!< Номер узла в сети
-				Uint16 Enabled; //!< Разрешение изменения параметров привода через ModBus
-				Uint16 Refresh;	//!< Флаг изменения параметров по Modbus
+struct SModBus{Uint32 BaudRate;//!<РЎРєРѕСЂРѕСЃС‚СЊ СЂР°Р±РѕС‚С‹ РїРѕ RS
+				Uint16 ExecutionFreq;//!< Р§Р°СЃС‚РѕС‚Р° С‚Р°РєС‚РёСЂРѕРІР°РЅРёСЏ РјРѕРґСѓР»СЏ
+				Uint16 RSNodeID; //!< РќРѕРјРµСЂ СѓР·Р»Р° РІ СЃРµС‚Рё
+				Uint16 Enabled; //!< Р Р°Р·СЂРµС€РµРЅРёРµ РёР·РјРµРЅРµРЅРёСЏ РїР°СЂР°РјРµС‚СЂРѕРІ РїСЂРёРІРѕРґР° С‡РµСЂРµР· ModBus
+				Uint16 Refresh;	//!< Р¤Р»Р°Рі РёР·РјРµРЅРµРЅРёСЏ РїР°СЂР°РјРµС‚СЂРѕРІ РїРѕ Modbus
 				int16 error;
 				int16 errorCode;
 				int16 AutoRestart;
 				int16 clear_error;
 				Uint16 received_data;
 				Uint16 GPIOsValue;
-				Uint16 isOnline;//!< В сети мы или нет (идут ли пакеты)
-				Uint32 OfflineCounter;//!< Счетчик инкрементируется с частотой вызова процедуры ModBus_Execute и обнуляется, если в сети есть пакеты
-				Uint32 OfflineCounterMax;//!< Таймаут отсутствия пакетов в сети (в единицах счёта OfflineCounter)
-				Uint16 ReceiveByteCounter;//!< Счетчик принятых байт
-                Uint16 ReceivePacketCounter;//!< Счетчик принятых посылок
-                MODBUS_INT MBInternals;//!< Служебные переменные для работы драйвера (не для пользователя)
+				Uint16 isOnline;//!< Р’ СЃРµС‚Рё РјС‹ РёР»Рё РЅРµС‚ (РёРґСѓС‚ Р»Рё РїР°РєРµС‚С‹)
+				Uint32 OfflineCounter;//!< РЎС‡РµС‚С‡РёРє РёРЅРєСЂРµРјРµРЅС‚РёСЂСѓРµС‚СЃСЏ СЃ С‡Р°СЃС‚РѕС‚РѕР№ РІС‹Р·РѕРІР° РїСЂРѕС†РµРґСѓСЂС‹ ModBus_Execute Рё РѕР±РЅСѓР»СЏРµС‚СЃСЏ, РµСЃР»Рё РІ СЃРµС‚Рё РµСЃС‚СЊ РїР°РєРµС‚С‹
+				Uint32 OfflineCounterMax;//!< РўР°Р№РјР°СѓС‚ РѕС‚СЃСѓС‚СЃС‚РІРёСЏ РїР°РєРµС‚РѕРІ РІ СЃРµС‚Рё (РІ РµРґРёРЅРёС†Р°С… СЃС‡С‘С‚Р° OfflineCounter)
+				Uint16 ReceiveByteCounter;//!< РЎС‡РµС‚С‡РёРє РїСЂРёРЅСЏС‚С‹С… Р±Р°Р№С‚
+                Uint16 ReceivePacketCounter;//!< РЎС‡РµС‚С‡РёРє РїСЂРёРЅСЏС‚С‹С… РїРѕСЃС‹Р»РѕРє
+                MODBUS_INT MBInternals;//!< РЎР»СѓР¶РµР±РЅС‹Рµ РїРµСЂРµРјРµРЅРЅС‹Рµ РґР»СЏ СЂР°Р±РѕС‚С‹ РґСЂР°Р№РІРµСЂР° (РЅРµ РґР»СЏ РїРѕР»СЊР·РѕРІР°С‚РµР»СЏ)
                 void (*Init)(volatile struct SModBus*);
                 void (*Execute)(volatile struct SModBus*);
                 };

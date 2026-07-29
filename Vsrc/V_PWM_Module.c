@@ -1,5 +1,5 @@
 /*!
-     Copyright 2017 	АО "НИИЭТ" и ООО "НПФ ВЕКТОР"
+     Copyright 2017 	РђРћ "РќРРР­Рў" Рё РћРћРћ "РќРџР¤ Р’Р•РљРўРћР "
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -14,8 +14,8 @@
    limitations under the License.
  
  \file      V_PWM_Module.c
- \brief     Модуль реализации векторной ШИМ (см. TPWM_Module)
- \author    ООО "НПФ Вектор". http://motorcontrol.ru
+ \brief     РњРѕРґСѓР»СЊ СЂРµР°Р»РёР·Р°С†РёРё РІРµРєС‚РѕСЂРЅРѕР№ РЁРРњ (СЃРј. TPWM_Module)
+ \author    РћРћРћ "РќРџР¤ Р’РµРєС‚РѕСЂ". http://motorcontrol.ru
  \version   v 2.0 25/03/2016
 
  \addtogroup V_PWM_Module 
@@ -29,7 +29,7 @@
 
 #ifdef HW_VECTORCARD_DRV8301_EVM
 #define GPIO_INV_ON  NT_GPIOG->MASKHIGHBYTE_bit[(1<<(8-8))].MASKHB = (1<<(8-8))
-//Для данной конфигурации выключение инвертора аппаратное не используется, выключение ключей осуществляется выводами упралвения ключами
+//Р”Р»СЏ РґР°РЅРЅРѕР№ РєРѕРЅС„РёРіСѓСЂР°С†РёРё РІС‹РєР»СЋС‡РµРЅРёРµ РёРЅРІРµСЂС‚РѕСЂР° Р°РїРїР°СЂР°С‚РЅРѕРµ РЅРµ РёСЃРїРѕР»СЊР·СѓРµС‚СЃСЏ, РІС‹РєР»СЋС‡РµРЅРёРµ РєР»СЋС‡РµР№ РѕСЃСѓС‰РµСЃС‚РІР»СЏРµС‚СЃСЏ РІС‹РІРѕРґР°РјРё СѓРїСЂР°Р»РІРµРЅРёСЏ РєР»СЋС‡Р°РјРё
 #define GPIO_INV_OFF NT_GPIOG->MASKHIGHBYTE_bit[(1<<(8-8))].MASKHB = (1<<(8-8))
 #endif
 
@@ -54,9 +54,9 @@
 #define GPIO_INV_OFF
 #endif
 
-//! Ограничения величины "мёртвого времени"
+//! РћРіСЂР°РЅРёС‡РµРЅРёСЏ РІРµР»РёС‡РёРЅС‹ "РјС‘СЂС‚РІРѕРіРѕ РІСЂРµРјРµРЅРё"
 #if defined(HW_MOTORCONTROLBOARD)
-//! для одноплатного инвертора нельзя меньше 3мкс, чтобы не сжечь
+//! РґР»СЏ РѕРґРЅРѕРїР»Р°С‚РЅРѕРіРѕ РёРЅРІРµСЂС‚РѕСЂР° РЅРµР»СЊР·СЏ РјРµРЅСЊС€Рµ 3РјРєСЃ, С‡С‚РѕР±С‹ РЅРµ СЃР¶РµС‡СЊ
 #define DEAD_BAND_MIN	_IQ(3)
 #define DEAD_BAND_MAX	_IQ(10)
 #else
@@ -64,126 +64,126 @@
 #define DEAD_BAND_MAX	_IQ(10)
 #endif
 
-//! Инициализация
+//! РРЅРёС†РёР°Р»РёР·Р°С†РёСЏ
 
 //! \memberof TPWM_Module
 void PWM_Module_Init(TPWM_Module *p) {
-	NT_COMMON_REG->PWM_SYNC_bit.TBCLKSYNC = 0; //синхронизация таймеров - сброс внутренних счетчиков
-	/* Синхронизировать ШИМы */
+	NT_COMMON_REG->PWM_SYNC_bit.TBCLKSYNC = 0; //СЃРёРЅС…СЂРѕРЅРёР·Р°С†РёСЏ С‚Р°Р№РјРµСЂРѕРІ - СЃР±СЂРѕСЃ РІРЅСѓС‚СЂРµРЅРЅРёС… СЃС‡РµС‚С‡РёРєРѕРІ
+	/* РЎРёРЅС…СЂРѕРЅРёР·РёСЂРѕРІР°С‚СЊ РЁРРњС‹ */
 	NT_COMMON_REG->PWM_CTRL = 0x8;
 
 // ------------------------------------------------------------------------
-	// Настраиваем модуль ePWM1
+	// РќР°СЃС‚СЂР°РёРІР°РµРј РјРѕРґСѓР»СЊ ePWM1
 	// ------------------------------------------------------------------------
 	if (p->Frequency < PWM_FREQ_MIN)
 		p->Frequency = PWM_FREQ_MIN;
 	if (p->Frequency > PWM_FREQ_MAX)
 		p->Frequency = PWM_FREQ_MAX;
-	NT_PWM0->TBPRD = _IQ10div(_IQ10(CORE_CLK/1000.0), p->Frequency << 1) >> 10; //период
+	NT_PWM0->TBPRD = _IQ10div(_IQ10(CORE_CLK/1000.0), p->Frequency << 1) >> 10; //РїРµСЂРёРѕРґ
 
 	p->k_pwm = NT_PWM0->TBPRD;
-	p->FreqPrev = p->Frequency;                 //предыдущая частота
+	p->FreqPrev = p->Frequency;                 //РїСЂРµРґС‹РґСѓС‰Р°СЏ С‡Р°СЃС‚РѕС‚Р°
 	NT_PWM0->TBPHS_bit.TBPHS = 0x0000;            // Phase is 0
 	NT_PWM0->TBCTR = 0x0000;                       // Clear counter
 
 	// Setup counter mode
-	NT_PWM0->TBCTL_bit.PRDLD = TB_SHADOW;        // загрузка TBPRD при TBCTR = 0
+	NT_PWM0->TBCTL_bit.PRDLD = TB_SHADOW;        // Р·Р°РіСЂСѓР·РєР° TBPRD РїСЂРё TBCTR = 0
 	NT_PWM0->TBCTL_bit.CTRMODE = TB_COUNT_UPDOWN;  // Count up-down
 	NT_PWM0->TBCTL_bit.PHSEN = TB_DISABLE;         // Disable phase loading
-	NT_PWM0->TBCTL_bit.PHSDIR = TB_UP;      // Считать вверх после загрузки фазы
+	NT_PWM0->TBCTL_bit.PHSDIR = TB_UP;      // РЎС‡РёС‚Р°С‚СЊ РІРІРµСЂС… РїРѕСЃР»Рµ Р·Р°РіСЂСѓР·РєРё С„Р°Р·С‹
 	NT_PWM0->TBCTL_bit.HSPCLKDIV = 0;     // High Speed Time-base Clock Prescale
 	NT_PWM0->TBCTL_bit.CLKDIV = 0;                 // Time-base Clock Prescale
-	NT_PWM0->TBCTL_bit.SYNCOSEL = TB_CTR_ZERO; // выдаём синхро-сигнал при TBCTR = 0
+	NT_PWM0->TBCTL_bit.SYNCOSEL = TB_CTR_ZERO; // РІС‹РґР°С‘Рј СЃРёРЅС…СЂРѕ-СЃРёРіРЅР°Р» РїСЂРё TBCTR = 0
 
 	// Setup shadowing
-	NT_PWM0->CMPCTL_bit.SHDWAMODE = CC_SHADOW;   //включить SHADOW для сравнения
+	NT_PWM0->CMPCTL_bit.SHDWAMODE = CC_SHADOW;   //РІРєР»СЋС‡РёС‚СЊ SHADOW РґР»СЏ СЃСЂР°РІРЅРµРЅРёСЏ
 	NT_PWM0->CMPCTL_bit.LOADAMODE = CC_CTR_ZERO;   // Load on zero
 
-	NT_PWM0->CMPCTL_bit.SHDWBMODE = CC_SHADOW;   //включить SHADOW для сравнения
+	NT_PWM0->CMPCTL_bit.SHDWBMODE = CC_SHADOW;   //РІРєР»СЋС‡РёС‚СЊ SHADOW РґР»СЏ СЃСЂР°РІРЅРµРЅРёСЏ
 	NT_PWM0->CMPCTL_bit.LOADBMODE = CC_CTR_ZERO;   // Load on zero
 
 	// Set Compare values
 	NT_PWM0->CMPA_bit.CMPA = 0;                   // Set compare A value
 
 	// Set actions
-	NT_PWM0->AQCTLA = AQ_EPWM_DISABLE; // для начала события для PWM1A запрещены
-	NT_PWM0->AQCTLA_bit.ZRO = 1; //обнуляем при нуле счетчика
-	NT_PWM0->AQCTLA_bit.CAU = 2; //включаем при сравнении и инкрементиовании
-	NT_PWM0->AQCTLA_bit.CAD = 1; //обнуляем при сравнении и декрементровании
+	NT_PWM0->AQCTLA = AQ_EPWM_DISABLE; // РґР»СЏ РЅР°С‡Р°Р»Р° СЃРѕР±С‹С‚РёСЏ РґР»СЏ PWM1A Р·Р°РїСЂРµС‰РµРЅС‹
+	NT_PWM0->AQCTLA_bit.ZRO = 1; //РѕР±РЅСѓР»СЏРµРј РїСЂРё РЅСѓР»Рµ СЃС‡РµС‚С‡РёРєР°
+	NT_PWM0->AQCTLA_bit.CAU = 2; //РІРєР»СЋС‡Р°РµРј РїСЂРё СЃСЂР°РІРЅРµРЅРёРё Рё РёРЅРєСЂРµРјРµРЅС‚РёРѕРІР°РЅРёРё
+	NT_PWM0->AQCTLA_bit.CAD = 1; //РѕР±РЅСѓР»СЏРµРј РїСЂРё СЃСЂР°РІРЅРµРЅРёРё Рё РґРµРєСЂРµРјРµРЅС‚СЂРѕРІР°РЅРёРё
 
-	//Для PWMB тоже самое, что для PWMА. Без инверсии. Инверсия далее в модуле МВ
-	NT_PWM0->AQCTLB = NT_PWM0->AQCTLA; // для начала события для PWM1B запрещены
-	NT_PWM0->AQCTLB_bit.ZRO = NT_PWM0->AQCTLA_bit.ZRO; //обнуляем при нуле счетчика
-	NT_PWM0->AQCTLB_bit.CAU = NT_PWM0->AQCTLA_bit.CAU; //включаем при сравнении и инкрементиовании
-	NT_PWM0->AQCTLB_bit.CAD = NT_PWM0->AQCTLA_bit.CAD; //обнуляем при сравнении и декрементровании
+	//Р”Р»СЏ PWMB С‚РѕР¶Рµ СЃР°РјРѕРµ, С‡С‚Рѕ РґР»СЏ PWMРђ. Р‘РµР· РёРЅРІРµСЂСЃРёРё. РРЅРІРµСЂСЃРёСЏ РґР°Р»РµРµ РІ РјРѕРґСѓР»Рµ РњР’
+	NT_PWM0->AQCTLB = NT_PWM0->AQCTLA; // РґР»СЏ РЅР°С‡Р°Р»Р° СЃРѕР±С‹С‚РёСЏ РґР»СЏ PWM1B Р·Р°РїСЂРµС‰РµРЅС‹
+	NT_PWM0->AQCTLB_bit.ZRO = NT_PWM0->AQCTLA_bit.ZRO; //РѕР±РЅСѓР»СЏРµРј РїСЂРё РЅСѓР»Рµ СЃС‡РµС‚С‡РёРєР°
+	NT_PWM0->AQCTLB_bit.CAU = NT_PWM0->AQCTLA_bit.CAU; //РІРєР»СЋС‡Р°РµРј РїСЂРё СЃСЂР°РІРЅРµРЅРёРё Рё РёРЅРєСЂРµРјРµРЅС‚РёРѕРІР°РЅРёРё
+	NT_PWM0->AQCTLB_bit.CAD = NT_PWM0->AQCTLA_bit.CAD; //РѕР±РЅСѓР»СЏРµРј РїСЂРё СЃСЂР°РІРЅРµРЅРёРё Рё РґРµРєСЂРµРјРµРЅС‚СЂРѕРІР°РЅРёРё
 
-	NT_PWM0->AQSFRC_bit.RLDCSF = 0; //по ТО надо писать 0
+	NT_PWM0->AQSFRC_bit.RLDCSF = 0; //РїРѕ РўРћ РЅР°РґРѕ РїРёСЃР°С‚СЊ 0
 
 	// Setup Deadband
-	// DBRED = DBFED = 150 * Tм_мкс / 4
+	// DBRED = DBFED = 150 * TРј_РјРєСЃ / 4
 	NT_PWM0->DBRED = _IQ4mpy(_IQ4(150 / 4), p->DeadBand >> 20) >> 4;
 	NT_PWM0->DBFED = NT_PWM0->DBRED;
-	NT_PWM0->DBCTL_bit.IN_MODE = DBA_RED_DBB_FED;    //s4=0, s5=1 на картинке DT
-	NT_PWM0->DBCTL_bit.OUT_MODE = DB_FULL_ENABLE;    //S1=1, S2=2 на картинке DT
+	NT_PWM0->DBCTL_bit.IN_MODE = DBA_RED_DBB_FED;    //s4=0, s5=1 РЅР° РєР°СЂС‚РёРЅРєРµ DT
+	NT_PWM0->DBCTL_bit.OUT_MODE = DB_FULL_ENABLE;    //S1=1, S2=2 РЅР° РєР°СЂС‚РёРЅРєРµ DT
 	NT_PWM0->DBCTL_bit.POLSEL = DB_ACTV_HIC;       // PWM1B = !PWM1A; S2=0, S3=1
 
-	NT_PWM0->ETSEL_bit.INTSEL = ET_DISABLE;        // Disable INT (шимовское)
+	NT_PWM0->ETSEL_bit.INTSEL = ET_DISABLE;        // Disable INT (С€РёРјРѕРІСЃРєРѕРµ)
 	NT_PWM0->ETSEL_bit.INTEN = 0;                  // Disable INT
 
 
-	//разрешаем TZ быть источником аппаратной аварии (one-shot)
+	//СЂР°Р·СЂРµС€Р°РµРј TZ Р±С‹С‚СЊ РёСЃС‚РѕС‡РЅРёРєРѕРј Р°РїРїР°СЂР°С‚РЅРѕР№ Р°РІР°СЂРёРё (one-shot)
 	//   NT_PWM0->TZSEL_bit.OSHT1 = TZ_ENABLE;
 //    NT_PWM0->TZSEL_bit.OSHT2 = TZ_ENABLE;
 //    NT_PWM0->TZSEL_bit.OSHT3 = TZ_ENABLE;
 
 	// Trip-Zone
-	NT_PWM0->TZCTL_bit.TZA = TZ_STATE;   // по событию "One-Shot Trip" переводим
-	NT_PWM0->TZCTL_bit.TZB = TZ_STATE;          // ШИМ выходы в нужное состояние
+	NT_PWM0->TZCTL_bit.TZA = TZ_STATE;   // РїРѕ СЃРѕР±С‹С‚РёСЋ "One-Shot Trip" РїРµСЂРµРІРѕРґРёРј
+	NT_PWM0->TZCTL_bit.TZB = TZ_STATE;          // РЁРРњ РІС‹С…РѕРґС‹ РІ РЅСѓР¶РЅРѕРµ СЃРѕСЃС‚РѕСЏРЅРёРµ
 
-	//Для VectorCARD от ШИМа запускается ADC
-	//NT_PWM0->ETSEL_bit.SOCAEN = 1;		// Разрешить запуск ацп
-	//NT_PWM0->ETSEL_bit.SOCASEL = 1;		// Запускать при CTR == 0 (Underflow)
+	//Р”Р»СЏ VectorCARD РѕС‚ РЁРРњР° Р·Р°РїСѓСЃРєР°РµС‚СЃСЏ ADC
+	//NT_PWM0->ETSEL_bit.SOCAEN = 1;		// Р Р°Р·СЂРµС€РёС‚СЊ Р·Р°РїСѓСЃРє Р°С†Рї
+	//NT_PWM0->ETSEL_bit.SOCASEL = 1;		// Р—Р°РїСѓСЃРєР°С‚СЊ РїСЂРё CTR == 0 (Underflow)
 
 	// ------------------------------------------------------------------------
-	// Настраиваем модуль ePWM2
+	// РќР°СЃС‚СЂР°РёРІР°РµРј РјРѕРґСѓР»СЊ ePWM2
 	// ------------------------------------------------------------------------
 	// Setup TBCLK
-	NT_PWM1->TBPRD = NT_PWM0->TBPRD;              //период такой же
-	NT_PWM1->TBPHS_bit.TBPHS = 0x0001;            // Фаза равна 1 из-за задержки в один такт на синхронизацию
+	NT_PWM1->TBPRD = NT_PWM0->TBPRD;              //РїРµСЂРёРѕРґ С‚Р°РєРѕР№ Р¶Рµ
+	NT_PWM1->TBPHS_bit.TBPHS = 0x0001;            // Р¤Р°Р·Р° СЂР°РІРЅР° 1 РёР·-Р·Р° Р·Р°РґРµСЂР¶РєРё РІ РѕРґРёРЅ С‚Р°РєС‚ РЅР° СЃРёРЅС…СЂРѕРЅРёР·Р°С†РёСЋ
 	NT_PWM1->TBCTR = 0x0000;                       // Clear counter
 
 	// Setup counter mode
-	NT_PWM1->TBCTL_bit.PRDLD = TB_SHADOW;        // загрузка TBPRD при TBCTR = 0
+	NT_PWM1->TBCTL_bit.PRDLD = TB_SHADOW;        // Р·Р°РіСЂСѓР·РєР° TBPRD РїСЂРё TBCTR = 0
 	NT_PWM1->TBCTL_bit.CTRMODE = TB_COUNT_UPDOWN;  // Count up-down
 	NT_PWM1->TBCTL_bit.PHSEN = TB_ENABLE;         // Enable phase loading
-	NT_PWM1->TBCTL_bit.PHSDIR = TB_UP;      // Считать вверх после загрузки фазы
+	NT_PWM1->TBCTL_bit.PHSDIR = TB_UP;      // РЎС‡РёС‚Р°С‚СЊ РІРІРµСЂС… РїРѕСЃР»Рµ Р·Р°РіСЂСѓР·РєРё С„Р°Р·С‹
 	NT_PWM1->TBCTL_bit.HSPCLKDIV = 0;     // High Speed Time-base Clock Prescale
 	NT_PWM1->TBCTL_bit.CLKDIV = 0;           // Time-base Clock Prescale
-	NT_PWM1->TBCTL_bit.SYNCOSEL = TB_SYNC_IN; // пропускаем синхро-сигнал "насквозь"
+	NT_PWM1->TBCTL_bit.SYNCOSEL = TB_SYNC_IN; // РїСЂРѕРїСѓСЃРєР°РµРј СЃРёРЅС…СЂРѕ-СЃРёРіРЅР°Р» "РЅР°СЃРєРІРѕР·СЊ"
 
 	// Setup shadowing
-	NT_PWM1->CMPCTL_bit.SHDWAMODE = CC_SHADOW;   //включить SHADOW для сравнения
+	NT_PWM1->CMPCTL_bit.SHDWAMODE = CC_SHADOW;   //РІРєР»СЋС‡РёС‚СЊ SHADOW РґР»СЏ СЃСЂР°РІРЅРµРЅРёСЏ
 	NT_PWM1->CMPCTL_bit.LOADAMODE = CC_CTR_ZERO;   // Load on zero
 
-	NT_PWM1->CMPCTL_bit.SHDWBMODE = CC_SHADOW;   //включить SHADOW для сравнения
+	NT_PWM1->CMPCTL_bit.SHDWBMODE = CC_SHADOW;   //РІРєР»СЋС‡РёС‚СЊ SHADOW РґР»СЏ СЃСЂР°РІРЅРµРЅРёСЏ
 	NT_PWM1->CMPCTL_bit.LOADBMODE = CC_CTR_ZERO;   // Load on zero
 
 	// Set Compare values
 	NT_PWM1->CMPA_bit.CMPA = 0;                   // Set compare A value
 
 	// Set actions
-	NT_PWM1->AQCTLA = AQ_EPWM_DISABLE; // для начала события запрещены
-	NT_PWM1->AQCTLA_bit.ZRO = 1; //обнуляем при нуле счетчика
-	NT_PWM1->AQCTLA_bit.CAU = 2; //включаем при сравнении и инкрементиовании
-	NT_PWM1->AQCTLA_bit.CAD = 1; //обнуляем при сравнении и декрементровании
+	NT_PWM1->AQCTLA = AQ_EPWM_DISABLE; // РґР»СЏ РЅР°С‡Р°Р»Р° СЃРѕР±С‹С‚РёСЏ Р·Р°РїСЂРµС‰РµРЅС‹
+	NT_PWM1->AQCTLA_bit.ZRO = 1; //РѕР±РЅСѓР»СЏРµРј РїСЂРё РЅСѓР»Рµ СЃС‡РµС‚С‡РёРєР°
+	NT_PWM1->AQCTLA_bit.CAU = 2; //РІРєР»СЋС‡Р°РµРј РїСЂРё СЃСЂР°РІРЅРµРЅРёРё Рё РёРЅРєСЂРµРјРµРЅС‚РёРѕРІР°РЅРёРё
+	NT_PWM1->AQCTLA_bit.CAD = 1; //РѕР±РЅСѓР»СЏРµРј РїСЂРё СЃСЂР°РІРЅРµРЅРёРё Рё РґРµРєСЂРµРјРµРЅС‚СЂРѕРІР°РЅРёРё
 
-	//Для PWMB тоже самое, что для PWMА. Без инверсии. Инверсия далее в модуле МВ
-	NT_PWM1->AQCTLB = NT_PWM0->AQCTLA; // для начала события для PWM1B запрещены
-	NT_PWM1->AQCTLB_bit.ZRO = NT_PWM0->AQCTLA_bit.ZRO; //обнуляем при нуле счетчика
-	NT_PWM1->AQCTLB_bit.CAU = NT_PWM0->AQCTLA_bit.CAU; //включаем при сравнении и инкрементиовании
-	NT_PWM1->AQCTLB_bit.CAD = NT_PWM0->AQCTLA_bit.CAD; //обнуляем при сравнении и декрементровании
+	//Р”Р»СЏ PWMB С‚РѕР¶Рµ СЃР°РјРѕРµ, С‡С‚Рѕ РґР»СЏ PWMРђ. Р‘РµР· РёРЅРІРµСЂСЃРёРё. РРЅРІРµСЂСЃРёСЏ РґР°Р»РµРµ РІ РјРѕРґСѓР»Рµ РњР’
+	NT_PWM1->AQCTLB = NT_PWM0->AQCTLA; // РґР»СЏ РЅР°С‡Р°Р»Р° СЃРѕР±С‹С‚РёСЏ РґР»СЏ PWM1B Р·Р°РїСЂРµС‰РµРЅС‹
+	NT_PWM1->AQCTLB_bit.ZRO = NT_PWM0->AQCTLA_bit.ZRO; //РѕР±РЅСѓР»СЏРµРј РїСЂРё РЅСѓР»Рµ СЃС‡РµС‚С‡РёРєР°
+	NT_PWM1->AQCTLB_bit.CAU = NT_PWM0->AQCTLA_bit.CAU; //РІРєР»СЋС‡Р°РµРј РїСЂРё СЃСЂР°РІРЅРµРЅРёРё Рё РёРЅРєСЂРµРјРµРЅС‚РёРѕРІР°РЅРёРё
+	NT_PWM1->AQCTLB_bit.CAD = NT_PWM0->AQCTLA_bit.CAD; //РѕР±РЅСѓР»СЏРµРј РїСЂРё СЃСЂР°РІРЅРµРЅРёРё Рё РґРµРєСЂРµРјРµРЅС‚СЂРѕРІР°РЅРёРё
 
-	NT_PWM1->AQSFRC_bit.RLDCSF = 0; //по ТО надо писать 0
+	NT_PWM1->AQSFRC_bit.RLDCSF = 0; //РїРѕ РўРћ РЅР°РґРѕ РїРёСЃР°С‚СЊ 0
 
 	// Active high complementary PWMs - Setup Deadband
 	NT_PWM1->DBRED = NT_PWM0->DBRED;
@@ -196,55 +196,55 @@ void PWM_Module_Init(TPWM_Module *p) {
 	NT_PWM1->ETSEL_bit.INTSEL = ET_DISABLE;        // Disable INT
 	NT_PWM1->ETSEL_bit.INTEN = 0;                  // Disable INT
 
-	//разрешаем TZ быть источником аппаратной аварии (one-shot)
+	//СЂР°Р·СЂРµС€Р°РµРј TZ Р±С‹С‚СЊ РёСЃС‚РѕС‡РЅРёРєРѕРј Р°РїРїР°СЂР°С‚РЅРѕР№ Р°РІР°СЂРёРё (one-shot)
 	//   NT_PWM1->TZSEL_bit.OSHT1 = TZ_ENABLE;
 	//   NT_PWM1->TZSEL_bit.OSHT2 = TZ_ENABLE;
 	//   NT_PWM1->TZSEL_bit.OSHT3 = TZ_ENABLE;
 
 	// Trip-Zone
-	NT_PWM1->TZCTL_bit.TZA = TZ_STATE;   // по событию "One-Shot Trip" переводим
-	NT_PWM1->TZCTL_bit.TZB = TZ_STATE;          // ШИМ выходы в нужное состояние
+	NT_PWM1->TZCTL_bit.TZA = TZ_STATE;   // РїРѕ СЃРѕР±С‹С‚РёСЋ "One-Shot Trip" РїРµСЂРµРІРѕРґРёРј
+	NT_PWM1->TZCTL_bit.TZB = TZ_STATE;          // РЁРРњ РІС‹С…РѕРґС‹ РІ РЅСѓР¶РЅРѕРµ СЃРѕСЃС‚РѕСЏРЅРёРµ
 
 	// ------------------------------------------------------------------------
-	// Настраиваем модуль ePWM3
+	// РќР°СЃС‚СЂР°РёРІР°РµРј РјРѕРґСѓР»СЊ ePWM3
 	// ------------------------------------------------------------------------
 	// Setup TBCLK
 	NT_PWM2->TBPRD = NT_PWM0->TBPRD;
-	NT_PWM2->TBPHS_bit.TBPHS = 0x0001;            // Фаза равна 1 из-за задержки в один такт на синхронизацию
+	NT_PWM2->TBPHS_bit.TBPHS = 0x0001;            // Р¤Р°Р·Р° СЂР°РІРЅР° 1 РёР·-Р·Р° Р·Р°РґРµСЂР¶РєРё РІ РѕРґРёРЅ С‚Р°РєС‚ РЅР° СЃРёРЅС…СЂРѕРЅРёР·Р°С†РёСЋ
 	NT_PWM2->TBCTR = 0x0000;                       // Clear counter
 
 	// Setup counter mode
-	NT_PWM2->TBCTL_bit.PRDLD = TB_SHADOW;        // загрузка TBPRD при TBCTR = 0
+	NT_PWM2->TBCTL_bit.PRDLD = TB_SHADOW;        // Р·Р°РіСЂСѓР·РєР° TBPRD РїСЂРё TBCTR = 0
 	NT_PWM2->TBCTL_bit.CTRMODE = TB_COUNT_UPDOWN;  // Count up-down
 	NT_PWM2->TBCTL_bit.PHSEN = TB_ENABLE;         // Enable phase loading
-	NT_PWM2->TBCTL_bit.PHSDIR = TB_UP;      // Считать вверх после загрузки фазы
+	NT_PWM2->TBCTL_bit.PHSDIR = TB_UP;      // РЎС‡РёС‚Р°С‚СЊ РІРІРµСЂС… РїРѕСЃР»Рµ Р·Р°РіСЂСѓР·РєРё С„Р°Р·С‹
 	NT_PWM2->TBCTL_bit.HSPCLKDIV = 0;     // High Speed Time-base Clock Prescale
 	NT_PWM2->TBCTL_bit.CLKDIV = 0;           // Time-base Clock Prescale
-	NT_PWM2->TBCTL_bit.SYNCOSEL = TB_SYNC_IN; // разрешаем выдачу синхро-сигнала
+	NT_PWM2->TBCTL_bit.SYNCOSEL = TB_SYNC_IN; // СЂР°Р·СЂРµС€Р°РµРј РІС‹РґР°С‡Сѓ СЃРёРЅС…СЂРѕ-СЃРёРіРЅР°Р»Р°
 
 	// Setup shadowing
-	NT_PWM2->CMPCTL_bit.SHDWAMODE = CC_SHADOW;   //включить SHADOW для сравнения
+	NT_PWM2->CMPCTL_bit.SHDWAMODE = CC_SHADOW;   //РІРєР»СЋС‡РёС‚СЊ SHADOW РґР»СЏ СЃСЂР°РІРЅРµРЅРёСЏ
 	NT_PWM2->CMPCTL_bit.LOADAMODE = CC_CTR_ZERO;   // Load on zero
 
-	NT_PWM2->CMPCTL_bit.SHDWBMODE = CC_SHADOW;   //включить SHADOW для сравнения
+	NT_PWM2->CMPCTL_bit.SHDWBMODE = CC_SHADOW;   //РІРєР»СЋС‡РёС‚СЊ SHADOW РґР»СЏ СЃСЂР°РІРЅРµРЅРёСЏ
 	NT_PWM2->CMPCTL_bit.LOADBMODE = CC_CTR_ZERO;   // Load on zero
 
 	// Set Compare values
 	NT_PWM2->CMPA_bit.CMPA = 0;                   // Set compare A value
 
 	// Set actions
-	NT_PWM2->AQCTLA = AQ_EPWM_DISABLE; // для начала события запрещены
-	NT_PWM2->AQCTLA_bit.ZRO = 1; //обнуляем при нуле счетчика
-	NT_PWM2->AQCTLA_bit.CAU = 2; //включаем при сравнении и инкрементиовании
-	NT_PWM2->AQCTLA_bit.CAD = 1; //обнуляем при сравнении и декрементровании
+	NT_PWM2->AQCTLA = AQ_EPWM_DISABLE; // РґР»СЏ РЅР°С‡Р°Р»Р° СЃРѕР±С‹С‚РёСЏ Р·Р°РїСЂРµС‰РµРЅС‹
+	NT_PWM2->AQCTLA_bit.ZRO = 1; //РѕР±РЅСѓР»СЏРµРј РїСЂРё РЅСѓР»Рµ СЃС‡РµС‚С‡РёРєР°
+	NT_PWM2->AQCTLA_bit.CAU = 2; //РІРєР»СЋС‡Р°РµРј РїСЂРё СЃСЂР°РІРЅРµРЅРёРё Рё РёРЅРєСЂРµРјРµРЅС‚РёРѕРІР°РЅРёРё
+	NT_PWM2->AQCTLA_bit.CAD = 1; //РѕР±РЅСѓР»СЏРµРј РїСЂРё СЃСЂР°РІРЅРµРЅРёРё Рё РґРµРєСЂРµРјРµРЅС‚СЂРѕРІР°РЅРёРё
 
-	//Для PWMB тоже самое, что для PWMА. Без инверсии. Инверсия далее в модуле МВ
-	NT_PWM2->AQCTLB = NT_PWM0->AQCTLA; // для начала события для PWM1B запрещены
-	NT_PWM2->AQCTLB_bit.ZRO = NT_PWM0->AQCTLA_bit.ZRO; //обнуляем при нуле счетчика
-	NT_PWM2->AQCTLB_bit.CAU = NT_PWM0->AQCTLA_bit.CAU; //включаем при сравнении и инкрементиовании
-	NT_PWM2->AQCTLB_bit.CAD = NT_PWM0->AQCTLA_bit.CAD; //обнуляем при сравнении и декрементровании
+	//Р”Р»СЏ PWMB С‚РѕР¶Рµ СЃР°РјРѕРµ, С‡С‚Рѕ РґР»СЏ PWMРђ. Р‘РµР· РёРЅРІРµСЂСЃРёРё. РРЅРІРµСЂСЃРёСЏ РґР°Р»РµРµ РІ РјРѕРґСѓР»Рµ РњР’
+	NT_PWM2->AQCTLB = NT_PWM0->AQCTLA; // РґР»СЏ РЅР°С‡Р°Р»Р° СЃРѕР±С‹С‚РёСЏ РґР»СЏ PWM1B Р·Р°РїСЂРµС‰РµРЅС‹
+	NT_PWM2->AQCTLB_bit.ZRO = NT_PWM0->AQCTLA_bit.ZRO; //РѕР±РЅСѓР»СЏРµРј РїСЂРё РЅСѓР»Рµ СЃС‡РµС‚С‡РёРєР°
+	NT_PWM2->AQCTLB_bit.CAU = NT_PWM0->AQCTLA_bit.CAU; //РІРєР»СЋС‡Р°РµРј РїСЂРё СЃСЂР°РІРЅРµРЅРёРё Рё РёРЅРєСЂРµРјРµРЅС‚РёРѕРІР°РЅРёРё
+	NT_PWM2->AQCTLB_bit.CAD = NT_PWM0->AQCTLA_bit.CAD; //РѕР±РЅСѓР»СЏРµРј РїСЂРё СЃСЂР°РІРЅРµРЅРёРё Рё РґРµРєСЂРµРјРµРЅС‚СЂРѕРІР°РЅРёРё
 
-	NT_PWM2->AQSFRC_bit.RLDCSF = 0; //по ТО надо писать 0
+	NT_PWM2->AQSFRC_bit.RLDCSF = 0; //РїРѕ РўРћ РЅР°РґРѕ РїРёСЃР°С‚СЊ 0
 
 	// Active high complementary PWMs - Setup Deadband
 	NT_PWM2->DBRED = NT_PWM0->DBRED;
@@ -257,54 +257,54 @@ void PWM_Module_Init(TPWM_Module *p) {
 	NT_PWM2->ETSEL_bit.INTSEL = ET_DISABLE;        // Disable INT
 	NT_PWM2->ETSEL_bit.INTEN = 0;                  // Disable INT
 
-	//разрешаем TZ быть источником аппаратной аварии (one-shot)
+	//СЂР°Р·СЂРµС€Р°РµРј TZ Р±С‹С‚СЊ РёСЃС‚РѕС‡РЅРёРєРѕРј Р°РїРїР°СЂР°С‚РЅРѕР№ Р°РІР°СЂРёРё (one-shot)
 	//  NT_PWM2->TZSEL_bit.OSHT1 = TZ_ENABLE;
 	//  NT_PWM2->TZSEL_bit.OSHT2 = TZ_ENABLE;
 	//  NT_PWM2->TZSEL_bit.OSHT3 = TZ_ENABLE;
 
 
 	// Trip-Zone
-	NT_PWM2->TZCTL_bit.TZA = TZ_STATE;   // по событию "One-Shot Trip" переводим
-	NT_PWM2->TZCTL_bit.TZB = TZ_STATE;          // ШИМ выходы в нужное состояние
+	NT_PWM2->TZCTL_bit.TZA = TZ_STATE;   // РїРѕ СЃРѕР±С‹С‚РёСЋ "One-Shot Trip" РїРµСЂРµРІРѕРґРёРј
+	NT_PWM2->TZCTL_bit.TZB = TZ_STATE;          // РЁРРњ РІС‹С…РѕРґС‹ РІ РЅСѓР¶РЅРѕРµ СЃРѕСЃС‚РѕСЏРЅРёРµ
 
 	// ------------------------------------------------------------------------
-	// Настраиваем модуль ePWM3 под АЦП
+	// РќР°СЃС‚СЂР°РёРІР°РµРј РјРѕРґСѓР»СЊ ePWM3 РїРѕРґ РђР¦Рџ
 	// ------------------------------------------------------------------------
 	// Setup TBCLK
 	NT_PWM3->TBPRD = NT_PWM0->TBPRD;
-	NT_PWM3->TBPHS_bit.TBPHS = 0x0001;      // Фаза равна 1 из-за задержки в один такт на синхронизацию
+	NT_PWM3->TBPHS_bit.TBPHS = 0x0001;      // Р¤Р°Р·Р° СЂР°РІРЅР° 1 РёР·-Р·Р° Р·Р°РґРµСЂР¶РєРё РІ РѕРґРёРЅ С‚Р°РєС‚ РЅР° СЃРёРЅС…СЂРѕРЅРёР·Р°С†РёСЋ
 	NT_PWM3->TBCTR = 0x0000;                       // Clear counter
 
 	// Setup counter mode
-	NT_PWM3->TBCTL_bit.PRDLD = TB_SHADOW;        // загрузка TBPRD при TBCTR = 0
+	NT_PWM3->TBCTL_bit.PRDLD = TB_SHADOW;        // Р·Р°РіСЂСѓР·РєР° TBPRD РїСЂРё TBCTR = 0
 	NT_PWM3->TBCTL_bit.CTRMODE = TB_COUNT_UPDOWN;  // Count up-down
 	NT_PWM3->TBCTL_bit.PHSEN = TB_ENABLE;         // Enable phase loading
-	NT_PWM3->TBCTL_bit.PHSDIR = TB_UP;      // Считать вверх после загрузки фазы
+	NT_PWM3->TBCTL_bit.PHSDIR = TB_UP;      // РЎС‡РёС‚Р°С‚СЊ РІРІРµСЂС… РїРѕСЃР»Рµ Р·Р°РіСЂСѓР·РєРё С„Р°Р·С‹
 	NT_PWM3->TBCTL_bit.HSPCLKDIV = 0;     // High Speed Time-base Clock Prescale
 	NT_PWM3->TBCTL_bit.CLKDIV = 0;           // Time-base Clock Prescale
-	NT_PWM3->TBCTL_bit.SYNCOSEL = TB_SYNC_IN; // разрешаем выдачу синхро-сигнала
+	NT_PWM3->TBCTL_bit.SYNCOSEL = TB_SYNC_IN; // СЂР°Р·СЂРµС€Р°РµРј РІС‹РґР°С‡Сѓ СЃРёРЅС…СЂРѕ-СЃРёРіРЅР°Р»Р°
 
 	// Interrupt where we will change the Compare Values
 	NT_PWM3->ETSEL_bit.INTSEL = ET_DISABLE;        // Disable INT
 	NT_PWM3->ETSEL_bit.INTEN = 0;                  // Disable INT
 
 
-	NT_PWM3->ETSEL_bit.SOCAEN = 1;		// Разрешить запуск ацп
-	NT_PWM3->ETSEL_bit.SOCASEL = 1;		// Запускать при CTR == 0 (Underflow)
+	NT_PWM3->ETSEL_bit.SOCAEN = 1;		// Р Р°Р·СЂРµС€РёС‚СЊ Р·Р°РїСѓСЃРє Р°С†Рї
+	NT_PWM3->ETSEL_bit.SOCASEL = 1;		// Р—Р°РїСѓСЃРєР°С‚СЊ РїСЂРё CTR == 0 (Underflow)
 
-	//сбрасываем все флаги аварий
+	//СЃР±СЂР°СЃС‹РІР°РµРј РІСЃРµ С„Р»Р°РіРё Р°РІР°СЂРёР№
 	NT_PWM0->TZCLR = 0x7;
 	NT_PWM1->TZCLR = 0x7;
 	NT_PWM2->TZCLR = 0x7;
 
-	//настройка ножек
+	//РЅР°СЃС‚СЂРѕР№РєР° РЅРѕР¶РµРє
 #ifdef HW_VECTORCARD_DRV8301_EVM
-	//ШИМ 6 выводов
+	//РЁРРњ 6 РІС‹РІРѕРґРѕРІ
 	NT_GPIOG->ALTFUNCSET = (1 << 2) + (1 << 3) + (1 << 4);		//ePWMxA(0), (1), (2)
 	NT_GPIOA->ALTFUNCSET = (1 << 10);		//ePWMxB(0)
 	NT_GPIOF->ALTFUNCSET = (1 << 2) + (1 << 4);		//ePWMxB(1), (2)
 
-	// Периферийная функция - PWM
+	// РџРµСЂРёС„РµСЂРёР№РЅР°СЏ С„СѓРЅРєС†РёСЏ - PWM
 	NT_COMMON_REG->GPIOPCTLA_bit.PIN10 = 2;//ePWMxB(0)
 	NT_COMMON_REG->GPIOPCTLF_bit.PIN2 = 0;//ePWMxB(1)
 	NT_COMMON_REG->GPIOPCTLF_bit.PIN4 = 0;//ePWMxB(2)
@@ -318,19 +318,19 @@ void PWM_Module_Init(TPWM_Module *p) {
 #endif
 
 #if defined(HW_VECTORCARD_DRV8312_EVM)
-	//ШИМ 3 вывода управления верхними ключами (нижние ключи ШИМят сами драйвером)
+	//РЁРРњ 3 РІС‹РІРѕРґР° СѓРїСЂР°РІР»РµРЅРёСЏ РІРµСЂС…РЅРёРјРё РєР»СЋС‡Р°РјРё (РЅРёР¶РЅРёРµ РєР»СЋС‡Рё РЁРРњСЏС‚ СЃР°РјРё РґСЂР°Р№РІРµСЂРѕРј)
 	NT_GPIOG->ALTFUNCSET = (1 << 2) + (1 << 3) + (1 << 4);	 //ePWMxA(0), (1), (2)
 
-	// Периферийная функция - PWM
+	// РџРµСЂРёС„РµСЂРёР№РЅР°СЏ С„СѓРЅРєС†РёСЏ - PWM
 	NT_COMMON_REG->GPIOPCTLG_bit.PIN2 = 0;//ePWMxA(0)
 	NT_COMMON_REG->GPIOPCTLG_bit.PIN3 = 0;//ePWMxA(1)
 	NT_COMMON_REG->GPIOPCTLG_bit.PIN4 = 0;//ePWMxA(2)
 
-	//выключаем альтернативные функции (на всякий)
+	//РІС‹РєР»СЋС‡Р°РµРј Р°Р»СЊС‚РµСЂРЅР°С‚РёРІРЅС‹Рµ С„СѓРЅРєС†РёРё (РЅР° РІСЃСЏРєРёР№)
 	NT_GPIOA->ALTFUNCCLR = (1 << 10);		//A[10]
 	NT_GPIOF->ALTFUNCCLR = (1 << 2) + (1 << 4);		//F[2], F[4]
 
-	//A[10], F[2], F[4]  ножки резета
+	//A[10], F[2], F[4]  РЅРѕР¶РєРё СЂРµР·РµС‚Р°
 	NT_GPIOA->OUTENSET = (1 << 10);
 	NT_GPIOF->OUTENSET = (1 << 2);
 	NT_GPIOF->OUTENSET = (1 << 4);
@@ -341,7 +341,7 @@ void PWM_Module_Init(TPWM_Module *p) {
 	NT_GPIOG->ALTFUNCSET_bit.ALTFUNCSET = (1 << 2) + (1 << 3) + (1 << 4); //ePWMxA(0), (1), (2)
 	NT_GPIOF->ALTFUNCSET_bit.ALTFUNCSET = (1 << 0) + (1 << 2) + (1 << 4); //ePWMxB(0), (1), (2)
 
-	// Периферийная функция - PWM
+	// РџРµСЂРёС„РµСЂРёР№РЅР°СЏ С„СѓРЅРєС†РёСЏ - PWM
 	NT_COMMON_REG->GPIOPCTLF_bit.PIN0 = 0;//ePWMxB(0)
 	NT_COMMON_REG->GPIOPCTLF_bit.PIN2 = 0;//ePWMxB(1)
 	NT_COMMON_REG->GPIOPCTLF_bit.PIN4 = 0;//ePWMxB(2)
@@ -350,18 +350,18 @@ void PWM_Module_Init(TPWM_Module *p) {
 	NT_COMMON_REG->GPIOPCTLG_bit.PIN3 = 0;//ePWMxA(1)
 	NT_COMMON_REG->GPIOPCTLG_bit.PIN4 = 0;//ePWMxA(2)
 
-	//Вход аппаратной аварии
+	//Р’С…РѕРґ Р°РїРїР°СЂР°С‚РЅРѕР№ Р°РІР°СЂРёРё
 	NT_GPIOA->ALTFUNCCLR = (1<<8); //A[8]
 
 #endif
 
 #ifdef HW_MOTORCONTROLBOARD
-	//ШИМ 6 выводов
+	//РЁРРњ 6 РІС‹РІРѕРґРѕРІ
 	NT_GPIOG->ALTFUNCSET = (1 << 2) + (1 << 3) + (1 << 4);		//ePWMxA(0), (1), (2)
 	NT_GPIOF->ALTFUNCSET = (1 << 0);							//ePWMxB(0)
 	NT_GPIOA->ALTFUNCSET = (1 << 11) + (1 << 12);				//ePWMxB(1), (2)
 
-	// Периферийная функция - PWM
+	// РџРµСЂРёС„РµСЂРёР№РЅР°СЏ С„СѓРЅРєС†РёСЏ - PWM
 	NT_COMMON_REG->GPIOPCTLF_bit.PIN0 = 0;		//ePWMxB(0)
 	NT_COMMON_REG->GPIOPCTLA_bit.PIN11 = 2;		//ePWMxB(1)
 	NT_COMMON_REG->GPIOPCTLA_bit.PIN12 = 2;		//ePWMxB(2)
@@ -372,18 +372,18 @@ void PWM_Module_Init(TPWM_Module *p) {
 	NT_COMMON_REG->GPIOPCTLG_bit.PIN4 = 0;//ePWMxA(2)
 #endif
 
-	//Синхронный запуск ШИМ
+	//РЎРёРЅС…СЂРѕРЅРЅС‹Р№ Р·Р°РїСѓСЃРє РЁРРњ
 	NT_COMMON_REG->PWM_SYNC_bit.TBCLKSYNC = 0x1FF;
 
 }
 
 
 
-//! Нормирование входных величин.
+//! РќРѕСЂРјРёСЂРѕРІР°РЅРёРµ РІС…РѕРґРЅС‹С… РІРµР»РёС‡РёРЅ.
 
-//!Учитывает компенсацию напряжения при изменении Ud,
-//!выполняет вписывание вектора в окружность, если требуется, и
-//!выполняет смену базиса, относительно которого идет нормировка.
+//!РЈС‡РёС‚С‹РІР°РµС‚ РєРѕРјРїРµРЅСЃР°С†РёСЋ РЅР°РїСЂСЏР¶РµРЅРёСЏ РїСЂРё РёР·РјРµРЅРµРЅРёРё Ud,
+//!РІС‹РїРѕР»РЅСЏРµС‚ РІРїРёСЃС‹РІР°РЅРёРµ РІРµРєС‚РѕСЂР° РІ РѕРєСЂСѓР¶РЅРѕСЃС‚СЊ, РµСЃР»Рё С‚СЂРµР±СѓРµС‚СЃСЏ, Рё
+//!РІС‹РїРѕР»РЅСЏРµС‚ СЃРјРµРЅСѓ Р±Р°Р·РёСЃР°, РѕС‚РЅРѕСЃРёС‚РµР»СЊРЅРѕ РєРѕС‚РѕСЂРѕРіРѕ РёРґРµС‚ РЅРѕСЂРјРёСЂРѕРІРєР°.
 //! \memberof TPWM_Module
 void PWM_Module_NormInput(TPWM_Module* p) {
     _iq knorm;
@@ -391,36 +391,36 @@ void PWM_Module_NormInput(TPWM_Module* p) {
     p->UalphaNorm=p->UalphaRef;
     p->UbetaNorm=p->UbetaRef;
 
-    //находим амплитуду (без учета ограничения)
+    //РЅР°С…РѕРґРёРј Р°РјРїР»РёС‚СѓРґСѓ (Р±РµР· СѓС‡РµС‚Р° РѕРіСЂР°РЅРёС‡РµРЅРёСЏ)
     p->U_mag=_IQmag(p->UalphaNorm,p->UbetaNorm);
 
 
     p->UdCorTmp=_IQdiv(_IQ(1.0),(_IQ(1.0)+_IQmpy((adc.Udc_meas-_IQ(1.0)),p->UdCompK)));
-    //учет пульсаций напряжения на Ud
-    if (p->UdCompEnable&1) { //он включен?
-        p->UalphaNorm=_IQmpy(p->UalphaNorm, p->UdCorTmp);//изменим пропорционально коэфф-ту коррекции
-        p->UbetaNorm=_IQmpy(p->UbetaNorm, p->UdCorTmp);//и это тоже
+    //СѓС‡РµС‚ РїСѓР»СЊСЃР°С†РёР№ РЅР°РїСЂСЏР¶РµРЅРёСЏ РЅР° Ud
+    if (p->UdCompEnable&1) { //РѕРЅ РІРєР»СЋС‡РµРЅ?
+        p->UalphaNorm=_IQmpy(p->UalphaNorm, p->UdCorTmp);//РёР·РјРµРЅРёРј РїСЂРѕРїРѕСЂС†РёРѕРЅР°Р»СЊРЅРѕ РєРѕСЌС„С„-С‚Сѓ РєРѕСЂСЂРµРєС†РёРё
+        p->UbetaNorm=_IQmpy(p->UbetaNorm, p->UdCorTmp);//Рё СЌС‚Рѕ С‚РѕР¶Рµ
     }
 
-    //вписывание заданной амплитуды напряжения в окружность, вписываемую в шестиугольник базывых векторов
-    //когда U_lim=1.0, это и есть такая окружность. Бывает, что мы хотим вписывать в шестиугольник. Тогда просто задираем вверх огрианичение U_lim
-    if (p->U_lim>_IQ(1.0/0.866)) //но нет смысла задирать выше максимально-реализ. напряжения (больше базового вектора)
+    //РІРїРёСЃС‹РІР°РЅРёРµ Р·Р°РґР°РЅРЅРѕР№ Р°РјРїР»РёС‚СѓРґС‹ РЅР°РїСЂСЏР¶РµРЅРёСЏ РІ РѕРєСЂСѓР¶РЅРѕСЃС‚СЊ, РІРїРёСЃС‹РІР°РµРјСѓСЋ РІ С€РµСЃС‚РёСѓРіРѕР»СЊРЅРёРє Р±Р°Р·С‹РІС‹С… РІРµРєС‚РѕСЂРѕРІ
+    //РєРѕРіРґР° U_lim=1.0, СЌС‚Рѕ Рё РµСЃС‚СЊ С‚Р°РєР°СЏ РѕРєСЂСѓР¶РЅРѕСЃС‚СЊ. Р‘С‹РІР°РµС‚, С‡С‚Рѕ РјС‹ С…РѕС‚РёРј РІРїРёСЃС‹РІР°С‚СЊ РІ С€РµСЃС‚РёСѓРіРѕР»СЊРЅРёРє. РўРѕРіРґР° РїСЂРѕСЃС‚Рѕ Р·Р°РґРёСЂР°РµРј РІРІРµСЂС… РѕРіСЂРёР°РЅРёС‡РµРЅРёРµ U_lim
+    if (p->U_lim>_IQ(1.0/0.866)) //РЅРѕ РЅРµС‚ СЃРјС‹СЃР»Р° Р·Р°РґРёСЂР°С‚СЊ РІС‹С€Рµ РјР°РєСЃРёРјР°Р»СЊРЅРѕ-СЂРµР°Р»РёР·. РЅР°РїСЂСЏР¶РµРЅРёСЏ (Р±РѕР»СЊС€Рµ Р±Р°Р·РѕРІРѕРіРѕ РІРµРєС‚РѕСЂР°)
         p->U_lim=_IQ(1.0/0.866);
-    /* рассчитываем амплитуду вектора, который хотим отработать*/
-    knorm=_IQmag(p->UalphaNorm,p->UbetaNorm);//плюс нормируем от 540 к 311
-    if (knorm>=p->U_lim) { //он больше, чем наше ограничение?
-        knorm=_IQdiv(p->U_lim,knorm);//в эту же переменную, для экономии, рассчитываем нормировку
-        p->UalphaNorm=_IQmpy(knorm,p->UalphaNorm);//уменьшаем пропорционально нормировке
-        p->UbetaNorm=_IQmpy(knorm,p->UbetaNorm);//и это
-        p->ULimitation=1;//флаг о том, что идет ограничение напряжения
+    /* СЂР°СЃСЃС‡РёС‚С‹РІР°РµРј Р°РјРїР»РёС‚СѓРґСѓ РІРµРєС‚РѕСЂР°, РєРѕС‚РѕСЂС‹Р№ С…РѕС‚РёРј РѕС‚СЂР°Р±РѕС‚Р°С‚СЊ*/
+    knorm=_IQmag(p->UalphaNorm,p->UbetaNorm);//РїР»СЋСЃ РЅРѕСЂРјРёСЂСѓРµРј РѕС‚ 540 Рє 311
+    if (knorm>=p->U_lim) { //РѕРЅ Р±РѕР»СЊС€Рµ, С‡РµРј РЅР°С€Рµ РѕРіСЂР°РЅРёС‡РµРЅРёРµ?
+        knorm=_IQdiv(p->U_lim,knorm);//РІ СЌС‚Сѓ Р¶Рµ РїРµСЂРµРјРµРЅРЅСѓСЋ, РґР»СЏ СЌРєРѕРЅРѕРјРёРё, СЂР°СЃСЃС‡РёС‚С‹РІР°РµРј РЅРѕСЂРјРёСЂРѕРІРєСѓ
+        p->UalphaNorm=_IQmpy(knorm,p->UalphaNorm);//СѓРјРµРЅСЊС€Р°РµРј РїСЂРѕРїРѕСЂС†РёРѕРЅР°Р»СЊРЅРѕ РЅРѕСЂРјРёСЂРѕРІРєРµ
+        p->UbetaNorm=_IQmpy(knorm,p->UbetaNorm);//Рё СЌС‚Рѕ
+        p->ULimitation=1;//С„Р»Р°Рі Рѕ С‚РѕРј, С‡С‚Рѕ РёРґРµС‚ РѕРіСЂР°РЅРёС‡РµРЅРёРµ РЅР°РїСЂСЏР¶РµРЅРёСЏ
     } else
         p->ULimitation=0;
 
-    /* рассчитываем приведенные вектора*/
-    /* До этого момента напряжение нормировалось относительно
-    базиса фазного амплитудного значения, например, 220*sqrt(2)
-    Теперь производится переход, где за единицу принимается максимально
-    реализуемое напряжение (длина базового вектора)
+    /* СЂР°СЃСЃС‡РёС‚С‹РІР°РµРј РїСЂРёРІРµРґРµРЅРЅС‹Рµ РІРµРєС‚РѕСЂР°*/
+    /* Р”Рѕ СЌС‚РѕРіРѕ РјРѕРјРµРЅС‚Р° РЅР°РїСЂСЏР¶РµРЅРёРµ РЅРѕСЂРјРёСЂРѕРІР°Р»РѕСЃСЊ РѕС‚РЅРѕСЃРёС‚РµР»СЊРЅРѕ
+    Р±Р°Р·РёСЃР° С„Р°Р·РЅРѕРіРѕ Р°РјРїР»РёС‚СѓРґРЅРѕРіРѕ Р·РЅР°С‡РµРЅРёСЏ, РЅР°РїСЂРёРјРµСЂ, 220*sqrt(2)
+    РўРµРїРµСЂСЊ РїСЂРѕРёР·РІРѕРґРёС‚СЃСЏ РїРµСЂРµС…РѕРґ, РіРґРµ Р·Р° РµРґРёРЅРёС†Сѓ РїСЂРёРЅРёРјР°РµС‚СЃСЏ РјР°РєСЃРёРјР°Р»СЊРЅРѕ
+    СЂРµР°Р»РёР·СѓРµРјРѕРµ РЅР°РїСЂСЏР¶РµРЅРёРµ (РґР»РёРЅР° Р±Р°Р·РѕРІРѕРіРѕ РІРµРєС‚РѕСЂР°)
     */
     p->UalphaNorm=_IQmpy(p->UalphaNorm,_IQ(0.866));
     p->UbetaNorm=_IQmpy(p->UbetaNorm,_IQ(0.866));
@@ -428,7 +428,7 @@ void PWM_Module_NormInput(TPWM_Module* p) {
 
 
 
-//! Функция 6ти секторной векторной ШИМ
+//! Р¤СѓРЅРєС†РёСЏ 6С‚Рё СЃРµРєС‚РѕСЂРЅРѕР№ РІРµРєС‚РѕСЂРЅРѕР№ РЁРРњ
 
 //! \memberof TPWM_Module
 void PWM_Module_No_SV_Update(TPWM_Module *p) {
@@ -440,8 +440,8 @@ void PWM_Module_No_SV_Update(TPWM_Module *p) {
     int16 gamma1;
     long tmp_pwm;
 
-    //Присвоение трех уставок сравнения только если счетчик таймера далек от нуля, чтобы
-    //предотвратить частичное применение скважностей, что в векторной ШИМ может быть критично и испортить период ШИМ.
+    //РџСЂРёСЃРІРѕРµРЅРёРµ С‚СЂРµС… СѓСЃС‚Р°РІРѕРє СЃСЂР°РІРЅРµРЅРёСЏ С‚РѕР»СЊРєРѕ РµСЃР»Рё СЃС‡РµС‚С‡РёРє С‚Р°Р№РјРµСЂР° РґР°Р»РµРє РѕС‚ РЅСѓР»СЏ, С‡С‚РѕР±С‹
+    //РїСЂРµРґРѕС‚РІСЂР°С‚РёС‚СЊ С‡Р°СЃС‚РёС‡РЅРѕРµ РїСЂРёРјРµРЅРµРЅРёРµ СЃРєРІР°Р¶РЅРѕСЃС‚РµР№, С‡С‚Рѕ РІ РІРµРєС‚РѕСЂРЅРѕР№ РЁРРњ РјРѕР¶РµС‚ Р±С‹С‚СЊ РєСЂРёС‚РёС‡РЅРѕ Рё РёСЃРїРѕСЂС‚РёС‚СЊ РїРµСЂРёРѕРґ РЁРРњ.
     DINT;
     if (NT_PWM0->TBCTR>30) {
         NT_PWM0->CMPA_bit.CMPA=(Uint16)p->GammaA;
@@ -452,9 +452,9 @@ void PWM_Module_No_SV_Update(TPWM_Module *p) {
 
     PWM_Module_NormInput(p);
 
-    //Расчет скважностей по методу Изосимова.
-    //Подробнее см. диссертацию Чуева П.В. http://motorcontrol.ru/wp-content/uploads/2015/11/Chuev_vector_control.pdf
-    tmp_pwm = _IQmpy(_1_SQRT3,p->UbetaNorm);  /*делим на корень из 3*/
+    //Р Р°СЃС‡РµС‚ СЃРєРІР°Р¶РЅРѕСЃС‚РµР№ РїРѕ РјРµС‚РѕРґСѓ РР·РѕСЃРёРјРѕРІР°.
+    //РџРѕРґСЂРѕР±РЅРµРµ СЃРј. РґРёСЃСЃРµСЂС‚Р°С†РёСЋ Р§СѓРµРІР° Рџ.Р’. http://motorcontrol.ru/wp-content/uploads/2015/11/Chuev_vector_control.pdf
+    tmp_pwm = _IQmpy(_1_SQRT3,p->UbetaNorm);  /*РґРµР»РёРј РЅР° РєРѕСЂРµРЅСЊ РёР· 3*/
     lambda1 = _IQmpy(p->k_pwm,(p->UalphaNorm - tmp_pwm));
     lambda2 = _IQmpy(p->k_pwm,2*tmp_pwm);
     lambda3 = _IQmpy(p->k_pwm,p->UalphaNorm + tmp_pwm);
@@ -464,7 +464,7 @@ void PWM_Module_No_SV_Update(TPWM_Module *p) {
         if (lambda3>0) {
             gamma=lambda3;
             gamma1=-lambda1;
-            p->sector=1; /*110 начало */
+            p->sector=1; /*110 РЅР°С‡Р°Р»Рѕ */
             p->GammaA=p->k_pwm-gamma;
             p->GammaB=p->k_pwm-(gamma+gamma1+1);
             p->GammaC=p->k_pwm-0;
@@ -472,57 +472,57 @@ void PWM_Module_No_SV_Update(TPWM_Module *p) {
         } else if (lambda2>0) {
             gamma=lambda2;
             gamma1=-lambda3;
-            p->sector=2; /*011 начало */
+            p->sector=2; /*011 РЅР°С‡Р°Р»Рѕ */
             p->GammaA=p->k_pwm-0;
             p->GammaB=p->k_pwm-(gamma+gamma1+1);
             p->GammaC=p->k_pwm-gamma1;
-            /*011 начало */
+            /*011 РЅР°С‡Р°Р»Рѕ */
         } else if (lambda1!=0) {
             gamma=-lambda1;
             gamma1=-lambda2;
-            p->sector=3; /*011 начало */
+            p->sector=3; /*011 РЅР°С‡Р°Р»Рѕ */
             p->GammaA=p->k_pwm-0;
             p->GammaB=p->k_pwm-gamma;
             p->GammaC=p->k_pwm-(gamma+gamma1+1);
-            /*011 начало */
+            /*011 РЅР°С‡Р°Р»Рѕ */
         } else {
             gamma=-lambda3;
             gamma1 = lambda1;
-            p->sector= 4; /*101 начало */
+            p->sector= 4; /*101 РЅР°С‡Р°Р»Рѕ */
             p->GammaA=p->k_pwm-gamma1;
             p->GammaB=p->k_pwm-0;
             p->GammaC=p->k_pwm-(gamma+gamma1+1);
-            /*101 начало */
+            /*101 РЅР°С‡Р°Р»Рѕ */
 
         }
     else if (lambda2>0) {
         gamma=lambda1;
         gamma1=lambda2;
-        p->sector= 0; /*110 начало */
+        p->sector= 0; /*110 РЅР°С‡Р°Р»Рѕ */
         p->GammaA=p->k_pwm-(gamma+gamma1+1);
         p->GammaB=p->k_pwm-gamma1;
         p->GammaC=p->k_pwm-0;
-        /*110 начало */
+        /*110 РЅР°С‡Р°Р»Рѕ */
     } else if (lambda3<0) {
         gamma=-lambda3;
         gamma1 = lambda1;
-        p->sector= 4; /*101 начало */
+        p->sector= 4; /*101 РЅР°С‡Р°Р»Рѕ */
         p->GammaA=p->k_pwm-gamma1;
         p->GammaB=p->k_pwm-0;
         p->GammaC=p->k_pwm-(gamma+gamma1+1);
-        /*101 начало */
+        /*101 РЅР°С‡Р°Р»Рѕ */
     } else {
         gamma=-lambda2;
         gamma1=lambda3;
-        p->sector=5; /*101 начало */
+        p->sector=5; /*101 РЅР°С‡Р°Р»Рѕ */
         p->GammaA=p->k_pwm-(gamma+gamma1+1);
         p->GammaB=p->k_pwm-0;
         p->GammaC=p->k_pwm-gamma;
-        /*101 начало */
+        /*101 РЅР°С‡Р°Р»Рѕ */
     }
 
 
-    /*насыщения */
+    /*РЅР°СЃС‹С‰РµРЅРёСЏ */
 
     if (p->GammaA<0) p->GammaA=0;
     if (p->GammaB<0) p->GammaB=0;
@@ -532,9 +532,9 @@ void PWM_Module_No_SV_Update(TPWM_Module *p) {
     if (p->GammaB>p->k_pwm) p->GammaB=p->k_pwm+1;
     if (p->GammaC>p->k_pwm) p->GammaC=p->k_pwm+1;
 
-    //Присвоение трех уставок сравнения только если счетчик таймера далек от нуля, чтобы
-    //предотвратить частичное применение скважностей, что в векторной ШИМ может быть критично и испортить период ШИМ.
-    //Второй раз - чтобы предотвратить ситуацию с постоянной "незагрузкой" при равенстве частот расчета и ШИМ
+    //РџСЂРёСЃРІРѕРµРЅРёРµ С‚СЂРµС… СѓСЃС‚Р°РІРѕРє СЃСЂР°РІРЅРµРЅРёСЏ С‚РѕР»СЊРєРѕ РµСЃР»Рё СЃС‡РµС‚С‡РёРє С‚Р°Р№РјРµСЂР° РґР°Р»РµРє РѕС‚ РЅСѓР»СЏ, С‡С‚РѕР±С‹
+    //РїСЂРµРґРѕС‚РІСЂР°С‚РёС‚СЊ С‡Р°СЃС‚РёС‡РЅРѕРµ РїСЂРёРјРµРЅРµРЅРёРµ СЃРєРІР°Р¶РЅРѕСЃС‚РµР№, С‡С‚Рѕ РІ РІРµРєС‚РѕСЂРЅРѕР№ РЁРРњ РјРѕР¶РµС‚ Р±С‹С‚СЊ РєСЂРёС‚РёС‡РЅРѕ Рё РёСЃРїРѕСЂС‚РёС‚СЊ РїРµСЂРёРѕРґ РЁРРњ.
+    //Р’С‚РѕСЂРѕР№ СЂР°Р· - С‡С‚РѕР±С‹ РїСЂРµРґРѕС‚РІСЂР°С‚РёС‚СЊ СЃРёС‚СѓР°С†РёСЋ СЃ РїРѕСЃС‚РѕСЏРЅРЅРѕР№ "РЅРµР·Р°РіСЂСѓР·РєРѕР№" РїСЂРё СЂР°РІРµРЅСЃС‚РІРµ С‡Р°СЃС‚РѕС‚ СЂР°СЃС‡РµС‚Р° Рё РЁРРњ
     DINT;
     if (NT_PWM0->TBCTR>30) {
         NT_PWM0->CMPA_bit.CMPA=(Uint16)p->GammaA;
@@ -544,7 +544,7 @@ void PWM_Module_No_SV_Update(TPWM_Module *p) {
     EINT;
 }
 
-//! Функция синусоидальной ШИМ
+//! Р¤СѓРЅРєС†РёСЏ СЃРёРЅСѓСЃРѕРёРґР°Р»СЊРЅРѕР№ РЁРРњ
 
 //! \memberof TPWM_Module
 void PWM_Module_Sin_Update(TPWM_Module *p) {
@@ -557,27 +557,27 @@ void PWM_Module_Sin_Update(TPWM_Module *p) {
 	p->UalphaNorm = p->UalphaRef;
 	p->UbetaNorm = p->UbetaRef;
 
-	//находим амплитуду (без учета ограничения)
+	//РЅР°С…РѕРґРёРј Р°РјРїР»РёС‚СѓРґСѓ (Р±РµР· СѓС‡РµС‚Р° РѕРіСЂР°РЅРёС‡РµРЅРёСЏ)
 	p->U_mag = _IQmag(p->UalphaNorm, p->UbetaNorm);
 
-	/* рассчитываем амплитуду вектора, который хотим отработать*/
+	/* СЂР°СЃСЃС‡РёС‚С‹РІР°РµРј Р°РјРїР»РёС‚СѓРґСѓ РІРµРєС‚РѕСЂР°, РєРѕС‚РѕСЂС‹Р№ С…РѕС‚РёРј РѕС‚СЂР°Р±РѕС‚Р°С‚СЊ*/
 	knorm = _IQmag(p->UalphaNorm, p->UbetaNorm);
-	if (knorm >= p->U_lim) { //он больше, чем наше ограничение?
-		knorm = _IQdiv(p->U_lim, knorm); //в эту же переменную, для экономии, рассчитываем нормировку
-		p->UalphaNorm = _IQmpy(knorm, p->UalphaNorm); //уменьшаем пропорционально нормировке
-		p->UbetaNorm = _IQmpy(knorm, p->UbetaNorm); //и это
-		p->ULimitation = 1; //флаг о том, что идет ограничение напряжения
+	if (knorm >= p->U_lim) { //РѕРЅ Р±РѕР»СЊС€Рµ, С‡РµРј РЅР°С€Рµ РѕРіСЂР°РЅРёС‡РµРЅРёРµ?
+		knorm = _IQdiv(p->U_lim, knorm); //РІ СЌС‚Сѓ Р¶Рµ РїРµСЂРµРјРµРЅРЅСѓСЋ, РґР»СЏ СЌРєРѕРЅРѕРјРёРё, СЂР°СЃСЃС‡РёС‚С‹РІР°РµРј РЅРѕСЂРјРёСЂРѕРІРєСѓ
+		p->UalphaNorm = _IQmpy(knorm, p->UalphaNorm); //СѓРјРµРЅСЊС€Р°РµРј РїСЂРѕРїРѕСЂС†РёРѕРЅР°Р»СЊРЅРѕ РЅРѕСЂРјРёСЂРѕРІРєРµ
+		p->UbetaNorm = _IQmpy(knorm, p->UbetaNorm); //Рё СЌС‚Рѕ
+		p->ULimitation = 1; //С„Р»Р°Рі Рѕ С‚РѕРј, С‡С‚Рѕ РёРґРµС‚ РѕРіСЂР°РЅРёС‡РµРЅРёРµ РЅР°РїСЂСЏР¶РµРЅРёСЏ
 	} else
 		p->ULimitation = 0;
 
-	//Нормирование входного напряжения. Так как синусоидальная ШИМ формирует на 0.866 меньшее напряжение,
-	//чем векторная ШИМ (270В амплитудного фазного напряжения вместо 311В), то для того, чтобы при том же задании в переменных
-	//p->UalphaNorm, p->UbetaNorm получилось то же самое напряжение на выходе, что и в векторной ШИМ, нужно задания увеличить в 1/0.866 раз.
-	//Деление на два нужно для последующих формул, чтобы переменые менялись в половинном от максимального диапазоне.
+	//РќРѕСЂРјРёСЂРѕРІР°РЅРёРµ РІС…РѕРґРЅРѕРіРѕ РЅР°РїСЂСЏР¶РµРЅРёСЏ. РўР°Рє РєР°Рє СЃРёРЅСѓСЃРѕРёРґР°Р»СЊРЅР°СЏ РЁРРњ С„РѕСЂРјРёСЂСѓРµС‚ РЅР° 0.866 РјРµРЅСЊС€РµРµ РЅР°РїСЂСЏР¶РµРЅРёРµ,
+	//С‡РµРј РІРµРєС‚РѕСЂРЅР°СЏ РЁРРњ (270Р’ Р°РјРїР»РёС‚СѓРґРЅРѕРіРѕ С„Р°Р·РЅРѕРіРѕ РЅР°РїСЂСЏР¶РµРЅРёСЏ РІРјРµСЃС‚Рѕ 311Р’), С‚Рѕ РґР»СЏ С‚РѕРіРѕ, С‡С‚РѕР±С‹ РїСЂРё С‚РѕРј Р¶Рµ Р·Р°РґР°РЅРёРё РІ РїРµСЂРµРјРµРЅРЅС‹С…
+	//p->UalphaNorm, p->UbetaNorm РїРѕР»СѓС‡РёР»РѕСЃСЊ С‚Рѕ Р¶Рµ СЃР°РјРѕРµ РЅР°РїСЂСЏР¶РµРЅРёРµ РЅР° РІС‹С…РѕРґРµ, С‡С‚Рѕ Рё РІ РІРµРєС‚РѕСЂРЅРѕР№ РЁРРњ, РЅСѓР¶РЅРѕ Р·Р°РґР°РЅРёСЏ СѓРІРµР»РёС‡РёС‚СЊ РІ 1/0.866 СЂР°Р·.
+	//Р”РµР»РµРЅРёРµ РЅР° РґРІР° РЅСѓР¶РЅРѕ РґР»СЏ РїРѕСЃР»РµРґСѓСЋС‰РёС… С„РѕСЂРјСѓР», С‡С‚РѕР±С‹ РїРµСЂРµРјРµРЅС‹Рµ РјРµРЅСЏР»РёСЃСЊ РІ РїРѕР»РѕРІРёРЅРЅРѕРј РѕС‚ РјР°РєСЃРёРјР°Р»СЊРЅРѕРіРѕ РґРёР°РїР°Р·РѕРЅРµ.
 	p->UalphaNorm = _IQmpy(p->UalphaNorm, _IQ(1/0.866/2));
 	p->UbetaNorm = _IQmpy(p->UbetaNorm, _IQ(1/0.866/2));
 
-	/*фазное преобразование из системы альфа, бетта в a,b,c */
+	/*С„Р°Р·РЅРѕРµ РїСЂРµРѕР±СЂР°Р·РѕРІР°РЅРёРµ РёР· СЃРёСЃС‚РµРјС‹ Р°Р»СЊС„Р°, Р±РµС‚С‚Р° РІ a,b,c */
 
 	PhasePtsA = _IQ(0.5) - (p->UalphaNorm);
 	PhasePtsB = _IQ(0.5) - (_IQmpy(p->UbetaNorm,_IQ(0.8660254)) - (p->UalphaNorm >> 1));
@@ -587,7 +587,7 @@ void PWM_Module_Sin_Update(TPWM_Module *p) {
 	p->GammaB = _IQmpy(p->k_pwm, PhasePtsB);
 	p->GammaC = _IQmpy(p->k_pwm, PhasePtsC);
 
-	/*насыщения */
+	/*РЅР°СЃС‹С‰РµРЅРёСЏ */
 
 	if (p->GammaA < 0)
 		p->GammaA = 0;
@@ -610,7 +610,7 @@ void PWM_Module_Sin_Update(TPWM_Module *p) {
 
 }
 
-//! Функция ШИМ с раздельными фазами (для модели SRM)
+//! Р¤СѓРЅРєС†РёСЏ РЁРРњ СЃ СЂР°Р·РґРµР»СЊРЅС‹РјРё С„Р°Р·Р°РјРё (РґР»СЏ РјРѕРґРµР»Рё SRM)
 
 //! \memberof TPWM_Module
 void PWM_Module_Separate_Update(TPWM_Module *p) {
@@ -631,7 +631,7 @@ void PWM_Module_Separate_Update(TPWM_Module *p) {
 	p->GammaB = _IQmpy(p->k_pwm, PhasePtsB);
 	p->GammaC = _IQmpy(p->k_pwm, PhasePtsC);
 
-	/*насыщения */
+	/*РЅР°СЃС‹С‰РµРЅРёСЏ */
 
 	if (p->GammaA < 0)
 		p->GammaA = 0;
@@ -672,29 +672,29 @@ void PWM_Module_DC_Update(TPWM_Module *p)
 	else if (UbetaRef < _IQ(0))
 		UbetaRef = _IQ(0);
 
-	//данное преобразование даёт возможность отрабатывать напряжения в диапазоне -1 - 0 - +1 (в относительных единицах)
-	//Напряжение 1 - скважность (1/2 + 0.5) = 1, Напряжение 0 - скважность 0,5 и т.д.
-	gamma1_DC = -(UalphaRef >> 1) + _IQ(0.5); // (IQ), Приводим заданное напряжение к соответствующей скважности.
+	//РґР°РЅРЅРѕРµ РїСЂРµРѕР±СЂР°Р·РѕРІР°РЅРёРµ РґР°С‘С‚ РІРѕР·РјРѕР¶РЅРѕСЃС‚СЊ РѕС‚СЂР°Р±Р°С‚С‹РІР°С‚СЊ РЅР°РїСЂСЏР¶РµРЅРёСЏ РІ РґРёР°РїР°Р·РѕРЅРµ -1 - 0 - +1 (РІ РѕС‚РЅРѕСЃРёС‚РµР»СЊРЅС‹С… РµРґРёРЅРёС†Р°С…)
+	//РќР°РїСЂСЏР¶РµРЅРёРµ 1 - СЃРєРІР°Р¶РЅРѕСЃС‚СЊ (1/2 + 0.5) = 1, РќР°РїСЂСЏР¶РµРЅРёРµ 0 - СЃРєРІР°Р¶РЅРѕСЃС‚СЊ 0,5 Рё С‚.Рґ.
+	gamma1_DC = -(UalphaRef >> 1) + _IQ(0.5); // (IQ), РџСЂРёРІРѕРґРёРј Р·Р°РґР°РЅРЅРѕРµ РЅР°РїСЂСЏР¶РµРЅРёРµ Рє СЃРѕРѕС‚РІРµС‚СЃС‚РІСѓСЋС‰РµР№ СЃРєРІР°Р¶РЅРѕСЃС‚Рё.
 
-	//На низких частотах величина p->k_pwm большая, значит большой может быть и temp32.
-	//по-этому для расчётов целесообразно использовать формат iq16.
-	gamma1_DC = gamma1_DC >> 8; // (IQ16) переводим то, что выше, в iq16.
-	temp32 = _IQ16mpy(gamma1_DC, _IQ16(p->k_pwm)); // (IQ16) переводим скважность в величину для загрузки в регистр сравнения.
-	p->GammaA = temp32 >> 16; // (IQ0) Загружем целую часть в регистр сравнения.
-	p->GammaB = p->k_pwm - p->GammaA; // в регистре сравнения EPwm2 то же, что и в EPwm1.
+	//РќР° РЅРёР·РєРёС… С‡Р°СЃС‚РѕС‚Р°С… РІРµР»РёС‡РёРЅР° p->k_pwm Р±РѕР»СЊС€Р°СЏ, Р·РЅР°С‡РёС‚ Р±РѕР»СЊС€РѕР№ РјРѕР¶РµС‚ Р±С‹С‚СЊ Рё temp32.
+	//РїРѕ-СЌС‚РѕРјСѓ РґР»СЏ СЂР°СЃС‡С‘С‚РѕРІ С†РµР»РµСЃРѕРѕР±СЂР°Р·РЅРѕ РёСЃРїРѕР»СЊР·РѕРІР°С‚СЊ С„РѕСЂРјР°С‚ iq16.
+	gamma1_DC = gamma1_DC >> 8; // (IQ16) РїРµСЂРµРІРѕРґРёРј С‚Рѕ, С‡С‚Рѕ РІС‹С€Рµ, РІ iq16.
+	temp32 = _IQ16mpy(gamma1_DC, _IQ16(p->k_pwm)); // (IQ16) РїРµСЂРµРІРѕРґРёРј СЃРєРІР°Р¶РЅРѕСЃС‚СЊ РІ РІРµР»РёС‡РёРЅСѓ РґР»СЏ Р·Р°РіСЂСѓР·РєРё РІ СЂРµРіРёСЃС‚СЂ СЃСЂР°РІРЅРµРЅРёСЏ.
+	p->GammaA = temp32 >> 16; // (IQ0) Р—Р°РіСЂСѓР¶РµРј С†РµР»СѓСЋ С‡Р°СЃС‚СЊ РІ СЂРµРіРёСЃС‚СЂ СЃСЂР°РІРЅРµРЅРёСЏ.
+	p->GammaB = p->k_pwm - p->GammaA; // РІ СЂРµРіРёСЃС‚СЂРµ СЃСЂР°РІРЅРµРЅРёСЏ EPwm2 С‚Рѕ Р¶Рµ, С‡С‚Рѕ Рё РІ EPwm1.
 
-	//На низких частотах величина p->k_pwm большая, значит большой может быть и temp32.
-	//по-этому для расчётов целесообразно использовать формат iq16.
-	gamma2_DC = UbetaRef >> 8; // (IQ16) переводим то, что выше, в iq16.
-	temp32 = _IQ16mpy(gamma2_DC, _IQ16(p->k_pwm)); // (IQ16) переводим скважность в величину для загрузки в регистр сравнения.
-	p->GammaC = p->k_pwm - (temp32 >> 16); // (IQ0) Загружем целую часть в регистр сравнения.
+	//РќР° РЅРёР·РєРёС… С‡Р°СЃС‚РѕС‚Р°С… РІРµР»РёС‡РёРЅР° p->k_pwm Р±РѕР»СЊС€Р°СЏ, Р·РЅР°С‡РёС‚ Р±РѕР»СЊС€РѕР№ РјРѕР¶РµС‚ Р±С‹С‚СЊ Рё temp32.
+	//РїРѕ-СЌС‚РѕРјСѓ РґР»СЏ СЂР°СЃС‡С‘С‚РѕРІ С†РµР»РµСЃРѕРѕР±СЂР°Р·РЅРѕ РёСЃРїРѕР»СЊР·РѕРІР°С‚СЊ С„РѕСЂРјР°С‚ iq16.
+	gamma2_DC = UbetaRef >> 8; // (IQ16) РїРµСЂРµРІРѕРґРёРј С‚Рѕ, С‡С‚Рѕ РІС‹С€Рµ, РІ iq16.
+	temp32 = _IQ16mpy(gamma2_DC, _IQ16(p->k_pwm)); // (IQ16) РїРµСЂРµРІРѕРґРёРј СЃРєРІР°Р¶РЅРѕСЃС‚СЊ РІ РІРµР»РёС‡РёРЅСѓ РґР»СЏ Р·Р°РіСЂСѓР·РєРё РІ СЂРµРіРёСЃС‚СЂ СЃСЂР°РІРЅРµРЅРёСЏ.
+	p->GammaC = p->k_pwm - (temp32 >> 16); // (IQ0) Р—Р°РіСЂСѓР¶РµРј С†РµР»СѓСЋ С‡Р°СЃС‚СЊ РІ СЂРµРіРёСЃС‚СЂ СЃСЂР°РІРЅРµРЅРёСЏ.
 
 	NT_PWM0->CMPA_bit.CMPA = (Uint16) p->GammaA;
 	NT_PWM1->CMPA_bit.CMPA = (Uint16) p->GammaB;
 	NT_PWM2->CMPA_bit.CMPA = (Uint16) p->GammaC;
 }
 
-//! Функция ШИМ для начальной зарядки будстрепных конденсаторов инвертора
+//! Р¤СѓРЅРєС†РёСЏ РЁРРњ РґР»СЏ РЅР°С‡Р°Р»СЊРЅРѕР№ Р·Р°СЂСЏРґРєРё Р±СѓРґСЃС‚СЂРµРїРЅС‹С… РєРѕРЅРґРµРЅСЃР°С‚РѕСЂРѕРІ РёРЅРІРµСЂС‚РѕСЂР°
 
 //! \memberof TPWM_Module
 void PWM_Module_ChargingMode(TPWM_Module *p) {
@@ -711,9 +711,9 @@ void PWM_Module_ChargingMode(TPWM_Module *p) {
 	EINT;
 }
 
-//! Общая функция-обертка для расчета ШИМ
+//! РћР±С‰Р°СЏ С„СѓРЅРєС†РёСЏ-РѕР±РµСЂС‚РєР° РґР»СЏ СЂР°СЃС‡РµС‚Р° РЁРРњ
 
-//Вызывающает ту версию ШИМ (ту функцию), что выбрана в настройках.
+//Р’С‹Р·С‹РІР°СЋС‰Р°РµС‚ С‚Сѓ РІРµСЂСЃРёСЋ РЁРРњ (С‚Сѓ С„СѓРЅРєС†РёСЋ), С‡С‚Рѕ РІС‹Р±СЂР°РЅР° РІ РЅР°СЃС‚СЂРѕР№РєР°С….
 
 //! \memberof TPWM_Module
 void PWM_Module_Update(TPWM_Module *p) {
@@ -743,22 +743,22 @@ void PWM_Module_Update(TPWM_Module *p) {
 
 }
 
-//! Медленный расчет
+//! РњРµРґР»РµРЅРЅС‹Р№ СЂР°СЃС‡РµС‚
 
-//! Пересчитываются введенные пользователем величины
-//! Величина мертвого времени, частота ШИМ и т.п.
+//! РџРµСЂРµСЃС‡РёС‚С‹РІР°СЋС‚СЃСЏ РІРІРµРґРµРЅРЅС‹Рµ РїРѕР»СЊР·РѕРІР°С‚РµР»РµРј РІРµР»РёС‡РёРЅС‹
+//! Р’РµР»РёС‡РёРЅР° РјРµСЂС‚РІРѕРіРѕ РІСЂРµРјРµРЅРё, С‡Р°СЃС‚РѕС‚Р° РЁРРњ Рё С‚.Рї.
 
 //! \memberof TPWM_Module
 void PWM_Module_SlowCalc(TPWM_Module *p) {
 	Uint16 tmp;
-	//проверка ограничений величины мертвого времени
+	//РїСЂРѕРІРµСЂРєР° РѕРіСЂР°РЅРёС‡РµРЅРёР№ РІРµР»РёС‡РёРЅС‹ РјРµСЂС‚РІРѕРіРѕ РІСЂРµРјРµРЅРё
 	if (p->DeadBand < DEAD_BAND_MIN)
 		p->DeadBand = DEAD_BAND_MIN;
 	if (p->DeadBand > DEAD_BAND_MAX)
 		p->DeadBand = DEAD_BAND_MAX;
-	//пересчет МВ из формата IQ в мкс в такты таймера на 100мГц
+	//РїРµСЂРµСЃС‡РµС‚ РњР’ РёР· С„РѕСЂРјР°С‚Р° IQ РІ РјРєСЃ РІ С‚Р°РєС‚С‹ С‚Р°Р№РјРµСЂР° РЅР° 100РјР“С†
 	NT_PWM0->DBRED = _IQ4mpy(_IQ4(100), p->DeadBand >> 20) >> 4;
-	//во все ключи то же самое
+	//РІРѕ РІСЃРµ РєР»СЋС‡Рё С‚Рѕ Р¶Рµ СЃР°РјРѕРµ
 	NT_PWM0->DBFED = NT_PWM0->DBRED;
 
 	NT_PWM1->DBFED = NT_PWM0->DBRED;
@@ -773,47 +773,47 @@ void PWM_Module_SlowCalc(TPWM_Module *p) {
 	NT_PWM0->FWDTH = _IQ4mpy(_IQ4(100), p->MinGammaLimit >> 20) >> 4;
 	NT_PWM1->FWDTH = NT_PWM0->FWDTH;
 	NT_PWM2->FWDTH = NT_PWM0->FWDTH;
-	//частота ШИМ. Смена "на лету".
-	if (p->FreqPrev != p->Frequency) { //сменили частоту
-		DINT; //запрещение прерываний
-		//проверка максимума/минимума
+	//С‡Р°СЃС‚РѕС‚Р° РЁРРњ. РЎРјРµРЅР° "РЅР° Р»РµС‚Сѓ".
+	if (p->FreqPrev != p->Frequency) { //СЃРјРµРЅРёР»Рё С‡Р°СЃС‚РѕС‚Сѓ
+		DINT; //Р·Р°РїСЂРµС‰РµРЅРёРµ РїСЂРµСЂС‹РІР°РЅРёР№
+		//РїСЂРѕРІРµСЂРєР° РјР°РєСЃРёРјСѓРјР°/РјРёРЅРёРјСѓРјР°
 		if (p->Frequency < PWM_FREQ_MIN)
 			p->Frequency = PWM_FREQ_MIN;
 		if (p->Frequency > PWM_FREQ_MAX)
 			p->Frequency = PWM_FREQ_MAX;
-		//изменяем период
-		p->k_pwm = _IQ10div(_IQ10(CORE_CLK/1000.0), p->Frequency << 1) >> 10; //период
+		//РёР·РјРµРЅСЏРµРј РїРµСЂРёРѕРґ
+		p->k_pwm = _IQ10div(_IQ10(CORE_CLK/1000.0), p->Frequency << 1) >> 10; //РїРµСЂРёРѕРґ
 		NT_PWM0->TBPRD = p->k_pwm;
-		//для всех стоек то же самое
+		//РґР»СЏ РІСЃРµС… СЃС‚РѕРµРє С‚Рѕ Р¶Рµ СЃР°РјРѕРµ
 		NT_PWM1->TBPRD = p->k_pwm;
 		NT_PWM2->TBPRD = p->k_pwm;
-		NT_PWM3->TBPRD = p->k_pwm;        //таймер АЦП
+		NT_PWM3->TBPRD = p->k_pwm;        //С‚Р°Р№РјРµСЂ РђР¦Рџ
 
-		//посчитаем длину выборки для усреднения токов, исходя из частоты ШИМ
-		adc.IASampleLength = (p->Frequency >> 10) / 10;	//Частота ШИМ в формате 22.10, приводим к инту и делим на 10 - частоту расчета системы управления
-		if (adc.IASampleLength > 4)	//не более 4 точек
+		//РїРѕСЃС‡РёС‚Р°РµРј РґР»РёРЅСѓ РІС‹Р±РѕСЂРєРё РґР»СЏ СѓСЃСЂРµРґРЅРµРЅРёСЏ С‚РѕРєРѕРІ, РёСЃС…РѕРґСЏ РёР· С‡Р°СЃС‚РѕС‚С‹ РЁРРњ
+		adc.IASampleLength = (p->Frequency >> 10) / 10;	//Р§Р°СЃС‚РѕС‚Р° РЁРРњ РІ С„РѕСЂРјР°С‚Рµ 22.10, РїСЂРёРІРѕРґРёРј Рє РёРЅС‚Сѓ Рё РґРµР»РёРј РЅР° 10 - С‡Р°СЃС‚РѕС‚Сѓ СЂР°СЃС‡РµС‚Р° СЃРёСЃС‚РµРјС‹ СѓРїСЂР°РІР»РµРЅРёСЏ
+		if (adc.IASampleLength > 4)	//РЅРµ Р±РѕР»РµРµ 4 С‚РѕС‡РµРє
 			adc.IASampleLength = 4;
-		if (adc.IASampleLength < 1)	//не менее 1 точки
+		if (adc.IASampleLength < 1)	//РЅРµ РјРµРЅРµРµ 1 С‚РѕС‡РєРё
 			adc.IASampleLength = 1;
 		adc.IBSampleLength = adc.IASampleLength;
 		adc.ICSampleLength = adc.IASampleLength;
 		adc.UdcSampleLength = adc.IASampleLength;
 
-		p->FreqPrev = p->Frequency; //предыдущая частота
+		p->FreqPrev = p->Frequency; //РїСЂРµРґС‹РґСѓС‰Р°СЏ С‡Р°СЃС‚РѕС‚Р°
 		EINT;
 	}
 
-	NT_PWM3->TBPHS_bit.TBPHS = 1;//подбор сдвига для запуска АЦП: 1 - ровно на нуле таймера
+	NT_PWM3->TBPHS_bit.TBPHS = 1;//РїРѕРґР±РѕСЂ СЃРґРІРёРіР° РґР»СЏ Р·Р°РїСѓСЃРєР° РђР¦Рџ: 1 - СЂРѕРІРЅРѕ РЅР° РЅСѓР»Рµ С‚Р°Р№РјРµСЂР°
 
 }
 
-//! Функция включения ШИМ (включение инвертора)
+//! Р¤СѓРЅРєС†РёСЏ РІРєР»СЋС‡РµРЅРёСЏ РЁРРњ (РІРєР»СЋС‡РµРЅРёРµ РёРЅРІРµСЂС‚РѕСЂР°)
 
 //! \memberof TPWM_Module
 void PWM_Module_On(TPWM_Module *p) {
-	p->Enabled = 1;	//флаг "включено"
+	p->Enabled = 1;	//С„Р»Р°Рі "РІРєР»СЋС‡РµРЅРѕ"
 
-	// Снимаем принудительную установку выходов
+	// РЎРЅРёРјР°РµРј РїСЂРёРЅСѓРґРёС‚РµР»СЊРЅСѓСЋ СѓСЃС‚Р°РЅРѕРІРєСѓ РІС‹С…РѕРґРѕРІ
     NT_PWM0->AQCSFRC = 0;
     NT_PWM1->AQCSFRC = 0;
     NT_PWM2->AQCSFRC = 0;
@@ -821,17 +821,17 @@ void PWM_Module_On(TPWM_Module *p) {
 
 }
 
-//! Функция выключения ШИМ (выключение инвертора)
+//! Р¤СѓРЅРєС†РёСЏ РІС‹РєР»СЋС‡РµРЅРёСЏ РЁРРњ (РІС‹РєР»СЋС‡РµРЅРёРµ РёРЅРІРµСЂС‚РѕСЂР°)
 
 //! \memberof TPWM_Module
 void PWM_Module_Off(TPWM_Module *p) {
 
-	p->Enabled = 0;	//флаг "выключено"
-	// Принудительно обнулим все ножки
+	p->Enabled = 0;	//С„Р»Р°Рі "РІС‹РєР»СЋС‡РµРЅРѕ"
+	// РџСЂРёРЅСѓРґРёС‚РµР»СЊРЅРѕ РѕР±РЅСѓР»РёРј РІСЃРµ РЅРѕР¶РєРё
 
-	NT_PWM0->AQCSFRC = 9;  // 0x1 - 0 на выходе PWMxA, 0x8 - 1 на выходе PWMxB
-    NT_PWM1->AQCSFRC = 9;  // 0x1 - 0 на выходе PWMxA, 0x8 - 1 на выходе PWMxB
-    NT_PWM2->AQCSFRC = 9;  // 0x1 - 0 на выходе PWMxA, 0x8 - 1 на выходе PWMxB
+	NT_PWM0->AQCSFRC = 9;  // 0x1 - 0 РЅР° РІС‹С…РѕРґРµ PWMxA, 0x8 - 1 РЅР° РІС‹С…РѕРґРµ PWMxB
+    NT_PWM1->AQCSFRC = 9;  // 0x1 - 0 РЅР° РІС‹С…РѕРґРµ PWMxA, 0x8 - 1 РЅР° РІС‹С…РѕРґРµ PWMxB
+    NT_PWM2->AQCSFRC = 9;  // 0x1 - 0 РЅР° РІС‹С…РѕРґРµ PWMxA, 0x8 - 1 РЅР° РІС‹С…РѕРґРµ PWMxB
 	GPIO_INV_OFF;
 
 }

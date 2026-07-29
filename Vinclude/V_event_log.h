@@ -1,5 +1,5 @@
 /*!
-     Copyright 2017 	АО "НИИЭТ" и ООО "НПФ ВЕКТОР"
+     Copyright 2017 	РђРћ "РќРРР­Рў" Рё РћРћРћ "РќРџР¤ Р’Р•РљРўРћР "
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -14,8 +14,8 @@
    limitations under the License.
 
  \file      V_event_log.h
- \brief     Сохранение событий и времени возникновениЯ в ЭнОЗУ
- \author    ООО "НПФ Вектор". http://motorcontrol.ru
+ \brief     РЎРѕС…СЂР°РЅРµРЅРёРµ СЃРѕР±С‹С‚РёР№ Рё РІСЂРµРјРµРЅРё РІРѕР·РЅРёРєРЅРѕРІРµРЅРёРЇ РІ Р­РЅРћР—РЈ
+ \author    РћРћРћ "РќРџР¤ Р’РµРєС‚РѕСЂ". http://motorcontrol.ru
  \version   v 1.0 2009_01_20
 
 */
@@ -27,14 +27,14 @@ extern "C"
 {
 #endif
 
-//#define LOG_BUF_SIZE 50  	//сохранЯем последние 50 событий
-#define LOG_FIFO_SIZE 10	//размер фифо длЯ буферированиЯ сообщений прежде чем они будут записаны в SPI
-//#define LOG_SPI_START_ADDR 3000						//начальный адрес в SPI
+//#define LOG_BUF_SIZE 50  	//СЃРѕС…СЂР°РЅРЇРµРј РїРѕСЃР»РµРґРЅРёРµ 50 СЃРѕР±С‹С‚РёР№
+#define LOG_FIFO_SIZE 10	//СЂР°Р·РјРµСЂ С„РёС„Рѕ РґР»РЇ Р±СѓС„РµСЂРёСЂРѕРІР°РЅРёРЇ СЃРѕРѕР±С‰РµРЅРёР№ РїСЂРµР¶РґРµ С‡РµРј РѕРЅРё Р±СѓРґСѓС‚ Р·Р°РїРёСЃР°РЅС‹ РІ SPI
+//#define LOG_SPI_START_ADDR 3000						//РЅР°С‡Р°Р»СЊРЅС‹Р№ Р°РґСЂРµСЃ РІ SPI
 
-#define LOG_NUM_LENGTH 2		//длина номера событиЯ (16бит) - 2байта
-#define LOG_TIME_LENGTH 4		//длина времени событиЯ (32бит) - 4байта
-#define LOG_CODE_LENGTH 2		//длина кода событиЯ (16бит) - 2байта
-#define LOG_LENGTH LOG_NUM_LENGTH + LOG_TIME_LENGTH + LOG_CODE_LENGTH	//общаЯ длина записи ошибки
+#define LOG_NUM_LENGTH 2		//РґР»РёРЅР° РЅРѕРјРµСЂР° СЃРѕР±С‹С‚РёРЇ (16Р±РёС‚) - 2Р±Р°Р№С‚Р°
+#define LOG_TIME_LENGTH 4		//РґР»РёРЅР° РІСЂРµРјРµРЅРё СЃРѕР±С‹С‚РёРЇ (32Р±РёС‚) - 4Р±Р°Р№С‚Р°
+#define LOG_CODE_LENGTH 2		//РґР»РёРЅР° РєРѕРґР° СЃРѕР±С‹С‚РёРЇ (16Р±РёС‚) - 2Р±Р°Р№С‚Р°
+#define LOG_LENGTH LOG_NUM_LENGTH + LOG_TIME_LENGTH + LOG_CODE_LENGTH	//РѕР±С‰Р°РЇ РґР»РёРЅР° Р·Р°РїРёСЃРё РѕС€РёР±РєРё
 
 #define EVENT_FIFO_SUCCESSFUL 0
 #define EVENT_FIFO_EMPTY 1
@@ -82,8 +82,8 @@ struct SLogger
 
     Uint32* time_ptr;
 
-    Uint16 bit_fault_written[4];	//флаги записанных аварий
-    Uint16 WriteCounter;		//счетчик битов для записи аварий в банк
+    Uint16 bit_fault_written[4];	//С„Р»Р°РіРё Р·Р°РїРёСЃР°РЅРЅС‹С… Р°РІР°СЂРёР№
+    Uint16 WriteCounter;		//СЃС‡РµС‚С‡РёРє Р±РёС‚РѕРІ РґР»СЏ Р·Р°РїРёСЃРё Р°РІР°СЂРёР№ РІ Р±Р°РЅРє
     Uint16 mainDCDCwritten;
     Uint16 DCDC3phwritten;
     Uint16 mcwritten;
@@ -100,7 +100,7 @@ struct SLogger
 
 typedef volatile struct SLogger TLogger;
 
-//т.к. часов реального времени нет (МК 30.1), в качестве временнОго маркера аварий используется время включенного состояния
+//С‚.Рє. С‡Р°СЃРѕРІ СЂРµР°Р»СЊРЅРѕРіРѕ РІСЂРµРјРµРЅРё РЅРµС‚ (РњРљ 30.1), РІ РєР°С‡РµСЃС‚РІРµ РІСЂРµРјРµРЅРЅРћРіРѕ РјР°СЂРєРµСЂР° Р°РІР°СЂРёР№ РёСЃРїРѕР»СЊР·СѓРµС‚СЃСЏ РІСЂРµРјСЏ РІРєР»СЋС‡РµРЅРЅРѕРіРѕ СЃРѕСЃС‚РѕСЏРЅРёСЏ
 #define LOGGER_DEFAULTS { .SPI_buf_size = 1,\
     .time_ptr = (Uint32*)&RTCclock.packed_time,\
     .bit_fault_written = {0,0,0,0},\
