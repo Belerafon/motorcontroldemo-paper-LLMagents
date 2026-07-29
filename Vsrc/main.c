@@ -32,6 +32,7 @@ TPark park = PARK_DEFAULTS; //!<Координатные преобразова�
 TIPark ipark = IPARK_DEFAULTS; //!<Обратные координатные преобразования
 TPidReg3 pid_id = PIDREG3_DEFAULTS; //!<Рег. тока по оси d
 TPidReg3 pid_iq = PIDREG3_DEFAULTS; //!<Рег. тока по оси q
+TCurrentDecoupling current_decoupling = CURRENT_DECOUPLING_DEFAULTS; //!<Компенсация перекрестных связей Id/Iq
 TPidReg3 pid_ia = PIDREG3_DEFAULTS; //!<Рег. тока якоря ДПТ
 TPidReg3 pid_spd = PIDREG3_DEFAULTS; //!<Рег. скорости
 TPidReg3_pos pid_pos = PIDREG3_DEFAULTS_POS; //!<Рег. положения

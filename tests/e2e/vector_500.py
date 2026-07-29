@@ -6,6 +6,7 @@ from pathlib import Path
 
 from motor_debug_core.datalogger import Channel
 from motor_debug_core.project import ProjectPaths
+from motor_debug_core.values import FixedPoint
 
 from .artifacts import plot_vector_500, write_csv, write_json
 from .common import (
@@ -68,6 +69,7 @@ def run(args: Namespace, paths: ProjectPaths) -> None:
         ramp_time = session.read_engineering("rmp.T", unit="s")
         speed_controller = session.read_controller("pid_spd")
         hardware = session.hardware()
+        iq24 = FixedPoint(q=24)
         channels = [
             Channel(
                 "speed_rpm",
@@ -98,6 +100,22 @@ def run(args: Namespace, paths: ProjectPaths) -> None:
                 "refs.speed_ref", TARGET_SPEED_RPM, unit="rpm"
             ) as original_speed_ref_raw:
                 before = session.verify_mode(5)
+                decoupling = {
+                    "enabled": session.target.read_u16(
+                        "current_decoupling.enabled"
+                    ),
+                    "parameters_valid": session.target.read_u16(
+                        "current_decoupling.parameters_valid"
+                    ),
+                    "gain": iq24.decode(
+                        session.target.read_u32("current_decoupling.gain")
+                    ),
+                    "cross_coefficient": iq24.decode(
+                        session.target.read_u32(
+                            "current_decoupling.cross_coefficient"
+                        )
+                    ),
+                }
                 capture = session.capture_triggered(
                     channels,
                     divider=args.sample_divider,
@@ -138,6 +156,16 @@ def run(args: Namespace, paths: ProjectPaths) -> None:
         metrics["window_s"]
         >= max(args.max_time_to_95_s, args.max_settling_s) + 0.1
     )
+    metrics["criteria"]["current_decoupling_enabled"] = (
+        decoupling["enabled"] == 1
+    )
+    metrics["criteria"]["current_decoupling_parameters_valid"] = (
+        decoupling["parameters_valid"] == 1
+        and decoupling["cross_coefficient"] > 0
+    )
+    metrics["criteria"]["current_decoupling_nominal_gain"] = (
+        abs(decoupling["gain"] - 1.0) <= 1.0 / (1 << 24)
+    )
     metrics["passed"] = all(metrics["criteria"].values())
 
     csv_path = output / "capture.csv"
@@ -158,6 +186,7 @@ def run(args: Namespace, paths: ProjectPaths) -> None:
             "trigger_timeout_s": args.timeout,
             "sample_divider": args.sample_divider,
             "speed_controller": speed_controller,
+            "current_decoupling": decoupling,
             "original_run_mode_raw": original_run_mode_raw,
             "original_speed_reference_raw": original_speed_ref_raw,
         },

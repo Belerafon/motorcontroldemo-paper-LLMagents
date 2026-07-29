@@ -247,6 +247,7 @@ void SM_Sys_Fast_Calc(TSM_Sys *p) {
 void SM_Sys_ms_Calc(TSM_Sys* p) {
 	sm_cmd_logic.ms_calc(&sm_cmd_logic); //Обработка команд управления
 	sm_net.ms_calc(&sm_net); //обертка для вызова коммуникационных драйверов
+	sm_ctrl.ms_calc(&sm_ctrl); //Параметры и медленные расчеты структур управления
 	adc.ms_calc(&adc); //АЦП
 	sm_prot.ms_calc(&sm_prot); //Защиты
 	AutoOffset.ms_calc(&AutoOffset); //авто смещение некоторых каналов АЦП

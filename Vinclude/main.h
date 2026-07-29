@@ -84,12 +84,14 @@ extern "C" {
 #include "V_fifo.h"
 #include "V_usblib.h"
 #include "V_Fan.h"
+#include "V_current_decoupling.h"
 
 extern TClarke 		clarke;
 extern TPark 		park;
 extern TIPark 		ipark;
 extern TPidReg3 	pid_id;
 extern TPidReg3 	pid_iq;
+extern TCurrentDecoupling current_decoupling;
 extern TPidReg3 	pid_ia;
 extern TPidReg3 	pid_spd;
 extern TPidReg3_pos 	pid_pos;

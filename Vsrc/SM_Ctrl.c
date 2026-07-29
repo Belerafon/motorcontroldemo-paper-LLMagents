@@ -27,6 +27,34 @@
 #include "V_IQmath.h"
 #include "main.h"
 
+static void SM_Ctrl_ResetCurrentDecoupling(void) {
+	CurrentDecoupling_Reset(&current_decoupling);
+	pid_id.saterr_reg3Add = 0;
+	pid_iq.saterr_reg3Add = 0;
+	Debug1 = 0;
+	Debug2 = 0;
+	Debug3 = 0;
+	Debug4 = 0;
+}
+
+static void SM_Ctrl_ApplyCurrentDecoupling(long electrical_speed) {
+	CurrentDecoupling_Calc(&current_decoupling, electrical_speed,
+			park.de, park.qe, pid_id.pid_out_reg3, pid_iq.pid_out_reg3,
+			pwm.U_lim);
+
+	/* Ошибка внешнего ограничения учитывается интеграторами на следующем такте. */
+	pid_id.saterr_reg3Add = current_decoupling.id_saturation_error;
+	pid_iq.saterr_reg3Add = current_decoupling.iq_saturation_error;
+
+	/* Диагностика в свободных read-only переменных словаря CANopen. */
+	Debug1 = current_decoupling.ud_feedforward;
+	Debug2 = current_decoupling.uq_feedforward;
+	Debug3 = current_decoupling.enabled && current_decoupling.parameters_valid;
+	Debug4 = current_decoupling.voltage_limited;
+
+	ipark.de = current_decoupling.ud_output;
+	ipark.qe = current_decoupling.uq_output;
+}
 
 //!Инициализация
 //!Всякие обнуления
@@ -34,6 +62,19 @@
 void SM_Ctrl_Init(TSM_Ctrl *p) {
 	p->state_prev = 0xff;
 	p->state = 0x00;
+
+	CurrentDecoupling_Init(&current_decoupling);
+	CurrentDecoupling_UpdateParameters(&current_decoupling, drv_params.Ls,
+			drv_params.freq_nom, drv_params.I_nom, drv_params.U_nom);
+
+	/*
+	 * Свободные отладочные переменные используются как временные ручки A/B.
+	 * Присваивание выполняется после загрузки CANopen, поэтому каждый сброс
+	 * гарантированно начинает работу с безопасными значениями.
+	 */
+	DebugW3 = 1;
+	DebugW4 = _IQ(1.0);
+	SM_Ctrl_ResetCurrentDecoupling();
 }
 
 //!Фоновый расчет
@@ -47,7 +88,15 @@ void SM_Ctrl_Slow_Calc(TSM_Ctrl *p) {
 
 //! \memberof TSM_Ctrl
 void SM_Ctrl_ms_Calc(TSM_Ctrl *p) {
+	current_decoupling.enabled = (DebugW3 == 1);
+	if (DebugW4 < 0)
+		DebugW4 = 0;
+	if (DebugW4 > CURRENT_DECOUPLING_GAIN_MAX)
+		DebugW4 = CURRENT_DECOUPLING_GAIN_MAX;
+	current_decoupling.gain = DebugW4;
 
+	CurrentDecoupling_UpdateParameters(&current_decoupling, drv_params.Ls,
+			drv_params.freq_nom, drv_params.I_nom, drv_params.U_nom);
 }
 
 //!Быстрый расчет
@@ -114,6 +163,7 @@ void SM_Ctrl_Fast_Calc(TSM_Ctrl *p) {
 		pwm.update(&pwm);
 		pid_id.reset(&pid_id);
 		pid_iq.reset(&pid_iq);
+		SM_Ctrl_ResetCurrentDecoupling();
 		pid_ia.reset(&pid_ia);
 		pid_spd.reset(&pid_spd);
 		pid_pos.reset(&pid_pos);
@@ -442,10 +492,9 @@ void SM_Ctrl_Fast_Calc(TSM_Ctrl *p) {
 			pid_id.pid_fdb_reg3 = park.de; //обратная связь рег. тока оси d - вычисленный ток по фазе d
 			pid_id.calc(&pid_id); //расчет регулятора тока оси d
 
-			//Обратный поворот на угол refs.theta_elec для 
+			//Обратный поворот на угол refs.theta_elec для
 			//выходов регуляторов тока (напряжений по осям d и q)
-			ipark.de = pid_id.pid_out_reg3;
-			ipark.qe = pid_iq.pid_out_reg3;
+			SM_Ctrl_ApplyCurrentDecoupling(cur_par.speed);
 			ipark.ang = refs.theta_elec;
 			ipark.calc(&ipark);            //расчет преобразования координат
 
@@ -584,8 +633,7 @@ void SM_Ctrl_Fast_Calc(TSM_Ctrl *p) {
 
 			//Обратный поворот на угол refs.theta_elec для
 			//выходов регуляторов тока (напряжений по осям d и q)
-			ipark.de = pid_id.pid_out_reg3;
-			ipark.qe = pid_iq.pid_out_reg3;
+			SM_Ctrl_ApplyCurrentDecoupling(cur_par.speed);
 			ipark.ang = posspeedEqep.theta_elec;
 			ipark.calc(&ipark);            //расчет преобразования координат
 
