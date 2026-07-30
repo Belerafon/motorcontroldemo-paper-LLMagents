@@ -4,7 +4,11 @@ import math
 import unittest
 from dataclasses import dataclass
 
-from tests.e2e.metrics import analyze_current_mode4, analyze_vector_500
+from tests.e2e.metrics import (
+    analyze_current_mode4,
+    analyze_field_weakening,
+    analyze_vector_500,
+)
 
 
 @dataclass(frozen=True)
@@ -98,6 +102,60 @@ class Vector500MetricsTests(unittest.TestCase):
 
         self.assertFalse(metrics["passed"])
         self.assertFalse(metrics["criteria"]["overshoot"])
+
+
+class FieldWeakeningMetricsTests(unittest.TestCase):
+    @staticmethod
+    def samples(*, negative_id: bool = True) -> list[SyntheticSample]:
+        result = []
+        for number in range(3001):
+            time_s = number * 0.001
+            speed = 750.0 * (1.0 - math.exp(-time_s / 0.35))
+            activation = max(0.0, min(1.0, (speed - 400.0) / 150.0))
+            id_current = -0.35 * activation if negative_id else 0.0
+            iq_current = 0.75 * math.exp(-time_s / 0.8) + 0.08
+            voltage = 0.80 + 0.04 * activation
+            result.append(
+                SyntheticSample(
+                    number,
+                    time_s,
+                    {
+                        "speed_rpm": speed,
+                        "id_a": id_current,
+                        "iq_a": iq_current,
+                        "voltage_demand_pu": voltage,
+                    },
+                )
+            )
+        return result
+
+    def test_automatic_negative_id_above_base_speed_passes(self) -> None:
+        metrics = analyze_field_weakening(
+            self.samples(),
+            target_speed_rpm=750.0,
+            nominal_speed_rpm=500.0,
+            protection_current_a=5.0,
+            voltage_limit_pu=0.866,
+        )
+
+        self.assertTrue(metrics["passed"])
+        self.assertLess(metrics["minimum_id_a"], -0.05)
+        self.assertGreater(
+            metrics["field_weakening_activation_speed_rpm"],
+            350.0,
+        )
+
+    def test_missing_negative_id_fails_acceptance(self) -> None:
+        metrics = analyze_field_weakening(
+            self.samples(negative_id=False),
+            target_speed_rpm=750.0,
+            nominal_speed_rpm=500.0,
+            protection_current_a=5.0,
+            voltage_limit_pu=0.866,
+        )
+
+        self.assertFalse(metrics["passed"])
+        self.assertFalse(metrics["criteria"]["negative_id_activated"])
 
 
 if __name__ == "__main__":

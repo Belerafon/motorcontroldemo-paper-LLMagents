@@ -128,3 +128,64 @@ def plot_vector_500(path: Path, samples: list[Sample]) -> None:
     current_axis.legend()
     figure.savefig(path, dpi=170)
     plt.close(figure)
+
+
+def plot_field_weakening(
+    path: Path,
+    samples: list[Sample],
+    *,
+    target_speed_rpm: float,
+    voltage_limit_pu: float,
+) -> None:
+    import matplotlib.pyplot as plt
+
+    time_s = [sample.time_s for sample in samples]
+    plt.style.use("seaborn-v0_8-whitegrid")
+    figure, (speed_axis, current_axis, voltage_axis) = plt.subplots(
+        3, 1, figsize=(11, 9), sharex=True, constrained_layout=True
+    )
+    speed_axis.plot(
+        time_s,
+        [s.values["speed_rpm"] for s in samples],
+        label="Measured speed",
+    )
+    speed_axis.axhline(
+        target_speed_rpm,
+        color="tab:orange",
+        linestyle="--",
+        label="Speed command",
+    )
+    speed_axis.set_title("Automatic field weakening above nominal speed")
+    speed_axis.set_ylabel("Speed, rpm")
+    speed_axis.legend()
+
+    current_axis.plot(
+        time_s,
+        [s.values["id_a"] for s in samples],
+        label="Measured Id",
+    )
+    current_axis.plot(
+        time_s,
+        [s.values["iq_a"] for s in samples],
+        label="Measured Iq",
+    )
+    current_axis.axhline(0.0, color="gray", linewidth=0.8)
+    current_axis.set_ylabel("Current, A")
+    current_axis.legend()
+
+    voltage_axis.plot(
+        time_s,
+        [s.values["voltage_demand_pu"] for s in samples],
+        label="Voltage demand",
+    )
+    voltage_axis.axhline(
+        voltage_limit_pu,
+        color="tab:red",
+        linestyle="--",
+        label="PWM voltage limit",
+    )
+    voltage_axis.set_xlabel("Time, s")
+    voltage_axis.set_ylabel("Voltage, pu")
+    voltage_axis.legend()
+    figure.savefig(path, dpi=170)
+    plt.close(figure)

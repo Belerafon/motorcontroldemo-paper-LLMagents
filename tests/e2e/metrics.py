@@ -343,3 +343,113 @@ def analyze_vector_500(
     metrics["criteria"] = criteria
     metrics["passed"] = all(criteria.values())
     return metrics
+
+
+def analyze_field_weakening(
+    samples: Sequence[Any],
+    *,
+    target_speed_rpm: float,
+    nominal_speed_rpm: float,
+    protection_current_a: float,
+    voltage_limit_pu: float,
+    max_time_to_95_s: float = 3.0,
+    max_steady_speed_error_percent: float = 5.0,
+    min_negative_id_a: float = 0.05,
+    max_current_margin_percent: float = 5.0,
+    max_voltage_margin_percent: float = 8.0,
+) -> dict[str, Any]:
+    time_s = _times(samples)
+    speed = _series(samples, "speed_rpm")
+    id_actual = _series(samples, "id_a")
+    iq_actual = _series(samples, "iq_a")
+    voltage = _series(samples, "voltage_demand_pu")
+    period = _sample_period(time_s)
+    tail_start = _tail_start(len(samples))
+    i95 = _first_crossing(speed, target_speed_rpm, 0.95, 0)
+    steady_speed = _mean(speed[tail_start:])
+    steady_speed_error = abs(steady_speed - target_speed_rpm)
+    steady_speed_error_percent = (
+        steady_speed_error / abs(target_speed_rpm) * 100.0
+    )
+    total_current = [
+        math.hypot(id_value, iq_value)
+        for id_value, iq_value in zip(id_actual, iq_actual)
+    ]
+    activation_index = next(
+        (
+            index
+            for index, id_value in enumerate(id_actual)
+            if id_value <= -min_negative_id_a
+        ),
+        None,
+    )
+    allowed_current = abs(protection_current_a) * (
+        1.0 + max_current_margin_percent / 100.0
+    )
+    allowed_voltage = abs(voltage_limit_pu) * (
+        1.0 + max_voltage_margin_percent / 100.0
+    )
+    min_id = min(id_actual)
+    peak_current = max(total_current)
+    steady_voltage = _mean(voltage[tail_start:])
+    metrics: dict[str, Any] = {
+        "samples": len(samples),
+        "sample_period_s": period,
+        "window_s": float(time_s[-1] - time_s[0]),
+        "target_speed_rpm": target_speed_rpm,
+        "nominal_speed_rpm": nominal_speed_rpm,
+        "steady_speed_rpm": steady_speed,
+        "steady_speed_error_rpm": steady_speed_error,
+        "steady_speed_error_percent": steady_speed_error_percent,
+        "time_to_95_percent_s": (
+            None if i95 is None else float(time_s[i95] - time_s[0])
+        ),
+        "minimum_id_a": min_id,
+        "steady_id_a": _mean(id_actual[tail_start:]),
+        "peak_abs_iq_a": max(abs(value) for value in iq_actual),
+        "peak_total_current_a": peak_current,
+        "field_weakening_activation_speed_rpm": (
+            None if activation_index is None else speed[activation_index]
+        ),
+        "peak_voltage_demand_pu": max(voltage),
+        "steady_voltage_demand_pu": steady_voltage,
+    }
+    criteria = {
+        "enough_samples": len(samples) >= 64,
+        "command_above_nominal_speed": (
+            abs(target_speed_rpm) > abs(nominal_speed_rpm)
+        ),
+        "reached_95_percent": (
+            metrics["time_to_95_percent_s"] is not None
+            and metrics["time_to_95_percent_s"] <= max_time_to_95_s
+        ),
+        "steady_speed_error": (
+            steady_speed_error_percent <= max_steady_speed_error_percent
+        ),
+        "negative_id_activated": min_id <= -min_negative_id_a,
+        "activation_occurs_at_high_speed": (
+            activation_index is not None
+            and abs(speed[activation_index]) >= 0.70 * abs(nominal_speed_rpm)
+        ),
+        "total_current_within_protection": (
+            protection_current_a > 0 and peak_current <= allowed_current
+        ),
+        "steady_voltage_controlled": steady_voltage <= allowed_voltage,
+        "voltage_demand_reached_weakening_region": (
+            max(voltage) >= 0.90 * abs(voltage_limit_pu)
+        ),
+    }
+    metrics["limits"] = {
+        "max_time_to_95_s": max_time_to_95_s,
+        "max_steady_speed_error_percent": max_steady_speed_error_percent,
+        "min_negative_id_a": min_negative_id_a,
+        "protection_current_a": protection_current_a,
+        "max_current_margin_percent": max_current_margin_percent,
+        "allowed_peak_current_a": allowed_current,
+        "voltage_limit_pu": voltage_limit_pu,
+        "max_voltage_margin_percent": max_voltage_margin_percent,
+        "allowed_steady_voltage_pu": allowed_voltage,
+    }
+    metrics["criteria"] = criteria
+    metrics["passed"] = all(criteria.values())
+    return metrics
