@@ -14,7 +14,7 @@ description: Сборка, прошивка, настройка и отладк�
 Запускай:
 
 ```powershell
-python .codex\skills\motorcontrol-demo\scripts\motor_debug.py build
+python .opencode\skills\motorcontrol-demo\scripts\motor_debug.py build
 ```
 
 Сценарий сборки напрямую вызывает репозиторный `Makefile` с инструментами
@@ -39,7 +39,7 @@ ARM GCC из комплекта VectorIDE и не запускает Eclipse. И
 Запускай:
 
 ```powershell
-python .codex\skills\motorcontrol-demo\scripts\motor_debug.py flash
+python .opencode\skills\motorcontrol-demo\scripts\motor_debug.py flash
 ```
 
 Не запускай отдельный пробный сеанс OpenOCD непосредственно перед прошивкой.
@@ -58,7 +58,7 @@ python .codex\skills\motorcontrol-demo\scripts\motor_debug.py flash
 Запускай диагностику только для чтения:
 
 ```powershell
-python .codex\skills\motorcontrol-demo\scripts\motor_debug.py status
+python .opencode\skills\motorcontrol-demo\scripts\motor_debug.py status
 ```
 
 Команда сбрасывает и запускает контроллер, затем без остановки ядра читает
@@ -178,7 +178,7 @@ python .codex\skills\motorcontrol-demo\scripts\motor_debug.py status
 Новое простое измерение начинай с:
 
 ```powershell
-python .codex\skills\motorcontrol-demo\scripts\basic_dlog_capture.py --help
+python .opencode\skills\motorcontrol-demo\scripts\basic_dlog_capture.py --help
 ```
 
 `basic_dlog_capture.py` намеренно ограничен безопасным сбором и исходным CSV.

@@ -7,7 +7,7 @@ from pathlib import Path
 
 
 ROOT = Path(__file__).resolve().parents[2]
-TOOLKIT = ROOT / ".codex/skills/motorcontrol-demo/scripts"
+TOOLKIT = ROOT / ".opencode/skills/motorcontrol-demo/scripts"
 for path in (ROOT, TOOLKIT):
     value = str(path)
     if value not in sys.path:

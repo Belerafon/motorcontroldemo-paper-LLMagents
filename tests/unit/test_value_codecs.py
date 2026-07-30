@@ -7,7 +7,7 @@ from pathlib import Path
 
 TOOLKIT = (
     Path(__file__).resolve().parents[2]
-    / ".codex/skills/motorcontrol-demo/scripts"
+     / ".opencode/skills/motorcontrol-demo/scripts"
 )
 sys.path.insert(0, str(TOOLKIT))
 

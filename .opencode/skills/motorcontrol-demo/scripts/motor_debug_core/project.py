@@ -16,7 +16,7 @@ class ProjectPaths:
     def discover(cls, anchor: Path, vector_ide: Path) -> "ProjectPaths":
         for candidate in (anchor.resolve(), *anchor.resolve().parents):
             if (candidate / "Makefile").is_file() and (
-                candidate / ".codex/skills/motorcontrol-demo/SKILL.md"
+                candidate / ".opencode/skills/motorcontrol-demo/SKILL.md"
             ).is_file():
                 return cls(candidate, vector_ide.resolve())
         raise RuntimeError("MotorControlDemo repository root was not found.")

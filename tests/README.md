@@ -2,7 +2,7 @@
 
 Тестовая инфраструктура отделена от рабочего JTAG-набора:
 
-- `.codex/skills/motorcontrol-demo/scripts/motor_debug_core/` — сборка,
+- `.opencode/skills/motorcontrol-demo/scripts/motor_debug_core/` — сборка,
   прошивка, транспорт OpenOCD, доступ к ELF/RAM, кодеки, безопасность и
   четырёхканальный регистратор;
 - `tests/e2e/` — сценарии с запуском программной модели, критерии приёмки,
