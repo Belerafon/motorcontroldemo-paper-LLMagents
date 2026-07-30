@@ -27,6 +27,127 @@
 #include "V_IQmath.h"
 #include "main.h"
 
+#define CURRENT_DECOUPLING_ENABLE_VALUE _IQ(1.0)
+#define CURRENT_DECOUPLING_GAIN_MAX     _IQ(1.5)
+#define CURRENT_DECOUPLING_VOLTAGE_MAX  _IQ(1.0)
+#define CURRENT_DECOUPLING_TWO_PI       _IQ(6.283185307179586)
+
+static long CurrentDecoupling_SaturateIq24(long long value)
+{
+	if (value > 2147483647LL)
+		return 2147483647L;
+	if (value < -2147483647LL - 1LL)
+		return (-2147483647L - 1L);
+	return (long)value;
+}
+
+static long CurrentDecoupling_MultiplyIq24(long value1, long value2)
+{
+	return CurrentDecoupling_SaturateIq24(
+			((long long)value1 * (long long)value2) >> 24);
+}
+
+static long CurrentDecoupling_LimitVoltage(long value)
+{
+	if (value > CURRENT_DECOUPLING_VOLTAGE_MAX)
+		return CURRENT_DECOUPLING_VOLTAGE_MAX;
+	if (value < -CURRENT_DECOUPLING_VOLTAGE_MAX)
+		return -CURRENT_DECOUPLING_VOLTAGE_MAX;
+	return value;
+}
+
+static long CurrentDecoupling_CalculateBaseGain(void)
+{
+	static long cached_ls;
+	static int cached_freq_nom;
+	static int cached_i_nom;
+	static int cached_u_nom;
+	static long cached_base_gain;
+	long long omega_l;
+	long long integer_factor;
+	long long max_before_division;
+
+	if ((drv_params.Ls == cached_ls)
+			&& (drv_params.freq_nom == cached_freq_nom)
+			&& (drv_params.I_nom == cached_i_nom)
+			&& (drv_params.U_nom == cached_u_nom))
+		return cached_base_gain;
+
+	cached_ls = drv_params.Ls;
+	cached_freq_nom = drv_params.freq_nom;
+	cached_i_nom = drv_params.I_nom;
+	cached_u_nom = drv_params.U_nom;
+
+	omega_l = ((long long)drv_params.Ls
+			* (long long)CURRENT_DECOUPLING_TWO_PI) >> 24;
+	integer_factor = (long long)drv_params.freq_nom
+			* (long long)drv_params.I_nom;
+	max_before_division = (2147483647LL * drv_params.U_nom)
+			/ integer_factor;
+	if (omega_l > max_before_division) {
+		cached_base_gain = 2147483647L;
+		return cached_base_gain;
+	}
+
+	cached_base_gain = (long)((omega_l * integer_factor) / drv_params.U_nom);
+	return cached_base_gain;
+}
+
+/*
+ * Компенсация перекрестных связей токовых контуров:
+ *   Ud_ff = -omega_e * Ls * Iq
+ *   Uq_ff =  omega_e * Ls * Id
+ *
+ * Все входы и выходы регуляторов заданы в IQ24, в относительных единицах.
+ * cur_par.speed нормирована на speed_nom, а freq_nom уже учитывает число пар
+ * полюсов. Поэтому коэффициент пересчета в относительное напряжение равен:
+ *   2*pi*freq_nom*Ls*I_nom/U_nom.
+ *
+ * DebugW3 == 1.0 включает алгоритм, DebugW4 задает усиление 0...1.5.
+ * Debug1 и Debug2 содержат фактические добавки Ud_ff и Uq_ff.
+ */
+static void CurrentDecoupling_Apply(long speed, long id, long iq,
+		long ud_pid, long uq_pid)
+{
+	long base_gain;
+	long gain;
+	long omega_l;
+	long ud_ff;
+	long uq_ff;
+
+	ipark.de = ud_pid;
+	ipark.qe = uq_pid;
+	Debug1 = 0;
+	Debug2 = 0;
+
+	if (DebugW3 != CURRENT_DECOUPLING_ENABLE_VALUE)
+		return;
+	if ((drv_params.Ls <= 0) || (drv_params.freq_nom <= 0)
+			|| (drv_params.I_nom <= 0) || (drv_params.U_nom <= 0))
+		return;
+
+	gain = DebugW4;
+	if (gain <= 0)
+		return;
+	if (gain > CURRENT_DECOUPLING_GAIN_MAX)
+		gain = CURRENT_DECOUPLING_GAIN_MAX;
+
+	base_gain = CurrentDecoupling_CalculateBaseGain();
+
+	omega_l = CurrentDecoupling_MultiplyIq24(base_gain, speed);
+	omega_l = CurrentDecoupling_MultiplyIq24(omega_l, gain);
+
+	ud_ff = -CurrentDecoupling_LimitVoltage(
+			CurrentDecoupling_MultiplyIq24(omega_l, iq));
+	uq_ff = CurrentDecoupling_LimitVoltage(
+			CurrentDecoupling_MultiplyIq24(omega_l, id));
+
+	Debug1 = ud_ff;
+	Debug2 = uq_ff;
+	ipark.de = ud_pid + ud_ff;
+	ipark.qe = uq_pid + uq_ff;
+}
+
 
 //!Инициализация
 //!Всякие обнуления
@@ -120,6 +241,8 @@ void SM_Ctrl_Fast_Calc(TSM_Ctrl *p) {
 		cur_par.Is = 0;
 		cur_par.power = 0;
 		cur_par.speed = 0;
+		Debug1 = 0;
+		Debug2 = 0;
 		//  cur_par.ThetaRefCurr=0;
 
 		/* Конец */
@@ -444,8 +567,9 @@ void SM_Ctrl_Fast_Calc(TSM_Ctrl *p) {
 
 			//Обратный поворот на угол refs.theta_elec для 
 			//выходов регуляторов тока (напряжений по осям d и q)
-			ipark.de = pid_id.pid_out_reg3;
-			ipark.qe = pid_iq.pid_out_reg3;
+			CurrentDecoupling_Apply(cur_par.speed,
+					pid_id.pid_fdb_reg3, pid_iq.pid_fdb_reg3,
+					pid_id.pid_out_reg3, pid_iq.pid_out_reg3);
 			ipark.ang = refs.theta_elec;
 			ipark.calc(&ipark);            //расчет преобразования координат
 
@@ -584,8 +708,9 @@ void SM_Ctrl_Fast_Calc(TSM_Ctrl *p) {
 
 			//Обратный поворот на угол refs.theta_elec для
 			//выходов регуляторов тока (напряжений по осям d и q)
-			ipark.de = pid_id.pid_out_reg3;
-			ipark.qe = pid_iq.pid_out_reg3;
+			CurrentDecoupling_Apply(cur_par.speed,
+					pid_id.pid_fdb_reg3, pid_iq.pid_fdb_reg3,
+					pid_id.pid_out_reg3, pid_iq.pid_out_reg3);
 			ipark.ang = posspeedEqep.theta_elec;
 			ipark.calc(&ipark);            //расчет преобразования координат
 
@@ -678,8 +803,9 @@ void SM_Ctrl_Fast_Calc(TSM_Ctrl *p) {
 
 			//Обратный поворот на угол refs.theta_elec для
 			//выходов регуляторов тока (напряжений по осям x и y)
-			ipark.de = pid_id.pid_out_reg3;
-			ipark.qe = pid_iq.pid_out_reg3;
+			CurrentDecoupling_Apply(cur_par.speed,
+					pid_id.pid_fdb_reg3, pid_iq.pid_fdb_reg3,
+					pid_id.pid_out_reg3, pid_iq.pid_out_reg3);
 			ipark.ang = refs.theta_elec;
 			ipark.calc(&ipark);            //расчет преобразования координат
 
@@ -837,8 +963,9 @@ void SM_Ctrl_Fast_Calc(TSM_Ctrl *p) {
 
 			//Обратный поворот на угол Temp1 для
 			//выходов регуляторов тока (напряжений по осям x и y)
-			ipark.de = pid_id.pid_out_reg3;
-			ipark.qe = pid_iq.pid_out_reg3;
+			CurrentDecoupling_Apply(cur_par.speed,
+					pid_id.pid_fdb_reg3, pid_iq.pid_fdb_reg3,
+					pid_id.pid_out_reg3, pid_iq.pid_out_reg3);
 			ipark.ang = Temp1;
 			ipark.calc(&ipark);            //расчет преобразования координат
 

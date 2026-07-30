@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import json
 from argparse import ArgumentParser, Namespace, SUPPRESS
+from contextlib import ExitStack
 from pathlib import Path
 
 from motor_debug_core.datalogger import Channel
@@ -37,6 +38,14 @@ def register(parser: ArgumentParser) -> None:
     parser.add_argument("--max-speed-ripple-rpm", type=float, default=25.0)
     parser.add_argument("--current-limit-margin-percent", type=float, default=25.0)
     parser.add_argument(
+        "--decoupling-gain",
+        type=float,
+        help=(
+            "Temporarily enable d/q current-loop decoupling with the given "
+            "gain (0 < gain <= 1.5)."
+        ),
+    )
+    parser.add_argument(
         "--output",
         type=Path,
         default=Path("artifacts/e2e/vector-500"),
@@ -48,6 +57,10 @@ def run(args: Namespace, paths: ProjectPaths) -> None:
         raise ValueError("--sample-divider must be in range 1..255.")
     if args.timeout <= 0:
         raise ValueError("--timeout must be positive.")
+    if args.decoupling_gain is not None and not (
+        0 < args.decoupling_gain <= 1.5
+    ):
+        raise ValueError("--decoupling-gain must be in range (0, 1.5].")
     if min(
         args.max_time_to_95_s,
         args.max_overshoot_percent,
@@ -91,27 +104,46 @@ def run(args: Namespace, paths: ProjectPaths) -> None:
             ),
         ]
 
-        with session.temporary_engineering_value(
-            "sm_ctrl.run_mode", 5
-        ) as original_run_mode_raw:
-            with session.temporary_engineering_value(
-                "refs.speed_ref", TARGET_SPEED_RPM, unit="rpm"
-            ) as original_speed_ref_raw:
-                before = session.verify_mode(5)
-                capture = session.capture_triggered(
-                    channels,
-                    divider=args.sample_divider,
-                    trigger_bit=4,
-                    timeout_s=args.timeout,
-                    validated_snapshot=before,
+        original_decoupling_enable_raw = session.target.read_u32("DebugW3")
+        original_decoupling_gain_raw = session.target.read_u32("DebugW4")
+        with ExitStack() as settings:
+            original_run_mode_raw = settings.enter_context(
+                session.temporary_engineering_value("sm_ctrl.run_mode", 5)
+            )
+            original_speed_ref_raw = settings.enter_context(
+                session.temporary_engineering_value(
+                    "refs.speed_ref", TARGET_SPEED_RPM, unit="rpm"
                 )
+            )
+            if args.decoupling_gain is not None:
+                settings.enter_context(
+                    session.temporary_raw_value("DebugW3", 1 << 24)
+                )
+                settings.enter_context(
+                    session.temporary_raw_value(
+                        "DebugW4", round(args.decoupling_gain * (1 << 24))
+                    )
+                )
+            before = session.verify_mode(5)
+            capture = session.capture_triggered(
+                channels,
+                divider=args.sample_divider,
+                trigger_bit=4,
+                timeout_s=args.timeout,
+                validated_snapshot=before,
+            )
         restored = session.drive.snapshot()
+        restored_decoupling_enable_raw = session.target.read_u32("DebugW3")
+        restored_decoupling_gain_raw = session.target.read_u32("DebugW4")
         if (
             restored.run_mode != original_run_mode_raw
             or restored.speed_ref_raw != original_speed_ref_raw
+            or restored_decoupling_enable_raw != original_decoupling_enable_raw
+            or restored_decoupling_gain_raw != original_decoupling_gain_raw
         ):
             raise RuntimeError(
-                "Mode or speed reference was not restored after the test."
+                "Temporary mode, reference, or decoupling settings were not "
+                "restored after the test."
             )
 
     metrics = analyze_vector_500(
@@ -133,6 +165,10 @@ def run(args: Namespace, paths: ProjectPaths) -> None:
     )
     metrics["criteria"]["run_mode_restored"] = (
         restored.run_mode == original_run_mode_raw
+    )
+    metrics["criteria"]["decoupling_settings_restored"] = (
+        restored_decoupling_enable_raw == original_decoupling_enable_raw
+        and restored_decoupling_gain_raw == original_decoupling_gain_raw
     )
     metrics["criteria"]["capture_window_covers_limits"] = (
         metrics["window_s"]
@@ -157,9 +193,12 @@ def run(args: Namespace, paths: ProjectPaths) -> None:
             "trigger_bit": 4,
             "trigger_timeout_s": args.timeout,
             "sample_divider": args.sample_divider,
+            "decoupling_gain": args.decoupling_gain,
             "speed_controller": speed_controller,
             "original_run_mode_raw": original_run_mode_raw,
             "original_speed_reference_raw": original_speed_ref_raw,
+            "original_decoupling_enable_raw": original_decoupling_enable_raw,
+            "original_decoupling_gain_raw": original_decoupling_gain_raw,
         },
         "snapshots": {
             "initial": snapshot_dict(initial),

@@ -136,12 +136,10 @@ class HardwareSession:
         }
 
     @contextmanager
-    def temporary_engineering_value(
-        self, expression: str, value: float, *, unit: str = ""
+    def temporary_raw_value(
+        self, expression: str, encoded: int
     ) -> Iterator[int]:
-        codec = self.dictionary.codec(expression, unit=unit)
         original = self.target.read_u32(expression)
-        encoded = codec.encode(value)
         try:
             self.target.write_u32(expression, encoded)
             actual = self.target.read_u32(expression)
@@ -161,6 +159,15 @@ class HardwareSession:
                     f"RAM restoration failed for {expression}: "
                     f"0x{restored:08X} != 0x{original:08X}."
                 )
+
+    @contextmanager
+    def temporary_engineering_value(
+        self, expression: str, value: float, *, unit: str = ""
+    ) -> Iterator[int]:
+        codec = self.dictionary.codec(expression, unit=unit)
+        encoded = codec.encode(value)
+        with self.temporary_raw_value(expression, encoded) as original:
+            yield original
 
     def capture_ring(
         self,
