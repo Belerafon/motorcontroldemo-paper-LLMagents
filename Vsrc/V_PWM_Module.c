@@ -64,6 +64,58 @@
 #define DEAD_BAND_MAX	_IQ(10)
 #endif
 
+//! Коэффициент, связывающий задание напряжения с доступным напряжением ЗПТ.
+static int32 PWM_Module_GetUdcScale(TPWM_Module *p) {
+	int32 udc_scale = _IQ(1.0);
+
+	if (adc.Udc_meas <= 0)
+		return 0;
+
+	if (p->UdCompEnable & 1) {
+		udc_scale += _IQmpy(adc.Udc_meas - _IQ(1.0), p->UdCompK);
+		if (udc_scale < 0)
+			udc_scale = 0;
+	}
+
+	return udc_scale;
+}
+
+//! Максимальная амплитуда напряжения, которую может сформировать выбранный тип ШИМ.
+//!
+//! Результат приведен к системе координат задания ШИМ и учитывает текущую
+//! компенсацию напряжения ЗПТ. Неподдерживаемый тип ШИМ безопасно дает ноль.
+int32 PWM_Module_GetAvailableVoltageLimit(TPWM_Module *p) {
+	int32 modulation_limit;
+	int32 udc_scale;
+
+	switch (p->PWM_type) {
+	case PWM_TYPE_6SECT_NO_SV:
+		modulation_limit = p->U_lim;
+		if (modulation_limit > _IQ(1.0 / 0.866))
+			modulation_limit = _IQ(1.0 / 0.866);
+		break;
+
+	case PWM_TYPE_SIN_PWM:
+		modulation_limit = p->U_lim;
+		if (modulation_limit > _IQ(0.866))
+			modulation_limit = _IQ(0.866);
+		break;
+
+	case PWM_TYPE_DC_DRIVE:
+		modulation_limit = _IQ(1.0);
+		break;
+
+	default:
+		return 0;
+	}
+
+	if (modulation_limit < 0)
+		return 0;
+
+	udc_scale = PWM_Module_GetUdcScale(p);
+	return _IQmpy(modulation_limit, udc_scale);
+}
+
 //! Инициализация
 
 //! \memberof TPWM_Module
@@ -395,7 +447,11 @@ void PWM_Module_NormInput(TPWM_Module* p) {
     p->U_mag=_IQmag(p->UalphaNorm,p->UbetaNorm);
 
 
-    p->UdCorTmp=_IQdiv(_IQ(1.0),(_IQ(1.0)+_IQmpy((adc.Udc_meas-_IQ(1.0)),p->UdCompK)));
+    p->UdCorTmp = PWM_Module_GetUdcScale(p);
+    if (p->UdCorTmp > 0)
+        p->UdCorTmp = _IQdiv(_IQ(1.0), p->UdCorTmp);
+    else
+        p->UdCorTmp = 0;
     //учет пульсаций напряжения на Ud
     if (p->UdCompEnable&1) { //он включен?
         p->UalphaNorm=_IQmpy(p->UalphaNorm, p->UdCorTmp);//изменим пропорционально коэфф-ту коррекции
@@ -557,6 +613,16 @@ void PWM_Module_Sin_Update(TPWM_Module *p) {
 	p->UalphaNorm = p->UalphaRef;
 	p->UbetaNorm = p->UbetaRef;
 
+	p->UdCorTmp = PWM_Module_GetUdcScale(p);
+	if (p->UdCorTmp > 0)
+		p->UdCorTmp = _IQdiv(_IQ(1.0), p->UdCorTmp);
+	else
+		p->UdCorTmp = 0;
+	if (p->UdCompEnable & 1) {
+		p->UalphaNorm = _IQmpy(p->UalphaNorm, p->UdCorTmp);
+		p->UbetaNorm = _IQmpy(p->UbetaNorm, p->UdCorTmp);
+	}
+
 	//находим амплитуду (без учета ограничения)
 	p->U_mag = _IQmag(p->UalphaNorm, p->UbetaNorm);
 
@@ -661,6 +727,16 @@ void PWM_Module_DC_Update(TPWM_Module *p)
 
 	UalphaRef = p->UalphaRef;
 	UbetaRef = p->UbetaRef;
+
+	p->UdCorTmp = PWM_Module_GetUdcScale(p);
+	if (p->UdCorTmp > 0)
+		p->UdCorTmp = _IQdiv(_IQ(1.0), p->UdCorTmp);
+	else
+		p->UdCorTmp = 0;
+	if (p->UdCompEnable & 1) {
+		UalphaRef = _IQmpy(UalphaRef, p->UdCorTmp);
+		UbetaRef = _IQmpy(UbetaRef, p->UdCorTmp);
+	}
 
 	if (UalphaRef > _IQ(1))
 		UalphaRef = _IQ(1);

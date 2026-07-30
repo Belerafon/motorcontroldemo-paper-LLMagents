@@ -148,6 +148,8 @@ void PWM_Module_SlowCalc(TPWM_Module *);
 void PWM_Module_On(TPWM_Module *);
 //! \memberof TPWM_Module
 void PWM_Module_Off(TPWM_Module *);
+//! Возвращает доступную амплитуду выходного напряжения в о.е. номинального ЗПТ.
+int32 PWM_Module_GetAvailableVoltageLimit(TPWM_Module *);
 
 //векторные функции из библиотеки
 void PWM_Module_No_SV_Update(TPWM_Module *);
