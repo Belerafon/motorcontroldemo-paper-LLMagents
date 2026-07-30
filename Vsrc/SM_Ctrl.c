@@ -27,6 +27,38 @@
 #include "V_IQmath.h"
 #include "main.h"
 
+static void SM_Ctrl_FieldWeakeningReset(void) {
+	field_weakening.reset(&field_weakening);
+	Debug1 = 0;
+	Debug2 = 0;
+	Debug3 = 0;
+	Debug4 = 0;
+}
+
+static long SM_Ctrl_FieldWeakeningIqLimit(void) {
+	long voltage_correction = _IQ(1.0);
+
+	field_weakening.enabled = DebugW2 != 0;
+	field_weakening.integral_gain = DebugW3;
+	field_weakening.id_min = DebugW4;
+	if ((pwm.UdCompEnable & 1) && (pwm.UdCorTmp > 0))
+		voltage_correction = pwm.UdCorTmp;
+
+	field_weakening.calc(&field_weakening,
+			cur_par.speed,
+			pid_id.pid_out_reg3,
+			pid_iq.pid_out_reg3,
+			refs.Iq_ref,
+			sm_prot.Imax_protect,
+			pwm.U_lim,
+			voltage_correction);
+
+	Debug1 = field_weakening.id_ref;
+	Debug2 = field_weakening.voltage_demand;
+	Debug3 = field_weakening.flags;
+	Debug4 = pwm.ULimitation != 0;
+	return field_weakening.iq_limit;
+}
 
 //!Инициализация
 //!Всякие обнуления
@@ -34,6 +66,16 @@
 void SM_Ctrl_Init(TSM_Ctrl *p) {
 	p->state_prev = 0xff;
 	p->state = 0x00;
+	field_weakening.init(&field_weakening);
+	/*
+	 * Runtime-only prototype controls. SM_Ctrl_Init runs after CANopen has
+	 * restored its object dictionary, so these compiled defaults are
+	 * deterministic and are never written to EEPROM.
+	 */
+	DebugW2 = FIELD_WEAKENING_DEFAULT_ENABLE;
+	DebugW3 = FIELD_WEAKENING_DEFAULT_GAIN;
+	DebugW4 = FIELD_WEAKENING_DEFAULT_ID_MIN;
+	SM_Ctrl_FieldWeakeningReset();
 }
 
 //!Фоновый расчет
@@ -117,6 +159,7 @@ void SM_Ctrl_Fast_Calc(TSM_Ctrl *p) {
 		pid_ia.reset(&pid_ia);
 		pid_spd.reset(&pid_spd);
 		pid_pos.reset(&pid_pos);
+		SM_Ctrl_FieldWeakeningReset();
 		cur_par.Is = 0;
 		cur_par.power = 0;
 		cur_par.speed = 0;
@@ -397,7 +440,7 @@ void SM_Ctrl_Fast_Calc(TSM_Ctrl *p) {
 				refs.theta_elec = SSI_Encoder.theta_elec; //текущее угловое положение - с ДПР
 			}
 
-			cur_par.Is = pid_iq.pid_fdb_reg3; //Текущий ток статора - ток по оси q
+			cur_par.Is = _IQmag(pid_iq.pid_fdb_reg3, pid_id.pid_fdb_reg3);
 
 			//Преобразование токов из трехфазной системы координат в двухфазную
 			clarke.as = adc.Imeas_a;
@@ -414,10 +457,10 @@ void SM_Ctrl_Fast_Calc(TSM_Ctrl *p) {
 			pid_spd.pid_fdb_reg3 = cur_par.speed; //обратная связь регулятора скорости - скорость ДПР
 
 
-			pid_spd.pid_out_max = refs.Iq_ref; //Максимум выхода регулятора скорости - заданный ток
+			pid_spd.pid_out_max = SM_Ctrl_FieldWeakeningIqLimit();
 
 			if (sw.recuperation_ena & 1)            //если разрешена рекуперация
-				pid_spd.pid_out_min = -refs.Iq_ref; //минимум рег. скор. - отрицательный ток
+				pid_spd.pid_out_min = -pid_spd.pid_out_max;
 			else
 				//иначе
 				pid_spd.pid_out_min = 0; //нулевой ток не даст рекупераци при вращении в положительную сторону
@@ -438,7 +481,7 @@ void SM_Ctrl_Fast_Calc(TSM_Ctrl *p) {
 			pid_iq.pid_fdb_reg3 = park.qe; //обратная связь рег. тока оси q - вычисленный ток по фазе q
 			pid_iq.calc(&pid_iq); //расчет регулятора тока оси q
 
-			pid_id.pid_ref_reg3 = 0; //задание тока по оси d - оси возбудения
+			pid_id.pid_ref_reg3 = field_weakening.id_ref;
 			pid_id.pid_fdb_reg3 = park.de; //обратная связь рег. тока оси d - вычисленный ток по фазе d
 			pid_id.calc(&pid_id); //расчет регулятора тока оси d
 
@@ -476,7 +519,7 @@ void SM_Ctrl_Fast_Calc(TSM_Ctrl *p) {
 		}
 		/*DO START*/
 		{
-			cur_par.Is = pid_iq.pid_fdb_reg3; //Текущий ток статора - ток по оси q
+			cur_par.Is = _IQmag(pid_iq.pid_fdb_reg3, pid_id.pid_fdb_reg3);
 			cur_par.speed = posspeedEqep.speed_elec; //Текущая скорость - с ДПР фильтрованная
 
 			//Преобразование токов из трехфазной системы координат в двухфазную
@@ -562,8 +605,8 @@ void SM_Ctrl_Fast_Calc(TSM_Ctrl *p) {
 //			pid_spd.pid_fdb_reg3 = posspeedEqep.speed_filter.output; //обратная связь регулятора скорости - скорость ДПР
 			pid_spd.pid_fdb_reg3 = cur_par.speed;
 
-			pid_spd.pid_out_max = refs.Iq_ref; //Максимум выхода регулятора скорости - заданный ток
-			pid_spd.pid_out_min = -refs.Iq_ref; //минимум рег. скор. - отрицательный ток
+			pid_spd.pid_out_max = SM_Ctrl_FieldWeakeningIqLimit();
+			pid_spd.pid_out_min = -pid_spd.pid_out_max;
 			pid_spd.calc(&pid_spd); //расчет регулятора скорости
 
 
@@ -578,7 +621,7 @@ void SM_Ctrl_Fast_Calc(TSM_Ctrl *p) {
 			pid_iq.pid_fdb_reg3 = park.qe; //обратная связь рег. тока оси q - вычисленный ток по фазе q
 			pid_iq.calc(&pid_iq); //расчет регулятора тока оси q
 
-			pid_id.pid_ref_reg3 = 0; //задание тока по оси d - оси возбудения
+			pid_id.pid_ref_reg3 = field_weakening.id_ref;
 			pid_id.pid_fdb_reg3 = park.de; //обратная связь рег. тока оси d - вычисленный ток по фазе d
 			pid_id.calc(&pid_id); //расчет регулятора тока оси d
 
