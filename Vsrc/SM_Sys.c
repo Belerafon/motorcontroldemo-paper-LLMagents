@@ -59,6 +59,7 @@ void SM_Sys_Init(TSM_Sys *p) {
 	sm_ctrl.init(&sm_ctrl); //Структура системы управления
 	pwm.init(&pwm); //Модуль ШИМ
 	cur_par.init(&cur_par); //Расчет текущих показателей привода
+	power_limiter.init(&power_limiter); //Ограничитель активной мощности
 	leds.init(&leds);//светодиоды
 	udControl.init(&udControl); //плавная зарядка ЗПТ через термисторы
 	DIO_Init(); //дискретные входы/выходы
@@ -278,6 +279,7 @@ void SM_Sys_Slow_Calc(TSM_Sys *p) {
 	pwm.slow_calc(&pwm); //фоновый обработчик модуля ШИМ (пересчет пользовательских заданий)
 	adc.slow_calc(&adc); //Фоновый обработчик АЦП
 	cur_par.slow_calc(&cur_par); //Расчет текущих показателей привода
+	power_limiter.slow_calc(&power_limiter); //Пересчет задания мощности из Вт в IQ24
 	AutoOffset.slow_calc(&AutoOffset);
 	posspeedEqep.slow_calc(&posspeedEqep);//инициализация модуля энкодера
 	RotorObserver.slow_calc(&RotorObserver);//наблюдатель потока ротора АД

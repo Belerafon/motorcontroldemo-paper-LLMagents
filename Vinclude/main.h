@@ -58,6 +58,7 @@ extern "C" {
 #include "V_adc.h"
 #include "V_PWM_Module.h"
 #include "V_CurPar.h"
+#include "V_PowerLimiter.h"
 #include "V_hzprof.h"
 #include "V_DPR_eCAP.h"
 #include "V_QEP.h"
@@ -112,6 +113,7 @@ extern TDrvParams drv_params;
 extern TAdcDrv  adc;
 extern TPWM_Module pwm;
 extern TCurPar cur_par;
+extern TPowerLimiter power_limiter;
 extern TVhzProf vhz;
 extern TDPReCAP	DPReCAP;
 extern TposspeedEqep   posspeedEqep;

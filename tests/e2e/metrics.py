@@ -343,3 +343,113 @@ def analyze_vector_500(
     metrics["criteria"] = criteria
     metrics["passed"] = all(criteria.values())
     return metrics
+
+
+def analyze_power_limited_acceleration(
+    samples: Sequence[Any],
+    *,
+    target_speed_rpm: float,
+    power_limit_w: float,
+    current_limit_a: float,
+    min_plateau_fraction: float = 0.55,
+    max_power_overshoot_percent: float = 20.0,
+    plateau_low_percent: float = 75.0,
+    max_time_to_95_s: float = 4.5,
+) -> dict[str, Any]:
+    time_s = _times(samples)
+    speed = _series(samples, "speed_rpm")
+    power = _series(samples, "power_w")
+    iq_ref = _series(samples, "iq_ref_a")
+    iq_limit = _series(samples, "iq_limit_a")
+    period = _sample_period(time_s)
+    direction = 1.0 if target_speed_rpm >= 0 else -1.0
+    directed_speed = [direction * value for value in speed]
+    start = _first_crossing(speed, target_speed_rpm, 0.05, 0)
+    i20 = _first_crossing(speed, target_speed_rpm, 0.20, 0)
+    i80 = _first_crossing(speed, target_speed_rpm, 0.80, 0)
+    i95 = _first_crossing(speed, target_speed_rpm, 0.95, 0)
+    if start is None:
+        start = 0
+    window_start = i20 if i20 is not None else start
+    window_stop = i80 if i80 is not None else len(samples) - 1
+    if window_stop <= window_start:
+        window_stop = len(samples) - 1
+
+    acceleration_power = [
+        abs(value) for value in power[window_start : window_stop + 1]
+    ]
+    acceleration_iq_limit = [
+        abs(value) for value in iq_limit[window_start : window_stop + 1]
+    ]
+    lower_power = power_limit_w * plateau_low_percent / 100.0
+    upper_power = power_limit_w * (
+        1.0 + max_power_overshoot_percent / 100.0
+    )
+    plateau_points = [
+        value
+        for value in acceleration_power
+        if lower_power <= value <= upper_power
+    ]
+    plateau_fraction = (
+        len(plateau_points) / len(acceleration_power)
+        if acceleration_power
+        else 0.0
+    )
+    peak_power = max(acceleration_power) if acceleration_power else math.inf
+    min_iq_limit = (
+        min(acceleration_iq_limit) if acceleration_iq_limit else math.inf
+    )
+    time_to_95 = (
+        None if i95 is None else float(time_s[i95] - time_s[start])
+    )
+
+    metrics: dict[str, Any] = {
+        "samples": len(samples),
+        "sample_period_s": period,
+        "window_s": float(time_s[-1] - time_s[0]),
+        "target_speed_rpm": target_speed_rpm,
+        "power_limit_w": power_limit_w,
+        "acceleration_window_start_s": float(time_s[window_start]),
+        "acceleration_window_stop_s": float(time_s[window_stop]),
+        "acceleration_power_mean_w": (
+            _mean(acceleration_power) if acceleration_power else None
+        ),
+        "acceleration_power_stddev_w": (
+            float(statistics.pstdev(acceleration_power))
+            if len(acceleration_power) >= 2
+            else None
+        ),
+        "peak_acceleration_power_w": peak_power,
+        "power_plateau_fraction": plateau_fraction,
+        "minimum_dynamic_iq_limit_a": min_iq_limit,
+        "peak_abs_iq_reference_a": max(abs(value) for value in iq_ref),
+        "peak_directed_speed_rpm": max(directed_speed),
+        "time_to_95_percent_s": time_to_95,
+    }
+    criteria = {
+        "enough_samples": len(samples) >= 64,
+        "valid_acceleration_window": (
+            i20 is not None and i80 is not None and window_stop > window_start
+        ),
+        "power_reached_limit_band": bool(plateau_points),
+        "power_plateau": plateau_fraction >= min_plateau_fraction,
+        "power_overshoot": peak_power <= upper_power,
+        "dynamic_iq_limit_reduced": (
+            current_limit_a > 0
+            and min_iq_limit <= abs(current_limit_a) * 0.90
+        ),
+        "reached_95_percent": (
+            time_to_95 is not None and time_to_95 <= max_time_to_95_s
+        ),
+    }
+    metrics["limits"] = {
+        "current_limit_a": current_limit_a,
+        "plateau_low_percent": plateau_low_percent,
+        "min_plateau_fraction": min_plateau_fraction,
+        "max_power_overshoot_percent": max_power_overshoot_percent,
+        "max_power_w": upper_power,
+        "max_time_to_95_s": max_time_to_95_s,
+    }
+    metrics["criteria"] = criteria
+    metrics["passed"] = all(criteria.values())
+    return metrics

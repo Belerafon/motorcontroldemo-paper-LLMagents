@@ -117,6 +117,7 @@ void SM_Ctrl_Fast_Calc(TSM_Ctrl *p) {
 		pid_ia.reset(&pid_ia);
 		pid_spd.reset(&pid_spd);
 		pid_pos.reset(&pid_pos);
+		power_limiter.reset(&power_limiter, refs.Iq_ref);
 		cur_par.Is = 0;
 		cur_par.power = 0;
 		cur_par.speed = 0;
@@ -378,6 +379,7 @@ void SM_Ctrl_Fast_Calc(TSM_Ctrl *p) {
 			/*ENTRY START*/
 			pwm.On(&pwm);            //Включение ШИМ
 			rmp.output = 0;            //Обнуление задатчика интенсивности
+			power_limiter.reset(&power_limiter, refs.Iq_ref);
 			if (dlog.StartBits & (1 << 4)) //Если пользователь задал этот бит осциллографирования
 				dlog.set_mode(1, &dlog);  //Запуск осциллографа по этому событию
 			/*ENTRY END*/
@@ -414,10 +416,14 @@ void SM_Ctrl_Fast_Calc(TSM_Ctrl *p) {
 			pid_spd.pid_fdb_reg3 = cur_par.speed; //обратная связь регулятора скорости - скорость ДПР
 
 
-			pid_spd.pid_out_max = refs.Iq_ref; //Максимум выхода регулятора скорости - заданный ток
+			long iq_limit = power_limiter.calc(
+					&power_limiter,
+					refs.Iq_ref,
+					cur_par.fPower.input);
+			pid_spd.pid_out_max = iq_limit; //Ток ограничен уставками тока и мощности
 
 			if (sw.recuperation_ena & 1)            //если разрешена рекуперация
-				pid_spd.pid_out_min = -refs.Iq_ref; //минимум рег. скор. - отрицательный ток
+				pid_spd.pid_out_min = -iq_limit; //ограничение действует и при рекуперации
 			else
 				//иначе
 				pid_spd.pid_out_min = 0; //нулевой ток не даст рекупераци при вращении в положительную сторону
@@ -470,6 +476,7 @@ void SM_Ctrl_Fast_Calc(TSM_Ctrl *p) {
 			/*ENTRY START*/
 			pwm.On(&pwm);            //Включение ШИМ
 			rmp.output = 0;            //Обнуление задатчика интенсивности
+			power_limiter.reset(&power_limiter, refs.Iq_ref);
 			if (dlog.StartBits & (1 << 4)) //Если пользователь задал этот бит осциллографирования
 				dlog.set_mode(1, &dlog);  //Запуск осциллографа по этому событию
 			/*ENTRY END*/
@@ -562,8 +569,12 @@ void SM_Ctrl_Fast_Calc(TSM_Ctrl *p) {
 //			pid_spd.pid_fdb_reg3 = posspeedEqep.speed_filter.output; //обратная связь регулятора скорости - скорость ДПР
 			pid_spd.pid_fdb_reg3 = cur_par.speed;
 
-			pid_spd.pid_out_max = refs.Iq_ref; //Максимум выхода регулятора скорости - заданный ток
-			pid_spd.pid_out_min = -refs.Iq_ref; //минимум рег. скор. - отрицательный ток
+			long iq_limit = power_limiter.calc(
+					&power_limiter,
+					refs.Iq_ref,
+					cur_par.fPower.input);
+			pid_spd.pid_out_max = iq_limit; //Ток ограничен уставками тока и мощности
+			pid_spd.pid_out_min = -iq_limit; //ограничение действует в обоих направлениях
 			pid_spd.calc(&pid_spd); //расчет регулятора скорости
 
 
@@ -607,6 +618,7 @@ void SM_Ctrl_Fast_Calc(TSM_Ctrl *p) {
 			RotorObserver.psi_d=0;
 			RotorObserver.psi_q=0;
 			rmp.output = 0;            //Обнуление задатчика интенсивности
+			power_limiter.reset(&power_limiter, refs.Iq_ref);
 			if (dlog.StartBits & (1 << 4)) //Если пользователь задал этот бит осциллографирования
 				dlog.set_mode(1, &dlog);  //Запуск осциллографа по этому событию
 			/*ENTRY END*/
@@ -631,10 +643,14 @@ void SM_Ctrl_Fast_Calc(TSM_Ctrl *p) {
 			pid_spd.pid_fdb_reg3 = posspeedEqep.speed_elec; //обратная связь регулятора скорости - скорость ДПР
 
 
-			pid_spd.pid_out_max = refs.Iq_ref; //Максимум выхода регулятора скорости - заданный ток
+			long iq_limit = power_limiter.calc(
+					&power_limiter,
+					refs.Iq_ref,
+					cur_par.fPower.input);
+			pid_spd.pid_out_max = iq_limit; //Ток ограничен уставками тока и мощности
 
 			if (sw.recuperation_ena & 1)            //если разрешена рекуперация
-				pid_spd.pid_out_min = -refs.Iq_ref; //минимум рег. скор. - отрицательный ток
+				pid_spd.pid_out_min = -iq_limit; //ограничение действует и при рекуперации
 			else
 				//иначе
 				pid_spd.pid_out_min = 0; //нулевой ток не даст рекупераци при вращении в положительную сторону
@@ -700,6 +716,7 @@ void SM_Ctrl_Fast_Calc(TSM_Ctrl *p) {
 			RotorObserver.psi_d=0;
 			RotorObserver.psi_q=0;
 			rmp.output = 0;            //Обнуление задатчика интенсивности
+			power_limiter.reset(&power_limiter, refs.Iq_ref);
 			if (dlog.StartBits & (1 << 4)) //Если пользователь задал этот бит осциллографирования
 				dlog.set_mode(1, &dlog);  //Запуск осциллографа по этому событию
 			/*ENTRY END*/
@@ -795,8 +812,12 @@ void SM_Ctrl_Fast_Calc(TSM_Ctrl *p) {
 //			pid_spd.pid_fdb_reg3 = posspeedEqep.speed_filter.output; //обратная связь регулятора скорости - скорость ДПР
 			pid_spd.pid_fdb_reg3 = cur_par.speed;
 
-			pid_spd.pid_out_max = refs.Iq_ref; //Максимум выхода регулятора скорости - заданный ток
-			pid_spd.pid_out_min = -refs.Iq_ref; //минимум рег. скор. - отрицательный ток
+			long iq_limit = power_limiter.calc(
+					&power_limiter,
+					refs.Iq_ref,
+					cur_par.fPower.input);
+			pid_spd.pid_out_max = iq_limit; //Ток ограничен уставками тока и мощности
+			pid_spd.pid_out_min = -iq_limit; //ограничение действует в обоих направлениях
 			pid_spd.calc(&pid_spd); //расчет регулятора скорости
 
 

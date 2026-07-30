@@ -54,6 +54,7 @@ Texcitation pwm_ex = excitation_DEFAULTS;	//!< Модуль возбудител
 TDPReCAP DPReCAP = DPRECAP_DEFAULTS; //!< Модуль ДПР на элементах Холла
 TposspeedEqep posspeedEqep = POSSPEED_DEFAULTS; //!< Модуль ДПР типа энкодер
 TCurPar cur_par = TCUR_PAR_DEFAULTS; //!< Модуль расчета и хранения текущих показателей привода - мощность, скорость
+TPowerLimiter power_limiter = POWER_LIMITER_DEFAULTS; //!< Динамический ограничитель активной мощности
 TUserMemory UserMem = USERMEMORY_DEFAULTS; //!< Модуль работы с энергонезависимой памятью.
 Tled leds = LED_DEFAULTS; //!< модуль для красивого мигания светодиодами
 Tdrv8301interface drv8301 = DRV8301_INTERFACE_DEFAULTS; //!< Модуль для настройки драйвера ключей drv8301
