@@ -49,6 +49,8 @@ extern "C"
 #define PWM_TYPE_DC_DRIVE		4
 //!ШИМ для управления SRM
 #define PWM_TYPE_SRD			5
+//!Центрированная векторная ШИМ без привязки нулевого вектора к шинам
+#define PWM_TYPE_CENTERED_SV	6
 
 
 //! Ограничения величины "минимальной скважности", мкс, min

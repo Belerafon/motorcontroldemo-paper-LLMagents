@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import json
 from argparse import ArgumentParser, Namespace, SUPPRESS
+from contextlib import ExitStack
 from pathlib import Path
 
 from motor_debug_core.datalogger import Channel
@@ -36,6 +37,13 @@ def register(parser: ArgumentParser) -> None:
     parser.add_argument("--max-steady-error-percent", type=float, default=2.0)
     parser.add_argument("--max-speed-ripple-rpm", type=float, default=25.0)
     parser.add_argument("--current-limit-margin-percent", type=float, default=25.0)
+    parser.add_argument(
+        "--pwm-type",
+        type=int,
+        choices=(0, 1, 6),
+        default=None,
+        help="Temporarily select PWM type in RAM (6: centered SVPWM).",
+    )
     parser.add_argument(
         "--output",
         type=Path,
@@ -91,28 +99,38 @@ def run(args: Namespace, paths: ProjectPaths) -> None:
             ),
         ]
 
-        with session.temporary_engineering_value(
-            "sm_ctrl.run_mode", 5
-        ) as original_run_mode_raw:
-            with session.temporary_engineering_value(
-                "refs.speed_ref", TARGET_SPEED_RPM, unit="rpm"
-            ) as original_speed_ref_raw:
-                before = session.verify_mode(5)
-                capture = session.capture_triggered(
-                    channels,
-                    divider=args.sample_divider,
-                    trigger_bit=4,
-                    timeout_s=args.timeout,
-                    validated_snapshot=before,
+        with ExitStack() as stack:
+            original_run_mode_raw = stack.enter_context(
+                session.temporary_engineering_value("sm_ctrl.run_mode", 5)
+            )
+            original_speed_ref_raw = stack.enter_context(
+                session.temporary_engineering_value(
+                    "refs.speed_ref", TARGET_SPEED_RPM, unit="rpm"
                 )
+            )
+            if args.pwm_type is None:
+                original_pwm_type = session.target.read_u16("pwm.PWM_type")
+            else:
+                original_pwm_type = stack.enter_context(
+                    session.temporary_u16_value("pwm.PWM_type", args.pwm_type)
+                )
+            active_pwm_type = session.target.read_u16("pwm.PWM_type")
+            before = session.verify_mode(5)
+            capture = session.capture_triggered(
+                channels,
+                divider=args.sample_divider,
+                trigger_bit=4,
+                timeout_s=args.timeout,
+                validated_snapshot=before,
+            )
         restored = session.drive.snapshot()
+        restored_pwm_type = session.target.read_u16("pwm.PWM_type")
         if (
             restored.run_mode != original_run_mode_raw
             or restored.speed_ref_raw != original_speed_ref_raw
+            or restored_pwm_type != original_pwm_type
         ):
-            raise RuntimeError(
-                "Mode or speed reference was not restored after the test."
-            )
+            raise RuntimeError("Temporary test settings were not restored.")
 
     metrics = analyze_vector_500(
         capture.samples,
@@ -133,6 +151,12 @@ def run(args: Namespace, paths: ProjectPaths) -> None:
     )
     metrics["criteria"]["run_mode_restored"] = (
         restored.run_mode == original_run_mode_raw
+    )
+    metrics["criteria"]["requested_pwm_type_applied"] = (
+        args.pwm_type is None or active_pwm_type == args.pwm_type
+    )
+    metrics["criteria"]["pwm_type_restored"] = (
+        restored_pwm_type == original_pwm_type
     )
     metrics["criteria"]["capture_window_covers_limits"] = (
         metrics["window_s"]
@@ -158,6 +182,10 @@ def run(args: Namespace, paths: ProjectPaths) -> None:
             "trigger_timeout_s": args.timeout,
             "sample_divider": args.sample_divider,
             "speed_controller": speed_controller,
+            "requested_pwm_type": args.pwm_type,
+            "active_pwm_type": active_pwm_type,
+            "original_pwm_type": original_pwm_type,
+            "restored_pwm_type": restored_pwm_type,
             "original_run_mode_raw": original_run_mode_raw,
             "original_speed_reference_raw": original_speed_ref_raw,
         },

@@ -544,6 +544,126 @@ void PWM_Module_No_SV_Update(TPWM_Module *p) {
     EINT;
 }
 
+//! Функция центрированной векторной ШИМ
+
+//! В линейной области добавляет одинаковую синфазную составляющую ко всем
+//! трем фазам, поэтому линейные напряжения не изменяются, а нулевой вектор
+//! симметрично распределяется между верхней и нижней шинами.
+//! \memberof TPWM_Module
+void PWM_Module_Centered_SV_Update(TPWM_Module *p) {
+	_iq phaseA;
+	_iq phaseB;
+	_iq phaseC;
+	_iq phaseMax;
+	_iq phaseMin;
+	_iq phaseSpan;
+	_iq commonMode;
+	_iq scale;
+
+	//Загрузить ранее рассчитанные скважности вдали от момента переноса
+	//теневых регистров, чтобы все три фазы изменились в одном периоде ШИМ.
+	DINT;
+	if (NT_PWM0->TBCTR > 30) {
+		NT_PWM0->CMPA_bit.CMPA = (Uint16) p->GammaA;
+		NT_PWM1->CMPA_bit.CMPA = (Uint16) p->GammaB;
+		NT_PWM2->CMPA_bit.CMPA = (Uint16) p->GammaC;
+	}
+	EINT;
+
+	PWM_Module_NormInput(p);
+
+	//Обратное преобразование Кларка. Нормировка 2/3 переводит координаты
+	//базового вектора в фазные потенциалы относительно напряжения ЗПТ.
+	phaseA = _IQmpy(p->UalphaNorm, _IQ(2.0 / 3.0));
+	phaseB = _IQmpy(p->UbetaNorm, _1_SQRT3) - (phaseA >> 1);
+	phaseC = -_IQmpy(p->UbetaNorm, _1_SQRT3) - (phaseA >> 1);
+
+	//Сектор нужен только для диагностики; расчет скважностей от него не
+	//зависит и остается непрерывным на границах секторов.
+	if (phaseA >= phaseB) {
+		if (phaseB >= phaseC)
+			p->sector = 0;
+		else if (phaseA >= phaseC)
+			p->sector = 5;
+		else
+			p->sector = 4;
+	} else {
+		if (phaseA >= phaseC)
+			p->sector = 1;
+		else if (phaseB >= phaseC)
+			p->sector = 2;
+		else
+			p->sector = 3;
+	}
+
+	phaseMax = phaseA;
+	if (phaseB > phaseMax)
+		phaseMax = phaseB;
+	if (phaseC > phaseMax)
+		phaseMax = phaseC;
+
+	phaseMin = phaseA;
+	if (phaseB < phaseMin)
+		phaseMin = phaseB;
+	if (phaseC < phaseMin)
+		phaseMin = phaseC;
+
+	//При выходе за физическую границу инвертора пропорционально уменьшаем
+	//вектор до границы шестиугольника, сохраняя его направление.
+	phaseSpan = phaseMax - phaseMin;
+	if (phaseSpan > _IQ(1.0)) {
+		scale = _IQdiv(_IQ(1.0), phaseSpan);
+		phaseA = _IQmpy(phaseA, scale);
+		phaseB = _IQmpy(phaseB, scale);
+		phaseC = _IQmpy(phaseC, scale);
+		p->UalphaNorm = _IQmpy(p->UalphaNorm, scale);
+		p->UbetaNorm = _IQmpy(p->UbetaNorm, scale);
+		p->ULimitation = 1;
+
+		phaseMax = phaseA;
+		if (phaseB > phaseMax)
+			phaseMax = phaseB;
+		if (phaseC > phaseMax)
+			phaseMax = phaseC;
+
+		phaseMin = phaseA;
+		if (phaseB < phaseMin)
+			phaseMin = phaseB;
+		if (phaseC < phaseMin)
+			phaseMin = phaseC;
+	}
+
+	//Инжекция нулевой последовательности. После нее крайние фазные
+	//потенциалы равноудалены от обеих шин.
+	commonMode = (phaseMax + phaseMin) >> 1;
+	p->GammaA = _IQmpy(p->k_pwm, _IQ(0.5) - phaseA + commonMode);
+	p->GammaB = _IQmpy(p->k_pwm, _IQ(0.5) - phaseB + commonMode);
+	p->GammaC = _IQmpy(p->k_pwm, _IQ(0.5) - phaseC + commonMode);
+
+	if (p->GammaA < 0)
+		p->GammaA = 0;
+	if (p->GammaB < 0)
+		p->GammaB = 0;
+	if (p->GammaC < 0)
+		p->GammaC = 0;
+
+	if (p->GammaA > p->k_pwm)
+		p->GammaA = p->k_pwm;
+	if (p->GammaB > p->k_pwm)
+		p->GammaB = p->k_pwm;
+	if (p->GammaC > p->k_pwm)
+		p->GammaC = p->k_pwm;
+
+	//Повторная попытка нужна при равенстве частот расчета и ШИМ.
+	DINT;
+	if (NT_PWM0->TBCTR > 30) {
+		NT_PWM0->CMPA_bit.CMPA = (Uint16) p->GammaA;
+		NT_PWM1->CMPA_bit.CMPA = (Uint16) p->GammaB;
+		NT_PWM2->CMPA_bit.CMPA = (Uint16) p->GammaC;
+	}
+	EINT;
+}
+
 //! Функция синусоидальной ШИМ
 
 //! \memberof TPWM_Module
@@ -728,6 +848,10 @@ void PWM_Module_Update(TPWM_Module *p) {
 		}
 		case PWM_TYPE_SIN_PWM: {
 			PWM_Module_Sin_Update(p);
+			break;
+		}
+		case PWM_TYPE_CENTERED_SV: {
+			PWM_Module_Centered_SV_Update(p);
 			break;
 		}
 		case PWM_TYPE_DC_DRIVE: {
