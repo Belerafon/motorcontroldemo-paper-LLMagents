@@ -27,6 +27,73 @@
 #include "V_IQmath.h"
 #include "main.h"
 
+#define POWER_LIMIT_ENABLE_VALUE 1
+#define POWER_LIMIT_DEFAULT_GAIN _IQ(0.4)
+
+//!Динамический предел тока для поддержания заданной активной мощности.
+//!
+//! DebugW3 = 1 включает ограничитель, DebugW4 задает мощность в ваттах,
+//! DebugF1 задает коэффициент коррекции за один такт 100 мкс (0 = 0.4).
+//! При выключении функция точно возвращает прежний фиксированный предел Iq.
+static long SM_Ctrl_PowerLimitedIqMax(TSM_Ctrl *p, long current_limit) {
+	long actual_power;
+	long correction;
+	long gain = POWER_LIMIT_DEFAULT_GAIN;
+	long power_limit_pu;
+	long next_iq_limit;
+	int64_t scaled_limit;
+	int64_t accumulated_limit;
+
+	if ((DebugW3 != POWER_LIMIT_ENABLE_VALUE) || (DebugW4 <= 0)
+			|| (drv_params.power <= 0) || (current_limit <= 0)) {
+		p->power_limit_enabled_prev = 0;
+		p->power_iq_limit = current_limit;
+		Debug1 = current_limit;
+		Debug2 = 0;
+		Debug3 = 0;
+		return current_limit;
+	}
+
+	// drv_params.power имеет формат Q6 и хранит базовую мощность в ваттах.
+	// Результат нужен в IQ24: W * 2^(24+6) / power_Q6.
+	scaled_limit = ((int64_t) DebugW4 << 30) / drv_params.power;
+	if (scaled_limit > 0x7FFFFFFFLL)
+		power_limit_pu = 0x7FFFFFFF;
+	else
+		power_limit_pu = (long) scaled_limit;
+
+	if ((DebugF1 > 0.0f) && (DebugF1 <= 1.0f))
+		gain = _IQ(DebugF1);
+
+	if (!p->power_limit_enabled_prev) {
+		// Мягкий пуск ограничителя не допускает выброс полной мощности.
+		p->power_iq_limit = 0;
+		p->power_limit_enabled_prev = 1;
+	}
+
+	// Для контура берем мгновенную мощность до экранного фильтра с
+	// постоянной времени 100 мс, иначе ограничение реагировало бы запоздало.
+	actual_power = cur_par.fPower.input;
+	if (actual_power < 0)
+		actual_power = (actual_power == (long) 0x80000000)
+				? 0x7FFFFFFF : -actual_power;
+
+	correction = _IQmpy(gain, power_limit_pu - actual_power);
+	accumulated_limit = (int64_t) p->power_iq_limit + correction;
+	if (accumulated_limit < 0)
+		next_iq_limit = 0;
+	else if (accumulated_limit > current_limit)
+		next_iq_limit = current_limit;
+	else
+		next_iq_limit = (long) accumulated_limit;
+	p->power_iq_limit = next_iq_limit;
+
+	// Диагностика: эффективный Iq, уставка мощности и состояние 1/2.
+	Debug1 = next_iq_limit;
+	Debug2 = power_limit_pu;
+	Debug3 = (next_iq_limit < current_limit) ? 2 : 1;
+	return next_iq_limit;
+}
 
 //!Инициализация
 //!Всякие обнуления
@@ -34,6 +101,8 @@
 void SM_Ctrl_Init(TSM_Ctrl *p) {
 	p->state_prev = 0xff;
 	p->state = 0x00;
+	p->power_iq_limit = 0;
+	p->power_limit_enabled_prev = 0;
 }
 
 //!Фоновый расчет
@@ -120,6 +189,11 @@ void SM_Ctrl_Fast_Calc(TSM_Ctrl *p) {
 		cur_par.Is = 0;
 		cur_par.power = 0;
 		cur_par.speed = 0;
+		p->power_iq_limit = 0;
+		p->power_limit_enabled_prev = 0;
+		Debug1 = 0;
+		Debug2 = 0;
+		Debug3 = 0;
 		//  cur_par.ThetaRefCurr=0;
 
 		/* Конец */
@@ -414,10 +488,11 @@ void SM_Ctrl_Fast_Calc(TSM_Ctrl *p) {
 			pid_spd.pid_fdb_reg3 = cur_par.speed; //обратная связь регулятора скорости - скорость ДПР
 
 
-			pid_spd.pid_out_max = refs.Iq_ref; //Максимум выхода регулятора скорости - заданный ток
+			Temp1 = SM_Ctrl_PowerLimitedIqMax(p, refs.Iq_ref);
+			pid_spd.pid_out_max = Temp1; //Токовый предел с опциональным ограничением мощности
 
 			if (sw.recuperation_ena & 1)            //если разрешена рекуперация
-				pid_spd.pid_out_min = -refs.Iq_ref; //минимум рег. скор. - отрицательный ток
+				pid_spd.pid_out_min = -Temp1; //симметричный предел рекуперации
 			else
 				//иначе
 				pid_spd.pid_out_min = 0; //нулевой ток не даст рекупераци при вращении в положительную сторону
@@ -631,10 +706,11 @@ void SM_Ctrl_Fast_Calc(TSM_Ctrl *p) {
 			pid_spd.pid_fdb_reg3 = posspeedEqep.speed_elec; //обратная связь регулятора скорости - скорость ДПР
 
 
-			pid_spd.pid_out_max = refs.Iq_ref; //Максимум выхода регулятора скорости - заданный ток
+			Temp1 = SM_Ctrl_PowerLimitedIqMax(p, refs.Iq_ref);
+			pid_spd.pid_out_max = Temp1; //Токовый предел с опциональным ограничением мощности
 
 			if (sw.recuperation_ena & 1)            //если разрешена рекуперация
-				pid_spd.pid_out_min = -refs.Iq_ref; //минимум рег. скор. - отрицательный ток
+				pid_spd.pid_out_min = -Temp1; //симметричный предел рекуперации
 			else
 				//иначе
 				pid_spd.pid_out_min = 0; //нулевой ток не даст рекупераци при вращении в положительную сторону

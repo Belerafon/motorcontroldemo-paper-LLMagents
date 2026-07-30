@@ -4,7 +4,11 @@ import math
 import unittest
 from dataclasses import dataclass
 
-from tests.e2e.metrics import analyze_current_mode4, analyze_vector_500
+from tests.e2e.metrics import (
+    analyze_current_mode4,
+    analyze_power_limited_acceleration,
+    analyze_vector_500,
+)
 
 
 @dataclass(frozen=True)
@@ -98,6 +102,56 @@ class Vector500MetricsTests(unittest.TestCase):
 
         self.assertFalse(metrics["passed"])
         self.assertFalse(metrics["criteria"]["overshoot"])
+
+
+class PowerLimitedAccelerationMetricsTests(unittest.TestCase):
+    @staticmethod
+    def samples(*, excessive_power: bool = False) -> list[SyntheticSample]:
+        result = []
+        for number in range(256):
+            time_s = number * 0.002
+            speed = min(500.0, 1250.0 * time_s)
+            limited = time_s >= 0.04 and speed < 475.0
+            iq_limit = 0.45 if limited else 1.0
+            active_power = 60.0 * (1.0 - math.exp(-time_s / 0.012))
+            if excessive_power and limited:
+                active_power = 90.0
+            result.append(
+                SyntheticSample(
+                    number,
+                    time_s,
+                    {
+                        "speed_rpm": speed,
+                        "active_power_w": active_power,
+                        "iq_limit_a": iq_limit,
+                        "iq_ref_a": min(0.98, iq_limit),
+                    },
+                )
+            )
+        return result
+
+    def test_constant_power_acceleration_passes(self) -> None:
+        metrics = analyze_power_limited_acceleration(
+            self.samples(),
+            target_speed_rpm=500.0,
+            power_limit_w=60.0,
+            current_limit_a=1.0,
+        )
+
+        self.assertTrue(metrics["passed"])
+        self.assertGreaterEqual(metrics["limited_samples"], 12)
+        self.assertLess(metrics["mean_power_error_percent"], 20.0)
+
+    def test_power_overshoot_fails_acceptance(self) -> None:
+        metrics = analyze_power_limited_acceleration(
+            self.samples(excessive_power=True),
+            target_speed_rpm=500.0,
+            power_limit_w=60.0,
+            current_limit_a=1.0,
+        )
+
+        self.assertFalse(metrics["passed"])
+        self.assertFalse(metrics["criteria"]["power_overshoot"])
 
 
 if __name__ == "__main__":

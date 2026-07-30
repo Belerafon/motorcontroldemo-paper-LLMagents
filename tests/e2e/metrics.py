@@ -343,3 +343,91 @@ def analyze_vector_500(
     metrics["criteria"] = criteria
     metrics["passed"] = all(criteria.values())
     return metrics
+
+
+def analyze_power_limited_acceleration(
+    samples: Sequence[Any],
+    *,
+    target_speed_rpm: float,
+    power_limit_w: float,
+    current_limit_a: float,
+    max_power_overshoot_percent: float = 25.0,
+    max_mean_power_error_percent: float = 20.0,
+    max_time_to_95_s: float = 0.5,
+    min_limited_samples: int = 12,
+) -> dict[str, Any]:
+    if power_limit_w <= 0 or current_limit_a <= 0:
+        raise ValueError("Power and current limits must be positive.")
+    time_s = _times(samples)
+    speed = _series(samples, "speed_rpm")
+    power = [abs(value) for value in _series(samples, "active_power_w")]
+    iq_limit = [abs(value) for value in _series(samples, "iq_limit_a")]
+    iq_ref = [abs(value) for value in _series(samples, "iq_ref_a")]
+    period = _sample_period(time_s)
+    direction = 1.0 if target_speed_rpm >= 0 else -1.0
+    start = _first_crossing(speed, target_speed_rpm, 0.01, 0) or 0
+    i95 = _first_crossing(speed, target_speed_rpm, 0.95, start)
+    acceleration_stop = i95 if i95 is not None else len(samples) - 1
+    limited = [
+        index
+        for index in range(start, acceleration_stop + 1)
+        if iq_limit[index] < current_limit_a * 0.98
+    ]
+    # Отбрасываем первые два отсчета включения ограничения: они отражают
+    # переход внешнего контура, а не участок поддержания мощности.
+    tracking = limited[2:] if len(limited) > 2 else limited
+    tracking_power = [power[index] for index in tracking]
+    acceleration_power = power[start : acceleration_stop + 1]
+    allowed_peak_power = power_limit_w * (
+        1.0 + max_power_overshoot_percent / 100.0
+    )
+    mean_power = _mean(tracking_power) if tracking_power else 0.0
+    mean_error_percent = (
+        abs(mean_power - power_limit_w) / power_limit_w * 100.0
+    )
+    iq_tracking_ok = all(
+        iq_ref[index] <= iq_limit[index] + max(0.02, current_limit_a * 0.05)
+        for index in limited
+    )
+    metrics: dict[str, Any] = {
+        "samples": len(samples),
+        "sample_period_s": period,
+        "window_s": float(time_s[-1] - time_s[0]),
+        "target_speed_rpm": target_speed_rpm,
+        "power_limit_w": power_limit_w,
+        "limited_samples": len(limited),
+        "tracking_samples": len(tracking),
+        "mean_power_on_limited_interval_w": mean_power,
+        "mean_power_error_percent": mean_error_percent,
+        "peak_power_during_acceleration_w": max(acceleration_power),
+        "minimum_effective_iq_limit_a": min(iq_limit),
+        "peak_abs_iq_reference_a": max(iq_ref),
+        "time_to_95_percent_s": (
+            None if i95 is None else float(time_s[i95] - time_s[start])
+        ),
+    }
+    criteria = {
+        "enough_samples": len(samples) >= 64,
+        "power_limiter_became_active": len(limited) >= min_limited_samples,
+        "power_reached_setpoint": mean_power >= power_limit_w * 0.75,
+        "mean_power_tracking": (
+            mean_error_percent <= max_mean_power_error_percent
+        ),
+        "power_overshoot": max(acceleration_power) <= allowed_peak_power,
+        "iq_reference_follows_dynamic_limit": iq_tracking_ok,
+        "reached_95_percent": (
+            metrics["time_to_95_percent_s"] is not None
+            and metrics["time_to_95_percent_s"] <= max_time_to_95_s
+        ),
+    }
+    metrics["limits"] = {
+        "current_limit_a": current_limit_a,
+        "max_power_overshoot_percent": max_power_overshoot_percent,
+        "allowed_peak_power_w": allowed_peak_power,
+        "max_mean_power_error_percent": max_mean_power_error_percent,
+        "max_time_to_95_s": max_time_to_95_s,
+        "min_limited_samples": min_limited_samples,
+    }
+    metrics["criteria"] = criteria
+    metrics["passed"] = all(criteria.values())
+    return metrics

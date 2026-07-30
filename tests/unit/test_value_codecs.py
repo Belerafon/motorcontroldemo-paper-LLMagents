@@ -11,10 +11,18 @@ TOOLKIT = (
 )
 sys.path.insert(0, str(TOOLKIT))
 
+from motor_debug_core.object_dictionary import ObjectDictionary  # noqa: E402
 from motor_debug_core.values import FixedPoint, Float32, SignedInt32  # noqa: E402
 
 
 class ValueCodecTests(unittest.TestCase):
+    def test_object_dictionary_applies_scale_q(self) -> None:
+        dictionary = ObjectDictionary(Path("cood.xml"))
+        codec = dictionary.codec("cur_par.power", unit="W")
+
+        self.assertIsInstance(codec, FixedPoint)
+        self.assertEqual(codec.scale, 300.0)
+
     def test_fixed_point_round_trip_in_engineering_units(self) -> None:
         codec = FixedPoint(q=24, scale=500.0, unit="rpm")
 

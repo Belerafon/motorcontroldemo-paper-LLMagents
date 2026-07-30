@@ -15,7 +15,10 @@ class ObjectDictionary:
         if scale_numbers is None:
             raise RuntimeError("cood.xml does not contain scale_numbers.")
         self.scales = {
-            int(element.tag.split("_", 1)[1]): float(element.attrib["possible_value"])
+            int(element.tag.split("_", 1)[1]): (
+                float(element.attrib["possible_value"])
+                / float(1 << int(element.attrib.get("scaleQ") or 0))
+            )
             for element in scale_numbers
             if element.attrib.get("possible_value")
         }
