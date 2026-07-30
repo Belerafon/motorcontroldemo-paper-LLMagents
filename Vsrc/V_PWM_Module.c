@@ -379,6 +379,41 @@ void PWM_Module_Init(TPWM_Module *p) {
 
 
 
+//! Ограничение входного вектора и компенсация напряжения звена постоянного тока.
+static void PWM_Module_LimitInput(TPWM_Module* p, _iq max_limit) {
+    _iq knorm;
+
+    p->UalphaNorm=p->UalphaRef;
+    p->UbetaNorm=p->UbetaRef;
+
+    //Амплитуда задания до компенсации напряжения звена.
+    p->U_mag=_IQmag(p->UalphaNorm,p->UbetaNorm);
+
+    p->UdCorTmp=_IQdiv(_IQ(1.0),(_IQ(1.0)+_IQmpy((adc.Udc_meas-_IQ(1.0)),p->UdCompK)));
+    if (p->UdCompEnable&1) {
+        p->UalphaNorm=_IQmpy(p->UalphaNorm, p->UdCorTmp);
+        p->UbetaNorm=_IQmpy(p->UbetaNorm, p->UdCorTmp);
+    }
+
+    if (p->U_lim>max_limit)
+        p->U_lim=max_limit;
+
+    knorm=_IQmag(p->UalphaNorm,p->UbetaNorm);
+    if (p->U_lim<=0) {
+        p->UalphaNorm=0;
+        p->UbetaNorm=0;
+        p->ULimitation=1;
+        return;
+    }
+    if (knorm>=p->U_lim) {
+        knorm=_IQdiv(p->U_lim,knorm);
+        p->UalphaNorm=_IQmpy(knorm,p->UalphaNorm);
+        p->UbetaNorm=_IQmpy(knorm,p->UbetaNorm);
+        p->ULimitation=1;
+    } else
+        p->ULimitation=0;
+}
+
 //! Нормирование входных величин.
 
 //!Учитывает компенсацию напряжения при изменении Ud,
@@ -386,35 +421,9 @@ void PWM_Module_Init(TPWM_Module *p) {
 //!выполняет смену базиса, относительно которого идет нормировка.
 //! \memberof TPWM_Module
 void PWM_Module_NormInput(TPWM_Module* p) {
-    _iq knorm;
-
-    p->UalphaNorm=p->UalphaRef;
-    p->UbetaNorm=p->UbetaRef;
-
-    //находим амплитуду (без учета ограничения)
-    p->U_mag=_IQmag(p->UalphaNorm,p->UbetaNorm);
-
-
-    p->UdCorTmp=_IQdiv(_IQ(1.0),(_IQ(1.0)+_IQmpy((adc.Udc_meas-_IQ(1.0)),p->UdCompK)));
-    //учет пульсаций напряжения на Ud
-    if (p->UdCompEnable&1) { //он включен?
-        p->UalphaNorm=_IQmpy(p->UalphaNorm, p->UdCorTmp);//изменим пропорционально коэфф-ту коррекции
-        p->UbetaNorm=_IQmpy(p->UbetaNorm, p->UdCorTmp);//и это тоже
-    }
-
     //вписывание заданной амплитуды напряжения в окружность, вписываемую в шестиугольник базывых векторов
     //когда U_lim=1.0, это и есть такая окружность. Бывает, что мы хотим вписывать в шестиугольник. Тогда просто задираем вверх огрианичение U_lim
-    if (p->U_lim>_IQ(1.0/0.866)) //но нет смысла задирать выше максимально-реализ. напряжения (больше базового вектора)
-        p->U_lim=_IQ(1.0/0.866);
-    /* рассчитываем амплитуду вектора, который хотим отработать*/
-    knorm=_IQmag(p->UalphaNorm,p->UbetaNorm);//плюс нормируем от 540 к 311
-    if (knorm>=p->U_lim) { //он больше, чем наше ограничение?
-        knorm=_IQdiv(p->U_lim,knorm);//в эту же переменную, для экономии, рассчитываем нормировку
-        p->UalphaNorm=_IQmpy(knorm,p->UalphaNorm);//уменьшаем пропорционально нормировке
-        p->UbetaNorm=_IQmpy(knorm,p->UbetaNorm);//и это
-        p->ULimitation=1;//флаг о том, что идет ограничение напряжения
-    } else
-        p->ULimitation=0;
+    PWM_Module_LimitInput(p, _IQ(1.0/0.866));
 
     /* рассчитываем приведенные вектора*/
     /* До этого момента напряжение нормировалось относительно
@@ -535,6 +544,103 @@ void PWM_Module_No_SV_Update(TPWM_Module *p) {
     //Присвоение трех уставок сравнения только если счетчик таймера далек от нуля, чтобы
     //предотвратить частичное применение скважностей, что в векторной ШИМ может быть критично и испортить период ШИМ.
     //Второй раз - чтобы предотвратить ситуацию с постоянной "незагрузкой" при равенстве частот расчета и ШИМ
+    DINT;
+    if (NT_PWM0->TBCTR>30) {
+        NT_PWM0->CMPA_bit.CMPA=(Uint16)p->GammaA;
+        NT_PWM1->CMPA_bit.CMPA=(Uint16)p->GammaB;
+        NT_PWM2->CMPA_bit.CMPA=(Uint16)p->GammaC;
+    }
+    EINT;
+}
+
+//! Функция центрированной векторной ШИМ.
+//!
+//! Общая составляющая выбирается как -(max+min)/2. Благодаря этому свободное
+//! время поровну распределяется между верхним и нижним нулевыми векторами:
+//! до границы линейной модуляции ни одна фаза не привязана к шине.
+//! Круговой линейный диапазон равен 1.0 о.е. против 0.866 о.е. у
+//! синусоидальной ШИМ.
+//!
+//! \memberof TPWM_Module
+void PWM_Module_Centered_SV_Update(TPWM_Module *p) {
+    _iq PhaseA;
+    _iq PhaseB;
+    _iq PhaseC;
+    _iq PhaseMax;
+    _iq PhaseMin;
+    _iq CommonMode;
+    _iq PhaseScale;
+    _iq PhasePtsA;
+    _iq PhasePtsB;
+    _iq PhasePtsC;
+
+    //Сначала передаем рассчитанные на предыдущем вызове значения. Повторная
+    //запись в конце исключает постоянный пропуск загрузки при совпадении
+    //частот расчета системы управления и ШИМ.
+    DINT;
+    if (NT_PWM0->TBCTR>30) {
+        NT_PWM0->CMPA_bit.CMPA=(Uint16)p->GammaA;
+        NT_PWM1->CMPA_bit.CMPA=(Uint16)p->GammaB;
+        NT_PWM2->CMPA_bit.CMPA=(Uint16)p->GammaC;
+    }
+    EINT;
+
+    //Для центрированной SVPWM круговой линейный диапазон заканчивается при
+    //амплитуде 1.0 о.е. Значения выше потребовали бы перемодуляции.
+    PWM_Module_LimitInput(p, _IQ(1.0));
+
+    //То же фазное масштабирование, что в синусоидальной ШИМ. В отличие от нее
+    //общая составляющая далее центрирует весь набор фазных потенциалов.
+    PhaseScale=_1_SQRT3;
+    p->UalphaNorm=_IQmpy(p->UalphaNorm,PhaseScale);
+    p->UbetaNorm=_IQmpy(p->UbetaNorm,PhaseScale);
+
+    PhaseA=p->UalphaNorm;
+    PhaseB=_IQmpy(p->UbetaNorm,_IQ(0.8660254))-(p->UalphaNorm>>1);
+    PhaseC=-_IQmpy(p->UbetaNorm,_IQ(0.8660254))-(p->UalphaNorm>>1);
+
+    PhaseMax=PhaseA;
+    if (PhaseB>PhaseMax) PhaseMax=PhaseB;
+    if (PhaseC>PhaseMax) PhaseMax=PhaseC;
+
+    PhaseMin=PhaseA;
+    if (PhaseB<PhaseMin) PhaseMin=PhaseB;
+    if (PhaseC<PhaseMin) PhaseMin=PhaseC;
+
+    CommonMode=-((PhaseMax+PhaseMin)>>1);
+    PhasePtsA=_IQ(0.5)-(PhaseA+CommonMode);
+    PhasePtsB=_IQ(0.5)-(PhaseB+CommonMode);
+    PhasePtsC=_IQ(0.5)-(PhaseC+CommonMode);
+
+    //Номер сектора определяется порядком фазных потенциалов.
+    if (PhaseA>=PhaseB) {
+        if (PhaseB>=PhaseC)
+            p->sector=0;
+        else if (PhaseA>=PhaseC)
+            p->sector=5;
+        else
+            p->sector=4;
+    } else {
+        if (PhaseA>=PhaseC)
+            p->sector=1;
+        else if (PhaseB>=PhaseC)
+            p->sector=2;
+        else
+            p->sector=3;
+    }
+
+    p->GammaA=_IQmpy(p->k_pwm,PhasePtsA);
+    p->GammaB=_IQmpy(p->k_pwm,PhasePtsB);
+    p->GammaC=_IQmpy(p->k_pwm,PhasePtsC);
+
+    if (p->GammaA<0) p->GammaA=0;
+    if (p->GammaB<0) p->GammaB=0;
+    if (p->GammaC<0) p->GammaC=0;
+
+    if (p->GammaA>p->k_pwm) p->GammaA=p->k_pwm+1;
+    if (p->GammaB>p->k_pwm) p->GammaB=p->k_pwm+1;
+    if (p->GammaC>p->k_pwm) p->GammaC=p->k_pwm+1;
+
     DINT;
     if (NT_PWM0->TBCTR>30) {
         NT_PWM0->CMPA_bit.CMPA=(Uint16)p->GammaA;
@@ -728,6 +834,10 @@ void PWM_Module_Update(TPWM_Module *p) {
 		}
 		case PWM_TYPE_SIN_PWM: {
 			PWM_Module_Sin_Update(p);
+			break;
+		}
+		case PWM_TYPE_CENTERED_SV: {
+			PWM_Module_Centered_SV_Update(p);
 			break;
 		}
 		case PWM_TYPE_DC_DRIVE: {

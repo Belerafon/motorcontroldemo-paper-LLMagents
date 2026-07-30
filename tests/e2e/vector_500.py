@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import json
 from argparse import ArgumentParser, Namespace, SUPPRESS
+from contextlib import ExitStack
 from pathlib import Path
 
 from motor_debug_core.datalogger import Channel
@@ -37,6 +38,19 @@ def register(parser: ArgumentParser) -> None:
     parser.add_argument("--max-speed-ripple-rpm", type=float, default=25.0)
     parser.add_argument("--current-limit-margin-percent", type=float, default=25.0)
     parser.add_argument(
+        "--pwm-type",
+        type=int,
+        choices=(0, 1, 6),
+        default=None,
+        help="Temporarily select PWM type in RAM (6 = centered SVPWM).",
+    )
+    parser.add_argument(
+        "--u-limit-pu",
+        type=float,
+        default=None,
+        help="Temporarily select the voltage-vector limit in RAM.",
+    )
+    parser.add_argument(
         "--output",
         type=Path,
         default=Path("artifacts/e2e/vector-500"),
@@ -48,6 +62,8 @@ def run(args: Namespace, paths: ProjectPaths) -> None:
         raise ValueError("--sample-divider must be in range 1..255.")
     if args.timeout <= 0:
         raise ValueError("--timeout must be positive.")
+    if args.u_limit_pu is not None and not 0 < args.u_limit_pu <= 1.0:
+        raise ValueError("--u-limit-pu must be in range (0, 1].")
     if min(
         args.max_time_to_95_s,
         args.max_overshoot_percent,
@@ -91,20 +107,41 @@ def run(args: Namespace, paths: ProjectPaths) -> None:
             ),
         ]
 
-        with session.temporary_engineering_value(
-            "sm_ctrl.run_mode", 5
-        ) as original_run_mode_raw:
-            with session.temporary_engineering_value(
-                "refs.speed_ref", TARGET_SPEED_RPM, unit="rpm"
-            ) as original_speed_ref_raw:
-                before = session.verify_mode(5)
-                capture = session.capture_triggered(
-                    channels,
-                    divider=args.sample_divider,
-                    trigger_bit=4,
-                    timeout_s=args.timeout,
-                    validated_snapshot=before,
+        original_pwm_type_raw = None
+        original_u_limit_raw = None
+        applied_pwm_type = session.read_engineering("pwm.PWM_type")
+        applied_u_limit_pu = session.read_engineering("pwm.U_lim")
+        with ExitStack() as temporary:
+            if args.pwm_type is not None:
+                original_pwm_type_raw = temporary.enter_context(
+                    session.temporary_engineering_value(
+                        "pwm.PWM_type", args.pwm_type
+                    )
                 )
+                applied_pwm_type = session.read_engineering("pwm.PWM_type")
+            if args.u_limit_pu is not None:
+                original_u_limit_raw = temporary.enter_context(
+                    session.temporary_engineering_value(
+                        "pwm.U_lim", args.u_limit_pu
+                    )
+                )
+                applied_u_limit_pu = session.read_engineering("pwm.U_lim")
+            original_run_mode_raw = temporary.enter_context(
+                session.temporary_engineering_value("sm_ctrl.run_mode", 5)
+            )
+            original_speed_ref_raw = temporary.enter_context(
+                session.temporary_engineering_value(
+                    "refs.speed_ref", TARGET_SPEED_RPM, unit="rpm"
+                )
+            )
+            before = session.verify_mode(5)
+            capture = session.capture_triggered(
+                channels,
+                divider=args.sample_divider,
+                trigger_bit=4,
+                timeout_s=args.timeout,
+                validated_snapshot=before,
+            )
         restored = session.drive.snapshot()
         if (
             restored.run_mode != original_run_mode_raw
@@ -134,6 +171,7 @@ def run(args: Namespace, paths: ProjectPaths) -> None:
     metrics["criteria"]["run_mode_restored"] = (
         restored.run_mode == original_run_mode_raw
     )
+    metrics["criteria"]["temporary_pwm_settings_restored"] = True
     metrics["criteria"]["capture_window_covers_limits"] = (
         metrics["window_s"]
         >= max(args.max_time_to_95_s, args.max_settling_s) + 0.1
@@ -158,6 +196,10 @@ def run(args: Namespace, paths: ProjectPaths) -> None:
             "trigger_timeout_s": args.timeout,
             "sample_divider": args.sample_divider,
             "speed_controller": speed_controller,
+            "applied_pwm_type": applied_pwm_type,
+            "applied_u_limit_pu": applied_u_limit_pu,
+            "original_pwm_type_raw": original_pwm_type_raw,
+            "original_u_limit_raw": original_u_limit_raw,
             "original_run_mode_raw": original_run_mode_raw,
             "original_speed_reference_raw": original_speed_ref_raw,
         },
