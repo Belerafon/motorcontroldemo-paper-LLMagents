@@ -4,7 +4,11 @@ import math
 import unittest
 from dataclasses import dataclass
 
-from tests.e2e.metrics import analyze_current_mode4, analyze_vector_500
+from tests.e2e.metrics import (
+    analyze_constant_power,
+    analyze_current_mode4,
+    analyze_vector_500,
+)
 
 
 @dataclass(frozen=True)
@@ -98,6 +102,52 @@ class Vector500MetricsTests(unittest.TestCase):
 
         self.assertFalse(metrics["passed"])
         self.assertFalse(metrics["criteria"]["overshoot"])
+
+
+class ConstantPowerMetricsTests(unittest.TestCase):
+    @staticmethod
+    def samples(*, excessive_power: bool = False) -> list[SyntheticSample]:
+        result = []
+        for number in range(2001):
+            time_s = number * 0.001
+            speed = min(500.0, 300.0 * time_s)
+            power = 60.0 * (1.0 - math.exp(-time_s / 0.05))
+            if excessive_power:
+                power *= 1.35
+            dynamic_limit = max(0.25, 1.0 - 0.35 * time_s)
+            result.append(
+                SyntheticSample(
+                    number,
+                    time_s,
+                    {
+                        "speed_rpm": speed,
+                        "power_w": power,
+                        "current_limit_a": dynamic_limit,
+                        "iq_a": dynamic_limit * 0.95,
+                    },
+                )
+            )
+        return result
+
+    def test_constant_power_plateau_passes(self) -> None:
+        metrics = analyze_constant_power(
+            self.samples(), power_limit_w=60.0, current_limit_a=1.0
+        )
+
+        self.assertTrue(metrics["passed"])
+        self.assertLess(metrics["controlled_mean_error_percent"], 10.0)
+        self.assertTrue(metrics["criteria"]["current_limit_reduced_dynamically"])
+
+    def test_excessive_power_fails_acceptance(self) -> None:
+        metrics = analyze_constant_power(
+            self.samples(excessive_power=True),
+            power_limit_w=60.0,
+            current_limit_a=1.0,
+        )
+
+        self.assertFalse(metrics["passed"])
+        self.assertFalse(metrics["criteria"]["mean_power_tracks_limit"])
+        self.assertFalse(metrics["criteria"]["power_overshoot"])
 
 
 if __name__ == "__main__":

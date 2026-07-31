@@ -35,6 +35,7 @@ TPidReg3 pid_iq = PIDREG3_DEFAULTS; //!<Рег. тока по оси q
 TPidReg3 pid_ia = PIDREG3_DEFAULTS; //!<Рег. тока якоря ДПТ
 TPidReg3 pid_spd = PIDREG3_DEFAULTS; //!<Рег. скорости
 TPidReg3_pos pid_pos = PIDREG3_DEFAULTS_POS; //!<Рег. положения
+TPowerLimit power_limiter = POWER_LIMIT_DEFAULTS; //!<Динамический ограничитель активной мощности
 TRelayReg i_a_reg = RELAY_REG_DEFAULTS;	//!<регулятор тока фазы A (для модели SRM)
 TRelayReg i_b_reg = RELAY_REG_DEFAULTS;	//!<регулятор тока фазы A (для модели SRM)
 TRelayReg i_c_reg = RELAY_REG_DEFAULTS;	//!<регулятор тока фазы A (для модели SRM)

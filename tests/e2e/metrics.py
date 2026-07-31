@@ -343,3 +343,106 @@ def analyze_vector_500(
     metrics["criteria"] = criteria
     metrics["passed"] = all(criteria.values())
     return metrics
+
+
+def analyze_constant_power(
+    samples: Sequence[Any],
+    *,
+    power_limit_w: float,
+    current_limit_a: float,
+    target_speed_rpm: float = 500.0,
+    engagement_settling_s: float = 0.30,
+    min_controlled_duration_s: float = 0.20,
+    max_mean_error_percent: float = 10.0,
+    max_overshoot_percent: float = 30.0,
+    max_ripple_percent: float = 30.0,
+) -> dict[str, Any]:
+    if power_limit_w <= 0 or current_limit_a <= 0:
+        raise ValueError("Positive power and current limits are required.")
+
+    time_s = _times(samples)
+    power = [abs(value) for value in _series(samples, "power_w")]
+    speed = [abs(value) for value in _series(samples, "speed_rpm")]
+    dynamic_limit = [
+        abs(value) for value in _series(samples, "current_limit_a")
+    ]
+    period = _sample_period(time_s)
+
+    first_limit_crossing = next(
+        (index for index, value in enumerate(power) if value >= 0.90 * power_limit_w),
+        None,
+    )
+    start = (
+        min(
+            len(samples),
+            first_limit_crossing + math.ceil(engagement_settling_s / period),
+        )
+        if first_limit_crossing is not None
+        else None
+    )
+    speed_stop = next(
+        (
+            index
+            for index, value in enumerate(speed)
+            if value >= 0.95 * abs(target_speed_rpm)
+        ),
+        len(samples),
+    )
+    stop = max(0, speed_stop)
+    controlled = power[start:stop] if start is not None and stop > start else []
+    controlled_time = (
+        float(time_s[stop - 1] - time_s[start])
+        if start is not None and stop - start >= 2
+        else 0.0
+    )
+
+    mean_power = _mean(controlled) if controlled else 0.0
+    mean_error_percent = (
+        abs(mean_power - power_limit_w) / power_limit_w * 100.0
+    )
+    peak_power = max(power)
+    overshoot_percent = max(0.0, peak_power - power_limit_w) / power_limit_w * 100.0
+    ripple_percent = (
+        (max(controlled) - min(controlled)) / power_limit_w * 100.0
+        if controlled
+        else 0.0
+    )
+    minimum_dynamic_limit = min(dynamic_limit)
+
+    criteria = {
+        "enough_samples": len(samples) >= 64,
+        "power_limit_reached": first_limit_crossing is not None,
+        "controlled_interval_long_enough": controlled_time >= min_controlled_duration_s,
+        "mean_power_tracks_limit": mean_error_percent <= max_mean_error_percent,
+        "power_overshoot": overshoot_percent <= max_overshoot_percent,
+        "power_ripple": bool(controlled) and ripple_percent <= max_ripple_percent,
+        "current_limit_reduced_dynamically": (
+            minimum_dynamic_limit <= 0.90 * current_limit_a
+        ),
+    }
+    metrics: dict[str, Any] = {
+        "samples": len(samples),
+        "sample_period_s": period,
+        "window_s": float(time_s[-1] - time_s[0]),
+        "power_limit_w": power_limit_w,
+        "controlled_interval_s": controlled_time,
+        "controlled_mean_power_w": mean_power,
+        "controlled_mean_error_percent": mean_error_percent,
+        "controlled_ripple_percent": ripple_percent,
+        "peak_power_w": peak_power,
+        "power_overshoot_percent": overshoot_percent,
+        "minimum_dynamic_current_limit_a": minimum_dynamic_limit,
+        "final_speed_rpm": speed[-1],
+        "limits": {
+            "current_limit_a": current_limit_a,
+            "target_speed_rpm": target_speed_rpm,
+            "engagement_settling_s": engagement_settling_s,
+            "min_controlled_duration_s": min_controlled_duration_s,
+            "max_mean_error_percent": max_mean_error_percent,
+            "max_overshoot_percent": max_overshoot_percent,
+            "max_ripple_percent": max_ripple_percent,
+        },
+        "criteria": criteria,
+    }
+    metrics["passed"] = all(criteria.values())
+    return metrics

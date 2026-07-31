@@ -249,6 +249,7 @@ void SM_Sys_ms_Calc(TSM_Sys* p) {
 	sm_net.ms_calc(&sm_net); //обертка для вызова коммуникационных драйверов
 	adc.ms_calc(&adc); //АЦП
 	sm_prot.ms_calc(&sm_prot); //Защиты
+	sm_ctrl.ms_calc(&sm_ctrl); //Динамические настройки контуров управления
 	AutoOffset.ms_calc(&AutoOffset); //авто смещение некоторых каналов АЦП
 
 	leds.msCalc(&leds);//светодиоды
