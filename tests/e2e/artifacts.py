@@ -128,3 +128,79 @@ def plot_vector_500(path: Path, samples: list[Sample]) -> None:
     current_axis.legend()
     figure.savefig(path, dpi=170)
     plt.close(figure)
+
+
+def plot_decoupling_high_speed(
+    path: Path, samples: list[Sample], *, target_speed_rpm: float = 3000.0
+) -> None:
+    import matplotlib.pyplot as plt
+
+    time_s = [sample.time_s for sample in samples]
+    channel_names = list(samples[0].values.keys()) if samples else []
+    has_vd = "vd_comp" in channel_names
+    has_vq = "vq_comp" in channel_names
+    n_plots = 2 + (1 if has_vd or has_vq else 0)
+    plt.style.use("seaborn-v0_8-whitegrid")
+    figure, axes = plt.subplots(
+        n_plots, 1, figsize=(11, 6 + n_plots * 1.5), sharex=True, constrained_layout=True
+    )
+    if n_plots == 2:
+        speed_axis, current_axis = axes
+        voltage_axis = None
+    else:
+        speed_axis, current_axis, voltage_axis = axes
+    speed_axis.plot(
+        time_s,
+        [s.values["rotor_speed_rpm"] for s in samples],
+        color="tab:green",
+        label="Rotor speed",
+    )
+    speed_axis.axhline(
+        target_speed_rpm * 0.95,
+        color="gray",
+        linestyle=":",
+        label="95% of target speed",
+    )
+    speed_axis.set_ylabel("Speed, rpm")
+    speed_axis.legend()
+    current_axis.plot(
+        time_s,
+        [s.values["iq_ref_a"] for s in samples],
+        "--",
+        color="tab:red",
+        label="Iq reference",
+    )
+    current_axis.plot(
+        time_s,
+        [s.values["iq_a"] for s in samples],
+        color="tab:red",
+        label="Iq actual",
+    )
+    current_axis.plot(
+        time_s,
+        [s.values["id_a"] for s in samples],
+        color="tab:blue",
+        label="Id actual",
+    )
+    current_axis.set_ylabel("Current, A")
+    current_axis.legend()
+    if voltage_axis is not None:
+        if has_vd:
+            voltage_axis.plot(
+                time_s,
+                [s.values["vd_comp"] for s in samples],
+                color="tab:blue",
+                label="Vd (PI output, decoupled)",
+            )
+        if has_vq:
+            voltage_axis.plot(
+                time_s,
+                [s.values["vq_comp"] for s in samples],
+                color="tab:red",
+                label="Vq (PI output, decoupled)",
+            )
+        voltage_axis.set_ylabel("Voltage ref, A (scaled)")
+        voltage_axis.legend()
+    axes[-1].set_xlabel("Time, s")
+    figure.savefig(path, dpi=170)
+    plt.close(figure)

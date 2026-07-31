@@ -343,3 +343,96 @@ def analyze_vector_500(
     metrics["criteria"] = criteria
     metrics["passed"] = all(criteria.values())
     return metrics
+
+
+def analyze_decoupling_high_speed(
+    samples: Sequence[Any],
+    *,
+    target_speed_rpm: float = 500.0,
+    settling_s: float = 1.0,
+    dwell_s: float = 0.5,
+    max_steady_iq_error_percent: float = 5.0,
+    max_steady_iq_error_a: float = 0.05,
+    max_steady_id_a: float = 0.2,
+    max_steady_iq_ripple_a: float = 0.15,
+    max_peak_iq_a: float = 1.5,
+) -> dict[str, Any]:
+    time_s = _times(samples)
+    channel_names = samples[0].values
+    iq_ref = _series(samples, "iq_ref_a")
+    iq = _series(samples, "iq_a")
+    id_actual = _series(samples, "id_a")
+    speed = _series(samples, "rotor_speed_rpm")
+    has_vd = "vd_comp" in channel_names
+    has_vq = "vq_comp" in channel_names
+    vd = _series(samples, "vd_comp") if has_vd else None
+    vq = _series(samples, "vq_comp") if has_vq else None
+    period = _sample_period(time_s)
+    tail_start = _tail_start(len(samples))
+    start = _event_start(speed, target_speed_rpm * 0.9)
+    tail_iq_ref = iq_ref[tail_start:]
+    tail_iq = iq[tail_start:]
+    tail_id = id_actual[tail_start:]
+    tail_vd = vd[tail_start:] if vd is not None else []
+    tail_vq = vq[tail_start:] if vq is not None else []
+    steady_iq_mean = _mean(tail_iq)
+    steady_iq_ref = _mean(tail_iq_ref)
+    steady_iq_error = abs(steady_iq_mean - steady_iq_ref)
+    steady_iq_error_percent = (
+        steady_iq_error / abs(steady_iq_ref) * 100.0
+        if abs(steady_iq_ref) > 1e-6
+        else math.inf
+    )
+    steady_id_rms = _rms(tail_id)
+    steady_iq_ripple = max(abs(v) for v in tail_iq) - min(abs(v) for v in tail_iq)
+    peak_iq = max(abs(v) for v in iq)
+    steady_vd_rms = _rms(tail_vd) if tail_vd else 0.0
+    steady_vq_mean = _mean(tail_vq) if tail_vq else 0.0
+    window_s = float(time_s[-1] - time_s[0]) if len(time_s) > 1 else 0.0
+    metrics: dict[str, Any] = {
+        "samples": len(samples),
+        "sample_period_s": period,
+        "window_s": window_s,
+        "target_speed_rpm": target_speed_rpm,
+        "steady_speed_rpm": _mean(speed[tail_start:]),
+        "steady_iq_ref_a": steady_iq_ref,
+        "steady_iq_mean_a": steady_iq_mean,
+        "steady_iq_error_a": steady_iq_error,
+        "steady_iq_error_percent": steady_iq_error_percent,
+        "steady_id_rms_a": steady_id_rms,
+        "steady_iq_ripple_a": steady_iq_ripple,
+        "peak_iq_a": peak_iq,
+        "steady_vd_rms_a": steady_vd_rms,
+        "steady_vq_mean_a": steady_vq_mean,
+        "has_vd_channel": has_vd,
+        "has_vq_channel": has_vq,
+    }
+    tolerance_a = max(max_steady_iq_error_a, abs(steady_iq_ref) * max_steady_iq_error_percent / 100.0)
+    criteria = {
+        "enough_samples": len(samples) >= 64,
+        "speed_reached": (
+            start is not None and start < len(samples)
+            and _mean(speed[max(0, start - 10) :]) >= target_speed_rpm * 0.9
+        ),
+        "steady_iq_error": steady_iq_error <= tolerance_a,
+        "steady_id_rms": steady_id_rms <= max_steady_id_a,
+        "steady_iq_ripple": steady_iq_ripple <= max_steady_iq_ripple_a,
+        "peak_iq_within_limit": peak_iq <= max_peak_iq_a,
+    }
+    if has_vd:
+        criteria["d_axis_voltage_present"] = steady_vd_rms > 1e-6
+    if has_vq:
+        criteria["q_axis_voltage_present"] = abs(steady_vq_mean) > 1e-6
+    metrics["limits"] = {
+        "target_speed_rpm": target_speed_rpm,
+        "settling_s": settling_s,
+        "dwell_s": dwell_s,
+        "max_steady_iq_error_percent": max_steady_iq_error_percent,
+        "max_steady_iq_error_a": max_steady_iq_error_a,
+        "max_steady_id_a": max_steady_id_a,
+        "max_steady_iq_ripple_a": max_steady_iq_ripple_a,
+        "max_peak_iq_a": max_peak_iq_a,
+    }
+    metrics["criteria"] = criteria
+    metrics["passed"] = all(criteria.values())
+    return metrics

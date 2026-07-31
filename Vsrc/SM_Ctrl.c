@@ -224,6 +224,21 @@ void SM_Ctrl_Fast_Calc(TSM_Ctrl *p) {
 
 		//обратные фазные преобразования.
 		//Крутим вектор напряжения, который выдают регуляторы токов обратно на угол refs.theta_elec
+		{
+			float omega_rad_s;
+			float Vdec_d;
+			float Vdec_q;
+			omega_rad_s = _IQ24toF(cur_par.speed) * _IQ24toF(drv_params.freq_nom) * 6.2831853f;
+			if (drv_params.Ls != 0 && omega_rad_s != 0.0f)
+			{
+				Vdec_d = omega_rad_s * _IQ24toF(model.motorInternals.lsq) * _IQ24toF(park.qe) * 0.001f;
+				Vdec_q = -(omega_rad_s * _IQ24toF(model.motorInternals.lsd) * _IQ24toF(park.de) * 0.001f + omega_rad_s * model.motorInternals.m);
+				Vdec_d = Vdec_d / _IQ24toF(drv_params.Udc_nom);
+				Vdec_q = Vdec_q / _IQ24toF(drv_params.Udc_nom);
+				pid_id.pid_out_reg3 -= _IQ(Vdec_d);
+				pid_iq.pid_out_reg3 -= _IQ(Vdec_q);
+			}
+		}
 		ipark.de = pid_id.pid_out_reg3;
 		ipark.qe = pid_iq.pid_out_reg3;
 		ipark.ang = refs.theta_elec;
@@ -345,35 +360,50 @@ void SM_Ctrl_Fast_Calc(TSM_Ctrl *p) {
 			pid_iq.pid_fdb_reg3 = park.qe;
 			pid_iq.calc(&pid_iq);
 
-			//обратные фазные преобразования.
-			//Крутим вектор напряжения, который выдают регуляторы токов обратно на угол refs.theta_elec
-			ipark.de = pid_id.pid_out_reg3;
-			ipark.qe = pid_iq.pid_out_reg3;
-			ipark.ang = refs.theta_elec;
-			ipark.calc(&ipark);
-
-			//получившиеся задания напряжения по осям альфа и бета отправляем на модуль ШИМ
-			pwm.UalphaRef = ipark.ds;
-			pwm.UbetaRef = ipark.qs;
-			pwm.update(&pwm);
-
-			//в наблюдаемые переменные - текущий амплитудный ток в статоре (обратная связь регулятора d)
-			cur_par.Is = pid_id.pid_fdb_reg3;
-			//и текущую частоту (скорость)
-			cur_par.speed = rmp.output;
-
-			if (sw.excitation_ena)
+		//обратные фазные преобразования.
+		//Крутим вектор напряжения, который выдают регуляторы токов обратно на угол refs.theta_elec
+		{
+			float omega_rad_s;
+			float Vdec_d;
+			float Vdec_q;
+			omega_rad_s = _IQ24toF(cur_par.speed) * _IQ24toF(drv_params.freq_nom) * 6.2831853f;
+			if (drv_params.Ls != 0 && omega_rad_s != 0.0f)
 			{
-				pwm_ex.ref = refs.uf_ref;
-				pwm_ex.calc(&pwm_ex);
+				Vdec_d = omega_rad_s * _IQ24toF(model.motorInternals.lsq) * _IQ24toF(park.qe) * 0.001f;
+				Vdec_q = -(omega_rad_s * _IQ24toF(model.motorInternals.lsd) * _IQ24toF(park.de) * 0.001f + omega_rad_s * model.motorInternals.m);
+				Vdec_d = Vdec_d / _IQ24toF(drv_params.Udc_nom);
+				Vdec_q = Vdec_q / _IQ24toF(drv_params.Udc_nom);
+				pid_id.pid_out_reg3 -= _IQ(Vdec_d);
+				pid_iq.pid_out_reg3 -= _IQ(Vdec_q);
 			}
-
-			/*DO END*/
 		}
-		break;
-	}
+		ipark.de = pid_id.pid_out_reg3;
+		ipark.qe = pid_iq.pid_out_reg3;
+		ipark.ang = refs.theta_elec;
+		ipark.calc(&ipark);
 
-	case CTRL_RUN_VECTOR_SM: {            //Датчиковая СУ для синхронной машины
+		//получившиеся задания напряжения по осям альфа и бета отправляем на модуль ШИМ
+		pwm.UalphaRef = ipark.ds;
+		pwm.UbetaRef = ipark.qs;
+		pwm.update(&pwm);
+
+		//в наблюдаемые переменные - текущий амплитудный ток в статоре (обратная связь регулятора d)
+		cur_par.Is = pid_id.pid_fdb_reg3;
+		//и текущую частоту (скорость)
+		cur_par.speed = rmp.output;
+
+		if (sw.excitation_ena)
+		{
+			pwm_ex.ref = refs.uf_ref;
+			pwm_ex.calc(&pwm_ex);
+		}
+
+		/*DO END*/
+	}
+	break;
+}
+
+case CTRL_RUN_VECTOR_SM: {            //Датчиковая СУ для синхронной машины
 		if (p->E == 1) {
 			/*ENTRY START*/
 			pwm.On(&pwm);            //Включение ШИМ
@@ -442,30 +472,45 @@ void SM_Ctrl_Fast_Calc(TSM_Ctrl *p) {
 			pid_id.pid_fdb_reg3 = park.de; //обратная связь рег. тока оси d - вычисленный ток по фазе d
 			pid_id.calc(&pid_id); //расчет регулятора тока оси d
 
-			//Обратный поворот на угол refs.theta_elec для 
-			//выходов регуляторов тока (напряжений по осям d и q)
-			ipark.de = pid_id.pid_out_reg3;
-			ipark.qe = pid_iq.pid_out_reg3;
-			ipark.ang = refs.theta_elec;
-			ipark.calc(&ipark);            //расчет преобразования координат
-
-			//Задание напряжение на модуль ШИМ после преобразования координат
-			pwm.UalphaRef = ipark.ds;            //Ось альфа
-			pwm.UbetaRef = ipark.qs;            //Ось бета
-			pwm.update(&pwm);            //Расчет модуля ШИМ
-
-			if (sw.excitation_ena)
+		//Обратный поворот на угол refs.theta_elec для
+		//выходов регуляторов тока (напряжениях по осям d и q)
+		{
+			float omega_rad_s;
+			float Vdec_d;
+			float Vdec_q;
+			omega_rad_s = _IQ24toF(cur_par.speed) * _IQ24toF(drv_params.freq_nom) * 6.2831853f;
+			if (drv_params.Ls != 0 && omega_rad_s != 0.0f)
 			{
-				pwm_ex.ref = refs.uf_ref;
-				pwm_ex.calc(&pwm_ex);
+				Vdec_d = omega_rad_s * _IQ24toF(model.motorInternals.lsq) * _IQ24toF(park.qe) * 0.001f;
+				Vdec_q = -(omega_rad_s * _IQ24toF(model.motorInternals.lsd) * _IQ24toF(park.de) * 0.001f + omega_rad_s * model.motorInternals.m);
+				Vdec_d = Vdec_d / _IQ24toF(drv_params.Udc_nom);
+				Vdec_q = Vdec_q / _IQ24toF(drv_params.Udc_nom);
+				pid_id.pid_out_reg3 -= _IQ(Vdec_d);
+				pid_iq.pid_out_reg3 -= _IQ(Vdec_q);
 			}
-
-			/*DO END*/
 		}
-		break;
-	}
+		ipark.de = pid_id.pid_out_reg3;
+		ipark.qe = pid_iq.pid_out_reg3;
+		ipark.ang = refs.theta_elec;
+		ipark.calc(&ipark);            //расчет преобразования координат
 
-	case CTRL_RUN_VECTOR_SM_ENCODER_POS: {            //Датчиковая СУ с энкодером и с контуром положения
+		//Задание напряжение на модуль ШИМ после преобразования координат
+		pwm.UalphaRef = ipark.ds;            //Ось альфа
+		pwm.UbetaRef = ipark.qs;            //Ось бета
+		pwm.update(&pwm);            //Расчет модуля ШИМ
+
+		if (sw.excitation_ena)
+		{
+			pwm_ex.ref = refs.uf_ref;
+			pwm_ex.calc(&pwm_ex);
+		}
+
+		/*DO END*/
+	}
+	break;
+}
+
+case CTRL_RUN_VECTOR_SM_ENCODER_POS: {            //Датчиковая СУ с энкодером и с контуром положения
 		if (p->E == 1) {
 			/*ENTRY START*/
 			pwm.On(&pwm);            //Включение ШИМ
@@ -582,25 +627,40 @@ void SM_Ctrl_Fast_Calc(TSM_Ctrl *p) {
 			pid_id.pid_fdb_reg3 = park.de; //обратная связь рег. тока оси d - вычисленный ток по фазе d
 			pid_id.calc(&pid_id); //расчет регулятора тока оси d
 
-			//Обратный поворот на угол refs.theta_elec для
-			//выходов регуляторов тока (напряжений по осям d и q)
-			ipark.de = pid_id.pid_out_reg3;
-			ipark.qe = pid_iq.pid_out_reg3;
-			ipark.ang = posspeedEqep.theta_elec;
-			ipark.calc(&ipark);            //расчет преобразования координат
-
-			//Задание напряжение на модуль ШИМ после преобразования координат
-			pwm.UalphaRef = ipark.ds;            //Ось альфа
-			pwm.UbetaRef = ipark.qs;            //Ось бета
-			pwm.update(&pwm);            //Расчет модуля ШИМ
-
-			/*DO END*/
+		//Обратный поворот на угол refs.theta_elec для
+		//выходов регуляторов тока (напряжениях по осям d и q)
+		{
+			float omega_rad_s;
+			float Vdec_d;
+			float Vdec_q;
+			omega_rad_s = _IQ24toF(cur_par.speed) * _IQ24toF(drv_params.freq_nom) * 6.2831853f;
+			if (drv_params.Ls != 0 && omega_rad_s != 0.0f)
+			{
+				Vdec_d = omega_rad_s * _IQ24toF(model.motorInternals.lsq) * _IQ24toF(park.qe) * 0.001f;
+				Vdec_q = -(omega_rad_s * _IQ24toF(model.motorInternals.lsd) * _IQ24toF(park.de) * 0.001f + omega_rad_s * model.motorInternals.m);
+				Vdec_d = Vdec_d / _IQ24toF(drv_params.Udc_nom);
+				Vdec_q = Vdec_q / _IQ24toF(drv_params.Udc_nom);
+				pid_id.pid_out_reg3 -= _IQ(Vdec_d);
+				pid_iq.pid_out_reg3 -= _IQ(Vdec_q);
+			}
 		}
-		break;
+		ipark.de = pid_id.pid_out_reg3;
+		ipark.qe = pid_iq.pid_out_reg3;
+		ipark.ang = posspeedEqep.theta_elec;
+		ipark.calc(&ipark);            //расчет преобразования координат
+
+		//Задание напряжение на модуль ШИМ после преобразования координат
+		pwm.UalphaRef = ipark.ds;            //Ось альфа
+		pwm.UbetaRef = ipark.qs;            //Ось бета
+		pwm.update(&pwm);            //Расчет модуля ШИМ
+
+		/*DO END*/
 	}
+	break;
+}
 
 
-	case CTRL_RUN_VECTOR_IM_ENCODER: { //Датчиковая СУ для АД с энкодером и контуром скорости
+case CTRL_RUN_VECTOR_IM_ENCODER: { //Датчиковая СУ для АД с энкодером и контуром скорости
 		if (p->E == 1) {
 			/*ENTRY START*/
 			pwm.On(&pwm);            //Включение ШИМ
@@ -676,24 +736,39 @@ void SM_Ctrl_Fast_Calc(TSM_Ctrl *p) {
 			pid_id.calc(&pid_id); //расчет регулятора тока оси x
 
 
-			//Обратный поворот на угол refs.theta_elec для
-			//выходов регуляторов тока (напряжений по осям x и y)
-			ipark.de = pid_id.pid_out_reg3;
-			ipark.qe = pid_iq.pid_out_reg3;
-			ipark.ang = refs.theta_elec;
-			ipark.calc(&ipark);            //расчет преобразования координат
-
-			//Задание напряжение на модуль ШИМ после преобразования координат
-			pwm.UalphaRef = ipark.ds;            //Ось альфа
-			pwm.UbetaRef = ipark.qs;            //Ось бета
-			pwm.update(&pwm);            //Расчет модуля ШИМ
-
-			/*DO END*/
+		//Обратный поворот на угол refs.theta_elec для
+		//выходов регуляторов тока (напряжениях по осям x и y)
+		{
+			float omega_rad_s;
+			float Vdec_d;
+			float Vdec_q;
+			omega_rad_s = _IQ24toF(cur_par.speed) * _IQ24toF(drv_params.freq_nom) * 6.2831853f;
+			if (drv_params.Ls != 0 && omega_rad_s != 0.0f)
+			{
+				Vdec_d = omega_rad_s * _IQ24toF(model.motorInternals.lsq) * _IQ24toF(park.qe) * 0.001f;
+				Vdec_q = -(omega_rad_s * _IQ24toF(model.motorInternals.lsd) * _IQ24toF(park.de) * 0.001f + omega_rad_s * model.motorInternals.m);
+				Vdec_d = Vdec_d / _IQ24toF(drv_params.Udc_nom);
+				Vdec_q = Vdec_q / _IQ24toF(drv_params.Udc_nom);
+				pid_id.pid_out_reg3 -= _IQ(Vdec_d);
+				pid_iq.pid_out_reg3 -= _IQ(Vdec_q);
+			}
 		}
-		break;
-	}
+		ipark.de = pid_id.pid_out_reg3;
+		ipark.qe = pid_iq.pid_out_reg3;
+		ipark.ang = refs.theta_elec;
+		ipark.calc(&ipark);            //расчет преобразования координат
 
-	case CTRL_RUN_VECTOR_IM_ENCODER_POS: { //Датчиковая СУ для АД с энкодером и контурами скорости и положения
+		//Задание напряжение на модуль ШИМ после преобразования координат
+		pwm.UalphaRef = ipark.ds;            //Ось альфа
+		pwm.UbetaRef = ipark.qs;            //Ось бета
+		pwm.update(&pwm);            //Расчет модуля ШИМ
+
+		/*DO END*/
+	}
+	break;
+}
+
+case CTRL_RUN_VECTOR_IM_ENCODER_POS: { //Датчиковая СУ для АД с энкодером и контурами скорости и положения
 		if (p->E == 1) {
 			/*ENTRY START*/
 			pwm.On(&pwm);            //Включение ШИМ
@@ -835,23 +910,38 @@ void SM_Ctrl_Fast_Calc(TSM_Ctrl *p) {
 			pid_id.calc(&pid_id); //расчет регулятора тока оси x
 
 
-			//Обратный поворот на угол Temp1 для
-			//выходов регуляторов тока (напряжений по осям x и y)
-			ipark.de = pid_id.pid_out_reg3;
-			ipark.qe = pid_iq.pid_out_reg3;
-			ipark.ang = Temp1;
-			ipark.calc(&ipark);            //расчет преобразования координат
-
-			//Задание напряжение на модуль ШИМ после преобразования координат
-			pwm.UalphaRef = ipark.ds;            //Ось альфа
-			pwm.UbetaRef = ipark.qs;            //Ось бета
-			pwm.update(&pwm);            //Расчет модуля ШИМ
-
-			/*DO END*/
+		//Обратный поворот на угол Temp1 для
+		//выходов регуляторов тока (напряжениях по осям x и y)
+		{
+			float omega_rad_s;
+			float Vdec_d;
+			float Vdec_q;
+			omega_rad_s = _IQ24toF(cur_par.speed) * _IQ24toF(drv_params.freq_nom) * 6.2831853f;
+			if (drv_params.Ls != 0 && omega_rad_s != 0.0f)
+			{
+				Vdec_d = omega_rad_s * _IQ24toF(model.motorInternals.lsq) * _IQ24toF(park.qe) * 0.001f;
+				Vdec_q = -(omega_rad_s * _IQ24toF(model.motorInternals.lsd) * _IQ24toF(park.de) * 0.001f + omega_rad_s * model.motorInternals.m);
+				Vdec_d = Vdec_d / _IQ24toF(drv_params.Udc_nom);
+				Vdec_q = Vdec_q / _IQ24toF(drv_params.Udc_nom);
+				pid_id.pid_out_reg3 -= _IQ(Vdec_d);
+				pid_iq.pid_out_reg3 -= _IQ(Vdec_q);
+			}
 		}
-		break;
+		ipark.de = pid_id.pid_out_reg3;
+		ipark.qe = pid_iq.pid_out_reg3;
+		ipark.ang = Temp1;
+		ipark.calc(&ipark);            //расчет преобразования координат
+
+		//Задание напряжение на модуль ШИМ после преобразования координат
+		pwm.UalphaRef = ipark.ds;            //Ось альфа
+		pwm.UbetaRef = ipark.qs;            //Ось бета
+		pwm.update(&pwm);            //Расчет модуля ШИМ
+
+		/*DO END*/
 	}
-	case CTRL_DC_DRIVE: {  // ДПТ разомкнутый
+	break;
+}
+case CTRL_DC_DRIVE: {  // ДПТ разомкнутый
 		if (p->E == 1) {
 			/*ENTRY START*/
 			pwm.On(&pwm);
@@ -943,15 +1033,30 @@ void SM_Ctrl_Fast_Calc(TSM_Ctrl *p) {
 			pid_id.pid_fdb_reg3 = park.de;
 			pid_id.calc(&pid_id);
 
-			ipark.de = pid_id.pid_out_reg3;
-			ipark.qe = pid_iq.pid_out_reg3;
-			ipark.ang = refs.theta_elec;
-			ipark.calc(&ipark);
+		{
+			float omega_rad_s;
+			float Vdec_d;
+			float Vdec_q;
+			omega_rad_s = _IQ24toF(cur_par.speed) * _IQ24toF(drv_params.freq_nom) * 6.2831853f;
+			if (drv_params.Ls != 0 && omega_rad_s != 0.0f)
+			{
+				Vdec_d = omega_rad_s * _IQ24toF(model.motorInternals.lsq) * _IQ24toF(park.qe) * 0.001f;
+				Vdec_q = -(omega_rad_s * _IQ24toF(model.motorInternals.lsd) * _IQ24toF(park.de) * 0.001f + omega_rad_s * model.motorInternals.m);
+				Vdec_d = Vdec_d / _IQ24toF(drv_params.Udc_nom);
+				Vdec_q = Vdec_q / _IQ24toF(drv_params.Udc_nom);
+				pid_id.pid_out_reg3 -= _IQ(Vdec_d);
+				pid_iq.pid_out_reg3 -= _IQ(Vdec_q);
+			}
+		}
+		ipark.de = pid_id.pid_out_reg3;
+		ipark.qe = pid_iq.pid_out_reg3;
+		ipark.ang = refs.theta_elec;
+		ipark.calc(&ipark);
 
-			pwm.UalphaRef = ipark.ds;
-			pwm.UbetaRef = ipark.qs;
+		pwm.UalphaRef = ipark.ds;
+		pwm.UbetaRef = ipark.qs;
 
-			pwm.update(&pwm);
+		pwm.update(&pwm);
 
 			//автоматическая настрока смещения для датчика Холла
 			if (p->AnglePrev != DPReCAP.Angle6) {
