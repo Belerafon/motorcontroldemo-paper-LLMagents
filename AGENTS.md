@@ -8,6 +8,11 @@ The e2e scenarios control only the firmware's software motor model. Treat them
 as ordinary tests: when the task calls for testing, run the relevant scenarios
 while preserving their state checks and guaranteed `stop` cleanup.
 
+For any newly added firmware function, write new e2e tests and run them on
+the microcontroller as described in `.opencode/skills/motorcontrol-demo/SKILL.md`.
+Do not consider the work complete until e2e tests pass and JTAG-based
+verification has been performed.
+
 Read the skill as UTF-8 with this PowerShell command:
 
 ```powershell
