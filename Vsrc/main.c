@@ -35,6 +35,16 @@ TPidReg3 pid_iq = PIDREG3_DEFAULTS; //!<Рег. тока по оси q
 TPidReg3 pid_ia = PIDREG3_DEFAULTS; //!<Рег. тока якоря ДПТ
 TPidReg3 pid_spd = PIDREG3_DEFAULTS; //!<Рег. скорости
 TPidReg3_pos pid_pos = PIDREG3_DEFAULTS_POS; //!<Рег. положения
+TPidReg3 pid_fw = { //!<Рег. ослабления поля
+    .calc = pid_reg3_calc,
+    .reset = pid_reg3_reset,
+    .pid_out_max = _IQ(0.0),
+    .pid_out_min = -_IQ(0.5),
+    .Kp_reg3 = -_IQ(1.0),
+    .Ki_reg3 = -_IQ(0.05),
+    .Kc_reg3 = _IQ(0.5),
+    .Kd_reg3 = _IQ(0),
+};
 TRelayReg i_a_reg = RELAY_REG_DEFAULTS;	//!<регулятор тока фазы A (для модели SRM)
 TRelayReg i_b_reg = RELAY_REG_DEFAULTS;	//!<регулятор тока фазы A (для модели SRM)
 TRelayReg i_c_reg = RELAY_REG_DEFAULTS;	//!<регулятор тока фазы A (для модели SRM)

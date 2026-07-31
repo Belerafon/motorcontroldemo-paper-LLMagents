@@ -117,6 +117,7 @@ void SM_Ctrl_Fast_Calc(TSM_Ctrl *p) {
 		pid_ia.reset(&pid_ia);
 		pid_spd.reset(&pid_spd);
 		pid_pos.reset(&pid_pos);
+		pid_fw.reset(&pid_fw);
 		cur_par.Is = 0;
 		cur_par.power = 0;
 		cur_par.speed = 0;
@@ -378,6 +379,7 @@ void SM_Ctrl_Fast_Calc(TSM_Ctrl *p) {
 			/*ENTRY START*/
 			pwm.On(&pwm);            //Включение ШИМ
 			rmp.output = 0;            //Обнуление задатчика интенсивности
+			pid_fw.reset(&pid_fw);
 			if (dlog.StartBits & (1 << 4)) //Если пользователь задал этот бит осциллографирования
 				dlog.set_mode(1, &dlog);  //Запуск осциллографа по этому событию
 			/*ENTRY END*/
@@ -438,11 +440,19 @@ void SM_Ctrl_Fast_Calc(TSM_Ctrl *p) {
 			pid_iq.pid_fdb_reg3 = park.qe; //обратная связь рег. тока оси q - вычисленный ток по фазе q
 			pid_iq.calc(&pid_iq); //расчет регулятора тока оси q
 
-			pid_id.pid_ref_reg3 = 0; //задание тока по оси d - оси возбудения
+			if (pwm.ULimitation && sw.field_weakening_ena) {
+				pid_fw.pid_ref_reg3 = pwm.U_lim;
+				pid_fw.pid_fdb_reg3 = pwm.U_mag;
+				pid_fw.calc(&pid_fw);
+				pid_id.pid_ref_reg3 = pid_fw.pid_out_reg3;
+			} else {
+				pid_id.pid_ref_reg3 = 0;
+				pid_fw.reset(&pid_fw);
+			}
 			pid_id.pid_fdb_reg3 = park.de; //обратная связь рег. тока оси d - вычисленный ток по фазе d
 			pid_id.calc(&pid_id); //расчет регулятора тока оси d
 
-			//Обратный поворот на угол refs.theta_elec для 
+			//Обратный поворот на угол refs.theta_elec для
 			//выходов регуляторов тока (напряжений по осям d и q)
 			ipark.de = pid_id.pid_out_reg3;
 			ipark.qe = pid_iq.pid_out_reg3;
@@ -470,6 +480,7 @@ void SM_Ctrl_Fast_Calc(TSM_Ctrl *p) {
 			/*ENTRY START*/
 			pwm.On(&pwm);            //Включение ШИМ
 			rmp.output = 0;            //Обнуление задатчика интенсивности
+			pid_fw.reset(&pid_fw);
 			if (dlog.StartBits & (1 << 4)) //Если пользователь задал этот бит осциллографирования
 				dlog.set_mode(1, &dlog);  //Запуск осциллографа по этому событию
 			/*ENTRY END*/
@@ -578,7 +589,15 @@ void SM_Ctrl_Fast_Calc(TSM_Ctrl *p) {
 			pid_iq.pid_fdb_reg3 = park.qe; //обратная связь рег. тока оси q - вычисленный ток по фазе q
 			pid_iq.calc(&pid_iq); //расчет регулятора тока оси q
 
-			pid_id.pid_ref_reg3 = 0; //задание тока по оси d - оси возбудения
+			if (pwm.ULimitation && sw.field_weakening_ena) {
+				pid_fw.pid_ref_reg3 = pwm.U_lim;
+				pid_fw.pid_fdb_reg3 = pwm.U_mag;
+				pid_fw.calc(&pid_fw);
+				pid_id.pid_ref_reg3 = pid_fw.pid_out_reg3;
+			} else {
+				pid_id.pid_ref_reg3 = 0;
+				pid_fw.reset(&pid_fw);
+			}
 			pid_id.pid_fdb_reg3 = park.de; //обратная связь рег. тока оси d - вычисленный ток по фазе d
 			pid_id.calc(&pid_id); //расчет регулятора тока оси d
 

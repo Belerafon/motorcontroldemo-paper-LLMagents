@@ -214,6 +214,86 @@ def analyze_current_mode4(
     return metrics
 
 
+def analyze_field_weakening(
+    samples: Sequence[Any],
+    *,
+    target_speed_rpm: float = 1000.0,
+    current_limit_a: float,
+    max_id_a: float = -0.05,
+    max_steady_speed_error_percent: float = 3.0,
+    max_steady_speed_ripple_rpm: float = 30.0,
+    min_fw_samples: int = 10,
+    settling_dwell_s: float = 0.10,
+) -> dict[str, Any]:
+    time_s = _times(samples)
+    speed = _series(samples, "speed_rpm")
+    speed_ref = _series(samples, "speed_ref_rpm")
+    id_actual = _series(samples, "id_a")
+    id_ref = _series(samples, "id_ref_a")
+    iq_actual = _series(samples, "iq_a")
+    iq_ref = _series(samples, "iq_ref_a")
+    period = _sample_period(time_s)
+    tail_start = _tail_start(len(samples))
+    start = _event_start(speed_ref, target_speed_rpm)
+    direction = 1.0 if target_speed_rpm >= 0 else -1.0
+    steady_speed = speed[tail_start:]
+    steady_ref = speed_ref[tail_start:]
+    steady_id = id_actual[tail_start:]
+    steady_iq = iq_actual[tail_start:]
+    steady_id_ref = id_ref[tail_start:]
+    fw_samples = [v for v in steady_id if v < max_id_a]
+    fw_active = len(fw_samples) >= min_fw_samples
+    steady_error = abs(_mean(steady_speed) - target_speed_rpm)
+    steady_error_percent = (
+        steady_error / abs(target_speed_rpm) * 100.0
+        if target_speed_rpm
+        else float("inf")
+    )
+    speed_ripple = max(steady_speed) - min(steady_speed)
+    peak_abs_iq = max(abs(value) for value in iq_actual[start:])
+    allowed_current = abs(current_limit_a) * 1.25
+    metrics: dict[str, Any] = {
+        "samples": len(samples),
+        "sample_period_s": period,
+        "window_s": float(time_s[-1] - time_s[0]),
+        "target_speed_rpm": target_speed_rpm,
+        "steady_speed_rpm": _mean(steady_speed),
+        "steady_speed_error_rpm": steady_error,
+        "steady_speed_error_percent": steady_error_percent,
+        "steady_speed_ripple_peak_to_peak_rpm": speed_ripple,
+        "fw_active_samples": len(fw_samples),
+        "fw_active": fw_active,
+        "min_id_a": min(id_actual),
+        "min_id_ref_a": min(id_ref),
+        "peak_abs_iq_a_during_run": peak_abs_iq,
+        "steady_iq_mean_a": _mean(steady_iq),
+        "steady_iq_rms_a": _rms(steady_iq),
+    }
+    criteria = {
+        "enough_samples": len(samples) >= 64,
+        "speed_reference_reached": (
+            abs(_mean(steady_ref) - target_speed_rpm) <= 5.0
+        ),
+        "fw_activated": fw_active,
+        "id_goes_negative": min(id_actual) < max_id_a,
+        "steady_speed_error": steady_error_percent <= max_steady_speed_error_percent,
+        "steady_speed_ripple": speed_ripple <= max_steady_speed_ripple_rpm,
+        "iq_within_limit": peak_abs_iq <= allowed_current,
+    }
+    metrics["limits"] = {
+        "max_id_a": max_id_a,
+        "min_fw_samples": min_fw_samples,
+        "max_steady_speed_error_percent": max_steady_speed_error_percent,
+        "max_steady_speed_ripple_rpm": max_steady_speed_ripple_rpm,
+        "current_limit_a": current_limit_a,
+        "allowed_peak_current_a": allowed_current,
+        "settling_dwell_s": settling_dwell_s,
+    }
+    metrics["criteria"] = criteria
+    metrics["passed"] = all(criteria.values())
+    return metrics
+
+
 def analyze_vector_500(
     samples: Sequence[Any],
     *,
