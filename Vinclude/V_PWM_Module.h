@@ -144,6 +144,8 @@ void PWM_Module_Init(TPWM_Module *);
 void PWM_Module_Update(TPWM_Module *);
 //! \memberof TPWM_Module
 void PWM_Module_SlowCalc(TPWM_Module *);
+//! Возвращает доступную амплитуду выходного напряжения в базисе задания ШИМ.
+int32 PWM_Module_GetAvailableVoltage(TPWM_Module *);
 //! \memberof TPWM_Module
 void PWM_Module_On(TPWM_Module *);
 //! \memberof TPWM_Module

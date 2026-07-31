@@ -381,6 +381,33 @@ void PWM_Module_Init(TPWM_Module *p) {
 
 //! Нормирование входных величин.
 
+static int32 PWM_Module_GetUdcFactor(TPWM_Module *p) {
+	int32 udc_factor;
+
+	if (!(p->UdCompEnable & 1))
+		return _IQ(1.0);
+
+	udc_factor = _IQ(1.0)
+			+ _IQmpy(adc.Udc_meas - _IQ(1.0), p->UdCompK);
+	if (udc_factor <= 0)
+		return 0;
+
+	return udc_factor;
+}
+
+static void PWM_Module_CompensateUdc(TPWM_Module *p) {
+	int32 udc_factor;
+
+	udc_factor = PWM_Module_GetUdcFactor(p);
+	if (udc_factor > 0)
+		p->UdCorTmp = _IQdiv(_IQ(1.0), udc_factor);
+	else
+		p->UdCorTmp = 0;
+
+	p->UalphaNorm = _IQmpy(p->UalphaNorm, p->UdCorTmp);
+	p->UbetaNorm = _IQmpy(p->UbetaNorm, p->UdCorTmp);
+}
+
 //!Учитывает компенсацию напряжения при изменении Ud,
 //!выполняет вписывание вектора в окружность, если требуется, и
 //!выполняет смену базиса, относительно которого идет нормировка.
@@ -394,13 +421,9 @@ void PWM_Module_NormInput(TPWM_Module* p) {
     //находим амплитуду (без учета ограничения)
     p->U_mag=_IQmag(p->UalphaNorm,p->UbetaNorm);
 
-
-    p->UdCorTmp=_IQdiv(_IQ(1.0),(_IQ(1.0)+_IQmpy((adc.Udc_meas-_IQ(1.0)),p->UdCompK)));
     //учет пульсаций напряжения на Ud
-    if (p->UdCompEnable&1) { //он включен?
-        p->UalphaNorm=_IQmpy(p->UalphaNorm, p->UdCorTmp);//изменим пропорционально коэфф-ту коррекции
-        p->UbetaNorm=_IQmpy(p->UbetaNorm, p->UdCorTmp);//и это тоже
-    }
+    if (p->UdCompEnable&1) //он включен?
+        PWM_Module_CompensateUdc(p);
 
     //вписывание заданной амплитуды напряжения в окружность, вписываемую в шестиугольник базывых векторов
     //когда U_lim=1.0, это и есть такая окружность. Бывает, что мы хотим вписывать в шестиугольник. Тогда просто задираем вверх огрианичение U_lim
@@ -559,6 +582,8 @@ void PWM_Module_Sin_Update(TPWM_Module *p) {
 
 	//находим амплитуду (без учета ограничения)
 	p->U_mag = _IQmag(p->UalphaNorm, p->UbetaNorm);
+	if (p->UdCompEnable & 1)
+		PWM_Module_CompensateUdc(p);
 
 	/* рассчитываем амплитуду вектора, который хотим отработать*/
 	knorm = _IQmag(p->UalphaNorm, p->UbetaNorm);
@@ -741,6 +766,47 @@ void PWM_Module_Update(TPWM_Module *p) {
 		}
 	}
 
+}
+
+//! Доступная амплитуда напряжения для внешних регуляторов.
+//!
+//! Ограничение задаётся в базисе номинального напряжения ЗПТ, поэтому
+//! фактическая возможность инвертора пропорциональна измеренному Udc.
+//! Допустимый коэффициент модуляции дополнительно ограничивается выбранным
+//! алгоритмом ШИМ.
+int32 PWM_Module_GetAvailableVoltage(TPWM_Module *p) {
+	int32 modulation_limit;
+	int32 udc_factor;
+
+	switch (p->PWM_type) {
+	case PWM_TYPE_6SECT_NO_SV:
+		modulation_limit = p->U_lim;
+		if (modulation_limit > _IQ(1.0 / 0.866))
+			modulation_limit = _IQ(1.0 / 0.866);
+		break;
+
+	case PWM_TYPE_SIN_PWM:
+		modulation_limit = p->U_lim;
+		if (modulation_limit > _IQ(0.866))
+			modulation_limit = _IQ(0.866);
+		break;
+
+	case PWM_TYPE_DC_DRIVE:
+	case PWM_TYPE_SRD:
+		return _IQ(1.0);
+
+	default:
+		return 0;
+	}
+
+	if (modulation_limit <= 0)
+		return 0;
+
+	udc_factor = PWM_Module_GetUdcFactor(p);
+	if (udc_factor <= 0)
+		return 0;
+
+	return _IQmpy(udc_factor, modulation_limit);
 }
 
 //! Медленный расчет
