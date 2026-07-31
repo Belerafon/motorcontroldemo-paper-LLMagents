@@ -544,6 +544,123 @@ void PWM_Module_No_SV_Update(TPWM_Module *p) {
     EINT;
 }
 
+//! Функция центрированной векторной ШИМ
+
+//! Нулевой вектор распределяется поровну между состояниями 000 и 111.
+//! Поэтому до границы линейной модуляции ни одна фаза не прижата постоянно
+//! к верхней или нижней шине. Добавление синфазной составляющей не изменяет
+//! линейные напряжения, но увеличивает доступное напряжение на 2/sqrt(3)
+//! относительно синусоидальной ШИМ.
+
+//! \memberof TPWM_Module
+void PWM_Module_Centered_SV_Update(TPWM_Module *p) {
+	_iq phaseA;
+	_iq phaseB;
+	_iq phaseC;
+	_iq phaseMin;
+	_iq phaseMax;
+	_iq phaseSpan;
+	_iq commonMode;
+	_iq scale;
+	_iq betaTerm;
+	_iq sectorBorder;
+
+	// Загружаем рассчитанные на предыдущем вызове значения, если расчет
+	// совпал с окном загрузки теневых регистров.
+	DINT;
+	if (NT_PWM0->TBCTR > 30) {
+		NT_PWM0->CMPA_bit.CMPA = (Uint16) p->GammaA;
+		NT_PWM1->CMPA_bit.CMPA = (Uint16) p->GammaB;
+		NT_PWM2->CMPA_bit.CMPA = (Uint16) p->GammaC;
+	}
+	EINT;
+
+	PWM_Module_NormInput(p);
+
+	// Потенциалы фаз в системе отсчета таймера. Их разности полностью
+	// определяют линейные напряжения; общий уровень выбирается ниже отдельно.
+	betaTerm = _IQmpy(_1_SQRT3, p->UbetaNorm);
+	phaseA = -_IQmpy(_IQ(2.0 / 3.0), p->UalphaNorm);
+	phaseB = _IQmpy(_IQ(1.0 / 3.0), p->UalphaNorm) - betaTerm;
+	phaseC = _IQmpy(_IQ(1.0 / 3.0), p->UalphaNorm) + betaTerm;
+
+	phaseMin = phaseA;
+	phaseMax = phaseA;
+	if (phaseB < phaseMin)
+		phaseMin = phaseB;
+	if (phaseC < phaseMin)
+		phaseMin = phaseC;
+	if (phaseB > phaseMax)
+		phaseMax = phaseB;
+	if (phaseC > phaseMax)
+		phaseMax = phaseC;
+
+	// Точное ограничение по шестиугольнику достижимых векторов. Оно нужно,
+	// когда U_lim задан выше вписанной окружности или включена компенсация Ud.
+	phaseSpan = phaseMax - phaseMin;
+	if (phaseSpan > _IQ(1.0)) {
+		scale = _IQdiv(_IQ(1.0), phaseSpan);
+		phaseA = _IQmpy(phaseA, scale);
+		phaseB = _IQmpy(phaseB, scale);
+		phaseC = _IQmpy(phaseC, scale);
+		phaseMin = _IQmpy(phaseMin, scale);
+		phaseMax = _IQmpy(phaseMax, scale);
+		p->ULimitation = 1;
+	}
+
+	// Центрируем диапазон потенциалов относительно 0,5. При наличии запаса
+	// обе нулевые комбинации получают одинаковую длительность.
+	commonMode = -((phaseMax + phaseMin) >> 1);
+	phaseA += commonMode + _IQ(0.5);
+	phaseB += commonMode + _IQ(0.5);
+	phaseC += commonMode + _IQ(0.5);
+
+	p->GammaA = _IQmpy(p->k_pwm, phaseA);
+	p->GammaB = _IQmpy(p->k_pwm, phaseB);
+	p->GammaC = _IQmpy(p->k_pwm, phaseC);
+
+	if (p->GammaA < 0)
+		p->GammaA = 0;
+	if (p->GammaB < 0)
+		p->GammaB = 0;
+	if (p->GammaC < 0)
+		p->GammaC = 0;
+	if (p->GammaA > p->k_pwm)
+		p->GammaA = p->k_pwm;
+	if (p->GammaB > p->k_pwm)
+		p->GammaB = p->k_pwm;
+	if (p->GammaC > p->k_pwm)
+		p->GammaC = p->k_pwm;
+
+	// Номер сектора нужен только для диагностики и не участвует в расчете.
+	sectorBorder = _IQmpy(_1_SQRT3, p->UbetaNorm);
+	if (p->UbetaNorm >= 0) {
+		if (p->UalphaNorm > sectorBorder)
+			p->sector = 0;
+		else if (p->UalphaNorm > -sectorBorder)
+			p->sector = 1;
+		else
+			p->sector = 2;
+	} else {
+		if (p->UalphaNorm < sectorBorder)
+			p->sector = 3;
+		else if (p->UalphaNorm < -sectorBorder)
+			p->sector = 4;
+		else
+			p->sector = 5;
+	}
+
+	// Повторная попытка исключает постоянный пропуск загрузки при равенстве
+	// частот расчета регуляторов и ШИМ.
+	DINT;
+	if (NT_PWM0->TBCTR > 30) {
+		NT_PWM0->CMPA_bit.CMPA = (Uint16) p->GammaA;
+		NT_PWM1->CMPA_bit.CMPA = (Uint16) p->GammaB;
+		NT_PWM2->CMPA_bit.CMPA = (Uint16) p->GammaC;
+	}
+	EINT;
+}
+
 //! Функция синусоидальной ШИМ
 
 //! \memberof TPWM_Module
@@ -728,6 +845,10 @@ void PWM_Module_Update(TPWM_Module *p) {
 		}
 		case PWM_TYPE_SIN_PWM: {
 			PWM_Module_Sin_Update(p);
+			break;
+		}
+		case PWM_TYPE_CENTERED_SVPWM: {
+			PWM_Module_Centered_SV_Update(p);
 			break;
 		}
 		case PWM_TYPE_DC_DRIVE: {

@@ -162,6 +162,36 @@ class HardwareSession:
                     f"0x{restored:08X} != 0x{original:08X}."
                 )
 
+    @contextmanager
+    def temporary_u16_value(
+        self, expression: str, value: int | None
+    ) -> Iterator[int]:
+        original = self.target.read_u16(expression)
+        if value is None:
+            yield original
+            return
+        if not 0 <= value <= 0xFFFF:
+            raise ValueError(f"16-bit value is out of range: {value}")
+        try:
+            self.target.write_u16(expression, value)
+            actual = self.target.read_u16(expression)
+            if actual != value:
+                raise RuntimeError(
+                    f"Write verification failed for {expression}: "
+                    f"0x{actual:04X} != 0x{value:04X}."
+                )
+            yield original
+        finally:
+            self.drive.stop()
+            time.sleep(0.1)
+            self.target.write_u16(expression, original)
+            restored = self.target.read_u16(expression)
+            if restored != original:
+                raise RuntimeError(
+                    f"RAM restoration failed for {expression}: "
+                    f"0x{restored:04X} != 0x{original:04X}."
+                )
+
     def capture_ring(
         self,
         channels: list[Channel],

@@ -47,6 +47,13 @@ def register(parser: ArgumentParser) -> None:
     parser.add_argument("--alignment-max-speed-rpm", type=float, default=1.0)
     parser.add_argument("--post-alignment-stop-s", type=float, default=0.05)
     parser.add_argument(
+        "--pwm-type",
+        type=int,
+        choices=(0, 1, 6),
+        default=None,
+        help="Temporarily select motor PWM type in RAM (6: centered SVPWM).",
+    )
+    parser.add_argument(
         "--output",
         type=Path,
         default=Path("artifacts/e2e/current-mode4"),
@@ -244,86 +251,92 @@ def run(args: Namespace, paths: ProjectPaths) -> None:
         hardware = session.hardware()
         speed_feedback = _speed_feedback(session)
         speed_expression = str(speed_feedback["expression"])
-        with session.temporary_engineering_value(
-            "refs.theta_elec", 0.0
-        ) as original_theta_raw:
+        with session.temporary_u16_value(
+            "pwm.PWM_type", args.pwm_type
+        ) as original_pwm_type:
+            active_pwm_type = session.target.read_u16("pwm.PWM_type")
             with session.temporary_engineering_value(
-                "refs.speed_ref", 0.0, unit="rpm"
-            ) as original_speed_ref_raw:
+                "refs.theta_elec", 0.0
+            ) as original_theta_raw:
                 with session.temporary_engineering_value(
-                    "sm_ctrl.run_mode", 2
-                ) as original_run_mode_raw:
+                    "refs.speed_ref", 0.0, unit="rpm"
+                ) as original_speed_ref_raw:
                     with session.temporary_engineering_value(
-                        "refs.i_flux_ref", alignment_current, unit="A"
-                    ) as original_flux_ref_raw:
-                        alignment_before = session.verify_mode(2)
-                        (
-                            alignment,
-                            alignment_runtime,
-                            alignment_after,
-                        ) = _align_rotor(
-                            session,
-                            args,
-                            alignment_before,
-                            speed_expression,
+                        "sm_ctrl.run_mode", 2
+                    ) as original_run_mode_raw:
+                        with session.temporary_engineering_value(
+                            "refs.i_flux_ref", alignment_current, unit="A"
+                        ) as original_flux_ref_raw:
+                            alignment_before = session.verify_mode(2)
+                            (
+                                alignment,
+                                alignment_runtime,
+                                alignment_after,
+                            ) = _align_rotor(
+                                session,
+                                args,
+                                alignment_before,
+                                speed_expression,
+                            )
+                    time.sleep(args.post_alignment_stop_s)
+                    with session.temporary_engineering_value(
+                        "sm_ctrl.run_mode", 4
+                    ) as mode4_original_run_mode_raw:
+                        if mode4_original_run_mode_raw != original_run_mode_raw:
+                            raise RuntimeError(
+                                "Run mode changed unexpectedly between alignment "
+                                "and the mode 4 capture."
+                            )
+                        before = session.verify_mode(4)
+                        speed_ref = session.read_engineering(
+                            "refs.speed_ref", unit="rpm"
                         )
-                time.sleep(args.post_alignment_stop_s)
-                with session.temporary_engineering_value(
-                    "sm_ctrl.run_mode", 4
-                ) as mode4_original_run_mode_raw:
-                    if mode4_original_run_mode_raw != original_run_mode_raw:
-                        raise RuntimeError(
-                            "Run mode changed unexpectedly between alignment "
-                            "and the mode 4 capture."
+                        channels = [
+                            Channel(
+                                "id_ref_a",
+                                "pid_id.pid_ref_reg3",
+                                session.dictionary.codec(
+                                    "pid_id.pid_ref_reg3", unit="A"
+                                ),
+                            ),
+                            Channel(
+                                "id_a",
+                                "pid_id.pid_fdb_reg3",
+                                session.dictionary.codec(
+                                    "pid_id.pid_fdb_reg3", unit="A"
+                                ),
+                            ),
+                            Channel(
+                                "rotor_speed_rpm",
+                                speed_expression,
+                                session.dictionary.codec(
+                                    speed_expression, unit="rpm"
+                                ),
+                            ),
+                            Channel(
+                                "iq_a",
+                                "pid_iq.pid_fdb_reg3",
+                                session.dictionary.codec(
+                                    "pid_iq.pid_fdb_reg3", unit="A"
+                                ),
+                            ),
+                        ]
+                        capture = session.capture_triggered(
+                            channels,
+                            divider=args.sample_divider,
+                            trigger_bit=3,
+                            timeout_s=args.timeout,
+                            validated_snapshot=before,
                         )
-                    before = session.verify_mode(4)
-                    speed_ref = session.read_engineering(
-                        "refs.speed_ref", unit="rpm"
-                    )
-                    channels = [
-                        Channel(
-                            "id_ref_a",
-                            "pid_id.pid_ref_reg3",
-                            session.dictionary.codec(
-                                "pid_id.pid_ref_reg3", unit="A"
-                            ),
-                        ),
-                        Channel(
-                            "id_a",
-                            "pid_id.pid_fdb_reg3",
-                            session.dictionary.codec(
-                                "pid_id.pid_fdb_reg3", unit="A"
-                            ),
-                        ),
-                        Channel(
-                            "rotor_speed_rpm",
-                            speed_expression,
-                            session.dictionary.codec(
-                                speed_expression, unit="rpm"
-                            ),
-                        ),
-                        Channel(
-                            "iq_a",
-                            "pid_iq.pid_fdb_reg3",
-                            session.dictionary.codec(
-                                "pid_iq.pid_fdb_reg3", unit="A"
-                            ),
-                        ),
-                    ]
-                    capture = session.capture_triggered(
-                        channels,
-                        divider=args.sample_divider,
-                        trigger_bit=3,
-                        timeout_s=args.timeout,
-                        validated_snapshot=before,
-                    )
         restored = session.drive.snapshot()
         restored_theta_raw = session.target.read_u32("refs.theta_elec")
+        restored_pwm_type = session.target.read_u16("pwm.PWM_type")
         if (
             restored.run_mode != original_run_mode_raw
             or restored.speed_ref_raw != original_speed_ref_raw
             or restored.flux_ref_raw != original_flux_ref_raw
             or restored_theta_raw != original_theta_raw
+            or restored_pwm_type != original_pwm_type
         ):
             raise RuntimeError("Temporary mode 4 test settings were not restored.")
 
@@ -346,6 +359,10 @@ def run(args: Namespace, paths: ProjectPaths) -> None:
         and restored.speed_ref_raw == original_speed_ref_raw
         and restored.flux_ref_raw == original_flux_ref_raw
         and restored_theta_raw == original_theta_raw
+        and restored_pwm_type == original_pwm_type
+    )
+    configuration_criteria["pwm_type_selected"] = (
+        args.pwm_type is None or active_pwm_type == args.pwm_type
     )
     metrics["criteria"].update(configuration_criteria)
     metrics["passed"] = all(metrics["criteria"].values())
@@ -371,6 +388,9 @@ def run(args: Namespace, paths: ProjectPaths) -> None:
             "post_alignment_stop_s": args.post_alignment_stop_s,
             "alignment": alignment,
             "speed_feedback": speed_feedback,
+            "requested_pwm_type": args.pwm_type,
+            "active_pwm_type": active_pwm_type,
+            "original_pwm_type": original_pwm_type,
             "original_run_mode_raw": original_run_mode_raw,
             "original_speed_reference_raw": original_speed_ref_raw,
             "original_flux_reference_raw": original_flux_ref_raw,
