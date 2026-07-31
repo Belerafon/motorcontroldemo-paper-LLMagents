@@ -27,6 +27,94 @@
 #include "V_IQmath.h"
 #include "main.h"
 
+#define CURRENT_DECOUPLING_ENABLE_VALUE 1
+#define CURRENT_DECOUPLING_GAIN_MAX     _IQ(2.0)
+#define CURRENT_DECOUPLING_SPEED_MAX    _IQ(8.0)
+#define CURRENT_DECOUPLING_CURRENT_MAX  _IQ(2.0)
+#define CURRENT_DECOUPLING_VOLTAGE_MAX  _IQ(4.0)
+
+/*
+ * Normalized coefficient 2*pi*f_base*Ls*I_base/U_base. It is recalculated
+ * in the background because drive base values can be restored from EEPROM.
+ */
+static _iq current_decoupling_k;
+
+static _iq CurrentDecouplingSat(_iq value, _iq limit) {
+	if (value > limit)
+		return limit;
+	if (value < -limit)
+		return -limit;
+	return value;
+}
+
+/*
+ * Add the inductive cross-coupling feed-forward terms for a rotating dq frame:
+ *     ud_ff = -omega_e * Ls * iq
+ *     uq_ff =  omega_e * Ls * id
+ *
+ * DebugW3 is an exact enable switch (1 = enabled). DebugW4 is a Q24 gain;
+ * its legacy/default value 0 is interpreted as unity. Debug1 and Debug2 expose
+ * ud_ff and uq_ff. Outer vector saturation is returned to the PI anti-windup
+ * inputs on the next control tick.
+ */
+static void CurrentDecouplingApply(_iq speed, _iq id, _iq iq,
+		_iq *ud, _iq *uq) {
+	_iq gain;
+	_iq omega_l;
+	_iq ud_requested;
+	_iq uq_requested;
+	_iq voltage_limit;
+	_iq voltage_mag;
+	_iq scale;
+
+	if (DebugW3 != CURRENT_DECOUPLING_ENABLE_VALUE) {
+		Debug1 = 0;
+		Debug2 = 0;
+		pid_id.saterr_reg3Add = 0;
+		pid_iq.saterr_reg3Add = 0;
+		return;
+	}
+
+	gain = DebugW4;
+	if (gain == 0)
+		gain = _IQ(1.0);
+	if (gain < 0)
+		gain = 0;
+	if (gain > CURRENT_DECOUPLING_GAIN_MAX)
+		gain = CURRENT_DECOUPLING_GAIN_MAX;
+
+	speed = CurrentDecouplingSat(speed, CURRENT_DECOUPLING_SPEED_MAX);
+	id = CurrentDecouplingSat(id, CURRENT_DECOUPLING_CURRENT_MAX);
+	iq = CurrentDecouplingSat(iq, CURRENT_DECOUPLING_CURRENT_MAX);
+	omega_l = _IQmpy(_IQmpy(speed, current_decoupling_k), gain);
+
+	Debug1 = -_IQmpy(omega_l, iq);
+	Debug2 =  _IQmpy(omega_l, id);
+
+	ud_requested = CurrentDecouplingSat(*ud + Debug1,
+			CURRENT_DECOUPLING_VOLTAGE_MAX);
+	uq_requested = CurrentDecouplingSat(*uq + Debug2,
+			CURRENT_DECOUPLING_VOLTAGE_MAX);
+	*ud = ud_requested;
+	*uq = uq_requested;
+
+	voltage_limit = pwm.U_lim;
+	if (voltage_limit <= 0)
+		voltage_limit = _IQ(1.0);
+	if (voltage_limit > _IQ(1.0 / 0.866))
+		voltage_limit = _IQ(1.0 / 0.866);
+
+	voltage_mag = _IQmag(*ud, *uq);
+	if (voltage_mag > voltage_limit) {
+		scale = _IQdiv(voltage_limit, voltage_mag);
+		*ud = _IQmpy(*ud, scale);
+		*uq = _IQmpy(*uq, scale);
+	}
+
+	pid_id.saterr_reg3Add = *ud - ud_requested;
+	pid_iq.saterr_reg3Add = *uq - uq_requested;
+}
+
 
 //!Инициализация
 //!Всякие обнуления
@@ -34,13 +122,33 @@
 void SM_Ctrl_Init(TSM_Ctrl *p) {
 	p->state_prev = 0xff;
 	p->state = 0x00;
+	current_decoupling_k = 0;
+	DebugW3 = CURRENT_DECOUPLING_ENABLE_VALUE;
+	DebugW4 = 0;
+	Debug1 = 0;
+	Debug2 = 0;
 }
 
 //!Фоновый расчет
 
 //! \memberof TSM_Ctrl
 void SM_Ctrl_Slow_Calc(TSM_Ctrl *p) {
+	float coefficient;
+	_iq new_decoupling_k = 0;
 
+	if ((drv_params.freq_nom > 0) && (drv_params.Ls > 0)
+			&& (drv_params.I_nom > 0) && (drv_params.U_nom > 0)) {
+		/* drv_params.Ls is Q24 in henries (display scale is 1000 mH). */
+		coefficient = 6.283185307179586f * (float) drv_params.freq_nom
+				* ((float) drv_params.Ls / 16777216.0f)
+				* (float) drv_params.I_nom / (float) drv_params.U_nom;
+		if (coefficient > 2.0f)
+			coefficient = 2.0f;
+		new_decoupling_k = _IQ(coefficient);
+	}
+
+	/* Single aligned write: the 10 kHz ISR never observes an intermediate 0. */
+	current_decoupling_k = new_decoupling_k;
 }
 
 //!Миллисекундный расчет
@@ -117,6 +225,10 @@ void SM_Ctrl_Fast_Calc(TSM_Ctrl *p) {
 		pid_ia.reset(&pid_ia);
 		pid_spd.reset(&pid_spd);
 		pid_pos.reset(&pid_pos);
+		pid_id.saterr_reg3Add = 0;
+		pid_iq.saterr_reg3Add = 0;
+		Debug1 = 0;
+		Debug2 = 0;
 		cur_par.Is = 0;
 		cur_par.power = 0;
 		cur_par.speed = 0;
@@ -349,6 +461,8 @@ void SM_Ctrl_Fast_Calc(TSM_Ctrl *p) {
 			//Крутим вектор напряжения, который выдают регуляторы токов обратно на угол refs.theta_elec
 			ipark.de = pid_id.pid_out_reg3;
 			ipark.qe = pid_iq.pid_out_reg3;
+			CurrentDecouplingApply(rmp.output, park.de, park.qe,
+					&ipark.de, &ipark.qe);
 			ipark.ang = refs.theta_elec;
 			ipark.calc(&ipark);
 
@@ -446,6 +560,8 @@ void SM_Ctrl_Fast_Calc(TSM_Ctrl *p) {
 			//выходов регуляторов тока (напряжений по осям d и q)
 			ipark.de = pid_id.pid_out_reg3;
 			ipark.qe = pid_iq.pid_out_reg3;
+			CurrentDecouplingApply(cur_par.speed, park.de, park.qe,
+					&ipark.de, &ipark.qe);
 			ipark.ang = refs.theta_elec;
 			ipark.calc(&ipark);            //расчет преобразования координат
 
@@ -586,6 +702,8 @@ void SM_Ctrl_Fast_Calc(TSM_Ctrl *p) {
 			//выходов регуляторов тока (напряжений по осям d и q)
 			ipark.de = pid_id.pid_out_reg3;
 			ipark.qe = pid_iq.pid_out_reg3;
+			CurrentDecouplingApply(cur_par.speed, park.de, park.qe,
+					&ipark.de, &ipark.qe);
 			ipark.ang = posspeedEqep.theta_elec;
 			ipark.calc(&ipark);            //расчет преобразования координат
 

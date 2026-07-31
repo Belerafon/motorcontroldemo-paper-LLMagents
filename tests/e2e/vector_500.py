@@ -30,6 +30,11 @@ def register(parser: ArgumentParser) -> None:
     )
     parser.add_argument("--timeout", type=float, default=6.0)
     parser.add_argument("--sample-divider", type=int, default=120)
+    parser.add_argument(
+        "--decoupling",
+        action="store_true",
+        help="Temporarily enable dq current-loop decoupling with unity gain.",
+    )
     parser.add_argument("--max-time-to-95-s", type=float, default=2.0)
     parser.add_argument("--max-overshoot-percent", type=float, default=10.0)
     parser.add_argument("--max-settling-s", type=float, default=2.5)
@@ -92,19 +97,22 @@ def run(args: Namespace, paths: ProjectPaths) -> None:
         ]
 
         with session.temporary_engineering_value(
-            "sm_ctrl.run_mode", 5
-        ) as original_run_mode_raw:
+            "DebugW3", int(args.decoupling)
+        ) as original_decoupling_raw:
             with session.temporary_engineering_value(
-                "refs.speed_ref", TARGET_SPEED_RPM, unit="rpm"
-            ) as original_speed_ref_raw:
-                before = session.verify_mode(5)
-                capture = session.capture_triggered(
-                    channels,
-                    divider=args.sample_divider,
-                    trigger_bit=4,
-                    timeout_s=args.timeout,
-                    validated_snapshot=before,
-                )
+                "sm_ctrl.run_mode", 5
+            ) as original_run_mode_raw:
+                with session.temporary_engineering_value(
+                    "refs.speed_ref", TARGET_SPEED_RPM, unit="rpm"
+                ) as original_speed_ref_raw:
+                    before = session.verify_mode(5)
+                    capture = session.capture_triggered(
+                        channels,
+                        divider=args.sample_divider,
+                        trigger_bit=4,
+                        timeout_s=args.timeout,
+                        validated_snapshot=before,
+                    )
         restored = session.drive.snapshot()
         if (
             restored.run_mode != original_run_mode_raw
@@ -157,6 +165,9 @@ def run(args: Namespace, paths: ProjectPaths) -> None:
             "trigger_bit": 4,
             "trigger_timeout_s": args.timeout,
             "sample_divider": args.sample_divider,
+            "decoupling_enabled": args.decoupling,
+            "decoupling_gain": 1.0 if args.decoupling else 0.0,
+            "original_decoupling_raw": original_decoupling_raw,
             "speed_controller": speed_controller,
             "original_run_mode_raw": original_run_mode_raw,
             "original_speed_reference_raw": original_speed_ref_raw,
