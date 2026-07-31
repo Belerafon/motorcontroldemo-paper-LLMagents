@@ -128,3 +128,39 @@ def plot_vector_500(path: Path, samples: list[Sample]) -> None:
     current_axis.legend()
     figure.savefig(path, dpi=170)
     plt.close(figure)
+
+
+def plot_field_weakening(
+    path: Path,
+    samples: list[Sample],
+    *,
+    target_speed_rpm: float,
+    voltage_target_pu: float,
+) -> None:
+    import matplotlib.pyplot as plt
+
+    time_s = [sample.time_s for sample in samples]
+    plt.style.use("seaborn-v0_8-whitegrid")
+    figure, (speed_axis, current_axis, voltage_axis) = plt.subplots(
+        3, 1, figsize=(11, 9), sharex=True, constrained_layout=True
+    )
+    speed_axis.plot(time_s, [s.values["speed_rpm"] for s in samples])
+    speed_axis.axhline(target_speed_rpm, linestyle="--", label="Target")
+    speed_axis.set_ylabel("Speed, rpm")
+    speed_axis.set_title("Automatic PMSM field weakening")
+    speed_axis.legend()
+    current_axis.plot(time_s, [s.values["id_ref_a"] for s in samples], label="Id ref")
+    current_axis.plot(time_s, [s.values["iq_ref_a"] for s in samples], label="Iq ref")
+    current_axis.set_ylabel("Current reference, A")
+    current_axis.legend()
+    voltage_axis.plot(
+        time_s,
+        [s.values["voltage_mag_pu"] for s in samples],
+        label="Voltage magnitude",
+    )
+    voltage_axis.axhline(voltage_target_pu, linestyle="--", label="Target")
+    voltage_axis.set_xlabel("Time, s")
+    voltage_axis.set_ylabel("Voltage, pu")
+    voltage_axis.legend()
+    figure.savefig(path, dpi=170)
+    plt.close(figure)

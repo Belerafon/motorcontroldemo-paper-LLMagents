@@ -117,6 +117,11 @@ void SM_Ctrl_Fast_Calc(TSM_Ctrl *p) {
 		pid_ia.reset(&pid_ia);
 		pid_spd.reset(&pid_spd);
 		pid_pos.reset(&pid_pos);
+		field_weakening.reset(&field_weakening);
+		Debug1 = 0;
+		Debug2 = 0;
+		Debug3 = 0;
+		Debug4 = 0;
 		cur_par.Is = 0;
 		cur_par.power = 0;
 		cur_par.speed = 0;
@@ -414,10 +419,19 @@ void SM_Ctrl_Fast_Calc(TSM_Ctrl *p) {
 			pid_spd.pid_fdb_reg3 = cur_par.speed; //обратная связь регулятора скорости - скорость ДПР
 
 
-			pid_spd.pid_out_max = refs.Iq_ref; //Максимум выхода регулятора скорости - заданный ток
+			field_weakening.calc(&field_weakening,
+					pid_id.pid_out_reg3, pid_iq.pid_out_reg3, pwm.U_lim,
+					pwm.UdCorTmp, pwm.UdCompEnable, refs.Iq_ref,
+					park.de, DebugW3, DebugW4);
+			Debug1 = field_weakening.id_ref;
+			Debug2 = field_weakening.voltage_error;
+			Debug3 = field_weakening.active;
+			Debug4 = pwm.ULimitation;
+
+			pid_spd.pid_out_max = field_weakening.iq_limit; //Ограничение Iq с учетом тока ослабления поля
 
 			if (sw.recuperation_ena & 1)            //если разрешена рекуперация
-				pid_spd.pid_out_min = -refs.Iq_ref; //минимум рег. скор. - отрицательный ток
+				pid_spd.pid_out_min = -field_weakening.iq_limit; //минимум рег. скор. - отрицательный ток
 			else
 				//иначе
 				pid_spd.pid_out_min = 0; //нулевой ток не даст рекупераци при вращении в положительную сторону
@@ -438,7 +452,7 @@ void SM_Ctrl_Fast_Calc(TSM_Ctrl *p) {
 			pid_iq.pid_fdb_reg3 = park.qe; //обратная связь рег. тока оси q - вычисленный ток по фазе q
 			pid_iq.calc(&pid_iq); //расчет регулятора тока оси q
 
-			pid_id.pid_ref_reg3 = 0; //задание тока по оси d - оси возбудения
+			pid_id.pid_ref_reg3 = field_weakening.id_ref; //отрицательный Id для автоматического ослабления поля
 			pid_id.pid_fdb_reg3 = park.de; //обратная связь рег. тока оси d - вычисленный ток по фазе d
 			pid_id.calc(&pid_id); //расчет регулятора тока оси d
 
@@ -562,8 +576,17 @@ void SM_Ctrl_Fast_Calc(TSM_Ctrl *p) {
 //			pid_spd.pid_fdb_reg3 = posspeedEqep.speed_filter.output; //обратная связь регулятора скорости - скорость ДПР
 			pid_spd.pid_fdb_reg3 = cur_par.speed;
 
-			pid_spd.pid_out_max = refs.Iq_ref; //Максимум выхода регулятора скорости - заданный ток
-			pid_spd.pid_out_min = -refs.Iq_ref; //минимум рег. скор. - отрицательный ток
+			field_weakening.calc(&field_weakening,
+					pid_id.pid_out_reg3, pid_iq.pid_out_reg3, pwm.U_lim,
+					pwm.UdCorTmp, pwm.UdCompEnable, refs.Iq_ref,
+					park.de, DebugW3, DebugW4);
+			Debug1 = field_weakening.id_ref;
+			Debug2 = field_weakening.voltage_error;
+			Debug3 = field_weakening.active;
+			Debug4 = pwm.ULimitation;
+
+			pid_spd.pid_out_max = field_weakening.iq_limit; //Ограничение Iq с учетом тока ослабления поля
+			pid_spd.pid_out_min = -field_weakening.iq_limit; //минимум рег. скор. - отрицательный ток
 			pid_spd.calc(&pid_spd); //расчет регулятора скорости
 
 
@@ -578,7 +601,7 @@ void SM_Ctrl_Fast_Calc(TSM_Ctrl *p) {
 			pid_iq.pid_fdb_reg3 = park.qe; //обратная связь рег. тока оси q - вычисленный ток по фазе q
 			pid_iq.calc(&pid_iq); //расчет регулятора тока оси q
 
-			pid_id.pid_ref_reg3 = 0; //задание тока по оси d - оси возбудения
+			pid_id.pid_ref_reg3 = field_weakening.id_ref; //отрицательный Id для автоматического ослабления поля
 			pid_id.pid_fdb_reg3 = park.de; //обратная связь рег. тока оси d - вычисленный ток по фазе d
 			pid_id.calc(&pid_id); //расчет регулятора тока оси d
 

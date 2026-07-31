@@ -4,7 +4,11 @@ import math
 import unittest
 from dataclasses import dataclass
 
-from tests.e2e.metrics import analyze_current_mode4, analyze_vector_500
+from tests.e2e.metrics import (
+    analyze_current_mode4,
+    analyze_field_weakening,
+    analyze_vector_500,
+)
 
 
 @dataclass(frozen=True)
@@ -98,6 +102,56 @@ class Vector500MetricsTests(unittest.TestCase):
 
         self.assertFalse(metrics["passed"])
         self.assertFalse(metrics["criteria"]["overshoot"])
+
+
+class FieldWeakeningMetricsTests(unittest.TestCase):
+    @staticmethod
+    def samples(*, id_ref_a: float = -0.5) -> list[SyntheticSample]:
+        result = []
+        for number in range(256):
+            time_s = number * 0.016
+            speed = 700.0 * (1.0 - math.exp(-time_s / 0.35))
+            id_ref = id_ref_a * (1.0 - math.exp(-time_s / 0.25))
+            iq_ref = math.sqrt(max(0.0, 1.0 - id_ref * id_ref)) * min(
+                1.0, math.exp(-time_s / 0.6) + 0.05
+            )
+            voltage = 0.84 + 0.12 * math.exp(-time_s / 0.3)
+            result.append(
+                SyntheticSample(
+                    number,
+                    time_s,
+                    {
+                        "speed_rpm": speed,
+                        "id_ref_a": id_ref,
+                        "iq_ref_a": iq_ref,
+                        "voltage_mag_pu": voltage,
+                    },
+                )
+            )
+        return result
+
+    def test_automatic_negative_id_passes(self) -> None:
+        metrics = analyze_field_weakening(
+            self.samples(),
+            target_speed_rpm=700.0,
+            current_limit_a=1.0,
+            voltage_target_pu=0.84,
+        )
+
+        self.assertTrue(metrics["passed"])
+        self.assertTrue(metrics["criteria"]["negative_id_activated"])
+        self.assertTrue(metrics["criteria"]["voltage_regulated"])
+
+    def test_missing_negative_id_fails(self) -> None:
+        metrics = analyze_field_weakening(
+            self.samples(id_ref_a=0.0),
+            target_speed_rpm=700.0,
+            current_limit_a=1.0,
+            voltage_target_pu=0.84,
+        )
+
+        self.assertFalse(metrics["passed"])
+        self.assertFalse(metrics["criteria"]["negative_id_activated"])
 
 
 if __name__ == "__main__":
