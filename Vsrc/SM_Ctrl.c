@@ -421,6 +421,28 @@ void SM_Ctrl_Fast_Calc(TSM_Ctrl *p) {
 			else
 				//иначе
 				pid_spd.pid_out_min = 0; //нулевой ток не даст рекупераци при вращении в положительную сторону
+
+			//Ограничение мощности: если включен режим постоянной мощности (Debug3 бит 0),
+			//то максимальный выход регулятора скорости ограничивается как DebugW1 / |speed|
+			//в безразмерных IQ24 единицах. Это поддерживает постоянство мощности при разгоне:
+			//P  ~ Iq * speed = const.
+			if (Debug3 & 1)
+			{
+				long abs_speed = (cur_par.speed < 0) ? -cur_par.speed : cur_par.speed;
+				if (abs_speed > _IQ(0.02))
+				{
+					long iq_limit_power = _IQdiv(DebugW1, abs_speed);
+					if (iq_limit_power < pid_spd.pid_out_max)
+						pid_spd.pid_out_max = iq_limit_power;
+					if (sw.recuperation_ena & 1)
+					{
+						if (iq_limit_power < -pid_spd.pid_out_min)
+							pid_spd.pid_out_min = -iq_limit_power;
+					}
+				}
+				DebugW2 = pid_spd.pid_out_max;
+			}
+
 			pid_spd.calc(&pid_spd); //расчет регулятора скорости
 
 
