@@ -85,9 +85,20 @@ void SM_Ctrl_Fast_Calc(TSM_Ctrl *p) {
 		p->E = 0;
 //нужно для дискретного автомата, определение
 //первого вхождения
-	p->state_prev = p->state;
+ 	p->state_prev = p->state;
 
-	switch (p->state) {
+ 	_iq voltage_limit = _IQmpy(adc.Udc_meas, pwm.U_lim);
+ 	if (voltage_limit > pwm.U_lim)
+ 		voltage_limit = pwm.U_lim;
+ 	_iq min_limit = _IQmpy(pwm.U_lim, _IQ(0.90));
+ 	if (voltage_limit < min_limit)
+ 		voltage_limit = min_limit;
+ 	pid_iq.pid_out_max = voltage_limit;
+ 	pid_iq.pid_out_min = -voltage_limit;
+ 	pid_id.pid_out_max = voltage_limit;
+ 	pid_id.pid_out_min = -voltage_limit;
+
+ 	switch (p->state) {
 	case CTRL_STOP: { //Состояние ОСТАНОВ
 		if (p->E == 1) { //Если первое вхождение в состояние
 			cmd.bit.start = 0;
