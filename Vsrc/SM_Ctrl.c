@@ -27,6 +27,7 @@
 #include "V_IQmath.h"
 #include "main.h"
 
+static void FieldWeakening_Calc(void);
 
 //!Инициализация
 //!Всякие обнуления
@@ -438,32 +439,32 @@ void SM_Ctrl_Fast_Calc(TSM_Ctrl *p) {
 			pid_iq.pid_fdb_reg3 = park.qe; //обратная связь рег. тока оси q - вычисленный ток по фазе q
 			pid_iq.calc(&pid_iq); //расчет регулятора тока оси q
 
-			pid_id.pid_ref_reg3 = 0; //задание тока по оси d - оси возбудения
-			pid_id.pid_fdb_reg3 = park.de; //обратная связь рег. тока оси d - вычисленный ток по фазе d
-			pid_id.calc(&pid_id); //расчет регулятора тока оси d
+		FieldWeakening_Calc(); //автоматическое ослабление поля при превышении номинальной скорости
+		pid_id.pid_fdb_reg3 = park.de; //обратная связь рег. тока оси d - вычисленный ток по фазе d
+		pid_id.calc(&pid_id); //расчет регулятора тока оси d
 
-			//Обратный поворот на угол refs.theta_elec для 
-			//выходов регуляторов тока (напряжений по осям d и q)
-			ipark.de = pid_id.pid_out_reg3;
-			ipark.qe = pid_iq.pid_out_reg3;
-			ipark.ang = refs.theta_elec;
-			ipark.calc(&ipark);            //расчет преобразования координат
+		//Обратный поворот на угол refs.theta_elec для
+		//выходов регуляторов тока (напряжений по осям d и q)
+		ipark.de = pid_id.pid_out_reg3;
+		ipark.qe = pid_iq.pid_out_reg3;
+		ipark.ang = refs.theta_elec;
+		ipark.calc(&ipark);            //расчет преобразования координат
 
-			//Задание напряжение на модуль ШИМ после преобразования координат
-			pwm.UalphaRef = ipark.ds;            //Ось альфа
-			pwm.UbetaRef = ipark.qs;            //Ось бета
-			pwm.update(&pwm);            //Расчет модуля ШИМ
+		//Задание напряжение на модуль ШИМ после преобразования координат
+		pwm.UalphaRef = ipark.ds;            //Ось альфа
+		pwm.UbetaRef = ipark.qs;            //Ось бета
+		pwm.update(&pwm);            //Расчет модуля ШИМ
 
-			if (sw.excitation_ena)
-			{
-				pwm_ex.ref = refs.uf_ref;
-				pwm_ex.calc(&pwm_ex);
-			}
-
-			/*DO END*/
+		if (sw.excitation_ena)
+		{
+			pwm_ex.ref = refs.uf_ref;
+			pwm_ex.calc(&pwm_ex);
 		}
-		break;
+
+		/*DO END*/
 	}
+	break;
+}
 
 	case CTRL_RUN_VECTOR_SM_ENCODER_POS: {            //Датчиковая СУ с энкодером и с контуром положения
 		if (p->E == 1) {
@@ -578,26 +579,26 @@ void SM_Ctrl_Fast_Calc(TSM_Ctrl *p) {
 			pid_iq.pid_fdb_reg3 = park.qe; //обратная связь рег. тока оси q - вычисленный ток по фазе q
 			pid_iq.calc(&pid_iq); //расчет регулятора тока оси q
 
-			pid_id.pid_ref_reg3 = 0; //задание тока по оси d - оси возбудения
-			pid_id.pid_fdb_reg3 = park.de; //обратная связь рег. тока оси d - вычисленный ток по фазе d
-			pid_id.calc(&pid_id); //расчет регулятора тока оси d
+		FieldWeakening_Calc(); //автоматическое ослабление поля при превышении номинальной скорости
+		pid_id.pid_fdb_reg3 = park.de; //обратная связь рег. тока оси d - вычисленный ток по фазе d
+		pid_id.calc(&pid_id); //расчет регулятора тока оси d
 
-			//Обратный поворот на угол refs.theta_elec для
-			//выходов регуляторов тока (напряжений по осям d и q)
-			ipark.de = pid_id.pid_out_reg3;
-			ipark.qe = pid_iq.pid_out_reg3;
-			ipark.ang = posspeedEqep.theta_elec;
-			ipark.calc(&ipark);            //расчет преобразования координат
+		//Обратный поворот на угол refs.theta_elec для
+		//выходов регуляторов тока (напряжений по осям d и q)
+		ipark.de = pid_id.pid_out_reg3;
+		ipark.qe = pid_iq.pid_out_reg3;
+		ipark.ang = posspeedEqep.theta_elec;
+		ipark.calc(&ipark);            //расчет преобразования координат
 
-			//Задание напряжение на модуль ШИМ после преобразования координат
-			pwm.UalphaRef = ipark.ds;            //Ось альфа
-			pwm.UbetaRef = ipark.qs;            //Ось бета
-			pwm.update(&pwm);            //Расчет модуля ШИМ
+		//Задание напряжение на модуль ШИМ после преобразования координат
+		pwm.UalphaRef = ipark.ds;            //Ось альфа
+		pwm.UbetaRef = ipark.qs;            //Ось бета
+		pwm.update(&pwm);            //Расчет модуля ШИМ
 
-			/*DO END*/
-		}
-		break;
+		/*DO END*/
 	}
+	break;
+}
 
 
 	case CTRL_RUN_VECTOR_IM_ENCODER: { //Датчиковая СУ для АД с энкодером и контуром скорости
@@ -1072,6 +1073,38 @@ void SM_Ctrl_Fast_Calc(TSM_Ctrl *p) {
 	}
 	}
 
+}
+
+//!Автоматическое ослабление поля для синхронной машины
+//!Активируется при превышении скорости выше номинальной
+//!DebugW1 - разрешение (0 - выкл, не 0 - вкл)
+//!DebugW2 - коэффициент ослабления (Q24)
+//!DebugW3 - максимальный отрицательный ток Id (Q24, модуль)
+//!DebugW4 - диагностика: вычисленная уставка Id
+
+static void FieldWeakening_Calc(void) {
+    long speed_abs;
+    long delta_speed;
+    long id_fw;
+
+    if (DebugW1 == 0) {
+        pid_id.pid_ref_reg3 = 0;
+        DebugW4 = 0;
+        return;
+    }
+
+    speed_abs = labs(cur_par.speed);
+
+    if (speed_abs > _IQ(1.0)) {
+        delta_speed = speed_abs - _IQ(1.0);
+        id_fw = _IQmpy(DebugW2, delta_speed);
+        if (DebugW3 > 0 && id_fw > DebugW3)
+            id_fw = DebugW3;
+        pid_id.pid_ref_reg3 = -id_fw;
+    } else {
+        pid_id.pid_ref_reg3 = 0;
+    }
+    DebugW4 = pid_id.pid_ref_reg3;
 }
 
 /*@}*/

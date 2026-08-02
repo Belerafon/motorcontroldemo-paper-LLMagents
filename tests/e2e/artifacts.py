@@ -128,3 +128,43 @@ def plot_vector_500(path: Path, samples: list[Sample]) -> None:
     current_axis.legend()
     figure.savefig(path, dpi=170)
     plt.close(figure)
+
+
+def plot_field_weaken(path: Path, samples: list[Sample]) -> None:
+    import matplotlib.pyplot as plt
+
+    time_s = [sample.time_s for sample in samples]
+    plt.style.use("seaborn-v0_8-whitegrid")
+    figure, (speed_axis, current_axis) = plt.subplots(
+        2, 1, figsize=(11, 7.2), sharex=True, constrained_layout=True
+    )
+    speed_axis.plot(
+        time_s,
+        [s.values["speed_rpm"] for s in samples],
+        label="Measured speed",
+    )
+    speed_axis.set_title("Field-weakening acceleration above nominal speed")
+    speed_axis.set_ylabel("Speed, rpm")
+    speed_axis.legend()
+    current_axis.plot(
+        time_s,
+        [s.values["id_ref_a"] for s in samples],
+        "--",
+        label="Id reference",
+    )
+    current_axis.plot(
+        time_s,
+        [s.values.get("fw_id_ref_a", 0.0) for s in samples],
+        label="FW computed Id",
+    )
+    if "debug_w1" in samples[0].values:
+        current_axis.plot(
+            time_s,
+            [s.values["debug_w1"] for s in samples],
+            label="DebugW1 (enable)",
+        )
+    current_axis.set_xlabel("Time, s")
+    current_axis.set_ylabel("d-axis current, A")
+    current_axis.legend()
+    figure.savefig(path, dpi=170)
+    plt.close(figure)

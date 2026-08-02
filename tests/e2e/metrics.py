@@ -332,13 +332,134 @@ def analyze_vector_500(
     metrics["limits"] = {
         "max_time_to_95_s": max_time_to_95_s,
         "max_overshoot_percent": max_overshoot_percent,
-        "max_settling_s": max_settling_s,
-        "max_steady_error_percent": max_steady_error_percent,
-        "max_speed_ripple_rpm": max_speed_ripple_rpm,
-        "current_limit_a": current_limit_a,
-        "current_limit_margin_percent": current_limit_margin_percent,
-        "allowed_peak_current_a": allowed_current,
         "settling_dwell_s": settling_dwell_s,
+    }
+    metrics["criteria"] = criteria
+    metrics["passed"] = all(criteria.values())
+    return metrics
+
+
+def analyze_field_weaken(
+    samples,
+    *,
+    target_speed_rpm,
+    current_limit_a,
+    max_time_to_95_s,
+    max_overshoot_percent,
+    max_settling_s,
+    max_steady_error_percent,
+    max_speed_ripple_rpm,
+    fw_max_id_a,
+):
+    time_s = _times(samples)
+    speed = _series(samples, "speed_rpm")
+    speed_ref = _series(samples, "speed_ref_rpm") if "speed_ref_rpm" in samples[0].values else [0.0] * len(samples)
+    iq = _series(samples, "iq_a") if "iq_a" in samples[0].values else [0.0] * len(samples)
+    iq_ref = _series(samples, "iq_ref_a") if "iq_ref_a" in samples[0].values else [0.0] * len(samples)
+    id_ref = _series(samples, "id_ref_a")
+    fw_id_ref = _series(samples, "fw_id_ref_a")
+
+    start = 0
+    final_reference = _mean(speed_ref[-10:])
+
+    steady_start = _tail_start(len(samples))
+    steady_speed = speed[steady_start:]
+    steady_ref = speed_ref[steady_start:]
+    steady_error = _mean(steady_speed) - target_speed_rpm
+    steady_error_percent = (
+        abs(steady_error / target_speed_rpm * 100.0)
+        if target_speed_rpm != 0
+        else float("inf")
+    )
+
+    i10 = _first_crossing(speed, 0.1 * target_speed_rpm, 1.0, start)
+    i90 = _first_crossing(speed, 0.9 * target_speed_rpm, 1.0, start)
+    i95 = _first_crossing(speed, 0.95 * target_speed_rpm, 1.0, start)
+
+    overshoot = max(speed) - target_speed_rpm
+    overshoot_percent = (
+        abs(overshoot / target_speed_rpm * 100.0)
+        if target_speed_rpm != 0
+        else float("inf")
+    )
+
+    settling = None
+    if i95 is not None:
+        for idx in range(i95, len(samples)):
+            window = speed[idx:]
+            if all(abs(v - target_speed_rpm) <= 0.02 * abs(target_speed_rpm) for v in window):
+                settling = float(time_s[idx] - time_s[start])
+                break
+
+    acceleration_values = []
+    acceleration_iq = []
+    peak_current = 0.0
+    for idx in range(1, len(samples)):
+        if time_s[idx] > time_s[idx - 1]:
+            acc = (speed[idx] - speed[idx - 1]) / (time_s[idx] - time_s[idx - 1])
+            acceleration_values.append(acc)
+            acceleration_iq.append(iq[idx])
+            peak_current = max(peak_current, abs(iq[idx]))
+
+    steady_iq = iq[steady_start:]
+    allowed_current = current_limit_a * 1.25
+
+    window_s = time_s[-1] - time_s[0] if len(time_s) >= 2 else 0.0
+    metrics = {
+        "target_speed_rpm": target_speed_rpm,
+        "final_speed_reference_rpm": final_reference,
+        "steady_speed_rpm": _mean(steady_speed),
+        "steady_speed_error_rpm": steady_error,
+        "steady_speed_error_percent": steady_error_percent,
+        "steady_speed_stddev_rpm": float(statistics.pstdev(steady_speed)),
+        "steady_speed_ripple_peak_to_peak_rpm": max(steady_speed) - min(steady_speed),
+        "rise_time_10_90_s": (
+            None
+            if i10 is None or i90 is None
+            else float(time_s[i90] - time_s[i10])
+        ),
+        "time_to_95_percent_s": (
+            None if i95 is None else float(time_s[i95] - time_s[start])
+        ),
+        "overshoot_percent": overshoot_percent,
+        "settling_time_2_percent_s": settling,
+        "integrated_absolute_speed_error_rpm_s": _trapz_abs_error(
+            time_s, speed, speed_ref, start
+        ),
+        "steady_tracking_rmse_rpm": _rmse(steady_speed, steady_ref),
+        "max_acceleration_rpm_per_s": (
+            max(acceleration_values) if acceleration_values else None
+        ),
+        "peak_abs_iq_a_during_acceleration": peak_current,
+        "rms_iq_a_during_acceleration": _rms(acceleration_iq),
+        "peak_abs_iq_reference_a": max(abs(value) for value in iq_ref),
+        "steady_iq_mean_a": _mean(steady_iq),
+        "steady_iq_rms_a": _rms(steady_iq),
+        "min_id_reference_a": min(id_ref) if id_ref else 0.0,
+        "min_fw_computed_id_a": min(fw_id_ref) if fw_id_ref else 0.0,
+        "window_s": window_s,
+    }
+
+    criteria = {
+        "enough_samples": len(samples) >= 64,
+        "speed_reference_reached_command": (
+            abs(final_reference - target_speed_rpm)
+            <= max(5.0, abs(target_speed_rpm) * 0.01)
+        ),
+        "reached_95_percent": (
+            metrics["time_to_95_percent_s"] is not None
+            and metrics["time_to_95_percent_s"] <= max_time_to_95_s
+        ),
+        "overshoot": overshoot_percent <= max_overshoot_percent,
+        "settled": settling is not None and settling <= max_settling_s,
+        "steady_speed_error": steady_error_percent <= max_steady_error_percent,
+        "steady_speed_ripple": (
+            metrics["steady_speed_ripple_peak_to_peak_rpm"]
+            <= max_speed_ripple_rpm
+        ),
+        "iq_within_limit_margin": (
+            current_limit_a > 0 and peak_current <= allowed_current
+        ),
     }
     metrics["criteria"] = criteria
     metrics["passed"] = all(criteria.values())
