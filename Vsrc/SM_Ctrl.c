@@ -72,22 +72,22 @@ void SM_Ctrl_Fast_Calc(TSM_Ctrl *p) {
 
 //если команда остановить, то переходим
 //в режим ОСТАНОВЛЕН
-	if (cmd.bit.stop == 1)
-		p->state = CTRL_STOP;
-// если есть авария, то переходим в стоп
-	if (sm_prot.state == PROT_FAIL)
-		p->state = CTRL_STOP;
+ 	if (cmd.bit.stop == 1)
+ 		p->state = CTRL_STOP;
+ // если есть авария, то переходим в стоп
+ 	if (sm_prot.state == PROT_FAIL)
+ 		p->state = CTRL_STOP;
 
 //считаем дискретный автомат
-	if (p->state_prev != p->state)
-		p->E = 1;
-	else
-		p->E = 0;
+ 	if (p->state_prev != p->state)
+ 		p->E = 1;
+ 	else
+ 		p->E = 0;
 //нужно для дискретного автомата, определение
 //первого вхождения
-	p->state_prev = p->state;
+ 	p->state_prev = p->state;
 
-	switch (p->state) {
+ 	switch (p->state) {
 	case CTRL_STOP: { //Состояние ОСТАНОВ
 		if (p->E == 1) { //Если первое вхождение в состояние
 			cmd.bit.start = 0;
@@ -1071,6 +1071,34 @@ void SM_Ctrl_Fast_Calc(TSM_Ctrl *p) {
 		break;
 	}
 	}
+
+//Динамическое ограничение регуляторов тока по доступному напряжению ЗПТ
+//и возможностям модуля ШИМ (после всех режимных расчетов)
+ {
+ 	_iq pwm_max_voltage = PWM_Module_GetMaxVoltage(&pwm);
+ 	_iq effective_ulim = pwm.U_lim;
+ 	if (effective_ulim > pwm_max_voltage) effective_ulim = pwm_max_voltage;
+ 	if (effective_ulim < _IQ(0.0)) effective_ulim = _IQ(0.0);
+ 	_iq available_voltage = _IQmpy(adc.Udc_meas, effective_ulim);
+ 	if (available_voltage > _IQ(1.0)) available_voltage = _IQ(1.0);
+ 	if (available_voltage < _IQ(0.05)) available_voltage = _IQ(0.05);
+
+ 	pid_iq.pid_out_max = available_voltage;
+ 	pid_iq.pid_out_min = -available_voltage;
+ 	pid_id.pid_out_max = available_voltage;
+ 	pid_id.pid_out_min = -available_voltage;
+
+ 	_iq voltage_ratio = adc.Udc_meas;
+ 	if (voltage_ratio > _IQ(1.0)) voltage_ratio = _IQ(1.0);
+ 	if (voltage_ratio < _IQ(0.0)) voltage_ratio = _IQ(0.0);
+ 	_iq dynamic_current_limit = _IQmpy(refs.Iq_ref, voltage_ratio);
+
+ 	pid_spd.pid_out_max = dynamic_current_limit;
+ 	if (sw.recuperation_ena & 1)
+ 		pid_spd.pid_out_min = -dynamic_current_limit;
+ 	else
+ 		pid_spd.pid_out_min = 0;
+ }
 
 }
 

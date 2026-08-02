@@ -387,6 +387,7 @@ void PWM_Module_Init(TPWM_Module *p) {
 //! \memberof TPWM_Module
 void PWM_Module_NormInput(TPWM_Module* p) {
     _iq knorm;
+    _iq pwm_max_voltage = PWM_Module_GetMaxVoltage(p);
 
     p->UalphaNorm=p->UalphaRef;
     p->UbetaNorm=p->UbetaRef;
@@ -402,10 +403,10 @@ void PWM_Module_NormInput(TPWM_Module* p) {
         p->UbetaNorm=_IQmpy(p->UbetaNorm, p->UdCorTmp);//и это тоже
     }
 
-    //вписывание заданной амплитуды напряжения в окружность, вписываемую в шестиугольник базывых векторов
+    //вписывание заданной амплитуды напряжения в окружность, вписываемую в шестиугольник базавых векторов
     //когда U_lim=1.0, это и есть такая окружность. Бывает, что мы хотим вписывать в шестиугольник. Тогда просто задираем вверх огрианичение U_lim
-    if (p->U_lim>_IQ(1.0/0.866)) //но нет смысла задирать выше максимально-реализ. напряжения (больше базового вектора)
-        p->U_lim=_IQ(1.0/0.866);
+    if (p->U_lim>_IQdiv(_IQ(1.0), pwm_max_voltage)) //но нет смысла задирать выше максимально-реализ. напряжения (больше базового вектора)
+        p->U_lim=_IQdiv(_IQ(1.0), pwm_max_voltage);
     /* рассчитываем амплитуду вектора, который хотим отработать*/
     knorm=_IQmag(p->UalphaNorm,p->UbetaNorm);//плюс нормируем от 540 к 311
     if (knorm>=p->U_lim) { //он больше, чем наше ограничение?
@@ -422,10 +423,9 @@ void PWM_Module_NormInput(TPWM_Module* p) {
     Теперь производится переход, где за единицу принимается максимально
     реализуемое напряжение (длина базового вектора)
     */
-    p->UalphaNorm=_IQmpy(p->UalphaNorm,_IQ(0.866));
-    p->UbetaNorm=_IQmpy(p->UbetaNorm,_IQ(0.866));
+    p->UalphaNorm=_IQmpy(p->UalphaNorm, pwm_max_voltage);
+    p->UbetaNorm=_IQmpy(p->UbetaNorm, pwm_max_voltage);
 }
-
 
 
 //! Функция 6ти секторной векторной ШИМ
@@ -552,7 +552,8 @@ void PWM_Module_Sin_Update(TPWM_Module *p) {
 	_iq PhasePtsB;
 	_iq PhasePtsC;
 	_iq knorm;
-
+	_iq pwm_max_voltage = PWM_Module_GetMaxVoltage(p);
+	_iq sin_norm_factor = _IQdiv(_IQ(1.0), _IQmpy(pwm_max_voltage, _IQ(2.0)));
 
 	p->UalphaNorm = p->UalphaRef;
 	p->UbetaNorm = p->UbetaRef;
@@ -570,12 +571,11 @@ void PWM_Module_Sin_Update(TPWM_Module *p) {
 	} else
 		p->ULimitation = 0;
 
-	//Нормирование входного напряжения. Так как синусоидальная ШИМ формирует на 0.866 меньшее напряжение,
-	//чем векторная ШИМ (270В амплитудного фазного напряжения вместо 311В), то для того, чтобы при том же задании в переменных
-	//p->UalphaNorm, p->UbetaNorm получилось то же самое напряжение на выходе, что и в векторной ШИМ, нужно задания увеличить в 1/0.866 раз.
-	//Деление на два нужно для последующих формул, чтобы переменые менялись в половинном от максимального диапазоне.
-	p->UalphaNorm = _IQmpy(p->UalphaNorm, _IQ(1/0.866/2));
-	p->UbetaNorm = _IQmpy(p->UbetaNorm, _IQ(1/0.866/2));
+	//Нормирование входного напряжения. Так как синусоидальная ШИМ формирует меньшее напряжение,
+	//чем векторная ШИМ, то для того, чтобы при том же задании в переменных
+	//p->UalphaNorm, p->UbetaNorm получилось то же самое напряжение на выходе, нужно задания увеличить в 1/(pwm_max*2) раз.
+	p->UalphaNorm = _IQmpy(p->UalphaNorm, sin_norm_factor);
+	p->UbetaNorm = _IQmpy(p->UbetaNorm, sin_norm_factor);
 
 	/*фазное преобразование из системы альфа, бетта в a,b,c */
 
@@ -834,6 +834,21 @@ void PWM_Module_Off(TPWM_Module *p) {
     NT_PWM2->AQCSFRC = 9;  // 0x1 - 0 на выходе PWMxA, 0x8 - 1 на выходе PWMxB
 	GPIO_INV_OFF;
 
+}
+
+//! Получение максимального реализуемого напряжения в относительных единицах
+//! для заданного типа ШИМ.
+//! \memberof TPWM_Module
+_iq PWM_Module_GetMaxVoltage(TPWM_Module *p) {
+    switch (p->PWM_type) {
+        case PWM_TYPE_SIN_PWM:
+            return _IQ(0.5);
+        case PWM_TYPE_6SECT_NO_SV:
+        case PWM_TYPE_12SECT_NO_SV:
+        case PWM_TYPE_FLY_12SECT:
+        default:
+            return _IQ(0.866);
+    }
 }
 
 /*@}*/

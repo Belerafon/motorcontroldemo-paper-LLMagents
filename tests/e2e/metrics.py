@@ -343,3 +343,139 @@ def analyze_vector_500(
     metrics["criteria"] = criteria
     metrics["passed"] = all(criteria.values())
     return metrics
+
+
+def analyze_dynamic_limits(
+    *,
+    udc_before: float,
+    udc_after: float,
+    pwm_ulim_before: float,
+    pwm_ulim_after: float,
+    iq_ref_before: float,
+    iq_ref_after: float,
+    pid_iq_baseline: dict[str, float],
+    pid_iq_pwm_scaled: dict[str, float],
+    pid_iq_udc_scaled: dict[str, float],
+    pid_id_baseline: dict[str, float],
+    pid_id_pwm_scaled: dict[str, float],
+    pid_id_udc_scaled: dict[str, float],
+    pid_spd_baseline: dict[str, float],
+    pid_spd_iq_scaled: dict[str, float],
+    pid_spd_udc_scaled: dict[str, float],
+    voltage_scale: float,
+    limit_tolerance: float,
+    pid_iq_scale: float = 20.0,
+    pid_spd_scale: float = 5.0,
+) -> dict[str, Any]:
+    pid_iq_baseline_raw = pid_iq_baseline["output_max_v"] / pid_iq_scale
+    pid_iq_pwm_scaled_raw = pid_iq_pwm_scaled["output_max_v"] / pid_iq_scale
+    pid_iq_udc_scaled_raw = pid_iq_udc_scaled["output_max_v"] / pid_iq_scale
+
+    pid_id_baseline_raw = pid_id_baseline["output_max_v"] / pid_iq_scale
+    pid_id_pwm_scaled_raw = pid_id_pwm_scaled["output_max_v"] / pid_iq_scale
+    pid_id_udc_scaled_raw = pid_id_udc_scaled["output_max_v"] / pid_iq_scale
+
+    pid_spd_baseline_raw = pid_spd_baseline["output_max_v"] / pid_spd_scale
+    pid_spd_iq_scaled_raw = pid_spd_iq_scaled["output_max_v"] / pid_spd_scale
+    pid_spd_udc_scaled_raw = pid_spd_udc_scaled["output_max_v"] / pid_spd_scale
+
+    estimated_effective_ulim_before = pid_iq_baseline_raw / max(udc_before, 1e-6)
+    if pwm_ulim_before > estimated_effective_ulim_before:
+        pwm_max_voltage_est = estimated_effective_ulim_before
+    else:
+        pwm_max_voltage_est = pwm_ulim_before * 2.0
+    effective_ulim_after = min(pwm_ulim_after, pwm_max_voltage_est)
+    expected_iq_ratio = effective_ulim_after / max(
+        estimated_effective_ulim_before, 1e-9
+    )
+    pid_iq_pwm_ratio = pid_iq_pwm_scaled_raw / max(
+        abs(pid_iq_baseline_raw), 1e-9
+    )
+    pid_id_pwm_ratio = pid_id_pwm_scaled_raw / max(
+        abs(pid_id_baseline_raw), 1e-9
+    )
+
+    expected_spd_ratio = iq_ref_after / max(iq_ref_before, 1e-9)
+    pid_spd_iq_ratio = pid_spd_iq_scaled_raw / max(
+        abs(pid_spd_baseline_raw), 1e-9
+    )
+
+    udc_ratio_expected = udc_after / max(udc_before, 1e-6)
+    pid_iq_udc_ratio = pid_iq_udc_scaled_raw / max(
+        abs(pid_iq_baseline_raw), 1e-9
+    )
+    pid_id_udc_ratio = pid_id_udc_scaled_raw / max(
+        abs(pid_id_baseline_raw), 1e-9
+    )
+    pid_spd_udc_ratio = pid_spd_udc_scaled_raw / max(
+        abs(pid_spd_baseline_raw), 1e-9
+    )
+
+    metrics: dict[str, Any] = {
+        "udc_before": udc_before,
+        "udc_after": udc_after,
+        "pwm_ulim_before": pwm_ulim_before,
+        "pwm_ulim_after": pwm_ulim_after,
+        "iq_ref_before": iq_ref_before,
+        "iq_ref_after": iq_ref_after,
+        "voltage_ratio_expected": udc_ratio_expected,
+        "pwm_ratio_expected": expected_iq_ratio,
+        "iq_ref_ratio_expected": expected_spd_ratio,
+        "pid_iq_max_baseline_v": pid_iq_baseline["output_max_v"],
+        "pid_iq_max_pwm_scaled_v": pid_iq_pwm_scaled["output_max_v"],
+        "pid_iq_max_udc_scaled_v": pid_iq_udc_scaled["output_max_v"],
+        "pid_id_max_baseline_v": pid_id_baseline["output_max_v"],
+        "pid_id_max_pwm_scaled_v": pid_id_pwm_scaled["output_max_v"],
+        "pid_id_max_udc_scaled_v": pid_id_udc_scaled["output_max_v"],
+        "pid_spd_max_baseline_a": pid_spd_baseline["output_max_v"],
+        "pid_spd_max_iq_scaled_a": pid_spd_iq_scaled["output_max_v"],
+        "pid_spd_max_udc_scaled_a": pid_spd_udc_scaled["output_max_v"],
+        "voltage_scale": voltage_scale,
+    }
+    criteria = {
+        "iq_pwm_limit_scaled": (
+            abs(pid_iq_pwm_ratio - expected_iq_ratio) <= limit_tolerance
+        ),
+        "id_pwm_limit_scaled": (
+            abs(pid_id_pwm_ratio - expected_iq_ratio) <= limit_tolerance
+        ),
+        "spd_iq_limit_scaled": (
+            abs(pid_spd_iq_ratio - expected_spd_ratio) <= limit_tolerance
+        ),
+        "positive_voltage_limits": (
+            pid_iq_pwm_scaled["output_max_v"] > 0
+            and pid_id_pwm_scaled["output_max_v"] > 0
+            and pid_spd_iq_scaled["output_max_v"] > 0
+        ),
+        "symmetric_voltage_limits": (
+            abs(
+                abs(pid_iq_pwm_scaled["output_max_v"])
+                - abs(pid_iq_pwm_scaled["output_min_v"])
+            )
+            <= limit_tolerance
+            and
+            abs(
+                abs(pid_id_pwm_scaled["output_max_v"])
+                - abs(pid_id_pwm_scaled["output_min_v"])
+            )
+            <= limit_tolerance
+        ),
+    }
+    if abs(udc_ratio_expected - 1.0) > limit_tolerance:
+        criteria["iq_udc_limit_scaled"] = (
+            abs(pid_iq_udc_ratio - udc_ratio_expected) <= limit_tolerance
+        )
+        criteria["id_udc_limit_scaled"] = (
+            abs(pid_id_udc_ratio - udc_ratio_expected) <= limit_tolerance
+        )
+        criteria["spd_udc_limit_scaled"] = (
+            abs(pid_spd_udc_ratio - udc_ratio_expected) <= limit_tolerance
+        )
+    metrics["limits"] = {
+        "limit_tolerance": limit_tolerance,
+        "voltage_scale": voltage_scale,
+        "pwm_u_lim": pwm_ulim_before,
+    }
+    metrics["criteria"] = criteria
+    metrics["passed"] = all(criteria.values())
+    return metrics

@@ -148,6 +148,8 @@ void PWM_Module_SlowCalc(TPWM_Module *);
 void PWM_Module_On(TPWM_Module *);
 //! \memberof TPWM_Module
 void PWM_Module_Off(TPWM_Module *);
+//! \memberof TPWM_Module
+_iq PWM_Module_GetMaxVoltage(TPWM_Module *p);
 
 //векторные функции из библиотеки
 void PWM_Module_No_SV_Update(TPWM_Module *);

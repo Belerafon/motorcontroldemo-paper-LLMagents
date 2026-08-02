@@ -4,7 +4,11 @@ import math
 import unittest
 from dataclasses import dataclass
 
-from tests.e2e.metrics import analyze_current_mode4, analyze_vector_500
+from tests.e2e.metrics import (
+    analyze_current_mode4,
+    analyze_dynamic_limits,
+    analyze_vector_500,
+)
 
 
 @dataclass(frozen=True)
@@ -98,6 +102,109 @@ class Vector500MetricsTests(unittest.TestCase):
 
         self.assertFalse(metrics["passed"])
         self.assertFalse(metrics["criteria"]["overshoot"])
+
+
+class DynamicLimitsMetricsTests(unittest.TestCase):
+    @staticmethod
+    def baseline(*, udc: float = 0.66, pwm_ulim: float = 0.866, iq_ref: float = 1.0):
+        scale_v = 20.0
+        scale_a = 5.0
+        pid_iq = {
+            "output_max_v": udc * pwm_ulim * scale_v,
+            "output_min_v": -udc * pwm_ulim * scale_v,
+        }
+        pid_id = {
+            "output_max_v": udc * pwm_ulim * scale_v,
+            "output_min_v": -udc * pwm_ulim * scale_v,
+        }
+        pid_spd = {
+            "output_max_v": iq_ref * udc * scale_a,
+            "output_min_v": 0.0,
+        }
+        return {
+            "udc_before": udc,
+            "udc_after": udc,
+            "pwm_ulim_before": pwm_ulim,
+            "pwm_ulim_after": pwm_ulim * 0.5,
+            "iq_ref_before": iq_ref,
+            "iq_ref_after": iq_ref * 0.5,
+            "pid_iq_baseline": pid_iq,
+            "pid_iq_pwm_scaled": {
+                "output_max_v": pid_iq["output_max_v"] * 0.5,
+                "output_min_v": pid_iq["output_min_v"] * 0.5,
+            },
+            "pid_iq_udc_scaled": pid_iq,
+            "pid_id_baseline": pid_id,
+            "pid_id_pwm_scaled": {
+                "output_max_v": pid_id["output_max_v"] * 0.5,
+                "output_min_v": pid_id["output_min_v"] * 0.5,
+            },
+            "pid_id_udc_scaled": pid_id,
+            "pid_spd_baseline": pid_spd,
+            "pid_spd_iq_scaled": {
+                "output_max_v": pid_spd["output_max_v"] * 0.5,
+                "output_min_v": pid_spd["output_min_v"] * 0.5,
+            },
+            "pid_spd_udc_scaled": pid_spd,
+            "voltage_scale": 0.5,
+            "limit_tolerance": 0.08,
+        }
+
+    def test_scaled_limits_pass(self) -> None:
+        metrics = analyze_dynamic_limits(**self.baseline())
+        self.assertTrue(metrics["passed"])
+        self.assertTrue(metrics["criteria"]["iq_pwm_limit_scaled"])
+        self.assertTrue(metrics["criteria"]["id_pwm_limit_scaled"])
+        self.assertTrue(metrics["criteria"]["spd_iq_limit_scaled"])
+
+    def test_clamped_pwm_ulim_scales_correctly(self) -> None:
+        # When pwm.U_lim is clamped by pwm_max_voltage, scaling should still work
+        udc = 0.66
+        pwm_ulim = 1.0  # clamped to ~0.866
+        iq_ref = 1.0
+        scale_v = 20.0
+        scale_a = 5.0
+        estimated_effective_ulim = udc * 0.866 * scale_v
+        pid_iq = {
+            "output_max_v": estimated_effective_ulim,
+            "output_min_v": -estimated_effective_ulim,
+        }
+        pid_id = {
+            "output_max_v": estimated_effective_ulim,
+            "output_min_v": -estimated_effective_ulim,
+        }
+        pid_spd = {
+            "output_max_v": iq_ref * udc * scale_a,
+            "output_min_v": 0.0,
+        }
+        scaled_pwm = pwm_ulim * 0.5
+        metrics = analyze_dynamic_limits(
+            udc_before=udc,
+            udc_after=udc,
+            pwm_ulim_before=pwm_ulim,
+            pwm_ulim_after=scaled_pwm,
+            iq_ref_before=iq_ref,
+            iq_ref_after=iq_ref,
+            pid_iq_baseline=pid_iq,
+            pid_iq_pwm_scaled={
+                "output_max_v": estimated_effective_ulim * 0.5,
+                "output_min_v": -estimated_effective_ulim * 0.5,
+            },
+            pid_iq_udc_scaled=pid_iq,
+            pid_id_baseline=pid_id,
+            pid_id_pwm_scaled={
+                "output_max_v": estimated_effective_ulim * 0.5,
+                "output_min_v": -estimated_effective_ulim * 0.5,
+            },
+            pid_id_udc_scaled=pid_id,
+            pid_spd_baseline=pid_spd,
+            pid_spd_iq_scaled=pid_spd,
+            pid_spd_udc_scaled=pid_spd,
+            voltage_scale=0.5,
+            limit_tolerance=0.08,
+        )
+        self.assertTrue(metrics["passed"])
+        self.assertTrue(metrics["criteria"]["iq_pwm_limit_scaled"])
 
 
 if __name__ == "__main__":
