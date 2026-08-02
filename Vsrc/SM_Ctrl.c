@@ -49,6 +49,31 @@ void SM_Ctrl_Slow_Calc(TSM_Ctrl *p) {
 void SM_Ctrl_ms_Calc(TSM_Ctrl *p) {
 
 }
+//!Компенсация перекрестных связей регуляторов тока (декаплинг)
+//!Вычитает из выходов регуляторов pid_id/pid_iq напряжение обратной ЭДС
+//!и поперечные индуктивные падения для улучшения реакции на высокой частоте вращения.
+//!Включается записью ненулевого значения в DebugW2.
+//! \memberof TSM_Ctrl
+static void CurrentDecoupling(void) {
+    float omega_rad_s;
+    float Vdec_d;
+    float Vdec_q;
+    omega_rad_s = _IQ24toF(cur_par.speed) * (float)drv_params.freq_nom * 6.2831853f;
+    if (DebugW2 != 0 && drv_params.Ls != 0 && omega_rad_s != 0.0f &&
+        model.motorInternals.lsd != 0.0f && model.motorInternals.lsq != 0.0f) {
+        Vdec_d = omega_rad_s * _IQ24toF(model.motorInternals.lsq) *
+                 _IQ24toF(park.qe) * 0.001f;
+        Vdec_q = -(omega_rad_s * _IQ24toF(model.motorInternals.lsd) *
+                   _IQ24toF(park.de) * 0.001f +
+                   omega_rad_s * model.motorInternals.m);
+        Vdec_d = Vdec_d / (float)drv_params.Udc_nom;
+        Vdec_q = Vdec_q / (float)drv_params.Udc_nom;
+        pid_id.pid_out_reg3 -= _IQ(Vdec_d);
+        pid_iq.pid_out_reg3 -= _IQ(Vdec_q);
+    }
+}
+
+
 
 //!Быстрый расчет
 
@@ -222,6 +247,8 @@ void SM_Ctrl_Fast_Calc(TSM_Ctrl *p) {
 		pid_iq.pid_fdb_reg3 = park.qe;park.de;//обратная связь - то что пришло с фазных преобразований
 		pid_iq.calc(&pid_iq);
 
+		CurrentDecoupling();
+
 		//обратные фазные преобразования.
 		//Крутим вектор напряжения, который выдают регуляторы токов обратно на угол refs.theta_elec
 		ipark.de = pid_id.pid_out_reg3;
@@ -345,6 +372,8 @@ void SM_Ctrl_Fast_Calc(TSM_Ctrl *p) {
 			pid_iq.pid_fdb_reg3 = park.qe;
 			pid_iq.calc(&pid_iq);
 
+			CurrentDecoupling();
+
 			//обратные фазные преобразования.
 			//Крутим вектор напряжения, который выдают регуляторы токов обратно на угол refs.theta_elec
 			ipark.de = pid_id.pid_out_reg3;
@@ -437,6 +466,8 @@ void SM_Ctrl_Fast_Calc(TSM_Ctrl *p) {
 			pid_iq.pid_ref_reg3 = pid_spd.pid_out_reg3;
 			pid_iq.pid_fdb_reg3 = park.qe; //обратная связь рег. тока оси q - вычисленный ток по фазе q
 			pid_iq.calc(&pid_iq); //расчет регулятора тока оси q
+
+			CurrentDecoupling();
 
 			pid_id.pid_ref_reg3 = 0; //задание тока по оси d - оси возбудения
 			pid_id.pid_fdb_reg3 = park.de; //обратная связь рег. тока оси d - вычисленный ток по фазе d
@@ -578,6 +609,8 @@ void SM_Ctrl_Fast_Calc(TSM_Ctrl *p) {
 			pid_iq.pid_fdb_reg3 = park.qe; //обратная связь рег. тока оси q - вычисленный ток по фазе q
 			pid_iq.calc(&pid_iq); //расчет регулятора тока оси q
 
+			CurrentDecoupling();
+
 			pid_id.pid_ref_reg3 = 0; //задание тока по оси d - оси возбудения
 			pid_id.pid_fdb_reg3 = park.de; //обратная связь рег. тока оси d - вычисленный ток по фазе d
 			pid_id.calc(&pid_id); //расчет регулятора тока оси d
@@ -668,6 +701,8 @@ void SM_Ctrl_Fast_Calc(TSM_Ctrl *p) {
 			pid_iq.pid_ref_reg3 = pid_spd.pid_out_reg3;
 			pid_iq.pid_fdb_reg3 = park.qe; //обратная связь рег. тока оси y - вычисленный ток по фазе y
 			pid_iq.calc(&pid_iq); //расчет регулятора тока оси y
+
+			CurrentDecoupling();
 
 			pid_id.pid_ref_reg3 = _IQmpy(RotorObserver.FluxCurrentRatio,labs(pid_iq.pid_ref_reg3)); //задание тока по оси x - оси возбудения. Пропорционально амплитуде задания тока статора
 			if (pid_id.pid_ref_reg3 < RotorObserver.FluxCurrentMin)
@@ -828,6 +863,8 @@ void SM_Ctrl_Fast_Calc(TSM_Ctrl *p) {
 			pid_iq.pid_fdb_reg3 = park.qe; //обратная связь рег. тока оси y - вычисленный ток по фазе y
 			pid_iq.calc(&pid_iq); //расчет регулятора тока оси y
 
+			CurrentDecoupling();
+
 			pid_id.pid_ref_reg3 = _IQmpy(RotorObserver.FluxCurrentRatio,labs(pid_iq.pid_ref_reg3)); //задание тока по оси x - оси возбудения. Пропорционально амплитуде задания тока статора
 			if (pid_id.pid_ref_reg3 < RotorObserver.FluxCurrentMin)
 				pid_id.pid_ref_reg3=RotorObserver.FluxCurrentMin;
@@ -942,6 +979,8 @@ void SM_Ctrl_Fast_Calc(TSM_Ctrl *p) {
 			pid_id.pid_ref_reg3 = refs.i_flux_ref;
 			pid_id.pid_fdb_reg3 = park.de;
 			pid_id.calc(&pid_id);
+
+			CurrentDecoupling();
 
 			ipark.de = pid_id.pid_out_reg3;
 			ipark.qe = pid_iq.pid_out_reg3;
