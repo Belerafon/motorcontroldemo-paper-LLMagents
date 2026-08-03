@@ -610,6 +610,93 @@ void PWM_Module_Sin_Update(TPWM_Module *p) {
 
 }
 
+//! Функция симметричной векторной ШИМ без привязки к шинам
+
+//! Реализует 7-сегментную SVPWM с равным разделением нулевого вектора
+//! между состояниями (000) и (111). Обеспечивает лучшее использование
+//! напряжения ЗПТ по сравнению с синусоидальной ШИМ без привязки к одной
+//! из шин постоянного тока.
+//! \memberof TPWM_Module
+void PWM_Module_SV_Update(TPWM_Module *p) {
+	_iq Va;
+	_iq Vb;
+	_iq Vc;
+	_iq Vmax;
+	_iq Vmin;
+	_iq Vcm;
+	_iq lambda1;
+	_iq lambda2;
+	_iq lambda3;
+	_iq tmp_pwm;
+
+	PWM_Module_NormInput(p);
+
+	/* Преобразование альфа-бета в трёхфазные напряжения */
+	Va = p->UalphaNorm;
+	Vb = _IQmpy(p->UbetaNorm, _IQ(0.8660254)) - (p->UalphaNorm >> 1);
+	Vc = -_IQmpy(p->UbetaNorm, _IQ(0.8660254)) - (p->UalphaNorm >> 1);
+
+	/* Определение максимального и минимального фазных напряжения */
+	Vmax = Va;
+	Vmin = Va;
+	if (Vb > Vmax) Vmax = Vb;
+	if (Vc > Vmax) Vmax = Vc;
+	if (Vb < Vmin) Vmin = Vb;
+	if (Vc < Vmin) Vmin = Vc;
+
+	/* Векторная ШИМ без привязки к шинам: среднее от максимума и минимума */
+	Vcm = (Vmax + Vmin) >> 1;
+
+	Va = Va - Vcm;
+	Vb = Vb - Vcm;
+	Vc = Vc - Vcm;
+
+	p->GammaA = _IQmpy(p->k_pwm, _IQ(0.5) - Va);
+	p->GammaB = _IQmpy(p->k_pwm, _IQ(0.5) - Vb);
+	p->GammaC = _IQmpy(p->k_pwm, _IQ(0.5) - Vc);
+
+	/* Насыщения */
+	if (p->GammaA < 0) p->GammaA = 0;
+	if (p->GammaB < 0) p->GammaB = 0;
+	if (p->GammaC < 0) p->GammaC = 0;
+
+	if (p->GammaA > p->k_pwm) p->GammaA = p->k_pwm + 1;
+	if (p->GammaB > p->k_pwm) p->GammaB = p->k_pwm + 1;
+	if (p->GammaC > p->k_pwm) p->GammaC = p->k_pwm + 1;
+
+	/* Определение сектора для диагностики */
+	tmp_pwm = _IQmpy(_1_SQRT3, p->UbetaNorm);
+	lambda1 = _IQmpy(p->k_pwm, (p->UalphaNorm - tmp_pwm));
+	lambda2 = _IQmpy(p->k_pwm, 2 * tmp_pwm);
+	lambda3 = _IQmpy(p->k_pwm, (p->UalphaNorm + tmp_pwm));
+
+	if (lambda1 > 0)
+		if (lambda3 > 0) {
+			p->sector = 1;
+		} else if (lambda2 > 0) {
+			p->sector = 0;
+		} else if (lambda1 != 0) {
+			p->sector = 5;
+		} else {
+			p->sector = 4;
+		}
+	else if (lambda2 > 0) {
+		p->sector = 1;
+	} else if (lambda3 < 0) {
+		p->sector = 2;
+	} else {
+		p->sector = 3;
+	}
+
+	DINT;
+	if (NT_PWM0->TBCTR > 30) {
+		NT_PWM0->CMPA_bit.CMPA = (Uint16)p->GammaA;
+		NT_PWM1->CMPA_bit.CMPA = (Uint16)p->GammaB;
+		NT_PWM2->CMPA_bit.CMPA = (Uint16)p->GammaC;
+	}
+	EINT;
+}
+
 //! Функция ШИМ с раздельными фазами (для модели SRM)
 
 //! \memberof TPWM_Module
@@ -736,6 +823,10 @@ void PWM_Module_Update(TPWM_Module *p) {
 		}
 		case PWM_TYPE_SRD: {
 			PWM_Module_Separate_Update(p);
+			break;
+		}
+		case PWM_TYPE_SV_PWM: {
+			PWM_Module_SV_Update(p);
 			break;
 		}
 		}
