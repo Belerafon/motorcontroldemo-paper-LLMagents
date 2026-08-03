@@ -421,7 +421,24 @@ void SM_Ctrl_Fast_Calc(TSM_Ctrl *p) {
 			else
 				//иначе
 				pid_spd.pid_out_min = 0; //нулевой ток не даст рекупераци при вращении в положительную сторону
-			pid_spd.calc(&pid_spd); //расчет регулятора скорости
+
+		if (sw.power_limit_ena & 1)
+		{
+			long speed_abs = labs(cur_par.speed);
+			if ((speed_abs > _IQ(0.01)) && (refs.power_limit > 0))
+			{
+				if (_IQmpy(pid_spd.pid_out_max, speed_abs) > refs.power_limit)
+				{
+					pid_spd.pid_out_max = _IQdiv(refs.power_limit, speed_abs);
+				}
+				if (_IQmpy(labs(pid_spd.pid_out_min), speed_abs) > refs.power_limit)
+				{
+					pid_spd.pid_out_min = -_IQdiv(refs.power_limit, speed_abs);
+				}
+			}
+		}
+
+		pid_spd.calc(&pid_spd); //расчет регулятора скорости
 
 
 			cur_par.ThetaRefCurr = refs.theta_elec;
@@ -509,7 +526,7 @@ void SM_Ctrl_Fast_Calc(TSM_Ctrl *p) {
 #define REVOLUTION_DROP_NUMBER 3
 			//чтобы можно было вращать неограниченно в одну сторону и не переполнилась переменная по положению
 			//но чтобы нельзя было накрутить 100500 оборотов вперед привода и он крутил бы дальше и дальше
-			//ограничим максимальное расхождение в обототах числом REVOLUTION_DROP_NUMBER
+			//ограничим максимальное расхождение в оботорах числом REVOLUTION_DROP_NUMBER
 			if (labs(SSI_Encoder.RevolutionCounter-posspeedEqep.RevolutionCounter)>REVOLUTION_DROP_NUMBER){
 				if (posspeedEqep.RevolutionCounter>SSI_Encoder.RevolutionCounter){
 					posspeedEqep.RevolutionCounter=SSI_Encoder.RevolutionCounter+REVOLUTION_DROP_NUMBER;
@@ -564,6 +581,23 @@ void SM_Ctrl_Fast_Calc(TSM_Ctrl *p) {
 
 			pid_spd.pid_out_max = refs.Iq_ref; //Максимум выхода регулятора скорости - заданный ток
 			pid_spd.pid_out_min = -refs.Iq_ref; //минимум рег. скор. - отрицательный ток
+
+			if (sw.power_limit_ena & 1)
+			{
+				long speed_abs = labs(cur_par.speed);
+				if ((speed_abs > _IQ(0.01)) && (refs.power_limit > 0))
+				{
+					if (_IQmpy(pid_spd.pid_out_max, speed_abs) > refs.power_limit)
+					{
+						pid_spd.pid_out_max = _IQdiv(refs.power_limit, speed_abs);
+					}
+					if (_IQmpy(labs(pid_spd.pid_out_min), speed_abs) > refs.power_limit)
+					{
+						pid_spd.pid_out_min = -_IQdiv(refs.power_limit, speed_abs);
+					}
+				}
+			}
+
 			pid_spd.calc(&pid_spd); //расчет регулятора скорости
 
 
@@ -638,6 +672,23 @@ void SM_Ctrl_Fast_Calc(TSM_Ctrl *p) {
 			else
 				//иначе
 				pid_spd.pid_out_min = 0; //нулевой ток не даст рекупераци при вращении в положительную сторону
+
+			if (sw.power_limit_ena & 1)
+			{
+				long speed_abs = labs(cur_par.speed);
+				if ((speed_abs > _IQ(0.01)) && (refs.power_limit > 0))
+				{
+					if (_IQmpy(pid_spd.pid_out_max, speed_abs) > refs.power_limit)
+					{
+						pid_spd.pid_out_max = _IQdiv(refs.power_limit, speed_abs);
+					}
+					if (_IQmpy(labs(pid_spd.pid_out_min), speed_abs) > refs.power_limit)
+					{
+						pid_spd.pid_out_min = -_IQdiv(refs.power_limit, speed_abs);
+					}
+				}
+			}
+
 			pid_spd.calc(&pid_spd); //расчет регулятора скорости
 
 
@@ -739,7 +790,7 @@ void SM_Ctrl_Fast_Calc(TSM_Ctrl *p) {
 #define REVOLUTION_DROP_NUMBER 3
 			//чтобы можно было вращать неограниченно в одну сторону и не переполнилась переменная по положению
 			//но чтобы нельзя было накрутить 100500 оборотов вперед привода и он крутил бы дальше и дальше
-			//ограничим максимальное расхождение в обототах числом REVOLUTION_DROP_NUMBER
+			//ограничим максимальное расхождение в оботорами числом REVOLUTION_DROP_NUMBER
 			if (labs(SSI_Encoder.RevolutionCounter-posspeedEqep.RevolutionCounter)>REVOLUTION_DROP_NUMBER){
 				if (posspeedEqep.RevolutionCounter>SSI_Encoder.RevolutionCounter){
 					posspeedEqep.RevolutionCounter=SSI_Encoder.RevolutionCounter+REVOLUTION_DROP_NUMBER;
@@ -759,10 +810,7 @@ void SM_Ctrl_Fast_Calc(TSM_Ctrl *p) {
 
 			//задание угла - от SSI энкодера
 			refs.theta_elec=SSI_Encoder.theta_elecContinouos;
-
-			refs.theta_elec=adc.ref_meas<<2; //задание положения от потенциометра
 */
-
 
 
 			//текущий угол с датчика положения, переведенный в электрический из механического
@@ -784,7 +832,7 @@ void SM_Ctrl_Fast_Calc(TSM_Ctrl *p) {
 			//обычно на ПИД регулятор подается задание и обратная связь, а внутри считается их разница.
 			//но разницу мы посчитали выше (и ограничили). Потому пусть задание на регулятор будет всё время нулевым,
 			//а в обратную связь подадим уже посчитанную и ограниченную ошибку (со знаком минус)
-			pid_pos.pid_ref_reg3 = 0;//задавать задание на положение надо через Temp1 (группа задания)
+			pid_pos.pid_ref_reg3 = 0;//задавать задание на положение надо через refs.theta_elec (группа задания)
 			pid_pos.pid_fdb_reg3 = -posRefError;//обратная связь
 			pid_pos.pid_out_max=refs.speed_ref;//ограничение рег. положения - максимум задаваемой скорости
 			pid_pos.pid_out_min=-refs.speed_ref;//и в минус
@@ -797,6 +845,23 @@ void SM_Ctrl_Fast_Calc(TSM_Ctrl *p) {
 
 			pid_spd.pid_out_max = refs.Iq_ref; //Максимум выхода регулятора скорости - заданный ток
 			pid_spd.pid_out_min = -refs.Iq_ref; //минимум рег. скор. - отрицательный ток
+
+			if (sw.power_limit_ena & 1)
+			{
+				long speed_abs = labs(cur_par.speed);
+				if ((speed_abs > _IQ(0.01)) && (refs.power_limit > 0))
+				{
+					if (_IQmpy(pid_spd.pid_out_max, speed_abs) > refs.power_limit)
+					{
+						pid_spd.pid_out_max = _IQdiv(refs.power_limit, speed_abs);
+					}
+					if (_IQmpy(labs(pid_spd.pid_out_min), speed_abs) > refs.power_limit)
+					{
+						pid_spd.pid_out_min = -_IQdiv(refs.power_limit, speed_abs);
+					}
+				}
+			}
+
 			pid_spd.calc(&pid_spd); //расчет регулятора скорости
 
 
@@ -1000,6 +1065,19 @@ void SM_Ctrl_Fast_Calc(TSM_Ctrl *p) {
 
 			pid_spd.pid_out_max = refs.Iq_ref;//Максимум выхода регулятора скорости - заданный ток
 			pid_spd.pid_out_min = 0; //Минимум выхода регулятора скорости - 0
+
+			if (sw.power_limit_ena & 1)
+			{
+				long speed_abs = labs(cur_par.speed);
+				if ((speed_abs > _IQ(0.01)) && (refs.power_limit > 0))
+				{
+					if (_IQmpy(pid_spd.pid_out_max, speed_abs) > refs.power_limit)
+					{
+						pid_spd.pid_out_max = _IQdiv(refs.power_limit, speed_abs);
+					}
+				}
+			}
+
 			pid_spd.calc(&pid_spd); //расчет регулятора скорости
 
 			//выдача задания тока в фазы с положительным моментом, исходя из угла
