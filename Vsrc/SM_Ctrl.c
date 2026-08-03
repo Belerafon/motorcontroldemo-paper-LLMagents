@@ -50,6 +50,32 @@ void SM_Ctrl_ms_Calc(TSM_Ctrl *p) {
 
 }
 
+static void SM_Ctrl_CurrentDecoupling(_iq *p_ud, _iq *p_uq, _iq isd, _iq isq, _iq omega) {
+	if (DebugW2 == 0)
+		return;
+
+	float isd_f = _IQtoF(isd);
+	float isq_f = _IQtoF(isq);
+	float omega_f = _IQtoF(omega);
+	float Rs_f = model.motorInternals.rs;
+	float Lsd_H = model.motorInternals.lsd / 1000.0f;
+	float Lsq_H = model.motorInternals.lsq / 1000.0f;
+	float psi_pm_f = model.motorInternals.m;
+
+	float Ud_dec_f = omega_f * (Rs_f * isd_f + Lsq_H * isq_f);
+	float Uq_dec_f = omega_f * (Lsd_H * isd_f + psi_pm_f);
+	float gain_f = _IQtoF(DebugW3);
+
+	long Ud_dec = _IQ(Ud_dec_f * gain_f);
+	long Uq_dec = _IQ(Uq_dec_f * gain_f);
+
+	*p_ud -= Ud_dec;
+	*p_uq -= Uq_dec;
+
+	Debug1 = Ud_dec;
+	Debug2 = Uq_dec;
+}
+
 //!Быстрый расчет
 
 //!Реализует все структуры управления (режимы работы), такие как 
@@ -352,6 +378,8 @@ void SM_Ctrl_Fast_Calc(TSM_Ctrl *p) {
 			ipark.ang = refs.theta_elec;
 			ipark.calc(&ipark);
 
+			SM_Ctrl_CurrentDecoupling(&ipark.ds, &ipark.qs, park.de, park.qe, cur_par.speed);
+
 			//получившиеся задания напряжения по осям альфа и бета отправляем на модуль ШИМ
 			pwm.UalphaRef = ipark.ds;
 			pwm.UbetaRef = ipark.qs;
@@ -442,12 +470,14 @@ void SM_Ctrl_Fast_Calc(TSM_Ctrl *p) {
 			pid_id.pid_fdb_reg3 = park.de; //обратная связь рег. тока оси d - вычисленный ток по фазе d
 			pid_id.calc(&pid_id); //расчет регулятора тока оси d
 
-			//Обратный поворот на угол refs.theta_elec для 
+			//Обратный поворот на угол refs.theta_elec для
 			//выходов регуляторов тока (напряжений по осям d и q)
 			ipark.de = pid_id.pid_out_reg3;
 			ipark.qe = pid_iq.pid_out_reg3;
 			ipark.ang = refs.theta_elec;
 			ipark.calc(&ipark);            //расчет преобразования координат
+
+			SM_Ctrl_CurrentDecoupling(&ipark.ds, &ipark.qs, park.de, park.qe, cur_par.speed);
 
 			//Задание напряжение на модуль ШИМ после преобразования координат
 			pwm.UalphaRef = ipark.ds;            //Ось альфа
@@ -582,12 +612,14 @@ void SM_Ctrl_Fast_Calc(TSM_Ctrl *p) {
 			pid_id.pid_fdb_reg3 = park.de; //обратная связь рег. тока оси d - вычисленный ток по фазе d
 			pid_id.calc(&pid_id); //расчет регулятора тока оси d
 
-			//Обратный поворот на угол refs.theta_elec для
-			//выходов регуляторов тока (напряжений по осям d и q)
+		//Обратный поворот на угол refs.theta_elec для
+		//выходов регуляторов тока (напряжений по осям x и y)
 			ipark.de = pid_id.pid_out_reg3;
 			ipark.qe = pid_iq.pid_out_reg3;
 			ipark.ang = posspeedEqep.theta_elec;
 			ipark.calc(&ipark);            //расчет преобразования координат
+
+			SM_Ctrl_CurrentDecoupling(&ipark.ds, &ipark.qs, park.de, park.qe, cur_par.speed);
 
 			//Задание напряжение на модуль ШИМ после преобразования координат
 			pwm.UalphaRef = ipark.ds;            //Ось альфа
@@ -682,6 +714,8 @@ void SM_Ctrl_Fast_Calc(TSM_Ctrl *p) {
 			ipark.qe = pid_iq.pid_out_reg3;
 			ipark.ang = refs.theta_elec;
 			ipark.calc(&ipark);            //расчет преобразования координат
+
+			SM_Ctrl_CurrentDecoupling(&ipark.ds, &ipark.qs, park.de, park.qe, cur_par.speed);
 
 			//Задание напряжение на модуль ШИМ после преобразования координат
 			pwm.UalphaRef = ipark.ds;            //Ось альфа
@@ -841,6 +875,8 @@ void SM_Ctrl_Fast_Calc(TSM_Ctrl *p) {
 			ipark.qe = pid_iq.pid_out_reg3;
 			ipark.ang = Temp1;
 			ipark.calc(&ipark);            //расчет преобразования координат
+
+			SM_Ctrl_CurrentDecoupling(&ipark.ds, &ipark.qs, park.de, park.qe, cur_par.speed);
 
 			//Задание напряжение на модуль ШИМ после преобразования координат
 			pwm.UalphaRef = ipark.ds;            //Ось альфа
