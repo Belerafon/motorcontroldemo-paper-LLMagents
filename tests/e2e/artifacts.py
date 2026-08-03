@@ -112,12 +112,13 @@ def plot_vector_500(path: Path, samples: list[Sample]) -> None:
     speed_axis.set_title("Vector control: acceleration to 500 rpm")
     speed_axis.set_ylabel("Speed, rpm")
     speed_axis.legend()
-    current_axis.plot(
-        time_s,
-        [s.values["iq_ref_a"] for s in samples],
-        "--",
-        label="Iq reference",
-    )
+    if "iq_ref_a" in samples[0].values:
+        current_axis.plot(
+            time_s,
+            [s.values["iq_ref_a"] for s in samples],
+            "--",
+            label="Iq reference",
+        )
     current_axis.plot(
         time_s,
         [s.values["iq_a"] for s in samples],

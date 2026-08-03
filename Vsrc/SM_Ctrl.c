@@ -26,6 +26,7 @@
 #include "DSP.h"
 #include "V_IQmath.h"
 #include "main.h"
+#include "V_FldWeak.h"
 
 
 //!Инициализация
@@ -378,6 +379,7 @@ void SM_Ctrl_Fast_Calc(TSM_Ctrl *p) {
 			/*ENTRY START*/
 			pwm.On(&pwm);            //Включение ШИМ
 			rmp.output = 0;            //Обнуление задатчика интенсивности
+			FldWeak_init(&fldWeak);
 			if (dlog.StartBits & (1 << 4)) //Если пользователь задал этот бит осциллографирования
 				dlog.set_mode(1, &dlog);  //Запуск осциллографа по этому событию
 			/*ENTRY END*/
@@ -438,11 +440,11 @@ void SM_Ctrl_Fast_Calc(TSM_Ctrl *p) {
 			pid_iq.pid_fdb_reg3 = park.qe; //обратная связь рег. тока оси q - вычисленный ток по фазе q
 			pid_iq.calc(&pid_iq); //расчет регулятора тока оси q
 
-			pid_id.pid_ref_reg3 = 0; //задание тока по оси d - оси возбудения
+			pid_id.pid_ref_reg3 = fldWeak.output; //задание тока по оси d - ослабление поля
 			pid_id.pid_fdb_reg3 = park.de; //обратная связь рег. тока оси d - вычисленный ток по фазе d
 			pid_id.calc(&pid_id); //расчет регулятора тока оси d
 
-			//Обратный поворот на угол refs.theta_elec для 
+			//Обратный поворот на угол refs.theta_elec для
 			//выходов регуляторов тока (напряжений по осям d и q)
 			ipark.de = pid_id.pid_out_reg3;
 			ipark.qe = pid_iq.pid_out_reg3;
@@ -453,6 +455,8 @@ void SM_Ctrl_Fast_Calc(TSM_Ctrl *p) {
 			pwm.UalphaRef = ipark.ds;            //Ось альфа
 			pwm.UbetaRef = ipark.qs;            //Ось бета
 			pwm.update(&pwm);            //Расчет модуля ШИМ
+
+			FldWeak_calc(&fldWeak);
 
 			if (sw.excitation_ena)
 			{
@@ -470,6 +474,7 @@ void SM_Ctrl_Fast_Calc(TSM_Ctrl *p) {
 			/*ENTRY START*/
 			pwm.On(&pwm);            //Включение ШИМ
 			rmp.output = 0;            //Обнуление задатчика интенсивности
+			FldWeak_init(&fldWeak);
 			if (dlog.StartBits & (1 << 4)) //Если пользователь задал этот бит осциллографирования
 				dlog.set_mode(1, &dlog);  //Запуск осциллографа по этому событию
 			/*ENTRY END*/
@@ -578,7 +583,7 @@ void SM_Ctrl_Fast_Calc(TSM_Ctrl *p) {
 			pid_iq.pid_fdb_reg3 = park.qe; //обратная связь рег. тока оси q - вычисленный ток по фазе q
 			pid_iq.calc(&pid_iq); //расчет регулятора тока оси q
 
-			pid_id.pid_ref_reg3 = 0; //задание тока по оси d - оси возбудения
+			pid_id.pid_ref_reg3 = fldWeak.output; //задание тока по оси d - ослабление поля
 			pid_id.pid_fdb_reg3 = park.de; //обратная связь рег. тока оси d - вычисленный ток по фазе d
 			pid_id.calc(&pid_id); //расчет регулятора тока оси d
 
@@ -593,6 +598,8 @@ void SM_Ctrl_Fast_Calc(TSM_Ctrl *p) {
 			pwm.UalphaRef = ipark.ds;            //Ось альфа
 			pwm.UbetaRef = ipark.qs;            //Ось бета
 			pwm.update(&pwm);            //Расчет модуля ШИМ
+
+			FldWeak_calc(&fldWeak);
 
 			/*DO END*/
 		}
