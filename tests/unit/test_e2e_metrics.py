@@ -4,7 +4,11 @@ import math
 import unittest
 from dataclasses import dataclass
 
-from tests.e2e.metrics import analyze_current_mode4, analyze_vector_500
+from tests.e2e.metrics import (
+    analyze_constant_power,
+    analyze_current_mode4,
+    analyze_vector_500,
+)
 
 
 @dataclass(frozen=True)
@@ -98,6 +102,61 @@ class Vector500MetricsTests(unittest.TestCase):
 
         self.assertFalse(metrics["passed"])
         self.assertFalse(metrics["criteria"]["overshoot"])
+
+
+class ConstantPowerMetricsTests(unittest.TestCase):
+    @staticmethod
+    def samples(*, power_limit_w: float = 150.0) -> list[SyntheticSample]:
+        result = []
+        for number in range(3001):
+            time_s = number * 0.001
+            speed = 500.0 * (1.0 - math.exp(-time_s / 0.30))
+            iq = 0.3 * power_limit_w / 150.0 * math.exp(-time_s / 0.40)
+            power = iq * speed / 0.3
+            result.append(
+                SyntheticSample(
+                    number,
+                    time_s,
+                    {
+                        "speed_rpm": speed,
+                        "speed_ref_rpm": 500.0,
+                        "iq_a": iq,
+                        "power_w": power,
+                    },
+                )
+            )
+        return result
+
+    def test_constant_power_passes(self) -> None:
+        metrics = analyze_constant_power(
+            self.samples(), power_limit_w=150.0, max_power_w=180.0
+        )
+
+        self.assertTrue(metrics["passed"])
+        self.assertLess(metrics["peak_power_w"], 180.0)
+
+    def test_excessive_power_fails(self) -> None:
+        samples = []
+        for number in range(3001):
+            time_s = number * 0.001
+            samples.append(
+                SyntheticSample(
+                    number,
+                    time_s,
+                    {
+                        "speed_rpm": 500.0,
+                        "speed_ref_rpm": 500.0,
+                        "iq_a": 1.0,
+                        "power_w": 200.0,
+                    },
+                )
+            )
+        metrics = analyze_constant_power(
+            samples, power_limit_w=50.0, max_power_w=60.0
+        )
+
+        self.assertFalse(metrics["passed"])
+        self.assertFalse(metrics["criteria"]["power_within_limit"])
 
 
 if __name__ == "__main__":

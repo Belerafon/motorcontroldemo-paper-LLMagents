@@ -27,6 +27,27 @@
 #include "V_IQmath.h"
 #include "main.h"
 
+//!Вспомогательная функция динамического ограничения по мощности
+//!Вычисляет допустимый максимум выхода регулятора скорости исходя из
+//!заданной мощности и текущей скорости. При включенном DebugW1 и положительном
+//!значении DebugW2 (Вт) уменьшает предел тока пропорционально отношению
+//!номинальной мощности к заданной и обратно пропорционально скорости.
+//! \memberof TSM_Ctrl
+static long SM_Ctrl_PowerLimit(long current_limit) {
+	if (DebugW1 != 0 && DebugW2 > 0) {
+		float speed_abs_f = _IQ24toF(labs(cur_par.speed));
+		if (speed_abs_f > 0.01f) {
+			float speed_physical_rpm = speed_abs_f * 500.0f;
+			float speed_ratio = (float)drv_params.speed_nom / speed_physical_rpm;
+			float power_ratio = (float)DebugW2 / _IQ6toF(drv_params.power);
+			float iq_max_f = power_ratio * _IQ24toF(current_limit) * speed_ratio;
+			long iq_max = _IQ24(iq_max_f);
+			if (iq_max > 0 && iq_max < current_limit)
+				return iq_max;
+		}
+	}
+	return current_limit;
+}
 
 //!Инициализация
 //!Всякие обнуления
@@ -410,18 +431,21 @@ void SM_Ctrl_Fast_Calc(TSM_Ctrl *p) {
 			rmp.input = refs.speed_ref;
 			rmp.calc(&rmp);//Расчет ЗИ
 
-			pid_spd.pid_ref_reg3 = rmp.output; //на воход регулятора скорости - выход ЗИ
-			pid_spd.pid_fdb_reg3 = cur_par.speed; //обратная связь регулятора скорости - скорость ДПР
+		pid_spd.pid_ref_reg3 = rmp.output; //на воход регулятора скорости - выход ЗИ
+		pid_spd.pid_fdb_reg3 = cur_par.speed; //обратная связь регулятора скорости - скорость ДПР
 
 
-			pid_spd.pid_out_max = refs.Iq_ref; //Максимум выхода регулятора скорости - заданный ток
+		{
+			long iq_max = SM_Ctrl_PowerLimit(refs.Iq_ref);
+			pid_spd.pid_out_max = iq_max; //Максимум выхода регулятора скорости - заданный ток
 
 			if (sw.recuperation_ena & 1)            //если разрешена рекуперация
-				pid_spd.pid_out_min = -refs.Iq_ref; //минимум рег. скор. - отрицательный ток
+				pid_spd.pid_out_min = -iq_max; //минимум рег. скор. - отрицательный ток
 			else
 				//иначе
 				pid_spd.pid_out_min = 0; //нулевой ток не даст рекупераци при вращении в положительную сторону
-			pid_spd.calc(&pid_spd); //расчет регулятора скорости
+		}
+		pid_spd.calc(&pid_spd); //расчет регулятора скорости
 
 
 			cur_par.ThetaRefCurr = refs.theta_elec;
@@ -558,16 +582,19 @@ void SM_Ctrl_Fast_Calc(TSM_Ctrl *p) {
 			pid_pos.saterr_reg3Add=pid_spd.saterr_reg3;//это улучшайзер. Учитывает насыщение рег. скорости и передает его в рег. положения.
 			pid_pos.calc(&pid_pos); //расчет регулятора положения
 
-			pid_spd.pid_ref_reg3 = pid_pos.pid_out_reg3; //на вход регулятора скорости - выход рег. положения
+		pid_spd.pid_ref_reg3 = pid_pos.pid_out_reg3; //на вход регулятора скорости - выход рег. положения
 //			pid_spd.pid_fdb_reg3 = posspeedEqep.speed_filter.output; //обратная связь регулятора скорости - скорость ДПР
-			pid_spd.pid_fdb_reg3 = cur_par.speed;
+		pid_spd.pid_fdb_reg3 = cur_par.speed;
 
-			pid_spd.pid_out_max = refs.Iq_ref; //Максимум выхода регулятора скорости - заданный ток
-			pid_spd.pid_out_min = -refs.Iq_ref; //минимум рег. скор. - отрицательный ток
-			pid_spd.calc(&pid_spd); //расчет регулятора скорости
+		{
+			long iq_max = SM_Ctrl_PowerLimit(refs.Iq_ref);
+			pid_spd.pid_out_max = iq_max; //Максимум выхода регулятора скорости - заданный ток
+			pid_spd.pid_out_min = -iq_max; //минимум рег. скор. - отрицательный ток
+		}
+		pid_spd.calc(&pid_spd); //расчет регулятора скорости
 
 
-			//Поворот токов фаз на угол refs.theta_elec
+		//Поворот токов фаз на угол refs.theta_elec
 			park.ds = clarke.ds;
 			park.qs = clarke.qs;
 			park.ang = posspeedEqep.theta_elec;
@@ -627,21 +654,24 @@ void SM_Ctrl_Fast_Calc(TSM_Ctrl *p) {
 			rmp.input = refs.speed_ref;
 			rmp.calc(&rmp);//Расчет ЗИ
 
-			pid_spd.pid_ref_reg3 = rmp.output; //на воход регулятора скорости - выход ЗИ
-			pid_spd.pid_fdb_reg3 = posspeedEqep.speed_elec; //обратная связь регулятора скорости - скорость ДПР
+		pid_spd.pid_ref_reg3 = rmp.output; //на воход регулятора скорости - выход ЗИ
+		pid_spd.pid_fdb_reg3 = posspeedEqep.speed_elec; //обратная связь регулятора скорости - скорость ДПР
 
 
-			pid_spd.pid_out_max = refs.Iq_ref; //Максимум выхода регулятора скорости - заданный ток
+		{
+			long iq_max = SM_Ctrl_PowerLimit(refs.Iq_ref);
+			pid_spd.pid_out_max = iq_max; //Максимум выхода регулятора скорости - заданный ток
 
 			if (sw.recuperation_ena & 1)            //если разрешена рекуперация
-				pid_spd.pid_out_min = -refs.Iq_ref; //минимум рег. скор. - отрицательный ток
+				pid_spd.pid_out_min = -iq_max; //минимум рег. скор. - отрицательный ток
 			else
 				//иначе
 				pid_spd.pid_out_min = 0; //нулевой ток не даст рекупераци при вращении в положительную сторону
-			pid_spd.calc(&pid_spd); //расчет регулятора скорости
+		}
+		pid_spd.calc(&pid_spd); //расчет регулятора скорости
 
 
-			//Поворот токов фаз на угол refs.theta_elec
+		//Поворот токов фаз на угол refs.theta_elec
 			park.ds = clarke.ds;
 			park.qs = clarke.qs;
 			park.ang = posspeedEqep.theta_elec;
@@ -791,16 +821,19 @@ void SM_Ctrl_Fast_Calc(TSM_Ctrl *p) {
 			pid_pos.saterr_reg3Add=pid_spd.saterr_reg3;//это улучшайзер. Учитывает насыщение рег. скорости и передает его в рег. положения.
 			pid_pos.calc(&pid_pos); //расчет регулятора положения
 
-			pid_spd.pid_ref_reg3 = pid_pos.pid_out_reg3; //на вход регулятора скорости - выход рег. положения
+		pid_spd.pid_ref_reg3 = pid_pos.pid_out_reg3; //на вход регулятора скорости - выход рег. положения
 //			pid_spd.pid_fdb_reg3 = posspeedEqep.speed_filter.output; //обратная связь регулятора скорости - скорость ДПР
-			pid_spd.pid_fdb_reg3 = cur_par.speed;
+		pid_spd.pid_fdb_reg3 = cur_par.speed;
 
-			pid_spd.pid_out_max = refs.Iq_ref; //Максимум выхода регулятора скорости - заданный ток
-			pid_spd.pid_out_min = -refs.Iq_ref; //минимум рег. скор. - отрицательный ток
-			pid_spd.calc(&pid_spd); //расчет регулятора скорости
+		{
+			long iq_max = SM_Ctrl_PowerLimit(refs.Iq_ref);
+			pid_spd.pid_out_max = iq_max; //Максимум выхода регулятора скорости - заданный ток
+			pid_spd.pid_out_min = -iq_max; //минимум рег. скор. - отрицательный ток
+		}
+		pid_spd.calc(&pid_spd); //расчет регулятора скорости
 
 
-			//Поворот токов фаз на угол Temp1
+		//Поворот токов фаз на угол Temp1
 			park.ds = clarke.ds;
 			park.qs = clarke.qs;
 			park.ang = posspeedEqep.theta_elec;
@@ -998,8 +1031,11 @@ void SM_Ctrl_Fast_Calc(TSM_Ctrl *p) {
 			pid_spd.pid_ref_reg3 = rmp.output;//на вход регулятора скорости - выход ЗИ
 			pid_spd.pid_fdb_reg3 = DPReCAP.speed;//обратная связь регулятора скорости - скорость ДПР Холла
 
-			pid_spd.pid_out_max = refs.Iq_ref;//Максимум выхода регулятора скорости - заданный ток
-			pid_spd.pid_out_min = 0; //Минимум выхода регулятора скорости - 0
+			{
+				long iq_max = SM_Ctrl_PowerLimit(refs.Iq_ref);
+				pid_spd.pid_out_max = iq_max;//Максимум выхода регулятора скорости - заданный ток
+				pid_spd.pid_out_min = 0; //Минимум выхода регулятора скорости - 0
+			}
 			pid_spd.calc(&pid_spd); //расчет регулятора скорости
 
 			//выдача задания тока в фазы с положительным моментом, исходя из угла

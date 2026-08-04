@@ -214,6 +214,81 @@ def analyze_current_mode4(
     return metrics
 
 
+def analyze_constant_power(
+    samples: Sequence[Any],
+    *,
+    target_speed_rpm: float = 500.0,
+    power_limit_w: float = 150.0,
+    max_power_w: float = 180.0,
+    max_time_to_95_s: float = 2.0,
+    settling_dwell_s: float = 0.10,
+) -> dict[str, Any]:
+    time_s = _times(samples)
+    speed = _series(samples, "speed_rpm")
+    speed_ref = _series(samples, "speed_ref_rpm")
+    iq = _series(samples, "iq_a")
+    power = _series(samples, "power_w")
+    period = _sample_period(time_s)
+    tail_start = _tail_start(len(samples))
+    start = _event_start(speed_ref, target_speed_rpm)
+    direction = 1.0 if target_speed_rpm >= 0 else -1.0
+    i95 = _first_crossing(speed, target_speed_rpm, 0.95, start)
+    peak_power = max(abs(value) for value in power[start:])
+    peak_current = max(abs(value) for value in iq[start:])
+    steady_power = power[tail_start:]
+    steady_speed = speed[tail_start:]
+    steady_iq = iq[tail_start:]
+    acceleration_stop = i95 if i95 is not None else len(samples) - 1
+    acceleration_power = power[start : acceleration_stop + 1]
+    acceleration_iq = iq[start : acceleration_stop + 1]
+    derivative_window = max(1, round(0.005 / period))
+    acceleration_values = [
+        direction
+        * (speed[index + derivative_window] - speed[index])
+        / (time_s[index + derivative_window] - time_s[index])
+        for index in range(start, len(speed) - derivative_window)
+    ]
+    steady_error = abs(_mean(steady_speed) - target_speed_rpm)
+    steady_error_percent = steady_error / abs(target_speed_rpm) * 100.0
+    metrics: dict[str, Any] = {
+        "samples": len(samples),
+        "sample_period_s": period,
+        "window_s": float(time_s[-1] - time_s[0]),
+        "target_speed_rpm": target_speed_rpm,
+        "peak_power_w": peak_power,
+        "peak_current_a": peak_current,
+        "steady_power_mean_w": _mean(steady_power),
+        "steady_power_max_w": max(steady_power),
+        "steady_speed_rpm": _mean(steady_speed),
+        "steady_speed_error_rpm": steady_error,
+        "steady_speed_error_percent": steady_error_percent,
+        "steady_iq_mean_a": _mean(steady_iq),
+        "steady_iq_rms_a": _rms(steady_iq),
+        "max_acceleration_rpm_per_s": (
+            max(acceleration_values) if acceleration_values else None
+        ),
+        "rms_iq_a_during_acceleration": _rms(acceleration_iq),
+        "mean_power_during_acceleration_w": _mean(acceleration_power),
+    }
+    criteria = {
+        "enough_samples": len(samples) >= 64,
+        "power_within_limit": peak_power <= max_power_w,
+        "reached_95_percent": (
+            i95 is not None and time_s[i95] - time_s[start] <= max_time_to_95_s
+        ),
+        "steady_speed_error": steady_error_percent <= 5.0,
+    }
+    metrics["limits"] = {
+        "power_limit_w": power_limit_w,
+        "max_power_w": max_power_w,
+        "max_time_to_95_s": max_time_to_95_s,
+        "settling_dwell_s": settling_dwell_s,
+    }
+    metrics["criteria"] = criteria
+    metrics["passed"] = all(criteria.values())
+    return metrics
+
+
 def analyze_vector_500(
     samples: Sequence[Any],
     *,

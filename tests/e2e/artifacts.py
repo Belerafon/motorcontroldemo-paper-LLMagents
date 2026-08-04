@@ -128,3 +128,44 @@ def plot_vector_500(path: Path, samples: list[Sample]) -> None:
     current_axis.legend()
     figure.savefig(path, dpi=170)
     plt.close(figure)
+
+
+def plot_constant_power(path: Path, samples: list[Sample]) -> None:
+    import matplotlib.pyplot as plt
+
+    time_s = [sample.time_s for sample in samples]
+    plt.style.use("seaborn-v0_8-whitegrid")
+    figure, (speed_axis, power_axis, current_axis) = plt.subplots(
+        3, 1, figsize=(11, 10.8), sharex=True, constrained_layout=True
+    )
+    speed_axis.plot(
+        time_s,
+        [s.values["speed_ref_rpm"] for s in samples],
+        "--",
+        label="Speed reference",
+    )
+    speed_axis.plot(
+        time_s,
+        [s.values["speed_rpm"] for s in samples],
+        label="Measured speed",
+    )
+    speed_axis.axhline(475.0, color="gray", linestyle=":", label="95% of 500 rpm")
+    speed_axis.set_ylabel("Speed, rpm")
+    speed_axis.legend()
+    power_axis.plot(
+        time_s,
+        [s.values["power_w"] for s in samples],
+        label="Electrical power",
+    )
+    power_axis.set_ylabel("Power, W")
+    power_axis.legend()
+    current_axis.plot(
+        time_s,
+        [s.values["iq_a"] for s in samples],
+        label="Measured Iq",
+    )
+    current_axis.set_xlabel("Time, s")
+    current_axis.set_ylabel("q-axis current, A")
+    current_axis.legend()
+    figure.savefig(path, dpi=170)
+    plt.close(figure)
