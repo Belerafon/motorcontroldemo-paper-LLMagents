@@ -28,6 +28,20 @@
 #include "main.h"
 
 
+//! Обновление ограничений регуляторов тока в зависимости от напряжения ЗПТ
+static void UpdateCurrentRegulatorLimits(void) {
+    _iq max_voltage = adc.Udc_meas;
+    if (max_voltage < _IQ(0.01))
+        max_voltage = _IQ(0.01);
+
+    pid_id.pid_out_max = max_voltage;
+    pid_id.pid_out_min = -max_voltage;
+    pid_iq.pid_out_max = max_voltage;
+    pid_iq.pid_out_min = -max_voltage;
+    pid_ia.pid_out_max = max_voltage;
+    pid_ia.pid_out_min = -max_voltage;
+}
+
 //!Инициализация
 //!Всякие обнуления
 //! \memberof TSM_Ctrl
@@ -66,9 +80,11 @@ void SM_Ctrl_Fast_Calc(TSM_Ctrl *p) {
 
 //если система находится в перееинициализации,
 //то пропускаем контур управления
-	if (sm_sys.state == SYS_INIT) {
-		return;
-	}
+ 	if (sm_sys.state == SYS_INIT) {
+ 		return;
+ 	}
+
+ 	UpdateCurrentRegulatorLimits();
 
 //если команда остановить, то переходим
 //в режим ОСТАНОВЛЕН
