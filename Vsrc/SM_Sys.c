@@ -61,6 +61,7 @@ void SM_Sys_Init(TSM_Sys *p) {
 	cur_par.init(&cur_par); //Расчет текущих показателей привода
 	leds.init(&leds);//светодиоды
 	udControl.init(&udControl); //плавная зарядка ЗПТ через термисторы
+	fieldWeakening.init(&fieldWeakening); //регулятор ослабления поля
 	DIO_Init(); //дискретные входы/выходы
 	FanControl.init(&FanControl); //вентилятор
 	//глобальное времЯ (внешние или внутр. часы)
@@ -288,6 +289,24 @@ void SM_Sys_Slow_Calc(TSM_Sys *p) {
 	drv_params._1_Udc_nom = _IQdiv(_IQ16(1), _IQ16(drv_params.Udc_nom));
 	drv_params._1_I_nom = _IQdiv(_IQ16(1), _IQ16(drv_params.I_nom));
 	drv_params._1_U_nom = _IQdiv(_IQ16(1), _IQ16(drv_params.U_nom));
+
+	//Управление регулятором ослабления поля через Debug-переменные CANopen.
+	//Используются свободные изменяемые переменные словаря 0x5174:
+	//  DebugW3 (0x5174.0D, IQ24, Editable) - переключатель: 0 = ослабление
+	//    поля выключено (исходное поведение СУ, Id = 0); любое ненулевое
+	//    значение включает автоматическое ослабление поля. Значение по
+	//    умолчанию 0, сброс в 0 при сбросе, в EEPROM не сохраняется.
+	//  DebugW4 (0x5174.0F, IQ24, Editable) - коэффициент Ki интегрального
+	//    регулятора ослабления поля, о.е. IQ24. Когда DebugW4 == 0, используется
+	//    безопасный коэффициент, заданный в FIELD_WEAKENING_DEFAULTS.
+	//Диагностика только для чтения выводится в свободные переменные:
+	//  Debug1 (0x5174.01, IQ24, Viewable) - текущий выход Id_out (<= 0);
+	//  Debug2 (0x5174.03, IQ24, Viewable) - текущая амплитуда напряжения U_mag.
+	fieldWeakening.Enabled = (DebugW3 != 0) ? 1 : 0;
+	if (DebugW4 != 0)
+		fieldWeakening.Ki = DebugW4;
+	Debug1 = fieldWeakening.Id_out;
+	Debug2 = fieldWeakening.U_mag;
 
 	if (sw.Reboot & 1) { //команда перезагрузки
 		sw.Reboot = 0; //сбрасываем её

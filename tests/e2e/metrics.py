@@ -343,3 +343,149 @@ def analyze_vector_500(
     metrics["criteria"] = criteria
     metrics["passed"] = all(criteria.values())
     return metrics
+
+
+def analyze_field_weakening(
+    samples: Sequence[Any],
+    *,
+    target_speed_rpm: float,
+    u_ref_pu: float,
+    u_lim_pu: float,
+    id_min_pu: float,
+    id_scale_a: float,
+    max_strengthening_pu: float = 0.02,
+    engagement_tol_pu: float = 0.02,
+    saturation_margin_pu: float = 0.05,
+    floor_margin_pu: float = 0.05,
+    min_survival_rpm: float = 100.0,
+    settling_dwell_s: float = 0.10,
+) -> dict[str, Any]:
+    """Validate field-weakening engagement, safety and transparency.
+
+    The d-axis current reference (Id_out of the FW regulator) is logged in
+    amperes; per-unit comparisons convert it back with ``id_scale_a``. The
+    voltage magnitude is logged in per-unit so it can be compared directly
+    with the per-unit regulator thresholds ``u_ref_pu``/``u_lim_pu``.
+    """
+    time_s = _times(samples)
+    speed = _series(samples, "speed_rpm")
+    id_ref = _series(samples, "id_ref_a")
+    id_fdb = _series(samples, "id_a")
+    u_mag = _series(samples, "u_mag_pu")
+    period = _sample_period(time_s)
+    tail_start = _tail_start(len(samples))
+    direction = 1.0 if target_speed_rpm >= 0 else -1.0
+
+    id_ref_pu = [value / id_scale_a for value in id_ref]
+    id_fdb_pu = [value / id_scale_a for value in id_fdb]
+    steady_speed = speed[tail_start:]
+    steady_id_ref = id_ref_pu[tail_start:]
+    steady_id_fdb = id_fdb_pu[tail_start:]
+    steady_u_mag = u_mag[tail_start:]
+
+    max_id_ref_pu = max(id_ref_pu)
+    min_id_ref_pu = min(id_ref_pu)
+    max_u_mag_pu = max(u_mag)
+    steady_mean_speed = _mean(steady_speed)
+    steady_peak_abs_speed = max(abs(value) for value in steady_speed)
+    peak_abs_speed = max(abs(value) for value in speed)
+
+    saturation_threshold = u_ref_pu - saturation_margin_pu
+    saturation_occurred = max_u_mag_pu >= saturation_threshold
+    fw_engaged = min_id_ref_pu <= -engagement_tol_pu
+    #Implication: if voltage saturated, the regulator must have weakened field.
+    engaged_when_saturated = (not saturation_occurred) or fw_engaged
+
+    speed_tolerance = max(1.0, abs(target_speed_rpm) * 0.02)
+    settling = _settling_time(
+        time_s,
+        speed,
+        target_speed_rpm,
+        speed_tolerance,
+        settling_dwell_s,
+        0,
+    )
+
+    metrics: dict[str, Any] = {
+        "samples": len(samples),
+        "sample_period_s": period,
+        "window_s": float(time_s[-1] - time_s[0]),
+        "target_speed_rpm": target_speed_rpm,
+        "peak_abs_speed_rpm": peak_abs_speed,
+        "steady_mean_speed_rpm": steady_mean_speed,
+        "steady_peak_abs_speed_rpm": steady_peak_abs_speed,
+        "steady_speed_ripple_peak_to_peak_rpm": max(steady_speed) - min(steady_speed),
+        "id_ref_max_pu": max_id_ref_pu,
+        "id_ref_min_pu": min_id_ref_pu,
+        "id_ref_steady_mean_pu": _mean(steady_id_ref),
+        "id_fdb_steady_mean_pu": _mean(steady_id_fdb),
+        "u_mag_max_pu": max_u_mag_pu,
+        "u_mag_steady_mean_pu": _mean(steady_u_mag),
+        "u_mag_steady_max_pu": max(steady_u_mag),
+        "saturation_occurred": saturation_occurred,
+        "field_weakening_engaged": fw_engaged,
+        "settling_time_2_percent_s": settling,
+    }
+    criteria = {
+        "enough_samples": len(samples) >= 64,
+        "no_field_strengthening": max_id_ref_pu <= max_strengthening_pu,
+        "respects_id_floor": min_id_ref_pu >= id_min_pu - floor_margin_pu,
+        "engaged_when_saturated": engaged_when_saturated,
+        "drive_survived": steady_peak_abs_speed >= min_survival_rpm,
+    }
+    metrics["limits"] = {
+        "u_ref_pu": u_ref_pu,
+        "u_lim_pu": u_lim_pu,
+        "id_min_pu": id_min_pu,
+        "id_scale_a": id_scale_a,
+        "max_strengthening_pu": max_strengthening_pu,
+        "engagement_tol_pu": engagement_tol_pu,
+        "saturation_margin_pu": saturation_margin_pu,
+        "floor_margin_pu": floor_margin_pu,
+        "min_survival_rpm": min_survival_rpm,
+        "saturation_threshold_pu": saturation_threshold,
+        "settling_dwell_s": settling_dwell_s,
+    }
+    metrics["criteria"] = criteria
+    metrics["passed"] = all(criteria.values())
+    return metrics
+
+
+def compare_field_weakening_speed(
+    samples_off: Sequence[Any],
+    samples_on: Sequence[Any],
+    *,
+    min_improvement_percent: float = 1.0,
+    tail_fraction: float = 0.2,
+) -> dict[str, Any]:
+    """Compare steady-state speed with field weakening off versus on.
+
+    Field weakening extends the speed range, so the steady-state speed reached
+    for the same command must be at least ``min_improvement_percent`` higher
+    with the regulator enabled than with it disabled.
+    """
+    if not samples_off or not samples_on:
+        raise ValueError("Both capture runs must contain samples.")
+    speed_off = _series(samples_off, "speed_rpm")
+    speed_on = _series(samples_on, "speed_rpm")
+    tail_off = _tail_start(len(samples_off), tail_fraction)
+    tail_on = _tail_start(len(samples_on), tail_fraction)
+    steady_off = _mean(speed_off[tail_off:])
+    steady_on = _mean(speed_on[tail_on:])
+    direction = 1.0 if steady_off >= 0 else -1.0
+    improvement_percent = (
+        (direction * steady_on - direction * steady_off)
+        / max(abs(steady_off), 1.0)
+        * 100.0
+    )
+    return {
+        "steady_speed_off_rpm": steady_off,
+        "steady_speed_on_rpm": steady_on,
+        "speed_improvement_percent": improvement_percent,
+        "min_improvement_percent": min_improvement_percent,
+        "criteria": {
+            "field_weaking_extends_speed": (
+                improvement_percent >= min_improvement_percent
+            ),
+        },
+    }

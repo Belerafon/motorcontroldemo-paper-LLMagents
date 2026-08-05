@@ -128,3 +128,51 @@ def plot_vector_500(path: Path, samples: list[Sample]) -> None:
     current_axis.legend()
     figure.savefig(path, dpi=170)
     plt.close(figure)
+
+
+def plot_field_weakening(path: Path, samples: list[Sample]) -> None:
+    import matplotlib.pyplot as plt
+
+    time_s = [sample.time_s for sample in samples]
+    plt.style.use("seaborn-v0_8-whitegrid")
+    figure, axes = plt.subplots(
+        3, 1, figsize=(11, 9.0), sharex=True, constrained_layout=True
+    )
+    speed_axis, current_axis, voltage_axis = axes
+
+    speed_axis.plot(
+        time_s,
+        [s.values["speed_rpm"] for s in samples],
+        label="Measured speed",
+    )
+    speed_axis.axhline(0.0, color="gray", linestyle=":", linewidth=1)
+    speed_axis.set_title("Field weakening: high-speed run with regulator enabled")
+    speed_axis.set_ylabel("Speed, rpm")
+    speed_axis.legend()
+
+    current_axis.plot(
+        time_s,
+        [s.values["id_ref_a"] for s in samples],
+        "--",
+        label="Id reference (FW output)",
+    )
+    current_axis.plot(
+        time_s,
+        [s.values["id_a"] for s in samples],
+        label="Measured Id",
+    )
+    current_axis.axhline(0.0, color="gray", linestyle=":", linewidth=1)
+    current_axis.set_ylabel("d-axis current, A")
+    current_axis.legend()
+
+    voltage_axis.plot(
+        time_s,
+        [s.values["u_mag_pu"] for s in samples],
+        color="tab:green",
+        label="Voltage magnitude",
+    )
+    voltage_axis.set_xlabel("Time, s")
+    voltage_axis.set_ylabel("Voltage magnitude, p.u.")
+    voltage_axis.legend()
+    figure.savefig(path, dpi=170)
+    plt.close(figure)

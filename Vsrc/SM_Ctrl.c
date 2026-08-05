@@ -117,6 +117,7 @@ void SM_Ctrl_Fast_Calc(TSM_Ctrl *p) {
 		pid_ia.reset(&pid_ia);
 		pid_spd.reset(&pid_spd);
 		pid_pos.reset(&pid_pos);
+		fieldWeakening.reset(&fieldWeakening); //Сброс регулятора ослабления поля в останове
 		cur_par.Is = 0;
 		cur_par.power = 0;
 		cur_par.speed = 0;
@@ -378,6 +379,7 @@ void SM_Ctrl_Fast_Calc(TSM_Ctrl *p) {
 			/*ENTRY START*/
 			pwm.On(&pwm);            //Включение ШИМ
 			rmp.output = 0;            //Обнуление задатчика интенсивности
+			fieldWeakening.reset(&fieldWeakening); //Сброс регулятора ослабления поля при старте режима
 			if (dlog.StartBits & (1 << 4)) //Если пользователь задал этот бит осциллографирования
 				dlog.set_mode(1, &dlog);  //Запуск осциллографа по этому событию
 			/*ENTRY END*/
@@ -438,7 +440,7 @@ void SM_Ctrl_Fast_Calc(TSM_Ctrl *p) {
 			pid_iq.pid_fdb_reg3 = park.qe; //обратная связь рег. тока оси q - вычисленный ток по фазе q
 			pid_iq.calc(&pid_iq); //расчет регулятора тока оси q
 
-			pid_id.pid_ref_reg3 = 0; //задание тока по оси d - оси возбудения
+			pid_id.pid_ref_reg3 = fieldWeakening.Id_out; //задание тока по оси d - оси возбудения (0, если ослабление поля выключено, иначе отрицательное при высоком напряжении)
 			pid_id.pid_fdb_reg3 = park.de; //обратная связь рег. тока оси d - вычисленный ток по фазе d
 			pid_id.calc(&pid_id); //расчет регулятора тока оси d
 
@@ -453,6 +455,12 @@ void SM_Ctrl_Fast_Calc(TSM_Ctrl *p) {
 			pwm.UalphaRef = ipark.ds;            //Ось альфа
 			pwm.UbetaRef = ipark.qs;            //Ось бета
 			pwm.update(&pwm);            //Расчет модуля ШИМ
+
+			//Регулятор ослабления поля: использует амплитуду вектора напряжения
+			//(pwm.U_mag), рассчитанную только что в pwm.update(), и формирует
+			//задание тока оси d (fieldWeakening.Id_out) для следующего такта.
+			//При выключенном модуле Id_out = 0, поведение СУ не меняется.
+			fieldWeakening.calc(&fieldWeakening);
 
 			if (sw.excitation_ena)
 			{

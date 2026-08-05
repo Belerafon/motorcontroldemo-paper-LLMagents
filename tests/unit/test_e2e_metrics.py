@@ -4,7 +4,12 @@ import math
 import unittest
 from dataclasses import dataclass
 
-from tests.e2e.metrics import analyze_current_mode4, analyze_vector_500
+from tests.e2e.metrics import (
+    analyze_current_mode4,
+    analyze_field_weakening,
+    analyze_vector_500,
+    compare_field_weakening_speed,
+)
 
 
 @dataclass(frozen=True)
@@ -98,6 +103,117 @@ class Vector500MetricsTests(unittest.TestCase):
 
         self.assertFalse(metrics["passed"])
         self.assertFalse(metrics["criteria"]["overshoot"])
+
+
+class FieldWeakeningMetricsTests(unittest.TestCase):
+    ID_SCALE_A = 5.0
+    U_REF_PU = 0.8
+    U_LIM_PU = 0.866
+    ID_MIN_PU = -0.8
+
+    @staticmethod
+    def samples(*, engage: bool = True, strengthen: bool = False) -> list[SyntheticSample]:
+        result = []
+        for number in range(501):
+            time_s = number * 0.01
+            #Speed ramps up and settles near the target.
+            speed = 1500.0 * (1.0 - math.exp(-time_s / 0.5))
+            #Voltage magnitude climbs and saturates above U_ref.
+            u_mag = min(0.86, 0.2 + 0.8 * (1.0 - math.exp(-time_s / 0.4)))
+            #Id reference stays at 0 while voltage is below U_ref, then weakens.
+            id_ref_pu = 0.0
+            if engage and u_mag >= 0.75:
+                id_ref_pu = -0.25 * min(1.0, (time_s - 0.4) / 0.6)
+            if strengthen:
+                id_ref_pu = max(id_ref_pu, 0.08)
+            result.append(
+                SyntheticSample(
+                    number,
+                    time_s,
+                    {
+                        "speed_rpm": speed,
+                        "id_ref_a": id_ref_pu * FieldWeakeningMetricsTests.ID_SCALE_A,
+                        "id_a": id_ref_pu * FieldWeakeningMetricsTests.ID_SCALE_A,
+                        "u_mag_pu": u_mag,
+                    },
+                )
+            )
+        return result
+
+    def test_engaging_run_passes(self) -> None:
+        metrics = analyze_field_weakening(
+            self.samples(),
+            target_speed_rpm=1500.0,
+            u_ref_pu=self.U_REF_PU,
+            u_lim_pu=self.U_LIM_PU,
+            id_min_pu=self.ID_MIN_PU,
+            id_scale_a=self.ID_SCALE_A,
+        )
+
+        self.assertTrue(metrics["passed"])
+        self.assertTrue(metrics["saturation_occurred"])
+        self.assertTrue(metrics["field_weakening_engaged"])
+        self.assertTrue(metrics["criteria"]["engaged_when_saturated"])
+        self.assertTrue(metrics["criteria"]["no_field_strengthening"])
+
+    def test_saturation_without_engagement_fails(self) -> None:
+        metrics = analyze_field_weakening(
+            self.samples(engage=False),
+            target_speed_rpm=1500.0,
+            u_ref_pu=self.U_REF_PU,
+            u_lim_pu=self.U_LIM_PU,
+            id_min_pu=self.ID_MIN_PU,
+            id_scale_a=self.ID_SCALE_A,
+        )
+
+        self.assertFalse(metrics["passed"])
+        self.assertFalse(metrics["criteria"]["engaged_when_saturated"])
+
+    def test_field_strengthening_fails_safety(self) -> None:
+        metrics = analyze_field_weakening(
+            self.samples(strengthen=True),
+            target_speed_rpm=1500.0,
+            u_ref_pu=self.U_REF_PU,
+            u_lim_pu=self.U_LIM_PU,
+            id_min_pu=self.ID_MIN_PU,
+            id_scale_a=self.ID_SCALE_A,
+        )
+
+        self.assertFalse(metrics["criteria"]["no_field_strengthening"])
+
+
+class FieldWeakeningSpeedComparisonTests(unittest.TestCase):
+    @staticmethod
+    def _run(steady_speed: float) -> list[SyntheticSample]:
+        result = []
+        for number in range(401):
+            time_s = number * 0.01
+            speed = steady_speed * (1.0 - math.exp(-time_s / 0.3))
+            result.append(
+                SyntheticSample(
+                    number, time_s, {"speed_rpm": speed},
+                )
+            )
+        return result
+
+    def test_higher_speed_with_fw_passes(self) -> None:
+        comparison = compare_field_weakening_speed(
+            self._run(700.0), self._run(800.0), min_improvement_percent=1.0
+        )
+
+        self.assertTrue(
+            comparison["criteria"]["field_weaking_extends_speed"]
+        )
+        self.assertGreater(comparison["speed_improvement_percent"], 1.0)
+
+    def test_no_improvement_fails(self) -> None:
+        comparison = compare_field_weakening_speed(
+            self._run(800.0), self._run(800.0), min_improvement_percent=1.0
+        )
+
+        self.assertFalse(
+            comparison["criteria"]["field_weaking_extends_speed"]
+        )
 
 
 if __name__ == "__main__":
