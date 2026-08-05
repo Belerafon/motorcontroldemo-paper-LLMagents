@@ -128,3 +128,49 @@ def plot_vector_500(path: Path, samples: list[Sample]) -> None:
     current_axis.legend()
     figure.savefig(path, dpi=170)
     plt.close(figure)
+
+
+def plot_pwm_svpwm(path: Path, samples: list[Sample], *, k_pwm: int) -> None:
+    import matplotlib.pyplot as plt
+
+    time_s = [sample.time_s for sample in samples]
+    plt.style.use("seaborn-v0_8-whitegrid")
+    figure, (speed_axis, gamma_axis) = plt.subplots(
+        2, 1, figsize=(11, 7.2), sharex=True, constrained_layout=True
+    )
+    speed_axis.plot(
+        time_s,
+        [s.values["speed_rpm"] for s in samples],
+        label="Measured speed",
+    )
+    speed_axis.axhline(500.0, color="gray", linestyle="--", label="500 rpm target")
+    speed_axis.set_title(
+        "PWM_TYPE_SVPWM_CENTERED: vector run with three compare values"
+    )
+    speed_axis.set_ylabel("Speed, rpm")
+    speed_axis.legend()
+    gamma_axis.plot(
+        time_s, [s.values["gamma_a"] for s in samples], label="GammaA", alpha=0.9
+    )
+    gamma_axis.plot(
+        time_s, [s.values["gamma_b"] for s in samples], label="GammaB", alpha=0.9
+    )
+    gamma_axis.plot(
+        time_s, [s.values["gamma_c"] for s in samples], label="GammaC", alpha=0.9
+    )
+    gamma_axis.axhline(0.0, color="black", linestyle=":", linewidth=0.8)
+    gamma_axis.axhline(
+        float(k_pwm + 1), color="black", linestyle=":", linewidth=0.8
+    )
+    gamma_axis.axhline(
+        float(k_pwm) / 2.0,
+        color="gray",
+        linestyle=":",
+        linewidth=0.8,
+        label="k_pwm/2",
+    )
+    gamma_axis.set_xlabel("Time, s")
+    gamma_axis.set_ylabel("Compare value, LSB")
+    gamma_axis.legend()
+    figure.savefig(path, dpi=170)
+    plt.close(figure)

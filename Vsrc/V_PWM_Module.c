@@ -544,6 +544,126 @@ void PWM_Module_No_SV_Update(TPWM_Module *p) {
     EINT;
 }
 
+//! Функция центрированной векторной ШИМ (SVPWM с минимально-максимальной
+//! инъекцией нулевой последовательности).
+
+//! Не привязывается к шинам звена постоянного тока (непрерывная ШИМ),
+//! обеспечивает использование напряжения звена до 2/sqrt(3) (на ~15.5%
+//! больше, чем синусоидальная ШИМ), и при этом не имеет участка
+//! "ступеньки" на одной из фаз, в отличие от 6-секторной ШИМ
+//! Изосимова (PWM_TYPE_6SECT_NO_SV).
+//!
+//! Использует ту же нормировку входа, что и 6-секторная векторная ШИМ
+//! (PWM_Module_NormInput), а затем:
+//!  - выполняет обратное преобразование Кларка (alpha, beta -> a, b, c);
+//!  - добавляет к трем фазам общую составляющую (common-mode)
+//!    Vzero = -k_inj * (Vmax + Vmin) / 2, где k_inj - коэффициент
+//!    инъекции из переменной Debug1 (формат IQ24, диапазон 0..1):
+//!       k_inj = 1.0 - полная центрированная SVPWM (максимальное
+//!                   использование напряжения звена);
+//!       k_inj = 0.0 - без инъекции, поведение эквивалентно
+//!                   синусоидальной ШИМ (удобно для A/B-сравнения);
+//!  - значение Vzero дублируется в переменную Debug2 для диагностики;
+//!  - переходит к скважностям по тому же соглашению, что и Sin-ШИМ.
+//!    Множитель 2/3 компенсирует внутреннее масштабирование NormInput
+//!    на 0.866, чтобы при k_inj=0 получить точное совпадение с Sin-ШИМ,
+//!    а при k_inj=1 - с 6-секторной ШИМ на границе линейной области.
+//!
+//! \memberof TPWM_Module
+void PWM_Module_SVPWM_Centered_Update(TPWM_Module *p) {
+    _iq Ua, Ub, Uc;
+    _iq Vmax, Vmin;
+    _iq Vzero;
+    _iq UaN, UbN, UcN;
+    _iq k_inj;
+    _iq PhasePtsA, PhasePtsB, PhasePtsC;
+
+    //Присвоение трех уставок сравнения только если счетчик таймера далек от нуля, чтобы
+    //предотвратить частичное применение скважностей, что в векторной ШИМ может быть критично и испортить период ШИМ.
+    DINT;
+    if (NT_PWM0->TBCTR>30) {
+        NT_PWM0->CMPA_bit.CMPA=(Uint16)p->GammaA;
+        NT_PWM1->CMPA_bit.CMPA=(Uint16)p->GammaB;
+        NT_PWM2->CMPA_bit.CMPA=(Uint16)p->GammaC;
+    }
+    EINT;
+
+    PWM_Module_NormInput(p);
+
+    //Коэффициент инъекции нулевой последовательности (ручка A/B-сравнения
+    //и настройки). По умолчанию Debug1 = 0, что безопасно и соответствует
+    //поведению синусоидальной ШИМ. Для включения нового алгоритма следует
+    //записать в Debug1 значение _IQ(1.0) (например, через CANOpen или JTAG).
+    k_inj = Debug1;
+    if (k_inj < 0)
+        k_inj = 0;
+    else if (k_inj > _IQ(1.0))
+        k_inj = _IQ(1.0);
+
+    //Обратное преобразование Кларка (alpha, beta -> a, b, c), амплитудно-
+    //инвариантная форма. UalphaNorm/UbetaNorm здесь уже в единицах, где
+    //|UalphaNorm|^2 + |UbetaNorm|^2 <= 1.0 в линейной области SVPWM.
+    Ua = p->UalphaNorm;
+    Ub = _IQmpy(p->UalphaNorm, _IQ(-0.5)) + _IQmpy(p->UbetaNorm, _IQ(0.8660254));
+    Uc = _IQmpy(p->UalphaNorm, _IQ(-0.5)) - _IQmpy(p->UbetaNorm, _IQ(0.8660254));
+
+    //Минимально-максимальная инъекция нулевой последовательности.
+    //Для гармонического задающего вектора Vzero - третья гармоника той
+    //же амплитуды, что и фазное напряжение, делённая на 4 (k_inj=1).
+    //Это "симметрирует" верх и низ, уводя обе экстремальные фазы
+    //на равный уровень относительно 0 и расширяя линейный участок до
+    //круга, вписанного в шестиугольник базовых векторов.
+    Vmax = Ua;
+    if (Ub > Vmax) Vmax = Ub;
+    if (Uc > Vmax) Vmax = Uc;
+    Vmin = Ua;
+    if (Ub < Vmin) Vmin = Ub;
+    if (Uc < Vmin) Vmin = Uc;
+
+    Vzero = _IQmpy(_IQ(-0.5), Vmax + Vmin);
+    Vzero = _IQmpy(k_inj, Vzero);
+    Debug2 = Vzero;
+
+    UaN = Ua + Vzero;
+    UbN = Ub + Vzero;
+    UcN = Uc + Vzero;
+
+    //Переход к скважностям (CMPA). Соглашение то же, что и в Sin-ШИМ:
+    //PhasePts = 0.5 - Vphase_mod. Множитель 2/3 компенсирует внутреннее
+    //масштабирование NormInput (0.866 = sqrt(3)/2), так как
+    //(2/3) * 0.866 = 1/sqrt(3) - то же самое масштабирование, что и в
+    //Sin-ШИМ (1/0.866/2). В результате при k_inj = 0 новая функция дает
+    //те же Gamma, что и Sin-ШИМ, а при k_inj = 1 - те же границы
+    //линейной области, что и 6-секторная векторная ШИМ.
+    PhasePtsA = _IQ(0.5) - _IQmpy(UaN, _IQ(0.6666667));
+    PhasePtsB = _IQ(0.5) - _IQmpy(UbN, _IQ(0.6666667));
+    PhasePtsC = _IQ(0.5) - _IQmpy(UcN, _IQ(0.6666667));
+
+    p->GammaA = _IQmpy(p->k_pwm, PhasePtsA);
+    p->GammaB = _IQmpy(p->k_pwm, PhasePtsB);
+    p->GammaC = _IQmpy(p->k_pwm, PhasePtsC);
+
+    /*насыщения */
+    if (p->GammaA<0) p->GammaA=0;
+    if (p->GammaB<0) p->GammaB=0;
+    if (p->GammaC<0) p->GammaC=0;
+
+    if (p->GammaA>p->k_pwm) p->GammaA=p->k_pwm+1;
+    if (p->GammaB>p->k_pwm) p->GammaB=p->k_pwm+1;
+    if (p->GammaC>p->k_pwm) p->GammaC=p->k_pwm+1;
+
+    //Присвоение трех уставок сравнения только если счетчик таймера далек от нуля, чтобы
+    //предотвратить частичное применение скважностей, что в векторной ШИМ может быть критично и испортить период ШИМ.
+    //Второй раз - чтобы предотвратить ситуацию с постоянной "незагрузкой" при равенстве частот расчета и ШИМ
+    DINT;
+    if (NT_PWM0->TBCTR>30) {
+        NT_PWM0->CMPA_bit.CMPA=(Uint16)p->GammaA;
+        NT_PWM1->CMPA_bit.CMPA=(Uint16)p->GammaB;
+        NT_PWM2->CMPA_bit.CMPA=(Uint16)p->GammaC;
+    }
+    EINT;
+}
+
 //! Функция синусоидальной ШИМ
 
 //! \memberof TPWM_Module
@@ -728,6 +848,10 @@ void PWM_Module_Update(TPWM_Module *p) {
 		}
 		case PWM_TYPE_SIN_PWM: {
 			PWM_Module_Sin_Update(p);
+			break;
+		}
+		case PWM_TYPE_SVPWM_CENTERED: {
+			PWM_Module_SVPWM_Centered_Update(p);
 			break;
 		}
 		case PWM_TYPE_DC_DRIVE: {
