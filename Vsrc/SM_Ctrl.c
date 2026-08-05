@@ -444,8 +444,19 @@ void SM_Ctrl_Fast_Calc(TSM_Ctrl *p) {
 
 			//Обратный поворот на угол refs.theta_elec для 
 			//выходов регуляторов тока (напряжений по осям d и q)
-			ipark.de = pid_id.pid_out_reg3;
-			ipark.qe = pid_iq.pid_out_reg3;
+			//Декаплинг токовых контуров: компенсация перекрестных связей
+			//U_d_dec = +K_dec*w_e*I_q ; U_q_dec = -K_dec*w_e*I_d.
+			//K_dec - DebugW3 (5174h.0Dh, IQ24, о.е.): 0 = прежний алгоритм
+			//без компенсации (точное A/B). Debug1/Debug2 - диагн. напряжения декаплинга.
+			{
+				long w_e_dec = cur_par.speed; //электрическая скорость, о.е.
+				long u_d_dec =  _IQmpy(DebugW3, _IQmpy(w_e_dec, park.qe));
+				long u_q_dec = -_IQmpy(DebugW3, _IQmpy(w_e_dec, park.de));
+				Debug1 = u_d_dec;
+				Debug2 = u_q_dec;
+				ipark.de = pid_id.pid_out_reg3 + u_d_dec;
+				ipark.qe = pid_iq.pid_out_reg3 + u_q_dec;
+			}
 			ipark.ang = refs.theta_elec;
 			ipark.calc(&ipark);            //расчет преобразования координат
 
@@ -584,8 +595,16 @@ void SM_Ctrl_Fast_Calc(TSM_Ctrl *p) {
 
 			//Обратный поворот на угол refs.theta_elec для
 			//выходов регуляторов тока (напряжений по осям d и q)
-			ipark.de = pid_id.pid_out_reg3;
-			ipark.qe = pid_iq.pid_out_reg3;
+			//Декаплинг токовых контуров (перекрестные связи). K_dec - DebugW3 (IQ24, о.е.).
+			{
+				long w_e_dec = cur_par.speed;
+				long u_d_dec =  _IQmpy(DebugW3, _IQmpy(w_e_dec, park.qe));
+				long u_q_dec = -_IQmpy(DebugW3, _IQmpy(w_e_dec, park.de));
+				Debug1 = u_d_dec;
+				Debug2 = u_q_dec;
+				ipark.de = pid_id.pid_out_reg3 + u_d_dec;
+				ipark.qe = pid_iq.pid_out_reg3 + u_q_dec;
+			}
 			ipark.ang = posspeedEqep.theta_elec;
 			ipark.calc(&ipark);            //расчет преобразования координат
 
@@ -678,8 +697,18 @@ void SM_Ctrl_Fast_Calc(TSM_Ctrl *p) {
 
 			//Обратный поворот на угол refs.theta_elec для
 			//выходов регуляторов тока (напряжений по осям x и y)
-			ipark.de = pid_id.pid_out_reg3;
-			ipark.qe = pid_iq.pid_out_reg3;
+			//Декаплинг токовых контуров (перекрестные связи). K_dec - DebugW3 (IQ24, о.е.).
+			//Для АД w_e приближенно равна электрической скорости ротора; K_dec
+			//настраивают так, чтобы компенсировать w_e*L_sigma*I_ortho.
+			{
+				long w_e_dec = cur_par.speed;
+				long u_d_dec =  _IQmpy(DebugW3, _IQmpy(w_e_dec, park.qe));
+				long u_q_dec = -_IQmpy(DebugW3, _IQmpy(w_e_dec, park.de));
+				Debug1 = u_d_dec;
+				Debug2 = u_q_dec;
+				ipark.de = pid_id.pid_out_reg3 + u_d_dec;
+				ipark.qe = pid_iq.pid_out_reg3 + u_q_dec;
+			}
 			ipark.ang = refs.theta_elec;
 			ipark.calc(&ipark);            //расчет преобразования координат
 
@@ -837,8 +866,16 @@ void SM_Ctrl_Fast_Calc(TSM_Ctrl *p) {
 
 			//Обратный поворот на угол Temp1 для
 			//выходов регуляторов тока (напряжений по осям x и y)
-			ipark.de = pid_id.pid_out_reg3;
-			ipark.qe = pid_iq.pid_out_reg3;
+			//Декаплинг токовых контуров (перекрестные связи). K_dec - DebugW3 (IQ24, о.е.).
+			{
+				long w_e_dec = cur_par.speed;
+				long u_d_dec =  _IQmpy(DebugW3, _IQmpy(w_e_dec, park.qe));
+				long u_q_dec = -_IQmpy(DebugW3, _IQmpy(w_e_dec, park.de));
+				Debug1 = u_d_dec;
+				Debug2 = u_q_dec;
+				ipark.de = pid_id.pid_out_reg3 + u_d_dec;
+				ipark.qe = pid_iq.pid_out_reg3 + u_q_dec;
+			}
 			ipark.ang = Temp1;
 			ipark.calc(&ipark);            //расчет преобразования координат
 
