@@ -343,3 +343,40 @@ def analyze_vector_500(
     metrics["criteria"] = criteria
     metrics["passed"] = all(criteria.values())
     return metrics
+
+
+def expected_current_reg_limit(
+    *,
+    u_lim_pu: float,
+    udc_meas_pu: float | None = None,
+    udcomp_enable: int | None = None,
+    udcomp_k: float | None = None,
+) -> float:
+    """Mirror of the firmware SM_Ctrl_CalcCurrentRegLimit() in per-unit.
+
+    The current-regulator voltage ceiling is pwm.U_lim - the point at which the
+    PWM module (PWM_Module_NormInput) begins to clip the command vector. The
+    DC-bus dependence is handled by the PWM's own Ud-compensation
+    (UdCompEnable/UdCompK), which maps the command to the actual delivered
+    voltage, so it must not be applied again here: doing so was measured to
+    starve the current loop during acceleration. The extra arguments are kept
+    for signature compatibility and ignored.
+    """
+    del udc_meas_pu, udcomp_enable, udcomp_k
+    v_max = u_lim_pu
+    if v_max < 0.0:
+        v_max = 0.0
+    return v_max
+
+
+def delivered_voltage_ceiling(u_lim_pu: float, udc_meas_pu: float) -> float:
+    """Estimated max real phase voltage (p.u. of nominal) = U_lim * Udc_meas.
+
+    Exposed for diagnostics (firmware mirrors it in Debug2). This is NOT the
+    regulator command limit - it is the actual voltage the inverter can place
+    across the motor windings at the current DC-bus level.
+    """
+    product = u_lim_pu * udc_meas_pu
+    if product < 0.0:
+        product = 0.0
+    return product

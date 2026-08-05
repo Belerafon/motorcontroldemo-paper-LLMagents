@@ -4,7 +4,11 @@ import math
 import unittest
 from dataclasses import dataclass
 
-from tests.e2e.metrics import analyze_current_mode4, analyze_vector_500
+from tests.e2e.metrics import (
+    analyze_current_mode4,
+    analyze_vector_500,
+    expected_current_reg_limit,
+)
 
 
 @dataclass(frozen=True)
@@ -98,6 +102,45 @@ class Vector500MetricsTests(unittest.TestCase):
 
         self.assertFalse(metrics["passed"])
         self.assertFalse(metrics["criteria"]["overshoot"])
+
+
+class ExpectedCurrentRegLimitTests(unittest.TestCase):
+    def test_limit_equals_u_lim_independent_of_udc_and_udcomp(self) -> None:
+        # The DC-bus dependence is handled by the PWM Ud-compensation, so the
+        # regulator command limit must be U_lim regardless of Udc/UdComp.
+        for udc in (0.3, 0.5, 0.667, 1.0, 1.2):
+            for udcomp_ena in (0, 1):
+                for udcomp_k in (0.0, 0.5, 1.0, 2.0):
+                    with self.subTest(udc=udc, ena=udcomp_ena, k=udcomp_k):
+                        self.assertAlmostEqual(
+                            expected_current_reg_limit(
+                                u_lim_pu=0.866,
+                                udc_meas_pu=udc,
+                                udcomp_enable=udcomp_ena,
+                                udcomp_k=udcomp_k,
+                            ),
+                            0.866,
+                            places=9,
+                        )
+
+    def test_negative_u_lim_clamped_to_zero(self) -> None:
+        self.assertEqual(
+            expected_current_reg_limit(
+                u_lim_pu=-0.5,
+                udc_meas_pu=1.0,
+                udcomp_enable=1,
+                udcomp_k=1.0,
+            ),
+            0.0,
+        )
+
+    def test_delivered_voltage_ceiling_is_u_lim_times_udc(self) -> None:
+        from tests.e2e.metrics import delivered_voltage_ceiling
+
+        self.assertAlmostEqual(
+            delivered_voltage_ceiling(0.866, 0.667), 0.577622, places=6
+        )
+        self.assertEqual(delivered_voltage_ceiling(-1.0, 0.5), 0.0)
 
 
 if __name__ == "__main__":
