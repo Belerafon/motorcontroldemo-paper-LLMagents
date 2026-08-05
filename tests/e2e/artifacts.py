@@ -128,3 +128,33 @@ def plot_vector_500(path: Path, samples: list[Sample]) -> None:
     current_axis.legend()
     figure.savefig(path, dpi=170)
     plt.close(figure)
+
+
+def plot_decouple(path: Path, samples: list[Sample]) -> None:
+    import matplotlib.pyplot as plt
+
+    time_s = [sample.time_s for sample in samples]
+    plt.style.use("seaborn-v0_8-whitegrid")
+    figure, (speed_axis, current_axis, decouple_axis) = plt.subplots(
+        3, 1, figsize=(11, 9), sharex=True, constrained_layout=True
+    )
+    speed_axis.plot(time_s, [s.values["speed_rpm"] for s in samples], label="Speed")
+    speed_axis.axhline(500.0, color="gray", linestyle="--", label="500 rpm target")
+    speed_axis.set_title("Vector control with d-q cross-coupling decoupling")
+    speed_axis.set_ylabel("Speed, rpm")
+    speed_axis.legend()
+    current_axis.plot(time_s, [s.values["iq_a"] for s in samples], label="Iq")
+    current_axis.set_ylabel("q-axis current, A")
+    current_axis.legend()
+    decouple_axis.plot(
+        time_s, [s.values["ud_dec_pu"] for s in samples], label="Ud decouple"
+    )
+    decouple_axis.plot(
+        time_s, [s.values["uq_dec_pu"] for s in samples], label="Uq decouple"
+    )
+    decouple_axis.axhline(0.0, color="gray", linestyle=":", linewidth=0.8)
+    decouple_axis.set_xlabel("Time, s")
+    decouple_axis.set_ylabel("Decoupling voltage, p.u.")
+    decouple_axis.legend()
+    figure.savefig(path, dpi=170)
+    plt.close(figure)

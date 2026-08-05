@@ -4,7 +4,11 @@ import math
 import unittest
 from dataclasses import dataclass
 
-from tests.e2e.metrics import analyze_current_mode4, analyze_vector_500
+from tests.e2e.metrics import (
+    analyze_current_mode4,
+    analyze_decouple,
+    analyze_vector_500,
+)
 
 
 @dataclass(frozen=True)
@@ -98,6 +102,61 @@ class Vector500MetricsTests(unittest.TestCase):
 
         self.assertFalse(metrics["passed"])
         self.assertFalse(metrics["criteria"]["overshoot"])
+
+
+class DecoupleMetricsTests(unittest.TestCase):
+    @staticmethod
+    def samples(*, k_dec_pu: float = 0.1) -> list[SyntheticSample]:
+        result: list[SyntheticSample] = []
+        speed_nom = 500.0
+        current_base = 5.0
+        for number in range(3001):
+            time_s = number * 0.001
+            speed = 500.0 * (1.0 - math.exp(-time_s / 0.30))
+            iq = 0.1 + 1.9 * math.exp(-time_s / 0.4)
+            speed_pu = speed / speed_nom
+            iq_pu = iq / current_base
+            ud = -k_dec_pu * speed_pu * iq_pu
+            uq = k_dec_pu * speed_pu * 0.0
+            result.append(
+                SyntheticSample(
+                    number,
+                    time_s,
+                    {
+                        "speed_rpm": speed,
+                        "iq_a": iq,
+                        "ud_dec_pu": ud,
+                        "uq_dec_pu": uq,
+                    },
+                )
+            )
+        return result
+
+    def test_matching_decouple_outputs_pass(self) -> None:
+        metrics = analyze_decouple(
+            self.samples(),
+            target_speed_rpm=500.0,
+            speed_nom_rpm=500.0,
+            current_base_a=5.0,
+            k_dec_pu=0.1,
+        )
+
+        self.assertTrue(metrics["passed"])
+        self.assertTrue(metrics["criteria"]["decoupling_active"])
+        self.assertTrue(metrics["criteria"]["decoupling_matches_formula"])
+        self.assertLess(metrics["ud_dec_rmse_vs_formula_pu"], 1e-6)
+
+    def test_mismatched_decouple_outputs_fail_formula(self) -> None:
+        metrics = analyze_decouple(
+            self.samples(k_dec_pu=0.1),
+            target_speed_rpm=500.0,
+            speed_nom_rpm=500.0,
+            current_base_a=5.0,
+            k_dec_pu=0.3,
+        )
+
+        self.assertFalse(metrics["passed"])
+        self.assertFalse(metrics["criteria"]["decoupling_matches_formula"])
 
 
 if __name__ == "__main__":

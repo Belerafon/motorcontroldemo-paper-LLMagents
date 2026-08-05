@@ -343,3 +343,109 @@ def analyze_vector_500(
     metrics["criteria"] = criteria
     metrics["passed"] = all(criteria.values())
     return metrics
+
+
+def analyze_decouple(
+    samples: Sequence[Any],
+    *,
+    target_speed_rpm: float,
+    speed_nom_rpm: float,
+    current_base_a: float,
+    k_dec_pu: float,
+    max_time_to_95_s: float = 3.0,
+    max_overshoot_percent: float = 15.0,
+    max_settling_s: float = 3.5,
+    max_steady_error_percent: float = 3.0,
+    min_decouple_peak_pu: float = 0.002,
+    max_decouple_rmse_pu: float = 0.01,
+    max_steady_uq_dec_abs_pu: float = 0.05,
+    settling_dwell_s: float = 0.10,
+) -> dict[str, Any]:
+    time_s = _times(samples)
+    speed = _series(samples, "speed_rpm")
+    iq = _series(samples, "iq_a")
+    ud = _series(samples, "ud_dec_pu")
+    uq = _series(samples, "uq_dec_pu")
+    period = _sample_period(time_s)
+    tail_start = _tail_start(len(samples))
+    start = _event_start(speed, target_speed_rpm)
+    direction = 1.0 if target_speed_rpm >= 0 else -1.0
+    i95 = _first_crossing(speed, target_speed_rpm, 0.95, start)
+    peak_speed = max(direction * value for value in speed[start:])
+    overshoot_percent = (
+        max(0.0, peak_speed - abs(target_speed_rpm))
+        / abs(target_speed_rpm)
+        * 100.0
+    )
+    speed_tolerance = max(1.0, abs(target_speed_rpm) * 0.02)
+    settling = _settling_time(
+        time_s,
+        speed,
+        target_speed_rpm,
+        speed_tolerance,
+        settling_dwell_s,
+        start,
+    )
+    steady_speed = speed[tail_start:]
+    steady_error_percent = (
+        abs(_mean(steady_speed) - target_speed_rpm)
+        / abs(target_speed_rpm)
+        * 100.0
+    )
+    speed_pu = [value / speed_nom_rpm for value in speed]
+    iq_pu = [value / current_base_a for value in iq]
+    expected_ud = [
+        -k_dec_pu * sp * qp for sp, qp in zip(speed_pu, iq_pu)
+    ]
+    peak_ud_abs_pu = max(abs(value) for value in ud)
+    ud_rmse_pu = _rmse(ud, expected_ud)
+    steady_uq_abs_pu = _mean([abs(value) for value in uq[tail_start:]])
+    acceleration_stop = i95 if i95 is not None else len(samples) - 1
+    acceleration_iq = iq[start : acceleration_stop + 1]
+    peak_current = max(abs(value) for value in acceleration_iq)
+    metrics: dict[str, Any] = {
+        "samples": len(samples),
+        "sample_period_s": period,
+        "window_s": float(time_s[-1] - time_s[0]),
+        "target_speed_rpm": target_speed_rpm,
+        "steady_speed_rpm": _mean(steady_speed),
+        "steady_speed_error_percent": steady_error_percent,
+        "rise_time_to_95_s": (
+            None if i95 is None else float(time_s[i95] - time_s[start])
+        ),
+        "overshoot_percent": overshoot_percent,
+        "settling_time_2_percent_s": settling,
+        "peak_abs_ud_dec_pu": peak_ud_abs_pu,
+        "ud_dec_rmse_vs_formula_pu": ud_rmse_pu,
+        "steady_mean_abs_uq_dec_pu": steady_uq_abs_pu,
+        "k_dec_pu": k_dec_pu,
+        "peak_abs_iq_a_during_acceleration": peak_current,
+    }
+    criteria = {
+        "enough_samples": len(samples) >= 64,
+        "reached_95_percent": (
+            metrics["rise_time_to_95_s"] is not None
+            and metrics["rise_time_to_95_s"] <= max_time_to_95_s
+        ),
+        "overshoot": overshoot_percent <= max_overshoot_percent,
+        "settled": settling is not None and settling <= max_settling_s,
+        "steady_speed_error": steady_error_percent <= max_steady_error_percent,
+        "decoupling_active": peak_ud_abs_pu >= min_decouple_peak_pu,
+        "decoupling_matches_formula": ud_rmse_pu <= max_decouple_rmse_pu,
+        "q_axis_decouple_small": steady_uq_abs_pu <= max_steady_uq_dec_abs_pu,
+    }
+    metrics["limits"] = {
+        "max_time_to_95_s": max_time_to_95_s,
+        "max_overshoot_percent": max_overshoot_percent,
+        "max_settling_s": max_settling_s,
+        "max_steady_error_percent": max_steady_error_percent,
+        "min_decouple_peak_pu": min_decouple_peak_pu,
+        "max_decouple_rmse_pu": max_decouple_rmse_pu,
+        "max_steady_uq_dec_abs_pu": max_steady_uq_dec_abs_pu,
+        "speed_nom_rpm": speed_nom_rpm,
+        "current_base_a": current_base_a,
+        "settling_dwell_s": settling_dwell_s,
+    }
+    metrics["criteria"] = criteria
+    metrics["passed"] = all(criteria.values())
+    return metrics

@@ -54,6 +54,7 @@ extern "C" {
 #include "ipark.h"
 #include "V_pid_reg3.h"
 #include "V_pid_reg3_pos.h"
+#include "V_Decouple.h"
 #include "V_rmp_ctrl.h"
 #include "V_adc.h"
 #include "V_PWM_Module.h"
@@ -93,6 +94,7 @@ extern TPidReg3 	pid_iq;
 extern TPidReg3 	pid_ia;
 extern TPidReg3 	pid_spd;
 extern TPidReg3_pos 	pid_pos;
+extern TCurrentDecouple current_decouple;
 extern TRelayReg i_a_reg;
 extern TRelayReg i_b_reg;
 extern TRelayReg i_c_reg;

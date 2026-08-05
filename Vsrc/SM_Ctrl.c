@@ -64,6 +64,11 @@ void SM_Ctrl_ms_Calc(TSM_Ctrl *p) {
 void SM_Ctrl_Fast_Calc(TSM_Ctrl *p) {
 	long Temp1;
 
+	current_decouple.enable = (DebugW1 == 1) ? 1 : 0;
+	current_decouple.K_dec = DebugW2;
+	Debug1 = current_decouple.ud_dec;
+	Debug2 = current_decouple.uq_dec;
+
 //если система находится в перееинициализации,
 //то пропускаем контур управления
 	if (sm_sys.state == SYS_INIT) {
@@ -117,6 +122,7 @@ void SM_Ctrl_Fast_Calc(TSM_Ctrl *p) {
 		pid_ia.reset(&pid_ia);
 		pid_spd.reset(&pid_spd);
 		pid_pos.reset(&pid_pos);
+		current_decouple.reset(&current_decouple);
 		cur_par.Is = 0;
 		cur_par.power = 0;
 		cur_par.speed = 0;
@@ -442,10 +448,15 @@ void SM_Ctrl_Fast_Calc(TSM_Ctrl *p) {
 			pid_id.pid_fdb_reg3 = park.de; //обратная связь рег. тока оси d - вычисленный ток по фазе d
 			pid_id.calc(&pid_id); //расчет регулятора тока оси d
 
+			current_decouple.omega_e = cur_par.speed;
+			current_decouple.id = park.de;
+			current_decouple.iq = park.qe;
+			current_decouple.calc(&current_decouple);
+
 			//Обратный поворот на угол refs.theta_elec для 
 			//выходов регуляторов тока (напряжений по осям d и q)
-			ipark.de = pid_id.pid_out_reg3;
-			ipark.qe = pid_iq.pid_out_reg3;
+			ipark.de = pid_id.pid_out_reg3 + current_decouple.ud_dec;
+			ipark.qe = pid_iq.pid_out_reg3 + current_decouple.uq_dec;
 			ipark.ang = refs.theta_elec;
 			ipark.calc(&ipark);            //расчет преобразования координат
 
@@ -582,10 +593,15 @@ void SM_Ctrl_Fast_Calc(TSM_Ctrl *p) {
 			pid_id.pid_fdb_reg3 = park.de; //обратная связь рег. тока оси d - вычисленный ток по фазе d
 			pid_id.calc(&pid_id); //расчет регулятора тока оси d
 
+			current_decouple.omega_e = cur_par.speed;
+			current_decouple.id = park.de;
+			current_decouple.iq = park.qe;
+			current_decouple.calc(&current_decouple);
+
 			//Обратный поворот на угол refs.theta_elec для
 			//выходов регуляторов тока (напряжений по осям d и q)
-			ipark.de = pid_id.pid_out_reg3;
-			ipark.qe = pid_iq.pid_out_reg3;
+			ipark.de = pid_id.pid_out_reg3 + current_decouple.ud_dec;
+			ipark.qe = pid_iq.pid_out_reg3 + current_decouple.uq_dec;
 			ipark.ang = posspeedEqep.theta_elec;
 			ipark.calc(&ipark);            //расчет преобразования координат
 
