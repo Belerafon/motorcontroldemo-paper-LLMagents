@@ -128,3 +128,49 @@ def plot_vector_500(path: Path, samples: list[Sample]) -> None:
     current_axis.legend()
     figure.savefig(path, dpi=170)
     plt.close(figure)
+
+
+def plot_pwm_svpwm(path: Path, samples: list[Sample]) -> None:
+    import matplotlib.pyplot as plt
+
+    time_s = [sample.time_s for sample in samples]
+    plt.style.use("seaborn-v0_8-whitegrid")
+    figure, (phase_a_axis, phase_b_axis) = plt.subplots(
+        2, 1, figsize=(11, 7.2), sharex=True, constrained_layout=True
+    )
+
+    phase_a_axis.plot(
+        time_s,
+        [s.values["gamma_a"] for s in samples],
+        label="Gamma A (captured)",
+    )
+    if "gamma_a_expected" in samples[0].values:
+        phase_a_axis.plot(
+            time_s,
+            [s.values["gamma_a_expected"] for s in samples],
+            "--",
+            label="Gamma A (SVPWM expected)",
+        )
+    phase_a_axis.set_title("Symmetric SVPWM: phase A compare register")
+    phase_a_axis.set_ylabel("Gamma A, timer ticks")
+    phase_a_axis.legend()
+
+    phase_b_axis.plot(
+        time_s,
+        [s.values["gamma_b"] for s in samples],
+        label="Gamma B (captured)",
+    )
+    if "gamma_b_expected" in samples[0].values:
+        phase_b_axis.plot(
+            time_s,
+            [s.values["gamma_b_expected"] for s in samples],
+            "--",
+            label="Gamma B (SVPWM expected)",
+        )
+    phase_b_axis.set_title("Phase B compare register")
+    phase_b_axis.set_xlabel("Time, s")
+    phase_b_axis.set_ylabel("Gamma B, timer ticks")
+    phase_b_axis.legend()
+
+    figure.savefig(path, dpi=170)
+    plt.close(figure)

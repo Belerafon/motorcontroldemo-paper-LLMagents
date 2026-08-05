@@ -544,6 +544,109 @@ void PWM_Module_No_SV_Update(TPWM_Module *p) {
     EINT;
 }
 
+//! Функция симметричной (непрерывной) векторной ШИМ (SVPWM)
+
+//! В отличие от PWM_TYPE_6SECT_NO_SV (DPWM с привязкой к шине), ни одна фаза
+//! не "залипает" на шине: в каждом периоде ШИМ оба нулевых вектора (000 и 111)
+//! используются симметрично, а активный вектор расположен в центре периода.
+//! Это даёт меньшие пульсации тока и принципиально не привязывает фазы к шинам,
+//! пока амплитуда задания не доходит до ограничения U_lim.
+//! По использованию напряжения звена постоянного тока эквивалентна векторной
+//! ШИМ с привязкой к шине: линейная область простирается до вписанной в
+//! шестиугольник базовых векторов окружности (|UalphaRef| = 1.0), что на
+//! 1/0.866 ~ 1.155 раза (на 15.5 %) больше, чем у синусоидальной ШИМ
+//! (для которой линейный предел - 0.866).
+//! Реализована методом впрыска нулевой последовательности (min-max injection),
+//! что математически эквивалентно классической SVPWM с симметричным
+//! распределением нулевых векторов, но не требует ни расчёта сектора, ни
+//! явного вычисления длительностей базовых векторов.
+
+//! \memberof TPWM_Module
+void PWM_Module_SV_Update(TPWM_Module *p) {
+	_iq Ua, Ub, Uc;
+	_iq Umax, Umin, Uz;
+	_iq Da, Db, Dc;
+	const _iq two_thirds = _IQ(2.0 / 3.0);
+
+	//Перестраховка: успеть применить предыдущие уставки сравнения, пока
+	//счётчик таймера далёк от нуля (см. PWM_Module_No_SV_Update).
+	DINT;
+	if (NT_PWM0->TBCTR > 30) {
+		NT_PWM0->CMPA_bit.CMPA = (Uint16) p->GammaA;
+		NT_PWM1->CMPA_bit.CMPA = (Uint16) p->GammaB;
+		NT_PWM2->CMPA_bit.CMPA = (Uint16) p->GammaC;
+	}
+	EINT;
+
+	//Ограничение по U_lim, компенсация Ud и расчёт U_mag - общие с векторной
+	//ШИМ с привязкой к шине. На выходе UalphaNorm/UbetaNorm - в масштабе
+	//базового вектора (умножены на 0.866).
+	PWM_Module_NormInput(p);
+
+	//Обратное преобразование Кларка: alpha-beta -> a-b-c.
+	Ua = p->UalphaNorm;
+	Ub = _IQmpy(_IQ(-0.5), p->UalphaNorm)
+			+ _IQmpy(_IQ(0.8660254), p->UbetaNorm);
+	Uc = _IQmpy(_IQ(-0.5), p->UalphaNorm)
+			- _IQmpy(_IQ(0.8660254), p->UbetaNorm);
+
+	//Симметрирующий впрыск нулевой последовательности (min-max injection):
+	//Uz = -(max(Ua,Ub,Uc) + min(Ua,Ub,Uc)) / 2.
+	//Это ставит активный вектор в центр периода ШИМ и распределение нулевых
+	//векторов 000 и 111 делает симметричным (классическая непрерывная SVPWM).
+	Umax = Ua;
+	Umin = Ua;
+	if (Ub > Umax)
+		Umax = Ub;
+	else if (Ub < Umin)
+		Umin = Ub;
+	if (Uc > Umax)
+		Umax = Uc;
+	else if (Uc < Umin)
+		Umin = Uc;
+	Uz = _IQmpy(_IQ(-0.5), Umax + Umin);
+
+	//Скважности фаз (доля времени с замкнутым верхним ключом, 0..1):
+	//Dx = 0.5 + (Ux + Uz) * (2/3).
+	//Множитель 2/3 переводит масштаб базового вектора в долю Ud: при
+	//|Ux + Uz| = 1 (вершина шестиугольника) Dx доходит до 0 или 1.
+	Da = _IQ(0.5) + _IQmpy(two_thirds, Ua + Uz);
+	Db = _IQ(0.5) + _IQmpy(two_thirds, Ub + Uz);
+	Dc = _IQ(0.5) + _IQmpy(two_thirds, Uc + Uz);
+
+	//Перевод скважности (0..1) в отсчёты таймера. По принятому в модуле
+	//соглашению о действиях AQCTL (duty = 1 - CMPA/k_pwm) это
+	//GammaX = k_pwm * (1 - Dx).
+	p->GammaA = _IQmpy(p->k_pwm, _IQ(1.0) - Da);
+	p->GammaB = _IQmpy(p->k_pwm, _IQ(1.0) - Db);
+	p->GammaC = _IQmpy(p->k_pwm, _IQ(1.0) - Dc);
+
+	/*насыщения */
+
+	if (p->GammaA < 0)
+		p->GammaA = 0;
+	if (p->GammaB < 0)
+		p->GammaB = 0;
+	if (p->GammaC < 0)
+		p->GammaC = 0;
+
+	if (p->GammaA > p->k_pwm)
+		p->GammaA = p->k_pwm + 1;
+	if (p->GammaB > p->k_pwm)
+		p->GammaB = p->k_pwm + 1;
+	if (p->GammaC > p->k_pwm)
+		p->GammaC = p->k_pwm + 1;
+
+	//Применение новых уставок сравнения (см. PWM_Module_No_SV_Update).
+	DINT;
+	if (NT_PWM0->TBCTR > 30) {
+		NT_PWM0->CMPA_bit.CMPA = (Uint16) p->GammaA;
+		NT_PWM1->CMPA_bit.CMPA = (Uint16) p->GammaB;
+		NT_PWM2->CMPA_bit.CMPA = (Uint16) p->GammaC;
+	}
+	EINT;
+}
+
 //! Функция синусоидальной ШИМ
 
 //! \memberof TPWM_Module
@@ -728,6 +831,10 @@ void PWM_Module_Update(TPWM_Module *p) {
 		}
 		case PWM_TYPE_SIN_PWM: {
 			PWM_Module_Sin_Update(p);
+			break;
+		}
+		case PWM_TYPE_SVPWM: {
+			PWM_Module_SV_Update(p);
 			break;
 		}
 		case PWM_TYPE_DC_DRIVE: {
