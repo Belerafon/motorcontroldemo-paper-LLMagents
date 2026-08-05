@@ -71,6 +71,7 @@ TDrvInterface drv_interface = DRV_INTERFACE_DEFAULTS;	//!<Интерфейс д�
 TLogger FaultLog = LOGGER_DEFAULTS;			//!<Протоколирование аварий
 TGlobalTime global_time = GLOBAL_TIME_DEFAULTS; //!<Работа с часами
 TUdControl udControl = UD_CONTROL_DEFAULTS; //!<Плавная зарядка ЗПТ через термисторы
+TCurLim cur_lim = CUR_LIM_DEFAULTS; //!<Динамическое ограничение регуляторов тока
 TFanControl FanControl = FAN_CONTROL_DEFAULTS; //!<Вентилятор
 
 TRefs refs; //!< Структура с заданиями (токи, скорости)

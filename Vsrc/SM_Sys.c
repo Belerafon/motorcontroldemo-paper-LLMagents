@@ -61,6 +61,7 @@ void SM_Sys_Init(TSM_Sys *p) {
 	cur_par.init(&cur_par); //Расчет текущих показателей привода
 	leds.init(&leds);//светодиоды
 	udControl.init(&udControl); //плавная зарядка ЗПТ через термисторы
+	cur_lim.init(&cur_lim); //динамическое ограничение регуляторов тока
 	DIO_Init(); //дискретные входы/выходы
 	FanControl.init(&FanControl); //вентилятор
 	//глобальное времЯ (внешние или внутр. часы)
@@ -216,6 +217,7 @@ void SM_Sys_Fast_Calc(TSM_Sys *p) {
 	}
 
 	adc.fast_calc(&adc); //АЦП
+	cur_lim.calc(&cur_lim); //Динамическое ограничение регуляторов тока по напряжению ЗПТ и возможностям ШИМ
 	dlog.update(&dlog); //Осциллографирование данных
 	sm_prot.fast_calc(&sm_prot); //Защиты
 	sm_ctrl.fast_calc(&sm_ctrl); //Главный дискретный автомат системы управления
