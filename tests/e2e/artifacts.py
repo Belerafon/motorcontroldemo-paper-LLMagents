@@ -128,3 +128,40 @@ def plot_vector_500(path: Path, samples: list[Sample]) -> None:
     current_axis.legend()
     figure.savefig(path, dpi=170)
     plt.close(figure)
+
+
+def plot_decoupling(
+    path: Path,
+    baseline: list[Sample],
+    decoupled: list[Sample],
+) -> None:
+    """Compare d-axis current disturbance off vs on during acceleration."""
+    import matplotlib.pyplot as plt
+
+    plt.style.use("seaborn-v0_8-whitegrid")
+    figure, axes = plt.subplots(
+        3, 1, figsize=(11, 8.4), sharex=True, constrained_layout=True
+    )
+    speed_ax, iq_ax, id_ax = axes
+
+    for samples, style, label in (
+        (baseline, "--", "Decoupling OFF"),
+        (decoupled, "-", "Decoupling ON"),
+    ):
+        time_s = [sample.time_s for sample in samples]
+        speed_ax.plot(time_s, [s.values["speed_rpm"] for s in samples], style,
+                      label=label, alpha=0.85)
+        iq_ax.plot(time_s, [s.values["iq_a"] for s in samples], style,
+                   label=label, alpha=0.85)
+        id_ax.plot(time_s, [s.values["id_a"] for s in samples], style,
+                   label=label, alpha=0.85)
+
+    speed_ax.set_title("Vector acceleration: cross-coupling decoupling A/B")
+    speed_ax.set_ylabel("Speed, rpm")
+    iq_ax.set_ylabel("q-axis current, A")
+    id_ax.set_ylabel("d-axis current, A")
+    id_ax.set_xlabel("Time, s")
+    for axis in axes:
+        axis.legend()
+    figure.savefig(path, dpi=170)
+    plt.close(figure)

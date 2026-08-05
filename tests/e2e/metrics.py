@@ -343,3 +343,110 @@ def analyze_vector_500(
     metrics["criteria"] = criteria
     metrics["passed"] = all(criteria.values())
     return metrics
+
+
+def analyze_decoupling_stability(
+    samples: Sequence[Any],
+    *,
+    target_speed_rpm: float,
+    max_id_pu: float = 0.10,
+    min_steady_speed_fraction: float = 0.90,
+    min_samples: int = 64,
+) -> dict[str, Any]:
+    """Vector-current-loop stability with cross-coupling decoupling enabled.
+
+    The capture covers acceleration to the target speed and the early steady
+    state. The d-axis current reference is zero in mode 5, so any large Id is
+    either a cross-coupling residual or a sign that the decoupling destablises
+    the loops.
+    """
+    time_s = _times(samples)
+    speed = _series(samples, "speed_rpm")
+    id_a = _series(samples, "id_a")
+    tail_start = _tail_start(len(samples))
+    steady_speed = speed[tail_start:]
+    peak_abs_id_pu = max(abs(value) for value in id_a) / 5.0
+    steady_speed_rpm = _mean(steady_speed) if steady_speed else 0.0
+    metrics: dict[str, Any] = {
+        "samples": len(samples),
+        "sample_period_s": _sample_period(time_s),
+        "window_s": float(time_s[-1] - time_s[0]),
+        "target_speed_rpm": target_speed_rpm,
+        "steady_speed_rpm": steady_speed_rpm,
+        "steady_speed_fraction": (
+            steady_speed_rpm / target_speed_rpm if target_speed_rpm else math.inf
+        ),
+        "peak_abs_id_a": max(abs(value) for value in id_a),
+        "peak_abs_id_pu": peak_abs_id_pu,
+    }
+    criteria = {
+        "enough_samples": len(samples) >= min_samples,
+        "reached_steady_speed": (
+            metrics["steady_speed_fraction"] >= min_steady_speed_fraction
+        ),
+        "d_axis_loop_intact": peak_abs_id_pu <= max_id_pu,
+    }
+    metrics["limits"] = {
+        "max_id_pu": max_id_pu,
+        "min_steady_speed_fraction": min_steady_speed_fraction,
+    }
+    metrics["criteria"] = criteria
+    metrics["passed"] = all(criteria.values())
+    return metrics
+
+
+def analyze_decoupling_correctness(
+    operating: dict[str, float],
+    *,
+    k_pu: float,
+    max_abs_error_pu: float = 0.010,
+    max_rel_error_percent: float = 10.0,
+    min_we_pu: float = 0.30,
+    min_iq_pu: float = 0.05,
+) -> dict[str, Any]:
+    """Verify the firmware decoupling voltage matches the analytic cross term.
+
+    At a steady operating point the firmware diagnostic voltages must equal
+    dVd = -we*K*Iq and dVq = +we*K*Id (per-unit), proving the decoupling path
+    computes and applies the intended compensation.
+    """
+    we = float(operating["we_pu"])
+    iq = float(operating["iq_pu"])
+    id_ = float(operating["id_pu"])
+    dvd = float(operating["dvd_pu"])
+    dvq = float(operating["dvq_pu"])
+    pred_dvd = -we * k_pu * iq
+    pred_dvq = we * k_pu * id_
+    err_dvd = abs(dvd - pred_dvd)
+    err_dvq = abs(dvq - pred_dvq)
+    tol_dvd = max(max_abs_error_pu, abs(pred_dvd) * max_rel_error_percent / 100.0)
+    tol_dvq = max(max_abs_error_pu, abs(pred_dvq) * max_rel_error_percent / 100.0)
+    excited = abs(we) >= min_we_pu and abs(iq) >= min_iq_pu
+    metrics: dict[str, Any] = {
+        "k_pu": k_pu,
+        "we_pu": we,
+        "iq_pu": iq,
+        "id_pu": id_,
+        "dvd_measured_pu": dvd,
+        "dvq_measured_pu": dvq,
+        "dvd_predicted_pu": pred_dvd,
+        "dvq_predicted_pu": pred_dvq,
+        "dvd_abs_error_pu": err_dvd,
+        "dvq_abs_error_pu": err_dvq,
+    }
+    criteria = {
+        "operating_point_excited": excited,
+        "d_axis_voltage_matches": err_dvd <= tol_dvd,
+        "q_axis_voltage_matches": (err_dvq <= tol_dvq) or abs(pred_dvq) < max_abs_error_pu,
+    }
+    metrics["limits"] = {
+        "max_abs_error_pu": max_abs_error_pu,
+        "max_rel_error_percent": max_rel_error_percent,
+        "dvd_tolerance_pu": tol_dvd,
+        "dvq_tolerance_pu": tol_dvq,
+        "min_we_pu": min_we_pu,
+        "min_iq_pu": min_iq_pu,
+    }
+    metrics["criteria"] = criteria
+    metrics["passed"] = all(criteria.values())
+    return metrics

@@ -442,10 +442,40 @@ void SM_Ctrl_Fast_Calc(TSM_Ctrl *p) {
 			pid_id.pid_fdb_reg3 = park.de; //обратная связь рег. тока оси d - вычисленный ток по фазе d
 			pid_id.calc(&pid_id); //расчет регулятора тока оси d
 
-			//Обратный поворот на угол refs.theta_elec для 
-			//выходов регуляторов тока (напряжений по осям d и q)
-			ipark.de = pid_id.pid_out_reg3;
-			ipark.qe = pid_iq.pid_out_reg3;
+			//Компенсация перекрестных связей (decoupling) токовых контуров.
+			//На высокой скорости ЭДС вращения в уравнениях напряжения СДПМ
+			//связывает оси d и q: изменение Iq возмущает Id и наоборот, из-за
+			//чего регуляторы тока хуже реагируют на задание. Компенсируем эти
+			//члены прямой связью поверх выходов регуляторов (в отн. единицах):
+			//  dVd = -we*Lsigma*Iq ; dVq = +we*Lsigma*Id,
+			//где we = cur_par.speed (1.0 = номинальная эл. скорость), а Lsigma -
+			//эквивалентная индуктивность фазы статора в отн. единицах
+			//(для СДПМ с немагнитным ротором Ld~=Lq~=Lsigma).
+			//Ручка: DebugW3 (индекс CANopen 5174h.0Dh, IQ24, Editable) - это и
+			//есть Lsigma, о.е.:
+			//  0          -> декаплинг выключен (старое поведение, безопасный дефолт);
+			//  Lsigma_ou  -> полная компенсация перекрестных связей.
+			//Безопасный диапазон: _IQ(-1.0).._IQ(1.0). При сбросе и из EEPROM
+			//восстанавливается 0 (дефолт словаря) -> декаплинг выключен.
+			//Debug1/Debug2 (5174h.01h/.03h, IQ24) - диагностические dVd/dVq.
+			if (DebugW3 != 0) {
+				long idc_we = cur_par.speed;                 //эл. скорость, о.е.
+				long idc_dVd = -_IQmpy(_IQmpy(idc_we, DebugW3), park.qe);
+				long idc_dVq =  _IQmpy(_IQmpy(idc_we, DebugW3), park.de);
+				Debug1 = idc_dVd;
+				Debug2 = idc_dVq;
+				//Обратный поворот на угол refs.theta_elec для
+				//выходов регуляторов тока (напряжений по осям d и q)
+				ipark.de = pid_id.pid_out_reg3 + idc_dVd;
+				ipark.qe = pid_iq.pid_out_reg3 + idc_dVq;
+			} else {
+				Debug1 = 0;
+				Debug2 = 0;
+				//Обратный поворот на угол refs.theta_elec для
+				//выходов регуляторов тока (напряжений по осям d и q)
+				ipark.de = pid_id.pid_out_reg3;
+				ipark.qe = pid_iq.pid_out_reg3;
+			}
 			ipark.ang = refs.theta_elec;
 			ipark.calc(&ipark);            //расчет преобразования координат
 
