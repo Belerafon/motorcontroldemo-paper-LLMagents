@@ -128,3 +128,66 @@ def plot_vector_500(path: Path, samples: list[Sample]) -> None:
     current_axis.legend()
     figure.savefig(path, dpi=170)
     plt.close(figure)
+
+
+def plot_power_limit(
+    path: Path,
+    samples: list[Sample],
+    phases: list[dict[str, object]],
+    natural_power_w: float,
+) -> None:
+    import matplotlib.pyplot as plt
+
+    time_s = [sample.time_s for sample in samples]
+    plt.style.use("seaborn-v0_8-whitegrid")
+    figure, (power_axis, drive_axis) = plt.subplots(
+        2, 1, figsize=(11, 7.6), sharex=True, constrained_layout=True
+    )
+    power_axis.plot(
+        time_s, [s.values["power_w"] for s in samples], label="Measured power"
+    )
+    palette = ["tab:green", "tab:purple", "tab:orange", "tab:brown"]
+    for index, phase in enumerate(phases):
+        if phase.get("setpoint_w") is None:
+            power_axis.axvline(
+                float(phase["start_s"]), color="gray", linestyle=":", linewidth=1.0
+            )
+            continue
+        color = palette[index % len(palette)]
+        power_axis.axhline(
+            float(phase["setpoint_w"]),
+            color=color,
+            linestyle="--",
+            linewidth=1.3,
+            label=f"{phase['name']} setpoint",
+        )
+        power_axis.axvline(
+            float(phase["start_s"]), color=color, linestyle=":", linewidth=1.0
+        )
+    power_axis.axhline(
+        natural_power_w, color="gray", linestyle="-.", label="Natural power"
+    )
+    power_axis.set_title("Constant-power limiter: stepped setpoint tracking")
+    power_axis.set_ylabel("Electrical power, W")
+    power_axis.legend(fontsize=8)
+
+    drive_axis.plot(
+        time_s, [s.values["speed_rpm"] for s in samples], label="Speed"
+    )
+    limit_axis = drive_axis.twinx()
+    limit_axis.plot(
+        time_s,
+        [s.values["limit_a"] for s in samples],
+        color="tab:red",
+        alpha=0.85,
+        label="Effective Iq limit (Debug1)",
+    )
+    drive_axis.set_xlabel("Time, s")
+    drive_axis.set_ylabel("Speed, rpm")
+    limit_axis.set_ylabel("Effective Iq limit, A", color="tab:red")
+    limit_axis.tick_params(axis="y", labelcolor="tab:red")
+    handles_a, labels_a = drive_axis.get_legend_handles_labels()
+    handles_b, labels_b = limit_axis.get_legend_handles_labels()
+    drive_axis.legend(handles_a + handles_b, labels_a + labels_b, fontsize=8)
+    figure.savefig(path, dpi=170)
+    plt.close(figure)

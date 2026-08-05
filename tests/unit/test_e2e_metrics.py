@@ -4,7 +4,7 @@ import math
 import unittest
 from dataclasses import dataclass
 
-from tests.e2e.metrics import analyze_current_mode4, analyze_vector_500
+from tests.e2e.metrics import analyze_current_mode4, analyze_power_limit, analyze_vector_500
 
 
 @dataclass(frozen=True)
@@ -98,6 +98,90 @@ class Vector500MetricsTests(unittest.TestCase):
 
         self.assertFalse(metrics["passed"])
         self.assertFalse(metrics["criteria"]["overshoot"])
+
+
+class PowerLimitMetricsTests(unittest.TestCase):
+    @staticmethod
+    def _sample(t: float, power: float, limit: float) -> SyntheticSample:
+        return SyntheticSample(
+            number=int(t * 100),
+            time_s=t,
+            values={
+                "power_w": power,
+                "speed_rpm": 500.0,
+                "iq_ref_a": limit,
+                "limit_a": limit,
+            },
+        )
+
+    def phases(self) -> list[dict[str, object]]:
+        return [
+            {"name": "baseline", "start_s": 0.0, "end_s": 0.8,
+             "setpoint_w": None, "active": False},
+            {"name": "setpoint_1", "start_s": 0.8, "end_s": 2.6,
+             "setpoint_w": 6.0, "active": True},
+            {"name": "setpoint_2", "start_s": 2.6, "end_s": 4.3,
+             "setpoint_w": 3.5, "active": True},
+            {"name": "disabled", "start_s": 4.3, "end_s": 5.8,
+             "setpoint_w": None, "active": False},
+        ]
+
+    def samples(self, *, sp1_w=6.0, sp2_w=3.5, limit_active=0.5) -> list[SyntheticSample]:
+        result: list[SyntheticSample] = []
+        # 100 Hz synthetic capture
+        for k in range(581):
+            t = k * 0.01
+            if t < 0.8:
+                power, limit = 10.0, 1.0
+            elif t < 2.6:
+                # exponential settle from 10 W to sp1 with the limiter acting
+                settled = sp1_w
+                power = settled + (10.0 - settled) * math.exp(-(t - 0.8) / 0.2)
+                limit = limit_active
+            elif t < 4.3:
+                settled = sp2_w
+                power = settled + (sp1_w - settled) * math.exp(-(t - 2.6) / 0.2)
+                limit = limit_active
+            else:
+                settled = 10.0
+                power = settled + (sp2_w - settled) * math.exp(-(t - 4.3) / 0.2)
+                limit = 1.0
+            result.append(self._sample(t, power, limit))
+        return result
+
+    def test_well_tracked_power_passes(self) -> None:
+        metrics = analyze_power_limit(
+            self.samples(),
+            phases=self.phases(),
+            natural_power_w=10.0,
+            iq_ref_a=1.0,
+        )
+        self.assertTrue(metrics["passed"])
+        self.assertTrue(metrics["criteria"]["setpoint_1_holds_setpoint"])
+        self.assertTrue(metrics["criteria"]["setpoint_2_holds_setpoint"])
+        self.assertTrue(metrics["criteria"]["setpoint_1_limiter_active"])
+        self.assertTrue(metrics["criteria"]["distinct_setpoint_tracking"])
+
+    def test_poor_setpoint_tracking_fails(self) -> None:
+        # second setpoint never settles near its demand
+        metrics = analyze_power_limit(
+            self.samples(sp2_w=8.0),
+            phases=self.phases(),
+            natural_power_w=10.0,
+            iq_ref_a=1.0,
+        )
+        self.assertFalse(metrics["passed"])
+        self.assertFalse(metrics["criteria"]["setpoint_2_holds_setpoint"])
+
+    def test_limiter_not_active_fails(self) -> None:
+        metrics = analyze_power_limit(
+            self.samples(limit_active=1.0),
+            phases=self.phases(),
+            natural_power_w=10.0,
+            iq_ref_a=1.0,
+        )
+        self.assertFalse(metrics["passed"])
+        self.assertFalse(metrics["criteria"]["setpoint_1_limiter_active"])
 
 
 if __name__ == "__main__":

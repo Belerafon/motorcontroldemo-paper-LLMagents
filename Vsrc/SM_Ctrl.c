@@ -28,6 +28,11 @@
 #include "main.h"
 
 
+//! Интегральный накопитель внешнего контура ограничения мощности.
+//! Используется только в режиме CTRL_RUN_VECTOR_SM. Обнуляется при
+//! выключении ограничения (DebugW1 == 0) и при повторном входе в режим.
+static long pwr_ctrl_int = 0;
+
 //!Инициализация
 //!Всякие обнуления
 //! \memberof TSM_Ctrl
@@ -94,6 +99,7 @@ void SM_Ctrl_Fast_Calc(TSM_Ctrl *p) {
 			DPReCAP.speed = 0;
 			DPReCAP.Ts = 0;
 			DPReCAP.Tspeed = 0;
+			pwr_ctrl_int = 0;            //сброс интегратора контура мощности
 			global_time.WtiteSPI_flag = 1;    //записать времЯ работы
 			//при переходе в стоп и работающем
 			//осциллографе переводим его в режим
@@ -378,6 +384,7 @@ void SM_Ctrl_Fast_Calc(TSM_Ctrl *p) {
 			/*ENTRY START*/
 			pwm.On(&pwm);            //Включение ШИМ
 			rmp.output = 0;            //Обнуление задатчика интенсивности
+			pwr_ctrl_int = 0;            //Сброс интегратора контура мощности при старте
 			if (dlog.StartBits & (1 << 4)) //Если пользователь задал этот бит осциллографирования
 				dlog.set_mode(1, &dlog);  //Запуск осциллографа по этому событию
 			/*ENTRY END*/
@@ -413,14 +420,63 @@ void SM_Ctrl_Fast_Calc(TSM_Ctrl *p) {
 			pid_spd.pid_ref_reg3 = rmp.output; //на воход регулятора скорости - выход ЗИ
 			pid_spd.pid_fdb_reg3 = cur_par.speed; //обратная связь регулятора скорости - скорость ДПР
 
+			// --- Внешний контур ограничения мощности (разгон с постоянством мощности) ---
+			// Управляющие переменные (словарь объектов CANopen, 5174h, всё IQ24):
+			//   DebugW1 (5174h.09h) - разрешение: значение > 0.5 о.е. = включить.
+			//                          (порог нужен: после co1/co2_Init из EEPROM
+			//                           по умолчанию DebugW1 = 0.001 о.е., что есть ВЫКЛ.)
+			//   DebugW2 (5174h.0Bh) - уставка мощности, о.е. номинала (drv_params.power).
+			//                          Контур активен только при DebugW2 > 0.
+			//   DebugW3 (5174h.0Dh) - Kp контура мощности, о.е. Iq / о.е. P.
+			//   DebugW4 (5174h.0Fh) - Ki контура мощности, о.е. Iq / (о.е. P * с).
+			// Диагностика (только чтение, IQ24):
+			//   Debug1  (5174h.01h) - действующий предел тока Iq, о.е. Iq_ref.
+			//   Debug2  (5174h.03h) - измеренная мощность cur_par.power, о.е. P.
+			// Контур уменьшает потолок тока Iq ниже refs.Iq_ref так, чтобы
+			// измеренная мощность cur_par.power удерживалась на уставке DebugW2.
+			// При выключении или неверной уставке потолок равен refs.Iq_ref
+			// (полное исходное поведение).
+			{
+				long Iq_max_eff = refs.Iq_ref; //по умолчанию - исходный предел тока
 
-			pid_spd.pid_out_max = refs.Iq_ref; //Максимум выхода регулятора скорости - заданный ток
+				if ((DebugW1 > _IQ(0.5)) && (DebugW2 > 0)) {
+					long P_sp   = DebugW2;          //уставка, о.е.
+					long P_meas = cur_par.power;    //измеренная мощность, о.е.
+					long Kp_pc  = DebugW3;          //Kp контура мощности
+					long Ki_pc  = DebugW4;          //Ki контура мощности
+					long P_err  = P_meas - P_sp;    //>0 при превышении мощности
+					long trim;
+					//симметричное интегрирование ошибки мощности
+					pwr_ctrl_int += _IQmpy(_IQmpy(Ki_pc, P_err), FAST_CALC_TS);
+					//anti-windup: накопитель ограничен диапазоном возможной подрезки
+					if (pwr_ctrl_int < 0)
+						pwr_ctrl_int = 0;
+					if (pwr_ctrl_int > refs.Iq_ref)
+						pwr_ctrl_int = refs.Iq_ref;
+					trim = _IQmpy(Kp_pc, P_err) + pwr_ctrl_int;
+					if (trim < 0)
+						trim = 0;
+					Iq_max_eff = refs.Iq_ref - trim;
+					if (Iq_max_eff < 0)
+						Iq_max_eff = 0;
+					if (Iq_max_eff > refs.Iq_ref)
+						Iq_max_eff = refs.Iq_ref;
+				}
+				else {
+					pwr_ctrl_int = 0; //сброс накопителя при выключении/неверной уставке
+				}
 
-			if (sw.recuperation_ena & 1)            //если разрешена рекуперация
-				pid_spd.pid_out_min = -refs.Iq_ref; //минимум рег. скор. - отрицательный ток
-			else
-				//иначе
-				pid_spd.pid_out_min = 0; //нулевой ток не даст рекупераци при вращении в положительную сторону
+				Debug1 = Iq_max_eff;       //действующий предел Iq, о.е.
+				Debug2 = cur_par.power;    //измеренная мощность, о.е.
+
+				pid_spd.pid_out_max = Iq_max_eff; //динамический потолок тока
+
+				if (sw.recuperation_ena & 1)            //если разрешена рекуперация
+					pid_spd.pid_out_min = -Iq_max_eff; //симметричный предел при торможении
+				else
+					//иначе
+					pid_spd.pid_out_min = 0; //нулевой ток не даст рекупераци при вращении в положительную сторону
+			}
 			pid_spd.calc(&pid_spd); //расчет регулятора скорости
 
 

@@ -343,3 +343,107 @@ def analyze_vector_500(
     metrics["criteria"] = criteria
     metrics["passed"] = all(criteria.values())
     return metrics
+
+
+def analyze_power_limit(
+    samples: Sequence[Any],
+    *,
+    phases: Sequence[dict[str, Any]],
+    natural_power_w: float,
+    iq_ref_a: float,
+    max_setpoint_error_percent: float = 15.0,
+    max_setpoint_error_w: float = 0.5,
+    max_natural_return_error_w: float = 1.5,
+    min_limit_reduction_percent: float = 10.0,
+    steady_tail_fraction: float = 0.4,
+    min_steady_samples: int = 3,
+) -> dict[str, Any]:
+    """Validate that the closed-loop power regulator holds measured power to the
+    requested setpoint in each phase of a stepped setpoint capture.
+
+    Each phase in ``phases`` is a dict with:
+      - ``name``: label;
+      - ``start_s`` / ``end_s``: time window inside the capture;
+      - ``setpoint_w``: demanded power (None for an unlimited phase);
+      - ``active``: True if the limiter must be acting (Debug1 < Iq_ref).
+    """
+    if not samples:
+        raise ValueError("At least one sample is required.")
+    time_s = _times(samples)
+    powers = _series(samples, "power_w")
+    limits = _series(samples, "limit_a")
+    window_s = float(time_s[-1] - time_s[0])
+    phase_results: list[dict[str, Any]] = []
+    criteria: dict[str, bool] = {}
+    for phase in phases:
+        lo = float(phase["start_s"])
+        hi = float(phase["end_s"])
+        setpoint = phase.get("setpoint_w")
+        active = bool(phase.get("active", False))
+        steady_lo = lo + (hi - lo) * (1.0 - steady_tail_fraction)
+        indices = [
+            i for i, t in enumerate(time_s)
+            if steady_lo <= t <= hi
+        ]
+        if not indices:
+            phase_results.append({**phase, "steady_power_w": None,
+                                  "steady_limit_a": None, "sample_count": 0})
+            criteria[f"{phase['name']}_has_samples"] = False
+            continue
+        mean_power = _mean([powers[i] for i in indices])
+        mean_limit = _mean([limits[i] for i in indices])
+        result = {
+            **phase,
+            "steady_power_w": mean_power,
+            "steady_limit_a": mean_limit,
+            "sample_count": len(indices),
+        }
+        phase_results.append(result)
+        criteria[f"{phase['name']}_has_samples"] = len(indices) >= min_steady_samples
+        if active and setpoint is not None:
+            tolerance = max(
+                max_setpoint_error_w,
+                abs(setpoint) * max_setpoint_error_percent / 100.0,
+            )
+            result["setpoint_tolerance_w"] = tolerance
+            criteria[f"{phase['name']}_holds_setpoint"] = (
+                abs(mean_power - setpoint) <= tolerance
+            )
+            limit_floor = iq_ref_a * (1.0 - min_limit_reduction_percent / 100.0)
+            result["limit_floor_a"] = limit_floor
+            criteria[f"{phase['name']}_limiter_active"] = (
+                iq_ref_a > 0 and mean_limit <= limit_floor
+            )
+        elif setpoint is None:
+            criteria[f"{phase['name']}_matches_natural"] = (
+                abs(mean_power - natural_power_w) <= max_natural_return_error_w
+            )
+    # dynamic tracking: the two active phases must settle to distinct powers
+    active_powers = [
+        r["steady_power_w"] for r in phase_results
+        if r.get("active") and r.get("steady_power_w") is not None
+    ]
+    distinct_tracking = (
+        len(active_powers) >= 2
+        and abs(active_powers[0] - active_powers[1])
+        > max_setpoint_error_w
+    )
+    metrics: dict[str, Any] = {
+        "samples": len(samples),
+        "window_s": window_s,
+        "natural_power_w": natural_power_w,
+        "iq_ref_a": iq_ref_a,
+        "phases": phase_results,
+        "distinct_setpoint_tracking": distinct_tracking,
+        "limits": {
+            "max_setpoint_error_percent": max_setpoint_error_percent,
+            "max_setpoint_error_w": max_setpoint_error_w,
+            "max_natural_return_error_w": max_natural_return_error_w,
+            "min_limit_reduction_percent": min_limit_reduction_percent,
+            "steady_tail_fraction": steady_tail_fraction,
+        },
+    }
+    criteria["distinct_setpoint_tracking"] = bool(distinct_tracking)
+    metrics["criteria"] = criteria
+    metrics["passed"] = all(criteria.values())
+    return metrics
