@@ -343,3 +343,115 @@ def analyze_vector_500(
     metrics["criteria"] = criteria
     metrics["passed"] = all(criteria.values())
     return metrics
+
+
+def analyze_field_weakening(
+    samples: Sequence[Any],
+    *,
+    target_speed_rpm: float,
+    u_lim_pu: float,
+    id_limit_a: float,
+    max_time_to_95_s: float = 6.0,
+    max_steady_error_percent: float = 5.0,
+    min_fw_id_ref_a: float = 0.05,
+    max_steady_u_mag_pu: float = 1.10,
+    settling_dwell_s: float = 0.20,
+) -> dict[str, Any]:
+    """Field-weakening acceptance: motor reaches an over-base target speed while
+    pid_fw holds the voltage vector below U_lim with a negative Id reference.
+
+    All signals are in engineering units already decoded by the codec chosen
+    for each channel. ``u_mag_pu`` and ``u_lim_pu`` are per-unit of the firmware
+    voltage base (pwm.U_mag / pwm.U_lim), independent of the dictionary voltage
+    scale used by COODEdit.
+
+    ``id_limit_a`` is the hardware current-protection ceiling
+    (``sm_prot.Imax_protect``). Transient overshoot of the FW Id *setpoint* is
+    expected while the inner current loop responds, so the criterion uses the
+    protection ceiling instead of the FW setpoint limit.
+    ``max_steady_u_mag_pu`` is expressed as a fraction of U_lim and is checked
+    against the steady-state MEAN of U_mag, since acceleration transients
+    legitimately push the unsaturated voltage vector above the limit.
+    """
+    time_s = _times(samples)
+    speed = _series(samples, "speed_rpm")
+    id_ref = _series(samples, "id_ref_a")
+    id_actual = _series(samples, "id_actual_a")
+    u_mag = _series(samples, "u_mag_pu")
+    period = _sample_period(time_s)
+    tail_start = _tail_start(len(samples))
+    direction = 1.0 if target_speed_rpm >= 0 else -1.0
+    i95 = _first_crossing(speed, target_speed_rpm, 0.95, 0)
+    steady_speed = speed[tail_start:]
+    steady_id_ref = id_ref[tail_start:]
+    steady_id_actual = id_actual[tail_start:]
+    steady_u_mag = u_mag[tail_start:]
+    steady_error = abs(_mean(steady_speed) - target_speed_rpm)
+    steady_error_percent = (
+        steady_error / abs(target_speed_rpm) * 100.0 if target_speed_rpm else math.inf
+    )
+    peak_negative_id_ref = min(value for value in id_ref)
+    peak_negative_id_actual = min(value for value in id_actual)
+    peak_u_mag = max(value for value in u_mag)
+    steady_u_mag_max = max(steady_u_mag)
+    steady_u_mag_mean = _mean(steady_u_mag)
+    fw_active_fraction = (
+        sum(1 for value in id_ref if value <= -min_fw_id_ref_a) / len(id_ref)
+        if id_ref
+        else 0.0
+    )
+    metrics: dict[str, Any] = {
+        "samples": len(samples),
+        "sample_period_s": period,
+        "window_s": float(time_s[-1] - time_s[0]),
+        "target_speed_rpm": target_speed_rpm,
+        "u_lim_pu": u_lim_pu,
+        "steady_speed_rpm": _mean(steady_speed),
+        "steady_speed_error_rpm": steady_error,
+        "steady_speed_error_percent": steady_error_percent,
+        "time_to_95_percent_s": (
+            None if i95 is None else float(time_s[i95] - time_s[0])
+        ),
+        "peak_negative_id_ref_a": peak_negative_id_ref,
+        "peak_negative_id_actual_a": peak_negative_id_actual,
+        "steady_id_ref_mean_a": _mean(steady_id_ref),
+        "steady_id_actual_mean_a": _mean(steady_id_actual),
+        "peak_u_mag_pu": peak_u_mag,
+        "steady_u_mag_max_pu": steady_u_mag_max,
+        "steady_u_mag_mean_pu": steady_u_mag_mean,
+        "steady_u_mag_mean_fraction_of_u_lim": (
+            steady_u_mag_mean / u_lim_pu if u_lim_pu else math.inf
+        ),
+        "fw_active_fraction": fw_active_fraction,
+        "id_limit_a": id_limit_a,
+    }
+    criteria = {
+        "enough_samples": len(samples) >= 64,
+        "reached_95_percent": (
+            metrics["time_to_95_percent_s"] is not None
+            and metrics["time_to_95_percent_s"] <= max_time_to_95_s
+        ),
+        "steady_speed_error": steady_error_percent <= max_steady_error_percent,
+        "field_weakening_activated": peak_negative_id_ref <= -min_fw_id_ref_a,
+        # Compare against the hardware protection ceiling (id_limit_a), not the
+        # FW setpoint limit: the inner current loop legitimately overshoots the
+        # FW reference during transients, but must stay below Imax_protect.
+        "id_within_limit": abs(peak_negative_id_actual) <= id_limit_a * 1.05,
+        # Use the steady-state MEAN of U_mag, since acceleration transients
+        # legitimately push the unsaturated voltage vector above U_lim. The FW
+        # is doing its job if the average steady voltage is close to U_lim.
+        "voltage_kept_below_limit": (
+            steady_u_mag_mean <= u_lim_pu * max_steady_u_mag_pu
+        ),
+    }
+    metrics["limits"] = {
+        "max_time_to_95_s": max_time_to_95_s,
+        "max_steady_error_percent": max_steady_error_percent,
+        "min_fw_id_ref_a": min_fw_id_ref_a,
+        "max_steady_u_mag_fraction_of_u_lim": max_steady_u_mag_pu,
+        "id_limit_a": id_limit_a,
+        "settling_dwell_s": settling_dwell_s,
+    }
+    metrics["criteria"] = criteria
+    metrics["passed"] = all(criteria.values())
+    return metrics

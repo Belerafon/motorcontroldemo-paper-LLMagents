@@ -162,6 +162,39 @@ class HardwareSession:
                     f"0x{restored:08X} != 0x{original:08X}."
                 )
 
+    @contextmanager
+    def temporary_raw_value(
+        self, expression: str, raw_value: int
+    ) -> Iterator[int]:
+        """Set a 32-bit symbol by raw IQ24/integer value, restore on exit.
+
+        Use this when the dictionary exposes a symbol with multiple conflicting
+        formats (e.g. Debug* variables) so that the toolkit's engineering codec
+        cannot be trusted to round-trip the exact bits the firmware reads.
+        """
+        if not 0 <= raw_value <= 0xFFFF_FFFF:
+            raise ValueError("raw_value must fit in 32 bits.")
+        original = self.target.read_u32(expression)
+        try:
+            self.target.write_u32(expression, raw_value)
+            actual = self.target.read_u32(expression)
+            if actual != raw_value:
+                raise RuntimeError(
+                    f"Write verification failed for {expression}: "
+                    f"0x{actual:08X} != 0x{raw_value:08X}."
+                )
+            yield original
+        finally:
+            self.drive.stop()
+            time.sleep(0.1)
+            self.target.write_u32(expression, original)
+            restored = self.target.read_u32(expression)
+            if restored != original:
+                raise RuntimeError(
+                    f"RAM restoration failed for {expression}: "
+                    f"0x{restored:08X} != 0x{original:08X}."
+                )
+
     def capture_ring(
         self,
         channels: list[Channel],

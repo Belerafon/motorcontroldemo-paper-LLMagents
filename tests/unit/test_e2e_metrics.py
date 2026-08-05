@@ -4,7 +4,11 @@ import math
 import unittest
 from dataclasses import dataclass
 
-from tests.e2e.metrics import analyze_current_mode4, analyze_vector_500
+from tests.e2e.metrics import (
+    analyze_current_mode4,
+    analyze_field_weakening,
+    analyze_vector_500,
+)
 
 
 @dataclass(frozen=True)
@@ -98,6 +102,110 @@ class Vector500MetricsTests(unittest.TestCase):
 
         self.assertFalse(metrics["passed"])
         self.assertFalse(metrics["criteria"]["overshoot"])
+
+
+class FieldWeakeningMetricsTests(unittest.TestCase):
+    @staticmethod
+    def samples(
+        *,
+        reach_target: bool = True,
+        fw_active: bool = True,
+        voltage_under_control: bool = True,
+        id_within_limit: bool = True,
+    ) -> list[SyntheticSample]:
+        result: list[SyntheticSample] = []
+        u_lim_pu = 1.0
+        target = 1000.0
+        id_limit = 1.0
+        for number in range(2001):
+            time_s = number * 0.005
+            # Smooth ramp from 0 to target in ~3 s.
+            ramp = 1.0 - math.exp(-time_s / 0.6)
+            speed = target * ramp if reach_target else 0.5 * target * ramp
+            # FW kicks in as voltage approaches the limit; without it the
+            # voltage would saturate and stay at U_lim.
+            if fw_active:
+                id_ref = -0.30 * ramp
+            else:
+                id_ref = 0.0
+            id_actual = id_ref * (1.0 - math.exp(-time_s / 0.05))
+            if not id_within_limit:
+                id_actual = -1.30 * ramp
+            if voltage_under_control:
+                u_mag = (0.85 + 0.03 * math.sin(time_s)) * u_lim_pu * ramp
+            else:
+                u_mag = 1.30 * u_lim_pu * ramp
+            result.append(
+                SyntheticSample(
+                    number,
+                    time_s,
+                    {
+                        "speed_rpm": speed,
+                        "id_ref_a": id_ref,
+                        "id_actual_a": id_actual,
+                        "u_mag_pu": u_mag,
+                    },
+                )
+            )
+        return result
+
+    def test_well_tuned_field_weakening_passes(self) -> None:
+        metrics = analyze_field_weakening(
+            self.samples(),
+            target_speed_rpm=1000.0,
+            u_lim_pu=1.0,
+            id_limit_a=1.0,
+        )
+
+        self.assertTrue(metrics["passed"])
+        self.assertLess(metrics["peak_negative_id_ref_a"], 0.0)
+        self.assertLessEqual(
+            metrics["steady_u_mag_mean_pu"], 1.10 * 1.0
+        )
+
+    def test_motor_that_never_reaches_target_fails(self) -> None:
+        metrics = analyze_field_weakening(
+            self.samples(reach_target=False),
+            target_speed_rpm=1000.0,
+            u_lim_pu=1.0,
+            id_limit_a=1.0,
+        )
+
+        self.assertFalse(metrics["passed"])
+        self.assertFalse(metrics["criteria"]["reached_95_percent"])
+
+    def test_disabled_field_weakening_fails_activation_check(self) -> None:
+        metrics = analyze_field_weakening(
+            self.samples(fw_active=False),
+            target_speed_rpm=1000.0,
+            u_lim_pu=1.0,
+            id_limit_a=1.0,
+        )
+
+        self.assertFalse(metrics["passed"])
+        self.assertFalse(metrics["criteria"]["field_weakening_activated"])
+
+    def test_uncontrolled_voltage_fails_limit_check(self) -> None:
+        metrics = analyze_field_weakening(
+            self.samples(voltage_under_control=False),
+            target_speed_rpm=1000.0,
+            u_lim_pu=1.0,
+            id_limit_a=1.0,
+        )
+
+        self.assertFalse(metrics["passed"])
+        self.assertFalse(metrics["criteria"]["voltage_kept_below_limit"])
+
+    def test_overcurrent_id_fails_limit_check(self) -> None:
+        metrics = analyze_field_weakening(
+            self.samples(id_within_limit=False),
+            target_speed_rpm=1000.0,
+            u_lim_pu=1.0,
+            id_limit_a=1.0,
+        )
+
+        self.assertFalse(metrics["passed"])
+        self.assertFalse(metrics["criteria"]["id_within_limit"])
 
 
 if __name__ == "__main__":
