@@ -28,6 +28,82 @@
 #include "main.h"
 
 
+//! Интегральная составляющая подстройки потолка тока по измеренной мощности.
+//! Обнуляется при выключенном ограничении мощности и при малой скорости.
+static long power_limit_iq_trim = 0;
+
+//! Потолок тока Iq с динамическим ограничением мощности.
+
+//! Поддерживает постоянство мощности при разгоне: на малой скорости доступен
+//! полный ток (момент), а при росте скорости потолок тока снижается как
+//! P_limit/omega, так что механическая мощность Iq*speed держится около уставки.
+//! Механическая мощность в о.е. равна произведению Iq (о.е. от I_nom) на скорость
+//! (о.е. от базовой скорости), поэтому потолок в о.е. тока считается напрямую
+//! делением уставки мощности (о.е. от drv_params.power) на скорость (о.е.).
+//!
+//! Ручки управления (уже в словаре объектов CANopen, группа "Для отладки"):
+//!   DebugW1 - разрешение: 0 = выключено (точно прежнее поведение), 1 = включено.
+//!             Индекс 5174h.09h, IQ24, о.е., по умолчанию 0.
+//!   DebugW2 - уставка мощности, о.е. от drv_params.power (IQ24).
+//!             Индекс 5174h.0Bh, по умолчанию _IQ(0.3) (30% базовой мощности).
+//!             Безопасный диапазон 0.._IQ(1.0).
+//!   DebugW3 - коэффициент интегральной коррекции по измеренной мощности
+//!             (IQ24, о.е. тока на о.е. мощности за такт); 0 = чистый feedforward.
+//!             Индекс 5174h.0Dh, по умолчанию 0.
+//! Диагностика (только чтение):
+//!   Debug1  - применённый потолок Iq, о.е. (IQ24). Индекс 5174h.01h.
+//!   Debug2  - измеренная активная мощность cur_par.power, о.е. (IQ24).
+//!
+//! Возвращает потолок Iq в о.е. для pid_spd.pid_out_max. При выключенном
+//! ограничении возвращает iq_ref без изменений, обеспечивая точное A/B-сравнение.
+static long PowerLimitIqCeiling(long iq_ref) {
+	long speed_abs;
+	long denom;
+	long iq_ff;
+	long iq_ceiling;
+	long p_limit = DebugW2;
+	long ki = DebugW3;
+	long eps = _IQ(0.02);		//порог деления/малой скорости, о.е.
+	long band;
+	long p_err;
+
+	//выключено или уставка не задана -> точно прежнее поведение
+	if (DebugW1 == 0 || p_limit <= 0) {
+		power_limit_iq_trim = 0;
+		return iq_ref;
+	}
+
+	speed_abs = labs(cur_par.speed);
+	denom = (speed_abs > eps) ? speed_abs : eps;
+	iq_ff = _IQdiv(p_limit, denom);				//feedforward: P/omega
+
+	if (ki > 0) {
+		//интегральная коррекция по измеренной мощности:
+		//мощность ниже уставки -> прибавить ток, выше -> убрать
+		p_err = p_limit - cur_par.power;
+		power_limit_iq_trim += _IQmpy(ki, p_err);
+		band = _IQmpy(iq_ref, _IQ(0.5));		//полоса подстройки +-50% от Iq_ref
+		if (power_limit_iq_trim > band)
+			power_limit_iq_trim = band;
+		if (power_limit_iq_trim < -band)
+			power_limit_iq_trim = -band;
+		if (speed_abs <= eps)
+			power_limit_iq_trim = 0;				//на малой скорости подстройка не нужна
+	} else {
+		power_limit_iq_trim = 0;
+	}
+
+	iq_ceiling = iq_ff + power_limit_iq_trim;
+	if (iq_ceiling > iq_ref)					//никогда не превышаем заданный ток
+		iq_ceiling = iq_ref;
+	if (iq_ceiling < 0)
+		iq_ceiling = 0;
+
+	Debug1 = iq_ceiling;						//диагностика: применённый потолок Iq, о.е.
+	Debug2 = cur_par.power;						//диагностика: измеренная мощность, о.е.
+	return iq_ceiling;
+}
+
 //!Инициализация
 //!Всякие обнуления
 //! \memberof TSM_Ctrl
@@ -63,6 +139,7 @@ void SM_Ctrl_ms_Calc(TSM_Ctrl *p) {
 //! \memberof TSM_Ctrl
 void SM_Ctrl_Fast_Calc(TSM_Ctrl *p) {
 	long Temp1;
+	long iq_max;
 
 //если система находится в перееинициализации,
 //то пропускаем контур управления
@@ -414,10 +491,11 @@ void SM_Ctrl_Fast_Calc(TSM_Ctrl *p) {
 			pid_spd.pid_fdb_reg3 = cur_par.speed; //обратная связь регулятора скорости - скорость ДПР
 
 
-			pid_spd.pid_out_max = refs.Iq_ref; //Максимум выхода регулятора скорости - заданный ток
+			iq_max = PowerLimitIqCeiling(refs.Iq_ref); //потолок тока с учётом ограничения мощности
+			pid_spd.pid_out_max = iq_max; //Максимум выхода регулятора скорости - заданный ток
 
 			if (sw.recuperation_ena & 1)            //если разрешена рекуперация
-				pid_spd.pid_out_min = -refs.Iq_ref; //минимум рег. скор. - отрицательный ток
+				pid_spd.pid_out_min = -iq_max; //минимум рег. скор. - отрицательный ток
 			else
 				//иначе
 				pid_spd.pid_out_min = 0; //нулевой ток не даст рекупераци при вращении в положительную сторону
@@ -562,8 +640,9 @@ void SM_Ctrl_Fast_Calc(TSM_Ctrl *p) {
 //			pid_spd.pid_fdb_reg3 = posspeedEqep.speed_filter.output; //обратная связь регулятора скорости - скорость ДПР
 			pid_spd.pid_fdb_reg3 = cur_par.speed;
 
-			pid_spd.pid_out_max = refs.Iq_ref; //Максимум выхода регулятора скорости - заданный ток
-			pid_spd.pid_out_min = -refs.Iq_ref; //минимум рег. скор. - отрицательный ток
+			iq_max = PowerLimitIqCeiling(refs.Iq_ref); //потолок тока с учётом ограничения мощности
+			pid_spd.pid_out_max = iq_max; //Максимум выхода регулятора скорости - заданный ток
+			pid_spd.pid_out_min = -iq_max; //минимум рег. скор. - отрицательный ток
 			pid_spd.calc(&pid_spd); //расчет регулятора скорости
 
 
@@ -631,10 +710,11 @@ void SM_Ctrl_Fast_Calc(TSM_Ctrl *p) {
 			pid_spd.pid_fdb_reg3 = posspeedEqep.speed_elec; //обратная связь регулятора скорости - скорость ДПР
 
 
-			pid_spd.pid_out_max = refs.Iq_ref; //Максимум выхода регулятора скорости - заданный ток
+			iq_max = PowerLimitIqCeiling(refs.Iq_ref); //потолок тока с учётом ограничения мощности
+			pid_spd.pid_out_max = iq_max; //Максимум выхода регулятора скорости - заданный ток
 
 			if (sw.recuperation_ena & 1)            //если разрешена рекуперация
-				pid_spd.pid_out_min = -refs.Iq_ref; //минимум рег. скор. - отрицательный ток
+				pid_spd.pid_out_min = -iq_max; //минимум рег. скор. - отрицательный ток
 			else
 				//иначе
 				pid_spd.pid_out_min = 0; //нулевой ток не даст рекупераци при вращении в положительную сторону
@@ -795,8 +875,9 @@ void SM_Ctrl_Fast_Calc(TSM_Ctrl *p) {
 //			pid_spd.pid_fdb_reg3 = posspeedEqep.speed_filter.output; //обратная связь регулятора скорости - скорость ДПР
 			pid_spd.pid_fdb_reg3 = cur_par.speed;
 
-			pid_spd.pid_out_max = refs.Iq_ref; //Максимум выхода регулятора скорости - заданный ток
-			pid_spd.pid_out_min = -refs.Iq_ref; //минимум рег. скор. - отрицательный ток
+			iq_max = PowerLimitIqCeiling(refs.Iq_ref); //потолок тока с учётом ограничения мощности
+			pid_spd.pid_out_max = iq_max; //Максимум выхода регулятора скорости - заданный ток
+			pid_spd.pid_out_min = -iq_max; //минимум рег. скор. - отрицательный ток
 			pid_spd.calc(&pid_spd); //расчет регулятора скорости
 
 

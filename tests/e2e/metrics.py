@@ -343,3 +343,178 @@ def analyze_vector_500(
     metrics["criteria"] = criteria
     metrics["passed"] = all(criteria.values())
     return metrics
+
+
+def analyze_constant_power(
+    samples: Sequence[Any],
+    *,
+    target_speed_rpm: float,
+    power_limit_pu: float,
+    current_limit_a: float,
+    base_speed_rpm: float = 500.0,
+    base_current_a: float = 5.0,
+    region_lo_fraction: float = 0.30,
+    region_hi_fraction: float = 0.95,
+    max_power_cv: float = 0.45,
+    max_power_half_ratio_deviation: float = 0.40,
+    min_power_fraction_of_limit: float = 0.40,
+    max_power_fraction_of_limit: float = 3.50,
+    min_region_samples: int = 32,
+    reached_fraction: float = 0.85,
+    current_limit_margin_percent: float = 40.0,
+    max_ceiling_violation_fraction: float = 0.10,
+) -> dict[str, Any]:
+    """Verify that acceleration is held at an approximately constant power.
+
+    The "constant-power region" is the part of the acceleration where the speed
+    is between ``region_lo_fraction`` and ``region_hi_fraction`` of the target.
+    Above the corner speed ``power_limit / current_limit`` the feedforward
+    limiter is active, so the measured power should stay flat there while the
+    q-axis current falls as the speed rises.
+    """
+    time_s = _times(samples)
+    speed = _series(samples, "speed_rpm")
+    iq = _series(samples, "iq_a")
+    ceiling = _series(samples, "iq_ceiling_pu")
+    #Механический proxy мощности в о.е.: P = Iq (о.е.) * speed (о.е.).
+    #cur_par.power измеряется отдельно (см. power_meas_pu) и не используется для
+    #критериев, т.к. её масштаб/фильтр искажают значение на лёгкой модели.
+    power = [
+        (speed[index] / base_speed_rpm) * (iq[index] / base_current_a)
+        for index in range(len(samples))
+    ]
+    period = _sample_period(time_s)
+    direction = 1.0 if target_speed_rpm >= 0 else -1.0
+
+    lo_speed = abs(target_speed_rpm) * region_lo_fraction
+    hi_speed = abs(target_speed_rpm) * region_hi_fraction
+    region = [
+        index
+        for index in range(len(samples))
+        if lo_speed <= direction * speed[index] <= hi_speed
+    ]
+
+    theoretical_corner_rpm = (
+        abs(target_speed_rpm) * power_limit_pu / abs(current_limit_a)
+        if current_limit_a
+        else 0.0
+    )
+
+    metrics: dict[str, Any] = {
+        "samples": len(samples),
+        "sample_period_s": period,
+        "window_s": float(time_s[-1] - time_s[0]),
+        "target_speed_rpm": target_speed_rpm,
+        "power_limit_pu": power_limit_pu,
+        "current_limit_a": current_limit_a,
+        "region_lo_fraction": region_lo_fraction,
+        "region_hi_fraction": region_hi_fraction,
+        "region_speed_bounds_rpm": [lo_speed, hi_speed],
+        "region_sample_count": len(region),
+        "theoretical_corner_speed_rpm": theoretical_corner_rpm,
+    }
+
+    if not region:
+        criteria = {
+            "region_entered": False,
+            "enough_region_samples": False,
+            "power_is_flat": False,
+            "power_near_limit": False,
+            "current_decreases_with_speed": False,
+            "ceiling_respected": False,
+            "reached_near_target": False,
+        }
+        metrics["criteria"] = criteria
+        metrics["passed"] = False
+        return metrics
+
+    region_power = [power[index] for index in region]
+    region_speed = [direction * speed[index] for index in region]
+    region_iq = [iq[index] for index in region]
+    region_ceiling = [ceiling[index] for index in region]
+    power_mean = _mean(region_power)
+    power_stddev = float(statistics.pstdev(region_power)) if len(region_power) > 1 else 0.0
+    power_cv = abs(power_stddev / power_mean) if power_mean else math.inf
+
+    midpoint = len(region) // 2
+    power_lower = _mean(region_power[: max(1, midpoint)])
+    power_upper = _mean(region_power[max(1, midpoint):])
+    #Для постоянной мощности отношение верхней половины региона к нижней близко к 1.
+    #При отсутствии ограничения мощность растёт со скоростью -> отношение заметно > 1.
+    power_half_ratio = power_upper / power_lower if power_lower else math.inf
+    lower_iq = _mean(region_iq[: max(1, midpoint)])
+    upper_iq = _mean(region_iq[max(1, midpoint):])
+    lower_speed = _mean(region_speed[: max(1, midpoint)])
+    upper_speed = _mean(region_speed[max(1, midpoint):])
+
+    peak_speed = max(direction * value for value in speed)
+    region_ceiling_a = [value * base_current_a for value in region_ceiling]
+    ceiling_mean_a = _mean(region_ceiling_a)
+    allowed_peak_current_a = max(region_ceiling_a) * (
+        1.0 + current_limit_margin_percent / 100.0
+    )
+    peak_region_iq = max(abs(value) for value in region_iq)
+    #Поотсчётная проверка: фактический ток не должен превышать потолок этого же
+    #отсчёта (с запасом под перерегулирование токового контура).
+    ceiling_violations = sum(
+        1
+        for iq_value, ceiling_value in zip(region_iq, region_ceiling_a)
+        if ceiling_value > 0
+        and iq_value > ceiling_value * (1.0 + current_limit_margin_percent / 100.0)
+    )
+    ceiling_violation_fraction = ceiling_violations / len(region_iq) if region_iq else 1.0
+
+    metrics.update(
+        {
+            "region_power_mean_pu": power_mean,
+            "region_power_stddev_pu": power_stddev,
+            "region_power_cv": power_cv,
+            "region_power_half_ratio": power_half_ratio,
+            "region_power_min_pu": min(region_power),
+            "region_power_max_pu": max(region_power),
+            "region_iq_mean_a": _mean(region_iq),
+            "region_iq_lower_half_mean_a": lower_iq,
+            "region_iq_upper_half_mean_a": upper_iq,
+            "region_speed_lower_half_mean_rpm": lower_speed,
+            "region_speed_upper_half_mean_rpm": upper_speed,
+            "region_ceiling_mean_a": ceiling_mean_a,
+            "region_ceiling_violation_fraction": ceiling_violation_fraction,
+            "region_peak_iq_a": peak_region_iq,
+            "peak_speed_rpm": peak_speed,
+        }
+    )
+
+    near_limit = (
+        power_mean >= power_limit_pu * min_power_fraction_of_limit
+        and power_mean <= power_limit_pu * max_power_fraction_of_limit
+    )
+    current_decreases = upper_iq < lower_iq and upper_speed > lower_speed
+    power_is_flat = abs(power_half_ratio - 1.0) <= max_power_half_ratio_deviation
+    ceiling_respected = (
+        ceiling_mean_a > 0
+        and ceiling_violation_fraction <= max_ceiling_violation_fraction
+    )
+
+    criteria = {
+        "region_entered": True,
+        "enough_region_samples": len(region) >= min_region_samples,
+        "power_is_flat": power_is_flat,
+        "power_near_limit": near_limit,
+        "current_decreases_with_speed": current_decreases,
+        "ceiling_respected": ceiling_respected,
+        "reached_near_target": peak_speed >= abs(target_speed_rpm) * reached_fraction,
+    }
+    metrics["limits"] = {
+        "max_power_cv": max_power_cv,
+        "max_power_half_ratio_deviation": max_power_half_ratio_deviation,
+        "min_power_fraction_of_limit": min_power_fraction_of_limit,
+        "max_power_fraction_of_limit": max_power_fraction_of_limit,
+        "min_region_samples": min_region_samples,
+        "reached_fraction": reached_fraction,
+        "current_limit_margin_percent": current_limit_margin_percent,
+        "max_ceiling_violation_fraction": max_ceiling_violation_fraction,
+        "allowed_peak_current_a": allowed_peak_current_a,
+    }
+    metrics["criteria"] = criteria
+    metrics["passed"] = all(criteria.values())
+    return metrics

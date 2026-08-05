@@ -4,7 +4,11 @@ import math
 import unittest
 from dataclasses import dataclass
 
-from tests.e2e.metrics import analyze_current_mode4, analyze_vector_500
+from tests.e2e.metrics import (
+    analyze_constant_power,
+    analyze_current_mode4,
+    analyze_vector_500,
+)
 
 
 @dataclass(frozen=True)
@@ -98,6 +102,67 @@ class Vector500MetricsTests(unittest.TestCase):
 
         self.assertFalse(metrics["passed"])
         self.assertFalse(metrics["criteria"]["overshoot"])
+
+
+class ConstantPowerMetricsTests(unittest.TestCase):
+    @staticmethod
+    def samples(*, power_limited: bool = True) -> list[SyntheticSample]:
+        #База: 500 об/мин, 5 А; предел тока 1.0 о.е., предел мощности 0.3 о.е.
+        #Угловая скорость = P_limit/Iq_max = 0.3 о.е. = 150 об/мин.
+        result: list[SyntheticSample] = []
+        base_speed = 500.0
+        base_current = 5.0
+        iq_limit_pu = 1.0
+        power_limit_pu = 0.3
+        corner_pu = power_limit_pu / iq_limit_pu
+        for number in range(4001):
+            time_s = number * 0.001
+            speed_pu = min(1.0, 1.0 - math.exp(-time_s / 0.45))
+            speed_rpm = speed_pu * base_speed
+            if power_limited and speed_pu > corner_pu:
+                iq_pu = power_limit_pu / speed_pu
+            else:
+                iq_pu = iq_limit_pu
+            power_pu = iq_pu * speed_pu
+            ceiling_pu = min(iq_limit_pu, power_limit_pu / speed_pu) if speed_pu > 0 else iq_limit_pu
+            result.append(
+                SyntheticSample(
+                    number,
+                    time_s,
+                    {
+                        "speed_rpm": speed_rpm,
+                        "iq_a": iq_pu * base_current,
+                        "power_pu": power_pu,
+                        "iq_ceiling_pu": ceiling_pu,
+                    },
+                )
+            )
+        return result
+
+    def test_constant_power_acceleration_passes(self) -> None:
+        metrics = analyze_constant_power(
+            self.samples(),
+            target_speed_rpm=500.0,
+            power_limit_pu=0.3,
+            current_limit_a=5.0,
+        )
+
+        self.assertTrue(metrics["passed"])
+        self.assertLess(metrics["region_power_cv"], 0.45)
+        self.assertTrue(metrics["criteria"]["current_decreases_with_speed"])
+        self.assertTrue(metrics["criteria"]["power_near_limit"])
+
+    def test_unlimited_current_fails_flat_power(self) -> None:
+        metrics = analyze_constant_power(
+            self.samples(power_limited=False),
+            target_speed_rpm=500.0,
+            power_limit_pu=0.3,
+            current_limit_a=5.0,
+        )
+
+        self.assertFalse(metrics["passed"])
+        self.assertFalse(metrics["criteria"]["power_is_flat"])
+        self.assertFalse(metrics["criteria"]["current_decreases_with_speed"])
 
 
 if __name__ == "__main__":

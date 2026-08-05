@@ -128,3 +128,73 @@ def plot_vector_500(path: Path, samples: list[Sample]) -> None:
     current_axis.legend()
     figure.savefig(path, dpi=170)
     plt.close(figure)
+
+
+def plot_constant_power(
+    path: Path,
+    samples: list[Sample],
+    *,
+    power_limit_pu: float,
+    base_current_a: float = 5.0,
+) -> None:
+    import matplotlib.pyplot as plt
+
+    time_s = [sample.time_s for sample in samples]
+    plt.style.use("seaborn-v0_8-whitegrid")
+    figure, (speed_axis, current_axis) = plt.subplots(
+        2, 1, figsize=(11, 7.6), sharex=True, constrained_layout=True
+    )
+    speed_axis.plot(
+        time_s,
+        [s.values["speed_rpm"] for s in samples],
+        label="Measured speed",
+    )
+    speed_axis.set_title("Constant-power acceleration")
+    speed_axis.set_ylabel("Speed, rpm")
+    speed_axis.legend(loc="center right")
+
+    current_axis.plot(
+        time_s,
+        [s.values["iq_a"] for s in samples],
+        label="Measured Iq",
+    )
+    current_axis.plot(
+        time_s,
+        [s.values["iq_ceiling_pu"] * base_current_a for s in samples],
+        "--",
+        label="Power-limited Iq ceiling",
+    )
+    current_axis.set_xlabel("Time, s")
+    current_axis.set_ylabel("q-axis current, A")
+    current_axis.legend(loc="center right")
+
+    power_axis = current_axis.twinx()
+    base_speed = 500.0
+    base_current = base_current_a
+    power_axis.plot(
+        time_s,
+        [(s.values["speed_rpm"] / base_speed) * (s.values["iq_a"] / base_current) for s in samples],
+        color="tab:red",
+        alpha=0.8,
+        label="Mech. power proxy (p.u.)",
+    )
+    if "power_meas_pu" in samples[0].values:
+        power_axis.plot(
+            time_s,
+            [s.values["power_meas_pu"] for s in samples],
+            color="tab:orange",
+            alpha=0.6,
+            linestyle=":",
+            label="cur_par.power (p.u.)",
+        )
+    power_axis.axhline(
+        power_limit_pu, color="tab:red", linestyle=":", label="Power limit"
+    )
+    power_axis.set_ylabel("Power, p.u.", color="tab:red")
+    power_axis.tick_params(axis="y", labelcolor="tab:red")
+    handles, labels = current_axis.get_legend_handles_labels()
+    p_handles, p_labels = power_axis.get_legend_handles_labels()
+    current_axis.legend(handles + p_handles, labels + p_labels, loc="center right")
+
+    figure.savefig(path, dpi=170)
+    plt.close(figure)

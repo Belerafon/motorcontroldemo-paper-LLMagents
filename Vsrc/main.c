@@ -89,8 +89,12 @@ volatile long Debug1 = 0;
 volatile long Debug2 = 0;
 volatile Uint16 Debug3 = 0;
 volatile Uint16 Debug4 = 0;
+//Ограничение мощности при разгоне (см. PowerLimitIqCeiling в SM_Ctrl.c):
+//DebugW1 - разрешение: 0 = выключено (прежнее поведение), 1 = включено.
+//DebugW2 - уставка мощности, о.е. от drv_params.power.
+//DebugW3 - коэфф. интегр. коррекции по измеренной мощности, 0 = чистый feedforward.
 volatile long DebugW1 = 0;
-volatile long DebugW2 = 0;
+volatile long DebugW2 = _IQ(0.3);
 volatile long DebugW3 = 0;
 volatile long DebugW4 = 0;
 volatile float DebugF1 = 0;
