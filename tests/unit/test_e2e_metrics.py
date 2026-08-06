@@ -4,7 +4,12 @@ import math
 import unittest
 from dataclasses import dataclass
 
-from tests.e2e.metrics import analyze_current_mode4, analyze_vector_500
+from tests.e2e.metrics import (
+    analyze_current_mode4,
+    analyze_dynamic_limit,
+    analyze_vector_500,
+    expected_voltage_limit,
+)
 
 
 @dataclass(frozen=True)
@@ -98,6 +103,58 @@ class Vector500MetricsTests(unittest.TestCase):
 
         self.assertFalse(metrics["passed"])
         self.assertFalse(metrics["criteria"]["overshoot"])
+
+
+class DynamicLimitMetricsTests(unittest.TestCase):
+    def test_expected_limit_is_min_of_udc_and_ulim(self) -> None:
+        # DC-link voltage is below the modulation capability: limit = Udc.
+        self.assertAlmostEqual(
+            expected_voltage_limit(udc_meas=0.6, u_lim=0.866), 0.6, places=4
+        )
+
+    def test_expected_limit_capped_by_pwm_ulim(self) -> None:
+        # DC-link voltage exceeds the PWM capability: limit = U_lim.
+        self.assertAlmostEqual(
+            expected_voltage_limit(udc_meas=1.2, u_lim=0.866), 0.866, places=4
+        )
+
+    def test_expected_limit_never_below_floor(self) -> None:
+        self.assertEqual(expected_voltage_limit(udc_meas=0.01, u_lim=0.866), 0.05)
+
+    def test_tracking_pass_and_fail(self) -> None:
+        good = {
+            "low": {
+                "udc_meas": 0.6,
+                "u_lim": 0.866,
+                "out_max": 0.6,
+                "out_min": -0.6,
+            },
+            "high": {
+                "udc_meas": 0.95,
+                "u_lim": 1.2,
+                "out_max": 0.95,
+                "out_min": -0.95,
+            },
+            "pwm-limited": {
+                "udc_meas": 0.95,
+                "u_lim": 0.5,
+                "out_max": 0.5,
+                "out_min": -0.5,
+            },
+        }
+        metrics = analyze_dynamic_limit(good)
+        self.assertTrue(metrics["passed"])
+
+        bad = dict(good)
+        bad["high"] = {
+            "udc_meas": 0.95,
+            "u_lim": 1.2,
+            "out_max": 0.9999,
+            "out_min": -0.9999,
+        }
+        failed = analyze_dynamic_limit(bad)
+        self.assertFalse(failed["passed"])
+        self.assertFalse(failed["criteria"]["high"])
 
 
 if __name__ == "__main__":

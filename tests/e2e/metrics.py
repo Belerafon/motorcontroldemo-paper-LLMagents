@@ -6,6 +6,53 @@ from collections.abc import Sequence
 from typing import Any
 
 
+def expected_voltage_limit(
+    udc_meas: float, u_lim: float, floor: float = 0.05
+) -> float:
+    """Dynamic current-controller output limit in per-unit.
+
+    Mirrors the firmware: the current regulators may command no more phase
+    voltage than the inverter can physically deliver at the measured DC-link
+    voltage (adc.Udc_meas, in per-unit of Udc_nom), and never more than the
+    PWM modulation can realize (pwm.U_lim). Hence the limit is the smaller of
+    the two. A small floor guards against overflow inside the regulators.
+    """
+    return max(floor, min(udc_meas, u_lim))
+
+
+def analyze_dynamic_limit(
+    points: dict[str, dict[str, float]],
+    *,
+    floor: float = 0.05,
+    tolerance: float = 1e-3,
+) -> dict[str, Any]:
+    """Validate that pid_out_max/min track udc_meas * u_lim at every point.
+
+    `points` maps a label to `{"udc_meas": float, "u_lim": float,
+    "out_max": float, "out_min": float}` in per-unit. Both the positive and
+    negative limits must match the expected clamped value.
+    """
+    criteria: dict[str, bool] = {}
+    errors: dict[str, float] = {}
+    for name, values in points.items():
+        expected = expected_voltage_limit(
+            values["udc_meas"], values["u_lim"], floor=floor
+        )
+        error = max(
+            abs(values["out_max"] - expected),
+            abs(values["out_min"] - (-expected)),
+        )
+        errors[name] = error
+        criteria[name] = error <= tolerance
+    return {
+        "floor": floor,
+        "tolerance": tolerance,
+        "errors": errors,
+        "criteria": criteria,
+        "passed": all(criteria.values()),
+    }
+
+
 def _series(samples: Sequence[Any], name: str) -> list[float]:
     if not samples:
         raise ValueError("At least one sample is required.")
