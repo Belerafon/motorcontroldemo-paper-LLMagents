@@ -610,6 +610,124 @@ void PWM_Module_Sin_Update(TPWM_Module *p) {
 
 }
 
+//! Функция непрерывной (симметричной) векторной ШИМ (SVPWM с min-max инъекцией)
+
+//! В отличие от 6-секторной векторной ШИМ (PWM_TYPE_6SECT_NO_SV), где одна фаза
+//! в каждом секторе привязана к шине (верхней или нижней), здесь применяется
+//! симметричная инъекция нулевой последовательности методом min-max. Ни одна
+//! фаза не привязана к шине вплоть до достижения ограничения напряжения, при
+//! этом использование напряжения звена постоянного тока такое же, как у
+//! векторной ШИМ (линейная область до U_lim = 1.0, т.е. до фазного напряжения
+//! Udc/sqrt(3)), и на 1/0.866 выше, чем у синусоидальной ШИМ.
+//! Нормирование (U_lim, компенсация Ud, U_mag) полностью совпадает с
+//! 6-секторной векторной ШИМ (повторно используется PWM_Module_NormInput).
+
+//! \memberof TPWM_Module
+void PWM_Module_SVPWM_Cont_Update(TPWM_Module *p) {
+	_iq va, vb, vc;		//обратное преобразование Кларка, единицы базового вектора
+	_iq vmax, vmin;
+	_iq z;				//инъекция нулевой последовательности, единицы базового вектора
+	_iq da, db, dc;		//скважности фаз в диапазоне [0, 1]
+	_iq tmp;
+	_iq k23 = _IQ(0.6666667);	//перевод единиц базового вектора в доли Udc (2/3)
+
+	//Безопасная загрузка регистров сравнения (предотвращение частичного применения
+	//скважностей вблизи нуля счетчика), как в 6-секторной векторной ШИМ.
+	DINT;
+	if (NT_PWM0->TBCTR > 30) {
+		NT_PWM0->CMPA_bit.CMPA = (Uint16) p->GammaA;
+		NT_PWM1->CMPA_bit.CMPA = (Uint16) p->GammaB;
+		NT_PWM2->CMPA_bit.CMPA = (Uint16) p->GammaC;
+	}
+	EINT;
+
+	//Нормирование входа: ограничение по U_lim, компенсация пульсаций Ud, расчет
+	//U_mag и переход к единицам базового вектора (умножение на 0.866 в NormInput).
+	PWM_Module_NormInput(p);
+
+	//Обратное (амплитудно-инвариантное) преобразование Кларка в единицы базового вектора.
+	va = p->UalphaNorm;
+	tmp = _IQmpy(p->UbetaNorm, _IQ(0.8660254));
+	vb = tmp - (p->UalphaNorm >> 1);
+	vc = -tmp - (p->UalphaNorm >> 1);
+
+	//Инъекция нулевой последовательности методом min-max: z = -(max+min)/2.
+	//Во всём линейном диапазоне (вписанная окружность при U_lim <= 1.0) после
+	//инъекции скважности остаются в [0, 1] без ограничения.
+	vmax = va;
+	if (vb > vmax)
+		vmax = vb;
+	if (vc > vmax)
+		vmax = vc;
+	vmin = va;
+	if (vb < vmin)
+		vmin = vb;
+	if (vc < vmin)
+		vmin = vc;
+	z = -((vmax + vmin) >> 1);
+
+	//Скважности фаз: duty = 0.5 + (2/3)*(v + z). Соответствие знака регистру
+	//сравнения такое же, как в синусоидальной ШИМ: меньшему Gamma соответствует
+	//большее время включения ключа.
+	da = _IQ(0.5) + _IQmpy(va + z, k23);
+	db = _IQ(0.5) + _IQmpy(vb + z, k23);
+	dc = _IQ(0.5) + _IQmpy(vc + z, k23);
+
+	//Расчет регистров сравнения: Gamma = k_pwm * (1 - duty).
+	p->GammaA = _IQmpy(p->k_pwm, _IQ(1.0) - da);
+	p->GammaB = _IQmpy(p->k_pwm, _IQ(1.0) - db);
+	p->GammaC = _IQmpy(p->k_pwm, _IQ(1.0) - dc);
+
+	/*насыщения */
+
+	if (p->GammaA < 0)
+		p->GammaA = 0;
+	if (p->GammaB < 0)
+		p->GammaB = 0;
+	if (p->GammaC < 0)
+		p->GammaC = 0;
+
+	if (p->GammaA > p->k_pwm)
+		p->GammaA = p->k_pwm + 1;
+	if (p->GammaB > p->k_pwm)
+		p->GammaB = p->k_pwm + 1;
+	if (p->GammaC > p->k_pwm)
+		p->GammaC = p->k_pwm + 1;
+
+	//Сектор (только для диагностики, объект CANopen [5105h.0Fh]) определяется по
+	//знакам проекций так же, как в 6-секторной векторной ШИМ.
+	{
+		_iq tb = _IQmpy(_1_SQRT3, p->UbetaNorm);
+		_iq l1 = p->UalphaNorm - tb;
+		_iq l2 = _IQmpy(_2_SQRT3, p->UbetaNorm);
+		_iq l3 = p->UalphaNorm + tb;
+		if (l1 <= 0) {
+			if (l3 > 0)
+				p->sector = 1;		/*110 начало */
+			else if (l2 > 0)
+				p->sector = 2;		/*011 начало */
+			else if (l1 != 0)
+				p->sector = 3;		/*011 начало */
+			else
+				p->sector = 4;		/*101 начало */
+		} else if (l2 > 0)
+			p->sector = 0;		/*110 начало */
+		else if (l3 < 0)
+			p->sector = 4;		/*101 начало */
+		else
+			p->sector = 5;		/*101 начало */
+	}
+
+	//Вторичная безопасная загрузка регистров сравнения.
+	DINT;
+	if (NT_PWM0->TBCTR > 30) {
+		NT_PWM0->CMPA_bit.CMPA = (Uint16) p->GammaA;
+		NT_PWM1->CMPA_bit.CMPA = (Uint16) p->GammaB;
+		NT_PWM2->CMPA_bit.CMPA = (Uint16) p->GammaC;
+	}
+	EINT;
+}
+
 //! Функция ШИМ с раздельными фазами (для модели SRM)
 
 //! \memberof TPWM_Module
@@ -728,6 +846,10 @@ void PWM_Module_Update(TPWM_Module *p) {
 		}
 		case PWM_TYPE_SIN_PWM: {
 			PWM_Module_Sin_Update(p);
+			break;
+		}
+		case PWM_TYPE_SVPWM_CONT: {
+			PWM_Module_SVPWM_Cont_Update(p);
 			break;
 		}
 		case PWM_TYPE_DC_DRIVE: {

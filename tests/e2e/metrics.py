@@ -343,3 +343,105 @@ def analyze_vector_500(
     metrics["criteria"] = criteria
     metrics["passed"] = all(criteria.values())
     return metrics
+
+
+def analyze_svpwm_cont(
+    samples: Sequence[Any],
+    *,
+    k_pwm: int,
+    target_speed_rpm: float = 500.0,
+    max_steady_error_percent: float = 3.0,
+    max_speed_ripple_rpm: float = 25.0,
+    min_rail_distance_percent: float = 2.0,
+) -> dict[str, Any]:
+    """Validate continuous (symmetric) SVPWM: spin-up plus no-bus-clamping proof.
+
+    The defining property of the continuous SVPWM (vs. the clamped 6-sector
+    DPWM) is that none of the three compare registers (GammaA/B/C) is pinned to
+    a DC bus rail during the linear modulation region. For every steady-state
+    sample and every phase the distance from the nearest rail
+    min(gamma, k_pwm - gamma) must stay strictly positive.
+    """
+    if k_pwm <= 0:
+        raise ValueError("k_pwm must be positive.")
+    time_s = _times(samples)
+    speed = _series(samples, "speed_rpm")
+    period = _sample_period(time_s)
+    tail_start = _tail_start(len(samples))
+    steady_speed = speed[tail_start:]
+    steady_error = abs(_mean(steady_speed) - target_speed_rpm)
+    steady_error_percent = (
+        steady_error / abs(target_speed_rpm) * 100.0 if target_speed_rpm else math.inf
+    )
+    phases = {
+        "gamma_a": _series(samples, "gamma_a"),
+        "gamma_b": _series(samples, "gamma_b"),
+        "gamma_c": _series(samples, "gamma_c"),
+    }
+    phase_reports: dict[str, Any] = {}
+    min_rail_distance_ticks = float(k_pwm)
+    min_duty = 1.0
+    max_duty = 0.0
+    for name, series in phases.items():
+        steady = series[tail_start:]
+        low = min(steady)
+        high = max(steady)
+        # distance of every steady sample to the nearest rail (0 or k_pwm)
+        phase_min_distance = min(min(v, k_pwm - v) for v in steady)
+        phase_min_distance = max(0.0, phase_min_distance)
+        min_rail_distance_ticks = min(min_rail_distance_ticks, phase_min_distance)
+        duty_low = (k_pwm - high) / k_pwm
+        duty_high = (k_pwm - low) / k_pwm
+        min_duty = min(min_duty, duty_low)
+        max_duty = max(max_duty, duty_high)
+        phase_reports[name] = {
+            "steady_min_ticks": low,
+            "steady_max_ticks": high,
+            "min_rail_distance_ticks": phase_min_distance,
+            "min_rail_distance_percent": phase_min_distance / k_pwm * 100.0,
+            "duty_low": duty_low,
+            "duty_high": duty_high,
+            "duty_peak_to_peak": duty_high - duty_low,
+            "clamped_to_rail": phase_min_distance <= 0.0,
+        }
+    min_rail_distance_percent_value = min_rail_distance_ticks / k_pwm * 100.0
+    metrics: dict[str, Any] = {
+        "samples": len(samples),
+        "sample_period_s": period,
+        "window_s": float(time_s[-1] - time_s[0]),
+        "k_pwm_ticks": k_pwm,
+        "target_speed_rpm": target_speed_rpm,
+        "steady_speed_rpm": _mean(steady_speed),
+        "steady_speed_error_rpm": steady_error,
+        "steady_speed_error_percent": steady_error_percent,
+        "steady_speed_ripple_peak_to_peak_rpm": max(steady_speed) - min(steady_speed),
+        "min_rail_distance_ticks": min_rail_distance_ticks,
+        "min_rail_distance_percent": min_rail_distance_percent_value,
+        "min_phase_duty": min_duty,
+        "max_phase_duty": max_duty,
+        "phases": phase_reports,
+    }
+    criteria = {
+        "enough_samples": len(samples) >= 64,
+        "reached_target_speed": (
+            steady_error_percent <= max_steady_error_percent
+        ),
+        "steady_speed_ripple": (
+            metrics["steady_speed_ripple_peak_to_peak_rpm"]
+            <= max_speed_ripple_rpm
+        ),
+        "no_phase_clamped_to_rail": all(
+            not info["clamped_to_rail"] for info in phase_reports.values()
+        ),
+        "continuous_modulation_margin": (
+            metrics["min_rail_distance_percent"] >= min_rail_distance_percent
+        ),
+    }
+    metrics["limits"] = {
+        "max_steady_error_percent": max_steady_error_percent,
+        "max_speed_ripple_rpm": max_speed_ripple_rpm,
+        "min_rail_distance_percent": min_rail_distance_percent,
+    }
+    metrics["criteria"] = criteria
+    metrics["passed"] = all(criteria.values())
+    return metrics

@@ -128,3 +128,32 @@ def plot_vector_500(path: Path, samples: list[Sample]) -> None:
     current_axis.legend()
     figure.savefig(path, dpi=170)
     plt.close(figure)
+
+
+def plot_svpwm_cont(path: Path, samples: list[Sample], k_pwm: int) -> None:
+    import matplotlib.pyplot as plt
+
+    time_s = [sample.time_s for sample in samples]
+    plt.style.use("seaborn-v0_8-whitegrid")
+    figure, (speed_axis, gamma_axis) = plt.subplots(
+        2, 1, figsize=(11, 7.6), sharex=True, constrained_layout=True
+    )
+    speed_axis.plot(time_s, [s.values["speed_rpm"] for s in samples], label="Speed")
+    speed_axis.set_title("Continuous SVPWM: spin-up and compare registers")
+    speed_axis.set_ylabel("Speed, rpm")
+    speed_axis.legend()
+    for name, color in (("gamma_a", "tab:red"), ("gamma_b", "tab:green"), ("gamma_c", "tab:purple")):
+        gamma_axis.plot(
+            time_s,
+            [s.values[name] for s in samples],
+            color=color,
+            alpha=0.85,
+            label=name.replace("_", " ").title(),
+        )
+    gamma_axis.axhline(0.0, color="black", linewidth=0.8, linestyle="--")
+    gamma_axis.axhline(float(k_pwm), color="black", linewidth=0.8, linestyle="--", label="rails (0 / k_pwm)")
+    gamma_axis.set_xlabel("Time, s")
+    gamma_axis.set_ylabel("Compare register, ticks")
+    gamma_axis.legend()
+    figure.savefig(path, dpi=170)
+    plt.close(figure)

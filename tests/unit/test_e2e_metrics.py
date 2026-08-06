@@ -4,7 +4,11 @@ import math
 import unittest
 from dataclasses import dataclass
 
-from tests.e2e.metrics import analyze_current_mode4, analyze_vector_500
+from tests.e2e.metrics import (
+    analyze_current_mode4,
+    analyze_svpwm_cont,
+    analyze_vector_500,
+)
 
 
 @dataclass(frozen=True)
@@ -98,6 +102,64 @@ class Vector500MetricsTests(unittest.TestCase):
 
         self.assertFalse(metrics["passed"])
         self.assertFalse(metrics["criteria"]["overshoot"])
+
+
+class SvpwmContMetricsTests(unittest.TestCase):
+    K_PWM = 10000
+
+    @staticmethod
+    def samples(*, clamp_phase_c: bool = False) -> list[SyntheticSample]:
+        k_pwm = SvpwmContMetricsTests.K_PWM
+        result = []
+        # 3 s window at 1 ms -> tail (last 20 %) is steady state at 500 rpm
+        for number in range(3001):
+            time_s = number * 0.001
+            speed = 500.0 * (1.0 - math.exp(-time_s / 0.30))
+            # three 120-degree-shifted duty waveforms, continuous SVPWM keeps
+            # every compare register strictly inside (0, k_pwm).
+            modulation = 0.30 * (1.0 - math.exp(-time_s / 0.30))
+            duty_a = 0.5 + modulation * math.sin(2.0 * math.pi * 0.5 * time_s)
+            duty_b = 0.5 + modulation * math.sin(
+                2.0 * math.pi * 0.5 * time_s - 2.0 * math.pi / 3.0
+            )
+            duty_c = 0.5 + modulation * math.sin(
+                2.0 * math.pi * 0.5 * time_s + 2.0 * math.pi / 3.0
+            )
+            gamma_a = k_pwm * (1.0 - duty_a)
+            gamma_b = k_pwm * (1.0 - duty_b)
+            gamma_c = 0.0 if clamp_phase_c else k_pwm * (1.0 - duty_c)
+            result.append(
+                SyntheticSample(
+                    number,
+                    time_s,
+                    {
+                        "speed_rpm": speed,
+                        "gamma_a": gamma_a,
+                        "gamma_b": gamma_b,
+                        "gamma_c": gamma_c,
+                    },
+                )
+            )
+        return result
+
+    def test_continuous_modulation_passes(self) -> None:
+        metrics = analyze_svpwm_cont(self.samples(), k_pwm=self.K_PWM)
+
+        self.assertTrue(metrics["passed"])
+        self.assertFalse(
+            any(info["clamped_to_rail"] for info in metrics["phases"].values())
+        )
+        self.assertGreater(metrics["min_rail_distance_percent"], 2.0)
+
+    def test_clamped_phase_fails_acceptance(self) -> None:
+        metrics = analyze_svpwm_cont(
+            self.samples(clamp_phase_c=True), k_pwm=self.K_PWM
+        )
+
+        self.assertFalse(metrics["passed"])
+        self.assertFalse(metrics["criteria"]["no_phase_clamped_to_rail"])
+        self.assertFalse(metrics["criteria"]["continuous_modulation_margin"])
+        self.assertTrue(metrics["phases"]["gamma_c"]["clamped_to_rail"])
 
 
 if __name__ == "__main__":
