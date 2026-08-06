@@ -89,7 +89,7 @@ volatile long Debug1 = 0;
 volatile long Debug2 = 0;
 volatile Uint16 Debug3 = 0;
 volatile Uint16 Debug4 = 0;
-volatile long DebugW1 = 0;
+volatile long DebugW1 = 1;	//декаплинг регуляторов тока: 0 = выкл, 1 = вкл
 volatile long DebugW2 = 0;
 volatile long DebugW3 = 0;
 volatile long DebugW4 = 0;

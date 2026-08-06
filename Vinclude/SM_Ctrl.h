@@ -77,6 +77,8 @@ extern "C"
   void SM_Ctrl_Fast_Calc(TSM_Ctrl*);
   //! \memberof TSM_Ctrl
   void SM_Ctrl_ms_Calc(TSM_Ctrl*);
+  //! \memberof TSM_Ctrl
+  void SM_Ctrl_DecouplingCalc(long id_fdb, long iq_fdb, long speed_pu);
 
 #ifdef __cplusplus
 }

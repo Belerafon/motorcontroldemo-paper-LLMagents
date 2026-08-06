@@ -89,6 +89,46 @@ def plot_current_mode4(path: Path, samples: list[Sample]) -> None:
     plt.close(figure)
 
 
+def plot_decoupling(
+    path: Path, off_samples: list[Sample], on_samples: list[Sample]
+) -> None:
+    import matplotlib.pyplot as plt
+
+    time_off = [s.time_s for s in off_samples]
+    time_on = [s.time_s for s in on_samples]
+    plt.style.use("seaborn-v0_8-whitegrid")
+    figure, axes = plt.subplots(
+        3, 1, figsize=(11, 9.0), sharex=True, constrained_layout=True
+    )
+    speed_axis = axes[0]
+    speed_axis.plot(time_off, [s.values["speed_rpm"] for s in off_samples],
+                    label="Speed (decoupling OFF)")
+    speed_axis.plot(time_on, [s.values["speed_rpm"] for s in on_samples],
+                    "--", label="Speed (decoupling ON)")
+    speed_axis.set_ylabel("Speed, rpm")
+    speed_axis.legend()
+
+    id_axis = axes[1]
+    id_axis.plot(time_off, [s.values["id_a"] for s in off_samples],
+                 label="Id (OFF)")
+    id_axis.plot(time_on, [s.values["id_a"] for s in on_samples],
+                 "--", label="Id (ON)")
+    id_axis.axhline(0.0, color="gray", linestyle=":")
+    id_axis.set_ylabel("d-axis current, A")
+    id_axis.legend()
+
+    comp_axis = axes[2]
+    comp_axis.plot(time_on, [s.values["ud_comp_pu"] for s in on_samples],
+                   label="Ud_comp (ON)")
+    comp_axis.axhline(0.0, color="gray", linestyle=":")
+    comp_axis.set_xlabel("Time, s")
+    comp_axis.set_ylabel("Ud compensation, pu")
+    comp_axis.legend()
+    figure.suptitle("Current-regulator decoupling: cross-coupling compensation")
+    figure.savefig(path, dpi=170)
+    plt.close(figure)
+
+
 def plot_vector_500(path: Path, samples: list[Sample]) -> None:
     import matplotlib.pyplot as plt
 

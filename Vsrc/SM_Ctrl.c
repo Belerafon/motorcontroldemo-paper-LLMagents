@@ -50,6 +50,60 @@ void SM_Ctrl_ms_Calc(TSM_Ctrl *p) {
 
 }
 
+//!База скорости для компенсации перекрёстных связей: 1.0 о.е. = 500 об/мин = 500*2*pi/60 рад/с
+#define DECOUP_WBASE_RADS   (500.0f * 6.283185307179586f / 60.0f)
+//!База тока: 1.0 о.е. = 5 А
+#define DECOUP_IBASE_A      5.0f
+//!База напряжения: 1.0 о.е. = 311 В (фазная амплитуда при Udc = 540 В)
+#define DECOUP_UBASE_V      311.0f
+//!Перевод индуктивности статора из мГн в безразмерный коэффициент компенсации о.е.:
+//!K = L[Гн] * wбаза * Iбаза / Uбаза = L[мГн] * wбаза * Iбаза / (1000 * Uбаза)
+#define DECOUP_LS_TO_K      (DECOUP_WBASE_RADS * DECOUP_IBASE_A / (1000.0f * DECOUP_UBASE_V))
+
+static long decoup_ud;	//!<Компенсационное напряжение оси d (IQ24)
+static long decoup_uq;	//!<Компенсационное напряжение оси q (IQ24)
+
+//! Декаплинг регуляторов тока dq (компенсация перекрёстных связей).
+//!
+//! При вращении в осях dq действуют перекрёстные ЭДС, пропорциональные L*w*i:
+//! ток оси q наводит ЭДС в ось d, а ток оси d - в ось q. Без компенсации эти
+//! связи действуют как возмущения, поэтому на высокой скорости регуляторы тока
+//! хуже отрабатывают изменения задания. Декаплинг добавляет к выходам
+//! регуляторов компенсацию, вычисленную вперёд (feed-forward):
+//!     Ud_comp = -K*w*Iq,   Uq_comp = +K*w*Id
+//!
+//! Управление (CANopen, группа "Отладка"):
+//!   DebugW1 - переключатель: 0 = выкл, иначе = вкл (по умолчанию 1);
+//!   DebugF1 - ручной коэффициент K в о.е.; 0 = авторасчёт по индуктивности
+//!             статора выбранного двигателя модели (lsd, lsq);
+//! Диагностика (только чтение):
+//!   DebugW2 = Ud_comp, DebugW3 = Uq_comp (IQ24).
+//!
+//! \memberof TSM_Ctrl
+void SM_Ctrl_DecouplingCalc(long id_fdb, long iq_fdb, long speed_pu) {
+	long ud_comp = 0;
+	long uq_comp = 0;
+
+	if (DebugW1 & 1) {	//включено
+		float w = _IQtoF(speed_pu);
+		float id = _IQtoF(id_fdb);
+		float iq = _IQtoF(iq_fdb);
+		float Kd = DebugF1;	//ручной коэффициент на ось d
+		float Kq = DebugF1;	//ручной коэффициент на ось q
+		if (DebugF1 <= 0.0f) {	//иначе авторасчёт по индуктивностям статора
+			Kd = model.motorInternals.lsq * DECOUP_LS_TO_K;
+			Kq = model.motorInternals.lsd * DECOUP_LS_TO_K;
+		}
+		ud_comp = _IQ(-Kd * w * iq);
+		uq_comp = _IQ( Kq * w * id);
+	}
+
+	decoup_ud = ud_comp;
+	decoup_uq = uq_comp;
+	DebugW2 = ud_comp;	//диагностика, только чтение
+	DebugW3 = uq_comp;	//диагностика, только чтение
+}
+
 //!Быстрый расчет
 
 //!Реализует все структуры управления (режимы работы), такие как 
@@ -442,10 +496,13 @@ void SM_Ctrl_Fast_Calc(TSM_Ctrl *p) {
 			pid_id.pid_fdb_reg3 = park.de; //обратная связь рег. тока оси d - вычисленный ток по фазе d
 			pid_id.calc(&pid_id); //расчет регулятора тока оси d
 
+			//компенсация перекрёстных связей регуляторов тока (декаплинг)
+			SM_Ctrl_DecouplingCalc(park.de, park.qe, cur_par.speed);
+
 			//Обратный поворот на угол refs.theta_elec для 
 			//выходов регуляторов тока (напряжений по осям d и q)
-			ipark.de = pid_id.pid_out_reg3;
-			ipark.qe = pid_iq.pid_out_reg3;
+			ipark.de = pid_id.pid_out_reg3 + decoup_ud;
+			ipark.qe = pid_iq.pid_out_reg3 + decoup_uq;
 			ipark.ang = refs.theta_elec;
 			ipark.calc(&ipark);            //расчет преобразования координат
 
@@ -582,10 +639,13 @@ void SM_Ctrl_Fast_Calc(TSM_Ctrl *p) {
 			pid_id.pid_fdb_reg3 = park.de; //обратная связь рег. тока оси d - вычисленный ток по фазе d
 			pid_id.calc(&pid_id); //расчет регулятора тока оси d
 
+			//компенсация перекрёстных связей регуляторов тока (декаплинг)
+			SM_Ctrl_DecouplingCalc(park.de, park.qe, cur_par.speed);
+
 			//Обратный поворот на угол refs.theta_elec для
 			//выходов регуляторов тока (напряжений по осям d и q)
-			ipark.de = pid_id.pid_out_reg3;
-			ipark.qe = pid_iq.pid_out_reg3;
+			ipark.de = pid_id.pid_out_reg3 + decoup_ud;
+			ipark.qe = pid_iq.pid_out_reg3 + decoup_uq;
 			ipark.ang = posspeedEqep.theta_elec;
 			ipark.calc(&ipark);            //расчет преобразования координат
 

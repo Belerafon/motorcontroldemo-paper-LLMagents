@@ -343,3 +343,130 @@ def analyze_vector_500(
     metrics["criteria"] = criteria
     metrics["passed"] = all(criteria.values())
     return metrics
+
+
+def analyze_decoupling(
+    off_samples: Sequence[Any],
+    on_samples: Sequence[Any],
+    *,
+    lsq_mh: float,
+    speed_base_rpm: float = 500.0,
+    current_base_a: float = 5.0,
+    voltage_base_v: float = 311.0,
+    high_speed_min_rpm: float = 400.0,
+    current_active_min_a: float = 0.10,
+    feedforward_tolerance_percent: float = 30.0,
+    min_compensation_pu: float = 1.0e-5,
+    max_disabled_compensation_pu: float = 1.0e-6,
+    min_id_reduction_percent: float = 0.0,
+) -> dict[str, Any]:
+    """Validate current-regulator decoupling (cross-coupling compensation).
+
+    The firmware computes a feed-forward voltage that cancels the dq
+    cross-coupling L*w*i:
+        Ud_comp = -K * w_pu * Iq_pu,   K = Lsq[mH] * wbase * Ibase / (1000*Ubase)
+    This verifies that (a) with the feature enabled the recorded compensation
+    matches the theoretical feed-forward, (b) it is disabled cleanly, and
+    (c) the d-axis current disturbance is not increased.
+    """
+
+    def series(samples: Sequence[Any], name: str) -> list[float]:
+        return _series(samples, name)
+
+    def high_speed(samples: Sequence[Any]) -> list[int]:
+        speed = series(samples, "speed_rpm")
+        return [i for i, value in enumerate(speed) if value >= high_speed_min_rpm]
+
+    def peak_abs_id_high(samples: Sequence[Any]) -> float:
+        ids = [abs(series(samples, "id_a")[i]) for i in high_speed(samples)]
+        return max(ids) if ids else 0.0
+
+    k_auto = lsq_mh * (
+        (speed_base_rpm * 2.0 * math.pi / 60.0)
+        * current_base_a
+        / (1000.0 * voltage_base_v)
+    )
+
+    on_speed = series(on_samples, "speed_rpm")
+    on_iq = series(on_samples, "iq_a")
+    on_id = series(on_samples, "id_a")
+    on_ud = series(on_samples, "ud_comp_pu")
+    theoretical: list[float] = []
+    measured: list[float] = []
+    for index, _ in enumerate(on_samples):
+        if abs(on_iq[index]) >= current_active_min_a:
+            w_pu = on_speed[index] / speed_base_rpm
+            iq_pu = on_iq[index] / current_base_a
+            theoretical.append(-k_auto * w_pu * iq_pu)
+            measured.append(on_ud[index])
+    relative_errors = [
+        100.0 * abs(measure - theory) / abs(theory)
+        for measure, theory in zip(measured, theoretical)
+        if abs(theory) > 1.0e-12
+    ]
+
+    off_ud = series(off_samples, "ud_comp_pu")
+    peak_comp_on = max(abs(value) for value in on_ud) if on_ud else 0.0
+    peak_comp_off = max(abs(value) for value in off_ud) if off_ud else 0.0
+    peak_id_off = peak_abs_id_high(off_samples)
+    peak_id_on = peak_abs_id_high(on_samples)
+    mean_abs_id_off = _mean([abs(value) for value in series(off_samples, "id_a")])
+    mean_abs_id_on = _mean([abs(value) for value in on_id])
+    id_reduction_percent = (
+        100.0 * (peak_id_off - peak_id_on) / peak_id_off if peak_id_off else 0.0
+    )
+
+    metrics: dict[str, Any] = {
+        "samples_on": len(on_samples),
+        "samples_off": len(off_samples),
+        "motor_lsq_mh": lsq_mh,
+        "auto_coefficient_k_pu": k_auto,
+        "active_current_samples": len(theoretical),
+        "feedforward_mean_relative_error_percent": (
+            _mean(relative_errors) if relative_errors else None
+        ),
+        "feedforward_median_relative_error_percent": (
+            float(statistics.median(relative_errors)) if relative_errors else None
+        ),
+        "peak_abs_compensation_on_pu": peak_comp_on,
+        "peak_abs_compensation_off_pu": peak_comp_off,
+        "peak_abs_id_off_a": peak_id_off,
+        "peak_abs_id_on_a": peak_id_on,
+        "mean_abs_id_off_a": mean_abs_id_off,
+        "mean_abs_id_on_a": mean_abs_id_on,
+        "id_disturbance_reduction_percent": id_reduction_percent,
+    }
+    feedforward_matches = (
+        bool(relative_errors)
+        and float(statistics.median(relative_errors))
+        <= feedforward_tolerance_percent
+    )
+    criteria = {
+        "enough_samples": len(on_samples) >= 64 and len(off_samples) >= 64,
+        "coupling_current_present": len(theoretical) >= 4,
+        "feedforward_matches_theory": feedforward_matches,
+        "compensation_active_when_enabled": peak_comp_on >= min_compensation_pu,
+        "compensation_zero_when_disabled": (
+            peak_comp_off <= max_disabled_compensation_pu
+        ),
+        "id_disturbance_not_increased": (
+            peak_id_on <= peak_id_off * (1.0 + 0.05)
+        ),
+    }
+    metrics["id_disturbance_reduced"] = (
+        id_reduction_percent >= min_id_reduction_percent
+    )
+    metrics["limits"] = {
+        "speed_base_rpm": speed_base_rpm,
+        "current_base_a": current_base_a,
+        "voltage_base_v": voltage_base_v,
+        "high_speed_min_rpm": high_speed_min_rpm,
+        "current_active_min_a": current_active_min_a,
+        "feedforward_tolerance_percent": feedforward_tolerance_percent,
+        "min_compensation_pu": min_compensation_pu,
+        "max_disabled_compensation_pu": max_disabled_compensation_pu,
+        "min_id_reduction_percent": min_id_reduction_percent,
+    }
+    metrics["criteria"] = criteria
+    metrics["passed"] = all(criteria.values())
+    return metrics
