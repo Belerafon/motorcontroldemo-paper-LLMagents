@@ -162,6 +162,37 @@ class HardwareSession:
                     f"0x{restored:08X} != 0x{original:08X}."
                 )
 
+    @contextmanager
+    def temporary_raw(
+        self, expression: str, value: float, *, q: int = 24, scale: float = 1.0
+    ) -> Iterator[int]:
+        """Temporarily write a raw fixed-point value (bypasses the dictionary
+        scale used only for GUI display) and restore it after stop."""
+        from motor_debug_core.values import FixedPoint
+
+        codec = FixedPoint(q=q, scale=scale)
+        original = self.target.read_u32(expression)
+        encoded = codec.encode(value)
+        try:
+            self.target.write_u32(expression, encoded)
+            actual = self.target.read_u32(expression)
+            if actual != encoded:
+                raise RuntimeError(
+                    f"Write verification failed for {expression}: "
+                    f"0x{actual:08X} != 0x{encoded:08X}."
+                )
+            yield original
+        finally:
+            self.drive.stop()
+            time.sleep(0.1)
+            self.target.write_u32(expression, original)
+            restored = self.target.read_u32(expression)
+            if restored != original:
+                raise RuntimeError(
+                    f"RAM restoration failed for {expression}: "
+                    f"0x{restored:08X} != 0x{original:08X}."
+                )
+
     def capture_ring(
         self,
         channels: list[Channel],

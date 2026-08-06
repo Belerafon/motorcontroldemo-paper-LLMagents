@@ -214,6 +214,162 @@ def analyze_current_mode4(
     return metrics
 
 
+def analyze_constant_power(
+    samples: Sequence[Any],
+    *,
+    power_limit_pu: float,
+    current_base_a: float,
+    speed_base_rpm: float,
+    iq_max_pu: float,
+    target_speed_rpm: float = 500.0,
+    max_power_spread_percent: float = 20.0,
+    max_power_error_percent: float = 15.0,
+    min_binding_samples: int = 20,
+    min_binding_speed_span_pu: float = 0.15,
+    current_reduction_percent: float = 5.0,
+    saturation_margin_percent: float = 5.0,
+) -> dict[str, Any]:
+    """Analyze a constant-power (torque = P / speed) acceleration capture.
+
+    ``power_limit_pu`` is the per-unit power limit written to the firmware
+    (1.0 = base power = current_base_a * speed_base_rpm). During the
+    power-limited region the q-axis current reference is clamped to
+    ``P / speed``, so the product ``iq_ref_pu * speed_pu`` stays constant and
+    equal to the set limit, and the current drops below the current clamp.
+
+    The binding region is the part of the acceleration where the speed
+    controller is saturated at the power-limit clamp, i.e. where
+    ``iq_ref_pu * speed_pu`` still equals the set limit within
+    ``saturation_margin_percent``. It ends when the controller leaves
+    saturation as the speed approaches the setpoint.
+    """
+    time_s = _times(samples)
+    speed = _series(samples, "speed_rpm")
+    speed_ref = _series(samples, "speed_ref_rpm")
+    iq_ref = _series(samples, "iq_ref_a")
+    iq = _series(samples, "iq_a")
+    period = _sample_period(time_s)
+    speed_pu = [value / speed_base_rpm for value in speed]
+    iq_ref_pu = [value / current_base_a for value in iq_ref]
+    power_ref_pu = [
+        iq_ref_pu[index] * speed_pu[index] for index in range(len(samples))
+    ]
+    start = _event_start(speed_ref, target_speed_rpm)
+    i95 = _first_crossing(speed, target_speed_rpm, 0.95, start)
+    accel_end = i95 if i95 is not None else len(samples) - 1
+
+    crossover: int | None = None
+    for index in range(start, accel_end + 1):
+        if speed_pu[index] > 0.05 and iq_ref_pu[index] < iq_max_pu * 0.95:
+            crossover = index
+            break
+
+    threshold = power_limit_pu * (1.0 - saturation_margin_percent / 100.0)
+    binding_indices: list[int] = []
+    if crossover is not None:
+        for index in range(crossover, accel_end + 1):
+            if power_ref_pu[index] >= threshold:
+                binding_indices.append(index)
+            else:
+                break
+
+    binding_speed_pu = [speed_pu[index] for index in binding_indices]
+    binding_iq_ref_pu = [iq_ref_pu[index] for index in binding_indices]
+    binding_power_pu = [power_ref_pu[index] for index in binding_indices]
+
+    if binding_power_pu:
+        median_power = float(statistics.median(binding_power_pu))
+        spread_percent = (
+            (max(binding_power_pu) - min(binding_power_pu))
+            / abs(median_power)
+            * 100.0
+            if median_power
+            else math.inf
+        )
+        power_error_percent = (
+            abs(median_power - power_limit_pu)
+            / abs(power_limit_pu)
+            * 100.0
+            if power_limit_pu
+            else math.inf
+        )
+        min_binding_iq_pu = min(binding_iq_ref_pu)
+        current_reduction_percent_measured = (
+            (iq_max_pu - min_binding_iq_pu) / iq_max_pu * 100.0
+            if iq_max_pu
+            else math.inf
+        )
+    else:
+        median_power = None
+        spread_percent = math.inf
+        power_error_percent = math.inf
+        min_binding_iq_pu = None
+        current_reduction_percent_measured = 0.0
+
+    binding_speed_span_pu = (
+        max(binding_speed_pu) - min(binding_speed_pu)
+        if binding_speed_pu
+        else 0.0
+    )
+    peak_iq_pu = max(iq_ref_pu[start : accel_end + 1]) if accel_end >= start else 0.0
+
+    metrics: dict[str, Any] = {
+        "samples": len(samples),
+        "sample_period_s": period,
+        "window_s": float(time_s[-1] - time_s[0]),
+        "event_start": start,
+        "acceleration_end": accel_end,
+        "crossover_sample": crossover,
+        "speed_base_rpm": speed_base_rpm,
+        "current_base_a": current_base_a,
+        "iq_max_pu": iq_max_pu,
+        "power_limit_pu": power_limit_pu,
+        "binding_sample_count": len(binding_indices),
+        "binding_speed_min_pu": (
+            min(binding_speed_pu) if binding_speed_pu else None
+        ),
+        "binding_speed_max_pu": (
+            max(binding_speed_pu) if binding_speed_pu else None
+        ),
+        "binding_speed_span_pu": binding_speed_span_pu,
+        "power_ref_median_pu": median_power,
+        "power_ref_spread_percent": spread_percent,
+        "power_ref_error_percent": power_error_percent,
+        "min_binding_iq_pu": min_binding_iq_pu,
+        "peak_accel_iq_pu": peak_iq_pu,
+        "current_reduction_percent": current_reduction_percent_measured,
+        "crossover_speed_pu": (
+            speed_pu[crossover] if crossover is not None else None
+        ),
+    }
+    criteria = {
+        "enough_samples": len(samples) >= 64,
+        "acceleration_started": start < accel_end,
+        "power_limit_binds": (
+            len(binding_indices) >= min_binding_samples
+            and binding_speed_span_pu >= min_binding_speed_span_pu
+        ),
+        "power_constant": spread_percent <= max_power_spread_percent,
+        "power_matches_setpoint": (
+            power_error_percent <= max_power_error_percent
+        ),
+        "current_reduced_below_max": (
+            current_reduction_percent_measured >= current_reduction_percent
+        ),
+    }
+    metrics["limits"] = {
+        "max_power_spread_percent": max_power_spread_percent,
+        "max_power_error_percent": max_power_error_percent,
+        "min_binding_samples": min_binding_samples,
+        "min_binding_speed_span_pu": min_binding_speed_span_pu,
+        "current_reduction_percent": current_reduction_percent,
+        "saturation_margin_percent": saturation_margin_percent,
+    }
+    metrics["criteria"] = criteria
+    metrics["passed"] = all(criteria.values())
+    return metrics
+
+
 def analyze_vector_500(
     samples: Sequence[Any],
     *,
