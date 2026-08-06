@@ -54,6 +54,7 @@ extern "C" {
 #include "ipark.h"
 #include "V_pid_reg3.h"
 #include "V_pid_reg3_pos.h"
+#include "V_CurLoopLim.h"
 #include "V_rmp_ctrl.h"
 #include "V_adc.h"
 #include "V_PWM_Module.h"
@@ -91,6 +92,7 @@ extern TIPark 		ipark;
 extern TPidReg3 	pid_id;
 extern TPidReg3 	pid_iq;
 extern TPidReg3 	pid_ia;
+extern TCurLoopLim 	curLoopLim;
 extern TPidReg3 	pid_spd;
 extern TPidReg3_pos 	pid_pos;
 extern TRelayReg i_a_reg;

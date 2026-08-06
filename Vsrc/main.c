@@ -35,6 +35,7 @@ TPidReg3 pid_iq = PIDREG3_DEFAULTS; //!<Рег. тока по оси q
 TPidReg3 pid_ia = PIDREG3_DEFAULTS; //!<Рег. тока якоря ДПТ
 TPidReg3 pid_spd = PIDREG3_DEFAULTS; //!<Рег. скорости
 TPidReg3_pos pid_pos = PIDREG3_DEFAULTS_POS; //!<Рег. положения
+TCurLoopLim curLoopLim = CUR_LOOP_LIM_DEFAULTS; //!<Динамическое ограничение регуляторов тока по Ud и ШИМ
 TRelayReg i_a_reg = RELAY_REG_DEFAULTS;	//!<регулятор тока фазы A (для модели SRM)
 TRelayReg i_b_reg = RELAY_REG_DEFAULTS;	//!<регулятор тока фазы A (для модели SRM)
 TRelayReg i_c_reg = RELAY_REG_DEFAULTS;	//!<регулятор тока фазы A (для модели SRM)
@@ -90,7 +91,7 @@ volatile long Debug2 = 0;
 volatile Uint16 Debug3 = 0;
 volatile Uint16 Debug4 = 0;
 volatile long DebugW1 = 0;
-volatile long DebugW2 = 0;
+volatile long DebugW2 = _IQ(1.0); //!< k_dyn для динамического ограничения регуляторов тока (1.0 = полный учёт Ud)
 volatile long DebugW3 = 0;
 volatile long DebugW4 = 0;
 volatile float DebugF1 = 0;

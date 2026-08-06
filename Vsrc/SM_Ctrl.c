@@ -64,8 +64,8 @@ void SM_Ctrl_ms_Calc(TSM_Ctrl *p) {
 void SM_Ctrl_Fast_Calc(TSM_Ctrl *p) {
 	long Temp1;
 
-//если система находится в перееинициализации,
-//то пропускаем контур управления
+ //если система находится в перееинициализации,
+ //то пропускаем контур управления
 	if (sm_sys.state == SYS_INIT) {
 		return;
 	}
@@ -77,6 +77,13 @@ void SM_Ctrl_Fast_Calc(TSM_Ctrl *p) {
 // если есть авария, то переходим в стоп
 	if (sm_prot.state == PROT_FAIL)
 		p->state = CTRL_STOP;
+
+//Динамическое ограничение выхода регуляторов тока по текущему Ud ЗПТ
+//и способности модуля ШИМ. Пересчёт каждый такт. Apply каждый такт
+//устанавливает пределы: при DebugW1==0 — статика 1.0 о.е. (прежнее
+//поведение), при DebugW1!=0 — вычисленный динамический предел.
+	curLoopLim.calc(&curLoopLim);
+	CurLoopLim_Apply(&curLoopLim, &pid_id, &pid_iq);
 
 //считаем дискретный автомат
 	if (p->state_prev != p->state)
