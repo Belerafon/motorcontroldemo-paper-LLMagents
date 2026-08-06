@@ -128,3 +128,63 @@ def plot_vector_500(path: Path, samples: list[Sample]) -> None:
     current_axis.legend()
     figure.savefig(path, dpi=170)
     plt.close(figure)
+
+
+def plot_field_weakening(
+    path: Path,
+    samples: list[Sample],
+    *,
+    u_setpoint_pu: float = 0.85,
+) -> None:
+    import matplotlib.pyplot as plt
+
+    time_s = [sample.time_s for sample in samples]
+    plt.style.use("seaborn-v0_8-whitegrid")
+    figure, axes = plt.subplots(
+        3, 1, figsize=(11, 9.0), sharex=True, constrained_layout=True
+    )
+    speed_axis, mod_axis, current_axis = axes
+
+    speed_axis.plot(
+        time_s,
+        [s.values["speed_rpm"] for s in samples],
+        label="Measured speed",
+    )
+    speed_axis.set_title("Field weakening: high-speed run above base-speed region")
+    speed_axis.set_ylabel("Speed, rpm")
+    speed_axis.legend()
+
+    mod_axis.plot(
+        time_s,
+        [s.values["mod_index_pu"] for s in samples],
+        label="Modulation index U_mag/U_lim",
+        color="tab:purple",
+    )
+    mod_axis.axhline(
+        u_setpoint_pu,
+        color="gray",
+        linestyle="--",
+        label=f"FW U_setpoint ({u_setpoint_pu:.2f})",
+    )
+    mod_axis.axhline(1.0, color="red", linestyle=":", alpha=0.5)
+    mod_axis.set_ylabel("Modulation index, p.u.")
+    mod_axis.legend()
+
+    current_axis.plot(
+        time_s,
+        [s.values["id_ref_a"] for s in samples],
+        "--",
+        label="Id reference (FW output)",
+    )
+    current_axis.plot(
+        time_s,
+        [s.values["iq_a"] for s in samples],
+        label="Measured Iq",
+        color="tab:green",
+    )
+    current_axis.axhline(0.0, color="gray", linestyle=":", alpha=0.5)
+    current_axis.set_xlabel("Time, s")
+    current_axis.set_ylabel("d/q current, A")
+    current_axis.legend()
+    figure.savefig(path, dpi=170)
+    plt.close(figure)

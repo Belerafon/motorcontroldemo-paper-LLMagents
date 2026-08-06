@@ -57,6 +57,7 @@ void SM_Sys_Init(TSM_Sys *p) {
 	drv8301.init(&drv8301);//драйвер ключей
 	sm_cmd_logic.init(&sm_cmd_logic); //Логика включения/выключения
 	sm_ctrl.init(&sm_ctrl); //Структура системы управления
+	fw.init(&fw); //Ослабление поля (по умолчанию выключено, включается через DebugW3)
 	pwm.init(&pwm); //Модуль ШИМ
 	cur_par.init(&cur_par); //Расчет текущих показателей привода
 	leds.init(&leds);//светодиоды
@@ -218,6 +219,7 @@ void SM_Sys_Fast_Calc(TSM_Sys *p) {
 	adc.fast_calc(&adc); //АЦП
 	dlog.update(&dlog); //Осциллографирование данных
 	sm_prot.fast_calc(&sm_prot); //Защиты
+	fw.calc(&fw); //Ослабление поля: расчёт по U_mag/U_lim предыдущего такта
 	sm_ctrl.fast_calc(&sm_ctrl); //Главный дискретный автомат системы управления
 	udControl.calc(&udControl);//Плавная зарядка ЗПТ через термисторы
 

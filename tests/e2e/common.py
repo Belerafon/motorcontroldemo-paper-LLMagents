@@ -14,6 +14,7 @@ from motor_debug_core.object_dictionary import ObjectDictionary
 from motor_debug_core.project import ProjectPaths
 from motor_debug_core.target import SymbolTable, Target
 from motor_debug_core.transport import OpenOcdTransport
+from motor_debug_core.values import FixedPoint, ValueCodec
 
 
 HARDWARE_TYPES = {
@@ -23,6 +24,10 @@ HARDWARE_TYPES = {
     3: "niiet-board-simulator",
     4: "motorcontrolboard-simulator",
 }
+
+# Plain IQ24 codec (scale=1.0) for variables that the dictionary exposes as
+# raw per-unit IQ24 - e.g. the Debug* scratch variables.
+IQ24_PU = FixedPoint(q=24, scale=1.0)
 
 
 @dataclass(frozen=True)
@@ -120,6 +125,50 @@ class HardwareSession:
     def read_engineering(self, expression: str, *, unit: str = "") -> float:
         codec = self.dictionary.codec(expression, unit=unit)
         return codec.decode(self.target.read_u32(expression))
+
+    def read_iq24(self, expression: str) -> float:
+        """Read a raw IQ24 per-unit symbol via direct fixed-point codec.
+
+        Use for symbols that the dictionary exposes as plain IQ24 with no
+        engineering scale (e.g. fw.U_setpoint, fw.mod_index, Debug1/2/...).
+        """
+        return IQ24_PU.decode(self.target.read_u32(expression))
+
+    # Internal alias so scenarios can call the same helper as a private hook
+    # without coupling to the module-level constant.
+    _read_iq24 = read_iq24
+
+    @contextmanager
+    def temporary_iq24_value(
+        self, expression: str, value_pu: float
+    ) -> Iterator[int]:
+        """Temporarily write an IQ24 per-unit value and restore it on exit.
+
+        Safer than temporary_engineering_value for symbols whose dictionary
+        entry's StandartNum variant wins over IQ (multiple dictionary entries
+        mapping to the same address). Always decodes/encodes via plain IQ24.
+        """
+        original = self.target.read_u32(expression)
+        encoded = IQ24_PU.encode(value_pu)
+        try:
+            self.target.write_u32(expression, encoded)
+            actual = self.target.read_u32(expression)
+            if actual != encoded:
+                raise RuntimeError(
+                    f"Write verification failed for {expression}: "
+                    f"0x{actual:08X} != 0x{encoded:08X}."
+                )
+            yield original
+        finally:
+            self.drive.stop()
+            time.sleep(0.1)
+            self.target.write_u32(expression, original)
+            restored = self.target.read_u32(expression)
+            if restored != original:
+                raise RuntimeError(
+                    f"RAM restoration failed for {expression}: "
+                    f"0x{restored:08X} != 0x{original:08X}."
+                )
 
     def read_controller(self, name: str) -> dict[str, float]:
         fields = {

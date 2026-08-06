@@ -343,3 +343,109 @@ def analyze_vector_500(
     metrics["criteria"] = criteria
     metrics["passed"] = all(criteria.values())
     return metrics
+
+
+def analyze_field_weakening(
+    samples: Sequence[Any],
+    *,
+    target_speed_rpm: float,
+    u_setpoint_pu: float = 0.85,
+    max_steady_mod_index_pu: float = 1.05,
+    min_fw_id_ref_a: float = 0.05,
+    min_steady_speed_rpm: float = 550.0,
+    settling_dwell_s: float = 0.50,
+    settling_tolerance_rpm: float = 50.0,
+) -> dict[str, Any]:
+    """Verify that field weakening activates above the base-speed region.
+
+    The scenario is run with `refs.speed_ref` set well above the base speed so
+    that the inverter runs into voltage saturation and the FW regulator has to
+    intervene by commanding a negative Id. The function checks the four
+    observable signatures of healthy FW behaviour:
+
+    - the modulation index exceeds `u_setpoint_pu` at some point (the FW
+      controller had a reason to activate);
+    - the d-axis current reference becomes negative by at least
+      `min_fw_id_ref_a` amperes (the FW regulator actually pushed back);
+    - in steady state the modulation index stays below
+      `max_steady_mod_index_pu` (the loop is closed, the inverter is no longer
+      deep in saturation);
+    - the steady-state speed clears `min_steady_speed_rpm` (the motor has
+      actually accelerated beyond the base region);
+    - the speed settles into a stable plateau with ripple within the dwell
+      window.
+    """
+    time_s = _times(samples)
+    speed = _series(samples, "speed_rpm")
+    mod_index = _series(samples, "mod_index_pu")
+    id_ref = _series(samples, "id_ref_a")
+    iq = _series(samples, "iq_a")
+    period = _sample_period(time_s)
+    tail_start = _tail_start(len(samples))
+    steady_speed = speed[tail_start:]
+    steady_mod_index = mod_index[tail_start:]
+    steady_id_ref = id_ref[tail_start:]
+    steady_iq = iq[tail_start:]
+
+    peak_mod_index = max(mod_index)
+    min_id_ref = min(id_ref)
+    steady_speed_mean = _mean(steady_speed)
+    steady_speed_ripple = max(steady_speed) - min(steady_speed)
+    steady_mod_index_mean = _mean(steady_mod_index)
+    steady_id_ref_mean = _mean(steady_id_ref)
+    steady_iq_mean = _mean(steady_iq)
+    steady_iq_rms = _rms(steady_iq)
+
+    settling = _settling_time(
+        time_s,
+        speed,
+        steady_speed_mean,
+        settling_tolerance_rpm,
+        settling_dwell_s,
+        start=0,
+    )
+
+    metrics: dict[str, Any] = {
+        "samples": len(samples),
+        "sample_period_s": period,
+        "window_s": float(time_s[-1] - time_s[0]),
+        "target_speed_rpm": target_speed_rpm,
+        "u_setpoint_pu": u_setpoint_pu,
+        "peak_mod_index_pu": peak_mod_index,
+        "min_id_ref_a": min_id_ref,
+        "steady_speed_mean_rpm": steady_speed_mean,
+        "steady_speed_ripple_rpm": steady_speed_ripple,
+        "steady_mod_index_mean_pu": steady_mod_index_mean,
+        "steady_id_ref_mean_a": steady_id_ref_mean,
+        "steady_iq_mean_a": steady_iq_mean,
+        "steady_iq_rms_a": steady_iq_rms,
+        "speed_settling_time_s": settling,
+        "steady_state_speed_margin_rpm": steady_speed_mean
+        - min_steady_speed_rpm,
+    }
+    criteria = {
+        "enough_samples": len(samples) >= 64,
+        "modulation_index_overshot_setpoint": (
+            peak_mod_index >= u_setpoint_pu
+        ),
+        "field_weakening_activated": min_id_ref <= -min_fw_id_ref_a,
+        "modulation_index_regulated_in_steady_state": (
+            steady_mod_index_mean <= max_steady_mod_index_pu
+        ),
+        "speed_above_base_region": steady_speed_mean >= min_steady_speed_rpm,
+        "speed_settled_to_plateau": (
+            settling is not None
+            and steady_speed_ripple <= settling_tolerance_rpm
+        ),
+    }
+    metrics["limits"] = {
+        "u_setpoint_pu": u_setpoint_pu,
+        "max_steady_mod_index_pu": max_steady_mod_index_pu,
+        "min_fw_id_ref_a": min_fw_id_ref_a,
+        "min_steady_speed_rpm": min_steady_speed_rpm,
+        "settling_dwell_s": settling_dwell_s,
+        "settling_tolerance_rpm": settling_tolerance_rpm,
+    }
+    metrics["criteria"] = criteria
+    metrics["passed"] = all(criteria.values())
+    return metrics
