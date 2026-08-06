@@ -610,6 +610,99 @@ void PWM_Module_Sin_Update(TPWM_Module *p) {
 
 }
 
+//! Функция непрерывной векторной ШИМ без привязки к шинам
+
+//!В отличие от шестисекторной векторной ШИМ PWM_Module_No_SV_Update здесь
+//!ни одна фаза не прижимается к верхней или нижней шине. Вместо этого во все
+//!три фазы добавляется нулевая последовательность, равная половине суммы
+//!максимального и минимального фазного потенциала (метод min/max, инжекция
+//!нулевой последовательности). Это даёт такой же линейный диапазон, как у
+//!векторной ШИМ (амплитуда до 1.0 в базисе фазного амплитудного значения),
+//!т.е. на 15.5% больше, чем у синусоидальной ШИМ, но без пауз коммутации,
+//!характерных для привязки к шине.
+//! \memberof TPWM_Module
+void PWM_Module_SVPWM_Update(TPWM_Module *p) {
+	_iq knorm;
+	_iq Va, Vb, Vc;
+	_iq Vmax, Vmin, Voffset;
+
+	p->UalphaNorm = p->UalphaRef;
+	p->UbetaNorm = p->UbetaRef;
+
+	//находим амплитуду (без учета ограничения)
+	p->U_mag = _IQmag(p->UalphaNorm, p->UbetaNorm);
+
+	/* рассчитываем амплитуду вектора, который хотим отработать*/
+	knorm = _IQmag(p->UalphaNorm, p->UbetaNorm);
+	if (knorm >= p->U_lim) { //он больше, чем наше ограничение?
+		knorm = _IQdiv(p->U_lim, knorm); //в эту же переменную, для экономии, рассчитываем нормировку
+		p->UalphaNorm = _IQmpy(knorm, p->UalphaNorm); //уменьшаем пропорционально нормировке
+		p->UbetaNorm = _IQmpy(knorm, p->UbetaNorm); //и это
+		p->ULimitation = 1; //флаг о том, что идет ограничение напряжения
+	} else
+		p->ULimitation = 0;
+
+	//переход в переменные скважности. Как и в синусоидальной ШИМ, масштаб
+	//1/sqrt(3), чтобы переменные менялись в диапазоне от -1/sqrt(3) до 1/sqrt(3).
+	//Синусоидальная ШИМ из-за отсутствия нулевой последовательности насыщается
+	//уже при амплитуде 0.866, непрерывная векторная - только при 1.0.
+	p->UalphaNorm = _IQmpy(p->UalphaNorm, _IQ(1/0.866/2));
+	p->UbetaNorm = _IQmpy(p->UbetaNorm, _IQ(1/0.866/2));
+
+	/*фазное преобразование из системы альфа, бетта в a,b,c (обратное Кларка)*/
+	Va = p->UalphaNorm;
+	Vb = _IQmpy(p->UbetaNorm, _IQ(0.8660254)) - (p->UalphaNorm >> 1);
+	Vc = -_IQmpy(p->UbetaNorm, _IQ(0.8660254)) - (p->UalphaNorm >> 1);
+
+	/*инжекция нулевой последовательности: из каждого фазного потенциала
+	  вычитаем половину суммы максимума и минимума. За счет этого общая точка
+	  трех потенциалов центрируется относительно середины шины, а ни один из
+	  потенциалов не прижимается к шине. SVPWM_offsetK (0..1) ослабляет
+	  инжекцию для плавного A/B-сравнения с синусоидальной ШИМ.*/
+	Vmax = Va;
+	Vmin = Va;
+	if (Vb > Vmax)
+		Vmax = Vb;
+	else if (Vb < Vmin)
+		Vmin = Vb;
+	if (Vc > Vmax)
+		Vmax = Vc;
+	else if (Vc < Vmin)
+		Vmin = Vc;
+	Voffset = _IQmpy((Vmax + Vmin), _IQ(0.5));
+	Voffset = _IQmpy(Voffset, p->SVPWM_offsetK);
+	p->SVPWM_offset = Voffset;
+	Va -= Voffset;
+	Vb -= Voffset;
+	Vc -= Voffset;
+
+	p->GammaA = _IQmpy(p->k_pwm, _IQ(0.5) - Va);
+	p->GammaB = _IQmpy(p->k_pwm, _IQ(0.5) - Vb);
+	p->GammaC = _IQmpy(p->k_pwm, _IQ(0.5) - Vc);
+
+	/*насыщения (страховка; в линейном диапазоне скважности уже в пределах)*/
+
+	if (p->GammaA < 0)
+		p->GammaA = 0;
+	if (p->GammaB < 0)
+		p->GammaB = 0;
+	if (p->GammaC < 0)
+		p->GammaC = 0;
+
+	if (p->GammaA > p->k_pwm)
+		p->GammaA = p->k_pwm + 1;
+	if (p->GammaB > p->k_pwm)
+		p->GammaB = p->k_pwm + 1;
+	if (p->GammaC > p->k_pwm)
+		p->GammaC = p->k_pwm + 1;
+
+
+	NT_PWM0->CMPA_bit.CMPA = (Uint16) p->GammaA;
+	NT_PWM1->CMPA_bit.CMPA = (Uint16) p->GammaB;
+	NT_PWM2->CMPA_bit.CMPA = (Uint16) p->GammaC;
+
+}
+
 //! Функция ШИМ с раздельными фазами (для модели SRM)
 
 //! \memberof TPWM_Module
@@ -736,6 +829,10 @@ void PWM_Module_Update(TPWM_Module *p) {
 		}
 		case PWM_TYPE_SRD: {
 			PWM_Module_Separate_Update(p);
+			break;
+		}
+		case PWM_TYPE_SVPWM: {
+			PWM_Module_SVPWM_Update(p);
 			break;
 		}
 		}
