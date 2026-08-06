@@ -4,7 +4,11 @@ import math
 import unittest
 from dataclasses import dataclass
 
-from tests.e2e.metrics import analyze_current_mode4, analyze_vector_500
+from tests.e2e.metrics import (
+    analyze_current_mode4,
+    analyze_field_weakening,
+    analyze_vector_500,
+)
 
 
 @dataclass(frozen=True)
@@ -56,6 +60,69 @@ class CurrentMode4MetricsTests(unittest.TestCase):
 
         self.assertFalse(metrics["passed"])
         self.assertFalse(metrics["criteria"]["rotor_stationary"])
+
+
+class FieldWeakeningMetricsTests(unittest.TestCase):
+    @staticmethod
+    def samples(
+        *, final_speed: float, id_ref: float = 0.0, fw_err: float = 0.0
+    ) -> list[SyntheticSample]:
+        result = []
+        for number in range(601):
+            time_s = number * 0.01
+            speed = final_speed * (1.0 - math.exp(-time_s / 0.30))
+            if id_ref < 0:
+                id_ref_series = id_ref * (1.0 - math.exp(-time_s / 0.15))
+            else:
+                id_ref_series = 0.0
+            result.append(
+                SyntheticSample(
+                    number,
+                    time_s,
+                    {
+                        "speed_rpm": speed,
+                        "id_ref_a": id_ref_series,
+                        "id_a": id_ref_series,
+                        "fw_err_pu": fw_err * (1.0 - math.exp(-time_s / 0.15)),
+                    },
+                )
+            )
+        return result
+
+    def test_field_weakening_enables_speed_above_limit(self) -> None:
+        metrics = analyze_field_weakening(
+            self.samples(final_speed=742.0, id_ref=-2.5, fw_err=0.12),
+            self.samples(final_speed=680.0),
+            target_speed_rpm=740.0,
+        )
+
+        self.assertTrue(metrics["passed"])
+        self.assertTrue(metrics["criteria"]["weakening_activated"])
+        self.assertTrue(metrics["criteria"]["reached_target_with_weakening"])
+        self.assertTrue(metrics["criteria"]["blocked_without_weakening"])
+        self.assertGreater(metrics["speed_gain_rpm"], 20.0)
+
+    def test_no_weakening_demand_fails_acceptance(self) -> None:
+        metrics = analyze_field_weakening(
+            self.samples(final_speed=700.0, id_ref=0.0, fw_err=0.0),
+            self.samples(final_speed=680.0),
+            target_speed_rpm=740.0,
+        )
+
+        self.assertFalse(metrics["passed"])
+        self.assertFalse(metrics["criteria"]["weakening_activated"])
+        self.assertFalse(metrics["criteria"]["voltage_limit_hit"])
+
+    def test_weakening_not_needed_fails_if_speed_gain_is_small(self) -> None:
+        metrics = analyze_field_weakening(
+            self.samples(final_speed=695.0, id_ref=-0.5, fw_err=0.05),
+            self.samples(final_speed=685.0),
+            target_speed_rpm=740.0,
+        )
+
+        self.assertFalse(metrics["passed"])
+        self.assertFalse(metrics["criteria"]["reached_target_with_weakening"])
+        self.assertFalse(metrics["criteria"]["meaningful_speed_gain"])
 
 
 class Vector500MetricsTests(unittest.TestCase):

@@ -80,6 +80,7 @@ extern "C" {
 #include "V_event_log.h"
 #include "Global_time.h"
 #include "V_UdControl.h"
+#include "V_FieldWeakening.h"
 #include "V_DIO.h"
 #include "V_fifo.h"
 #include "V_usblib.h"
@@ -131,6 +132,7 @@ extern TLogger		FaultLog;
 extern TGlobalTime global_time;
 extern TUdControl udControl;
 extern TFanControl FanControl;
+extern TFieldWeakening field_weak;
 
 extern Uint16 msCounter;
 extern Uint16 FastCounter;

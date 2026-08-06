@@ -378,6 +378,9 @@ void SM_Ctrl_Fast_Calc(TSM_Ctrl *p) {
 			/*ENTRY START*/
 			pwm.On(&pwm);            //Включение ШИМ
 			rmp.output = 0;            //Обнуление задатчика интенсивности
+			field_weak.ui = 0;        //сброс ослабления поля
+			field_weak.id_ref = 0;
+			field_weak.fV.output = 0;
 			if (dlog.StartBits & (1 << 4)) //Если пользователь задал этот бит осциллографирования
 				dlog.set_mode(1, &dlog);  //Запуск осциллографа по этому событию
 			/*ENTRY END*/
@@ -438,7 +441,9 @@ void SM_Ctrl_Fast_Calc(TSM_Ctrl *p) {
 			pid_iq.pid_fdb_reg3 = park.qe; //обратная связь рег. тока оси q - вычисленный ток по фазе q
 			pid_iq.calc(&pid_iq); //расчет регулятора тока оси q
 
-			pid_id.pid_ref_reg3 = 0; //задание тока по оси d - оси возбудения
+			//задание тока по оси d - из модуля ослабления поля
+			//(автоматически уходит в отрицательную область при ограничении напряжения)
+			pid_id.pid_ref_reg3 = field_weak.id_ref;
 			pid_id.pid_fdb_reg3 = park.de; //обратная связь рег. тока оси d - вычисленный ток по фазе d
 			pid_id.calc(&pid_id); //расчет регулятора тока оси d
 
@@ -453,6 +458,16 @@ void SM_Ctrl_Fast_Calc(TSM_Ctrl *p) {
 			pwm.UalphaRef = ipark.ds;            //Ось альфа
 			pwm.UbetaRef = ipark.qs;            //Ось бета
 			pwm.update(&pwm);            //Расчет модуля ШИМ
+
+			//ослабление поля: на вход амплитуда запрошенного напряжения и его ограничение,
+			//на следующий такт формируется отрицательное задание тока по оси d
+			field_weak.v_mag = pwm.U_mag;
+			field_weak.v_lim = pwm.U_lim;
+			field_weak.calc(&field_weak);
+
+			//диагностика для наблюдения в UniCON
+			DebugW3 = field_weak.id_ref;
+			DebugW4 = field_weak.err;
 
 			if (sw.excitation_ena)
 			{
@@ -470,6 +485,9 @@ void SM_Ctrl_Fast_Calc(TSM_Ctrl *p) {
 			/*ENTRY START*/
 			pwm.On(&pwm);            //Включение ШИМ
 			rmp.output = 0;            //Обнуление задатчика интенсивности
+			field_weak.ui = 0;        //сброс ослабления поля
+			field_weak.id_ref = 0;
+			field_weak.fV.output = 0;
 			if (dlog.StartBits & (1 << 4)) //Если пользователь задал этот бит осциллографирования
 				dlog.set_mode(1, &dlog);  //Запуск осциллографа по этому событию
 			/*ENTRY END*/
@@ -578,7 +596,9 @@ void SM_Ctrl_Fast_Calc(TSM_Ctrl *p) {
 			pid_iq.pid_fdb_reg3 = park.qe; //обратная связь рег. тока оси q - вычисленный ток по фазе q
 			pid_iq.calc(&pid_iq); //расчет регулятора тока оси q
 
-			pid_id.pid_ref_reg3 = 0; //задание тока по оси d - оси возбудения
+			//задание тока по оси d - из модуля ослабления поля
+			//(автоматически уходит в отрицательную область при ограничении напряжения)
+			pid_id.pid_ref_reg3 = field_weak.id_ref;
 			pid_id.pid_fdb_reg3 = park.de; //обратная связь рег. тока оси d - вычисленный ток по фазе d
 			pid_id.calc(&pid_id); //расчет регулятора тока оси d
 
@@ -593,6 +613,16 @@ void SM_Ctrl_Fast_Calc(TSM_Ctrl *p) {
 			pwm.UalphaRef = ipark.ds;            //Ось альфа
 			pwm.UbetaRef = ipark.qs;            //Ось бета
 			pwm.update(&pwm);            //Расчет модуля ШИМ
+
+			//ослабление поля: на вход амплитуда запрошенного напряжения и его ограничение,
+			//на следующий такт формируется отрицательное задание тока по оси d
+			field_weak.v_mag = pwm.U_mag;
+			field_weak.v_lim = pwm.U_lim;
+			field_weak.calc(&field_weak);
+
+			//диагностика для наблюдения в UniCON
+			DebugW3 = field_weak.id_ref;
+			DebugW4 = field_weak.err;
 
 			/*DO END*/
 		}

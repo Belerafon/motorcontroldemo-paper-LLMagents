@@ -214,6 +214,84 @@ def analyze_current_mode4(
     return metrics
 
 
+def analyze_field_weakening(
+    enabled_samples: Sequence[Any],
+    disabled_samples: Sequence[Any],
+    *,
+    target_speed_rpm: float,
+    min_id_weakening_a: float = 1.0,
+    min_voltage_over_limit: float = 0.02,
+    enabled_speed_margin_rpm: float = 20.0,
+    disabled_speed_margin_rpm: float = 30.0,
+    min_speed_gain_rpm: float = 20.0,
+) -> dict[str, Any]:
+    """Analyse an A/B field-weakening capture.
+
+    ``enabled_samples`` holds the run with field weakening switched on (it
+    must reach the target speed and demand a negative d-axis current), while
+    ``disabled_samples`` holds the reference run with field weakening off
+    (it must saturate on the voltage limit below the target). Both captures
+    use the channels ``speed_rpm``, ``id_ref_a``, ``id_a`` and ``fw_err_pu``.
+    """
+    enabled_time = _times(enabled_samples)
+    disabled_time = _times(disabled_samples)
+    enabled_speed = _series(enabled_samples, "speed_rpm")
+    disabled_speed = _series(disabled_samples, "speed_rpm")
+    id_ref = _series(enabled_samples, "id_ref_a")
+    fw_err = _series(enabled_samples, "fw_err_pu")
+
+    enabled_period = _sample_period(enabled_time)
+    enabled_tail = _tail_start(len(enabled_speed))
+    disabled_tail = _tail_start(len(disabled_speed))
+
+    enabled_steady = _mean(enabled_speed[enabled_tail:])
+    disabled_steady = _mean(disabled_speed[disabled_tail:])
+    enabled_peak = max(enabled_speed)
+    min_id_ref = min(id_ref)
+    max_fw_err = max(fw_err)
+
+    speed_gain = enabled_steady - disabled_steady
+
+    metrics: dict[str, Any] = {
+        "enabled_samples": len(enabled_samples),
+        "disabled_samples": len(disabled_samples),
+        "enabled_window_s": float(enabled_time[-1] - enabled_time[0]),
+        "disabled_window_s": float(disabled_time[-1] - disabled_time[0]),
+        "target_speed_rpm": target_speed_rpm,
+        "enabled_steady_speed_rpm": enabled_steady,
+        "enabled_peak_speed_rpm": enabled_peak,
+        "disabled_steady_speed_rpm": disabled_steady,
+        "speed_gain_rpm": speed_gain,
+        "min_id_reference_a": min_id_ref,
+        "max_voltage_over_limit_pu": max_fw_err,
+    }
+    criteria = {
+        "enough_samples": (
+            len(enabled_samples) >= 64 and len(disabled_samples) >= 64
+        ),
+        "weakening_activated": min_id_ref <= -min_id_weakening_a,
+        "voltage_limit_hit": max_fw_err >= min_voltage_over_limit,
+        "reached_target_with_weakening": (
+            enabled_steady >= target_speed_rpm - enabled_speed_margin_rpm
+        ),
+        "blocked_without_weakening": (
+            disabled_steady <= target_speed_rpm - disabled_speed_margin_rpm
+        ),
+        "meaningful_speed_gain": speed_gain >= min_speed_gain_rpm,
+    }
+    metrics["limits"] = {
+        "target_speed_rpm": target_speed_rpm,
+        "min_id_weakening_a": min_id_weakening_a,
+        "min_voltage_over_limit_pu": min_voltage_over_limit,
+        "enabled_speed_margin_rpm": enabled_speed_margin_rpm,
+        "disabled_speed_margin_rpm": disabled_speed_margin_rpm,
+        "min_speed_gain_rpm": min_speed_gain_rpm,
+    }
+    metrics["criteria"] = criteria
+    metrics["passed"] = all(criteria.values())
+    return metrics
+
+
 def analyze_vector_500(
     samples: Sequence[Any],
     *,
