@@ -128,3 +128,50 @@ def plot_vector_500(path: Path, samples: list[Sample]) -> None:
     current_axis.legend()
     figure.savefig(path, dpi=170)
     plt.close(figure)
+
+
+def plot_constant_power(
+    path: Path, samples: list[Sample], *, power_limit_pu: float
+) -> None:
+    import matplotlib.pyplot as plt
+
+    time_s = [sample.time_s for sample in samples]
+    speed_rpm = [s.values["speed_rpm"] for s in samples]
+    iq_a = [s.values["iq_a"] for s in samples]
+    speed_pu = [value / 500.0 for value in speed_rpm]
+    iq_pu = [value / 5.0 for value in iq_a]
+    power_pu = [sp * iq for sp, iq in zip(speed_pu, iq_pu)]
+    plt.style.use("seaborn-v0_8-whitegrid")
+    figure, (speed_axis, power_axis) = plt.subplots(
+        2, 1, figsize=(11, 7.2), sharex=True, constrained_layout=True
+    )
+    speed_axis.plot(
+        time_s,
+        [s.values["speed_ref_rpm"] for s in samples],
+        "--",
+        label="Speed reference",
+    )
+    speed_axis.plot(time_s, speed_rpm, label="Measured speed")
+    speed_axis.set_title("Constant-power acceleration (speed*Iq held at limit)")
+    speed_axis.set_ylabel("Speed, rpm")
+    speed_axis.legend()
+    power_axis.plot(time_s, power_pu, label="Power speed_pu * iq_pu")
+    power_axis.axhline(
+        power_limit_pu,
+        color="tab:red",
+        linestyle=":",
+        label=f"Power limit {power_limit_pu:g} pu",
+    )
+    if "power_pu" in samples[0].values:
+        power_axis.plot(
+            time_s,
+            [s.values["power_pu"] for s in samples],
+            color="tab:green",
+            alpha=0.7,
+            label="Firmware power (DebugW3)",
+        )
+    power_axis.set_xlabel("Time, s")
+    power_axis.set_ylabel("Power, per-unit")
+    power_axis.legend()
+    figure.savefig(path, dpi=170)
+    plt.close(figure)

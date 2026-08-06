@@ -5,10 +5,11 @@ from pathlib import Path
 
 from motor_debug_core.project import ProjectPaths
 
-from . import current_mode4, vector_500
+from . import constant_power, current_mode4, vector_500
 
 
 SCENARIOS = {
+    constant_power.NAME: constant_power,
     current_mode4.NAME: current_mode4,
     vector_500.NAME: vector_500,
 }

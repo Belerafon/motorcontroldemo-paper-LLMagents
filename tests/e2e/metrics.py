@@ -343,3 +343,133 @@ def analyze_vector_500(
     metrics["criteria"] = criteria
     metrics["passed"] = all(criteria.values())
     return metrics
+
+
+def analyze_constant_power(
+    samples: Sequence[Any],
+    *,
+    target_speed_rpm: float,
+    power_limit_pu: float,
+    speed_base_rpm: float = 500.0,
+    current_base_a: float = 5.0,
+    max_time_to_95_s: float = 2.5,
+    max_power_exceed_percent: float = 15.0,
+    engage_tolerance_percent: float = 25.0,
+    max_power_relative_std_percent: float = 15.0,
+    max_power_offset_percent: float = 20.0,
+    max_current_shape_factor: float = 0.85,
+    window_base_speed_frac: float = 0.35,
+    window_top_speed_frac: float = 0.9,
+) -> dict[str, Any]:
+    """Validate constant-power acceleration against a settable power limit.
+
+    The firmware limits the q-current reference to ``power_limit / speed``,
+    so during acceleration ``speed_pu * iq_pu`` stays close to the limit.
+    Power is computed independently from the logged speed and q-current, and
+    the firmware's own power estimate (channel ``power_pu``) is reported too.
+    """
+    if power_limit_pu <= 0:
+        raise ValueError("power_limit_pu must be positive.")
+    if not 0.0 < window_base_speed_frac < window_top_speed_frac <= 1.0:
+        raise ValueError("Speed window must satisfy base < top and fit in (0, 1].")
+
+    time_s = _times(samples)
+    speed_rpm = _series(samples, "speed_rpm")
+    speed_ref = _series(samples, "speed_ref_rpm")
+    iq_a = _series(samples, "iq_a")
+    channel_names = samples[0].values
+    power_pu = (
+        _series(samples, "power_pu")
+        if "power_pu" in channel_names
+        else [0.0] * len(samples)
+    )
+    speed_pu = [value / speed_base_rpm for value in speed_rpm]
+    iq_pu = [value / current_base_a for value in iq_a]
+    power_actual_pu = [
+        sp * iq for sp, iq in zip(speed_pu, iq_pu)
+    ]
+    period = _sample_period(time_s)
+    start = _event_start(speed_ref, target_speed_rpm)
+
+    i95 = _first_crossing(speed_rpm, target_speed_rpm, 0.95, start)
+    time_to_95 = None if i95 is None else float(time_s[i95] - time_s[start])
+
+    window = [
+        index
+        for index, sp in enumerate(speed_pu)
+        if window_base_speed_frac <= sp <= window_top_speed_frac
+    ]
+    if not window:
+        raise ValueError(
+            "No samples fell inside the constant-power speed window; "
+            "the acceleration profile cannot be validated."
+        )
+    window_power = [power_actual_pu[index] for index in window]
+    peak_power = max(window_power)
+    mean_power = _mean(window_power)
+    std_power = float(statistics.pstdev(window_power))
+    relative_std = std_power / mean_power * 100.0 if mean_power else math.inf
+    offset_percent = abs(mean_power - power_limit_pu) / power_limit_pu * 100.0
+    engaged = peak_power >= power_limit_pu * (1.0 - engage_tolerance_percent / 100.0)
+    bounded = peak_power <= power_limit_pu * (1.0 + max_power_exceed_percent / 100.0)
+
+    iq_base = _mean([iq_pu[index] for index in window if speed_pu[index] <=
+                     (window_base_speed_frac + window_top_speed_frac) / 2.0])
+    iq_top = _mean([iq_pu[index] for index in window if speed_pu[index] >=
+                    (window_base_speed_frac + window_top_speed_frac) / 2.0])
+    current_shape_factor = (iq_top / iq_base) if iq_base else math.inf
+
+    overall_peak_power = max(power_actual_pu)
+    metrics: dict[str, Any] = {
+        "samples": len(samples),
+        "sample_period_s": period,
+        "window_s": float(time_s[-1] - time_s[0]),
+        "target_speed_rpm": target_speed_rpm,
+        "power_limit_pu": power_limit_pu,
+        "speed_base_rpm": speed_base_rpm,
+        "current_base_a": current_base_a,
+        "time_to_95_percent_s": time_to_95,
+        "speed_window": [window_base_speed_frac, window_top_speed_frac],
+        "window_sample_count": len(window),
+        "power_pu_overall_peak": overall_peak_power,
+        "power_pu_window_peak": peak_power,
+        "power_pu_window_mean": mean_power,
+        "power_pu_window_stddev": std_power,
+        "power_pu_window_relative_std_percent": relative_std,
+        "power_pu_offset_from_limit_percent": offset_percent,
+        "power_limit_engaged": engaged,
+        "iq_pu_window_low_speed_mean": iq_base,
+        "iq_pu_window_high_speed_mean": iq_top,
+        "iq_pu_shape_factor": current_shape_factor,
+        "firmware_power_pu_window_mean": _mean(
+            [power_pu[index] for index in window]
+        ),
+    }
+    criteria = {
+        "enough_samples": len(samples) >= 64,
+        "window_covered": len(window) >= 16,
+        "reached_95_percent": (
+            time_to_95 is not None and time_to_95 <= max_time_to_95_s
+        ),
+        "power_limit_engaged": engaged,
+        "power_bounded_by_limit": bounded,
+        "power_constant": (
+            relative_std <= max_power_relative_std_percent
+            and offset_percent <= max_power_offset_percent
+        ),
+        "current_drops_with_speed": current_shape_factor <= max_current_shape_factor,
+    }
+    metrics["limits"] = {
+        "power_limit_pu": power_limit_pu,
+        "max_time_to_95_s": max_time_to_95_s,
+        "max_power_exceed_percent": max_power_exceed_percent,
+        "engage_tolerance_percent": engage_tolerance_percent,
+        "max_power_relative_std_percent": max_power_relative_std_percent,
+        "max_power_offset_percent": max_power_offset_percent,
+        "max_current_shape_factor": max_current_shape_factor,
+        "allowed_peak_power_pu": power_limit_pu
+        * (1.0 + max_power_exceed_percent / 100.0),
+    }
+    metrics["criteria"] = criteria
+    metrics["passed"] = all(criteria.values())
+    return metrics
