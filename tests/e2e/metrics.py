@@ -214,6 +214,165 @@ def analyze_current_mode4(
     return metrics
 
 
+def _constant_power_series(
+    samples: Sequence[Any],
+    *,
+    speed_nom_rpm: float,
+    i_nom_a: float,
+    speed_lo_rpm: float,
+    speed_hi_rpm: float,
+    saturation_ratio: float = 0.08,
+) -> dict[str, Any]:
+    """Collect speed/current samples inside the power-limit speed window."""
+    speed = _series(samples, "speed_rpm")
+    iq_ref = _series(samples, "iq_ref_a")
+    limit = _series(samples, "limit_a")
+    keep = []
+    for index, value in enumerate(speed):
+        if not (speed_lo_rpm <= value <= speed_hi_rpm):
+            continue
+        if limit[index] <= 0:
+            continue
+        deviation = abs(iq_ref[index] - limit[index]) / limit[index]
+        if deviation > saturation_ratio:
+            continue
+        keep.append(index)
+    if not keep:
+        return {"keep": keep, "speed": [], "iq_ref": [], "limit": [], "power_pu": []}
+    power = [
+        (speed[index] / speed_nom_rpm) * (abs(iq_ref[index]) / i_nom_a)
+        for index in keep
+    ]
+    return {
+        "keep": keep,
+        "speed": [speed[index] for index in keep],
+        "iq_ref": [iq_ref[index] for index in keep],
+        "limit": [limit[index] for index in keep],
+        "power_pu": power,
+    }
+
+
+def analyze_constant_power(
+    samples: Sequence[Any],
+    *,
+    mode: str,
+    speed_nom_rpm: float,
+    i_nom_a: float,
+    iq_current_limit_a: float,
+    power_set_pu: float,
+    speed_lo_rpm: float,
+    speed_hi_rpm: float,
+    max_power_cv_percent: float = 12.0,
+    power_match_percent: float = 15.0,
+    min_speed_span_rpm: float = 40.0,
+    current_drop_ratio: float = 0.90,
+    saturation_error_percent: float = 8.0,
+    torque_tolerance_percent: float = 10.0,
+    min_power_growth_ratio: float = 1.15,
+    min_window_samples: int = 10,
+) -> dict[str, Any]:
+    if mode not in ("power", "torque"):
+        raise ValueError("mode must be 'power' or 'torque'.")
+    series = _constant_power_series(
+        samples,
+        speed_nom_rpm=speed_nom_rpm,
+        i_nom_a=i_nom_a,
+        speed_lo_rpm=speed_lo_rpm,
+        speed_hi_rpm=speed_hi_rpm,
+    )
+    power = series["power_pu"]
+    iq_ref = series["iq_ref"]
+    limit = series["limit"]
+    n_window = len(power)
+    if n_window:
+        span = max(series["speed"]) - min(series["speed"])
+        power_mean = _mean(power)
+        power_std = math.sqrt(_mean([(value - power_mean) ** 2 for value in power]))
+        power_cv = power_std / power_mean * 100.0 if power_mean else math.inf
+        third = max(1, n_window // 4)
+        head = _mean(power[:third])
+        tail = _mean(power[-third:])
+        power_growth_ratio = tail / head if head else math.inf
+        iq_start = _mean(iq_ref[:third])
+        iq_end = _mean(iq_ref[-third:])
+        iq_drop_ratio = iq_end / iq_start if iq_start else math.inf
+        median_iq = float(statistics.median(iq_ref))
+        saturation_error = _mean(
+            [abs(ref - lim) / lim * 100.0 for ref, lim in zip(iq_ref, limit)]
+        )
+    else:
+        span = 0.0
+        power_mean = 0.0
+        power_std = 0.0
+        power_cv = math.inf
+        power_growth_ratio = math.inf
+        iq_drop_ratio = 0.0
+        median_iq = 0.0
+        saturation_error = 0.0
+    torque_ratio = median_iq / iq_current_limit_a if iq_current_limit_a else 0.0
+    power_match = (
+        abs(power_mean - power_set_pu) / power_set_pu * 100.0
+        if power_set_pu
+        else math.inf
+    )
+    metrics: dict[str, Any] = {
+        "mode": mode,
+        "window_samples": n_window,
+        "window_speed_span_rpm": span,
+        "power_mean_pu": power_mean,
+        "power_std_pu": power_std,
+        "power_cv_percent": power_cv,
+        "power_set_pu": power_set_pu,
+        "power_match_percent": power_match,
+        "power_growth_ratio": power_growth_ratio,
+        "iq_reference_median_a": median_iq,
+        "iq_current_limit_a": iq_current_limit_a,
+        "torque_ratio_to_limit": torque_ratio,
+        "iq_drop_ratio_over_window": iq_drop_ratio,
+        "saturation_error_percent": saturation_error,
+    }
+    limits = {
+        "max_power_cv_percent": max_power_cv_percent,
+        "power_match_percent": power_match_percent,
+        "min_speed_span_rpm": min_speed_span_rpm,
+        "current_drop_ratio": current_drop_ratio,
+        "saturation_error_percent": saturation_error_percent,
+        "torque_tolerance_percent": torque_tolerance_percent,
+        "min_power_growth_ratio": min_power_growth_ratio,
+        "min_window_samples": min_window_samples,
+        "speed_lo_rpm": speed_lo_rpm,
+        "speed_hi_rpm": speed_hi_rpm,
+        "speed_nom_rpm": speed_nom_rpm,
+        "i_nom_a": i_nom_a,
+    }
+    criteria = {
+        "enough_window_samples": n_window >= min_window_samples,
+        "speed_span_reached": span >= min_speed_span_rpm,
+        "power_limited_saturated": saturation_error <= saturation_error_percent,
+    }
+    if mode == "power":
+        criteria.update(
+            {
+                "power_held_constant": power_cv <= max_power_cv_percent,
+                "power_matches_limit": power_match <= power_match_percent,
+                "current_ramps_down": iq_drop_ratio <= current_drop_ratio,
+            }
+        )
+    else:
+        criteria.update(
+            {
+                "torque_held_at_limit": abs(torque_ratio - 1.0)
+                <= torque_tolerance_percent / 100.0,
+                "power_grows_with_speed": power_growth_ratio
+                >= min_power_growth_ratio,
+            }
+        )
+    metrics["limits"] = limits
+    metrics["criteria"] = criteria
+    metrics["passed"] = all(criteria.values())
+    return metrics
+
+
 def analyze_vector_500(
     samples: Sequence[Any],
     *,

@@ -39,7 +39,7 @@ def write_csv(path: Path, samples: list[Sample]) -> None:
 def write_json(path: Path, report: dict[str, Any]) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(
-        json.dumps(report, ensure_ascii=False, indent=2, allow_nan=False) + "\n",
+        json.dumps(report, ensure_ascii=False, indent=2, allow_nan=True) + "\n",
         encoding="utf-8",
     )
 
@@ -126,5 +126,42 @@ def plot_vector_500(path: Path, samples: list[Sample]) -> None:
     current_axis.set_xlabel("Time, s")
     current_axis.set_ylabel("q-axis current, A")
     current_axis.legend()
+    figure.savefig(path, dpi=170)
+    plt.close(figure)
+
+
+def plot_constant_power(
+    path: Path,
+    samples: list[Sample],
+    *,
+    speed_nom_rpm: float,
+    i_nom_a: float,
+    power_set_pu: float,
+) -> None:
+    import matplotlib.pyplot as plt
+
+    time_s = [sample.time_s for sample in samples]
+    speed = [sample.values["speed_rpm"] for sample in samples]
+    iq_ref = [sample.values["iq_ref_a"] for sample in samples]
+    power_pu = [
+        (value / speed_nom_rpm) * (abs(iq) / i_nom_a)
+        for value, iq in zip(speed, iq_ref)
+    ]
+    plt.style.use("seaborn-v0_8-whitegrid")
+    figure, (speed_axis, current_axis, power_axis) = plt.subplots(
+        3, 1, figsize=(11, 9.6), sharex=True, constrained_layout=True
+    )
+    speed_axis.plot(time_s, speed, label="Speed")
+    speed_axis.set_title("Constant-power acceleration")
+    speed_axis.set_ylabel("Speed, rpm")
+    speed_axis.legend()
+    current_axis.plot(time_s, iq_ref, label="Iq reference (torque)")
+    current_axis.set_ylabel("q-axis current, A")
+    current_axis.legend()
+    power_axis.plot(time_s, power_pu, label="Power, pu")
+    power_axis.axhline(power_set_pu, color="gray", linestyle=":", label="Set limit")
+    power_axis.set_xlabel("Time, s")
+    power_axis.set_ylabel("Power, pu")
+    power_axis.legend()
     figure.savefig(path, dpi=170)
     plt.close(figure)

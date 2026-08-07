@@ -4,7 +4,11 @@ import math
 import unittest
 from dataclasses import dataclass
 
-from tests.e2e.metrics import analyze_current_mode4, analyze_vector_500
+from tests.e2e.metrics import (
+    analyze_constant_power,
+    analyze_current_mode4,
+    analyze_vector_500,
+)
 
 
 @dataclass(frozen=True)
@@ -98,6 +102,87 @@ class Vector500MetricsTests(unittest.TestCase):
 
         self.assertFalse(metrics["passed"])
         self.assertFalse(metrics["criteria"]["overshoot"])
+
+
+class ConstantPowerMetricsTests(unittest.TestCase):
+    SPEED_NOM = 500.0
+    I_NOM = 5.0
+    IQ_LIMIT = 4.0
+    P_SET = 0.40
+
+    @staticmethod
+    def _sample(speed_rpm, iq_ref_a, limit_a, iq_a) -> SyntheticSample:
+        return SyntheticSample(
+            0, 0.0, {"speed_rpm": speed_rpm, "iq_ref_a": iq_ref_a, "iq_a": iq_a, "limit_a": limit_a}
+        )
+
+    @classmethod
+    def power_samples(cls, *, constant_torque: bool = False) -> list[SyntheticSample]:
+        result = []
+        for number in range(801):
+            speed = 100.0 + number * (340.0 / 800.0)
+            if constant_torque:
+                iq_ref = cls.IQ_LIMIT
+            else:
+                iq_ref = cls.P_SET * cls.I_NOM * cls.SPEED_NOM / speed
+            result.append(cls._sample(speed, iq_ref, iq_ref, iq_ref))
+        return result
+
+    @classmethod
+    def torque_samples(cls) -> list[SyntheticSample]:
+        result = []
+        for number in range(801):
+            speed = 100.0 + number * (340.0 / 800.0)
+            result.append(cls._sample(speed, cls.IQ_LIMIT, cls.IQ_LIMIT, cls.IQ_LIMIT))
+        return result
+
+    def test_constant_power_mode_passes(self) -> None:
+        metrics = analyze_constant_power(
+            self.power_samples(),
+            mode="power",
+            speed_nom_rpm=self.SPEED_NOM,
+            i_nom_a=self.I_NOM,
+            iq_current_limit_a=self.IQ_LIMIT,
+            power_set_pu=self.P_SET,
+            speed_lo_rpm=270.0,
+            speed_hi_rpm=370.0,
+        )
+
+        self.assertTrue(metrics["passed"])
+        self.assertLess(metrics["power_cv_percent"], 12.0)
+        self.assertLess(metrics["power_match_percent"], 15.0)
+
+    def test_constant_torque_fails_power_mode(self) -> None:
+        metrics = analyze_constant_power(
+            self.power_samples(constant_torque=True),
+            mode="power",
+            speed_nom_rpm=self.SPEED_NOM,
+            i_nom_a=self.I_NOM,
+            iq_current_limit_a=self.IQ_LIMIT,
+            power_set_pu=self.P_SET,
+            speed_lo_rpm=270.0,
+            speed_hi_rpm=370.0,
+        )
+
+        self.assertFalse(metrics["passed"])
+        self.assertFalse(metrics["criteria"]["current_ramps_down"])
+        self.assertFalse(metrics["criteria"]["power_matches_limit"])
+
+    def test_disabled_torque_mode_passes(self) -> None:
+        metrics = analyze_constant_power(
+            self.torque_samples(),
+            mode="torque",
+            speed_nom_rpm=self.SPEED_NOM,
+            i_nom_a=self.I_NOM,
+            iq_current_limit_a=self.IQ_LIMIT,
+            power_set_pu=self.P_SET,
+            speed_lo_rpm=270.0,
+            speed_hi_rpm=370.0,
+        )
+
+        self.assertTrue(metrics["passed"])
+        self.assertGreater(metrics["power_growth_ratio"], 1.15)
+        self.assertLess(abs(metrics["torque_ratio_to_limit"] - 1.0), 0.1)
 
 
 if __name__ == "__main__":
