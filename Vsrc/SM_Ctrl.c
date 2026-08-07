@@ -63,12 +63,32 @@ void SM_Ctrl_ms_Calc(TSM_Ctrl *p) {
 //! \memberof TSM_Ctrl
 void SM_Ctrl_Fast_Calc(TSM_Ctrl *p) {
 	long Temp1;
+	long UmaxAvail;
 
 //если система находится в перееинициализации,
 //то пропускаем контур управления
 	if (sm_sys.state == SYS_INIT) {
 		return;
 	}
+
+	//Динамическое ограничение выхода регуляторов тока (напряжений по осям).
+	//Максимально реализуемое модулем ШИМ напряжение ограничено текущим
+	//напряжением ЗПТ (adc.Udc_meas, 1.0 = Udc_nom) и настройкой U_lim модуля
+	//ШИМ (запас до перемодуляции). Выход регуляторов тока (задание напряжения)
+	//не должен превышать эту величину, иначе вектор всё равно будет вписан в
+	//шестиугольник внутри ШИМ, а интеграторы регуляторов накопят лишнее.
+	UmaxAvail = adc.Udc_meas;
+	if (UmaxAvail > pwm.U_lim)
+		UmaxAvail = pwm.U_lim;
+	if (UmaxAvail < 0)
+		UmaxAvail = 0;
+	pid_id.pid_out_max = UmaxAvail;
+	pid_id.pid_out_min = -UmaxAvail;
+	pid_iq.pid_out_max = UmaxAvail;
+	pid_iq.pid_out_min = -UmaxAvail;
+	pid_ia.pid_out_max = UmaxAvail;
+	pid_ia.pid_out_min = -UmaxAvail;
+	DebugF1 = _IQtoF(UmaxAvail); //наблюдение величины доступного напряжения
 
 //если команда остановить, то переходим
 //в режим ОСТАНОВЛЕН
