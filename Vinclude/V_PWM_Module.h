@@ -49,6 +49,8 @@ extern "C"
 #define PWM_TYPE_DC_DRIVE		4
 //!ШИМ для управления SRM
 #define PWM_TYPE_SRD			5
+//!Непрерывная векторная ШИМ (синусоидальная + центрирующая добавка нулевой последовательности, без привязки к шинам)
+#define PWM_TYPE_SVPWM_CONT		6
 
 
 //! Ограничения величины "минимальной скважности", мкс, min
@@ -151,6 +153,8 @@ void PWM_Module_Off(TPWM_Module *);
 
 //векторные функции из библиотеки
 void PWM_Module_No_SV_Update(TPWM_Module *);
+//! Непрерывная векторная ШИМ (без привязки к шинам, полное использование напряжения ЗПТ)
+void PWM_Module_SVPWM_Update(TPWM_Module *);
 
 #ifdef __cplusplus
 }

@@ -214,6 +214,101 @@ def analyze_current_mode4(
     return metrics
 
 
+def analyze_svpwm_gamma(
+    samples: Sequence[Any],
+    *,
+    k_pwm: int,
+    target_speed_rpm: float = 500.0,
+    max_speed_deviation_rpm: float = 50.0,
+    min_common_mode_fraction: float = 0.02,
+    max_duty_edge_margin_fraction: float = 0.01,
+    max_clamped_samples_fraction: float = 0.10,
+    min_samples: int = 64,
+) -> dict[str, Any]:
+    """Analyse the three PWM duty cycles produced by continuous SVPWM.
+
+    Verifies the two signature properties of the continuous space-vector
+    algorithm (``PWM_TYPE_SVPWM_CONT``) on a capture of ``pwm.GammaA/B/C``
+    while the motor runs:
+
+    * no sustained bus clamping: at most a small fraction of samples may put
+      a phase on a DC-bus rail (only the momentary touch at the linear limit
+      of SVPWM during voltage transients). A discontinuous/clamped modulator
+      such as the 6-sector PWM holds a phase on the rail for a large fraction
+      of every electrical cycle at any operating point, so its clamped-sample
+      fraction is far above the threshold;
+    * zero-sequence injection: the instantaneous common mode of the three
+      duties deviates from the half-bus point ``k_pwm/2`` (a plain
+      sinusoidal modulator keeps the common mode at exactly ``k_pwm/2``).
+
+    Together the two checks single out continuous SVPWM among the existing
+    PWM types. ``samples`` must contain ``gamma_a``, ``gamma_b``,
+    ``gamma_c`` and ``speed_rpm`` channels; ``gamma_*`` values are raw timer
+    counts comparable with ``k_pwm``.
+    """
+    if k_pwm <= 0:
+        raise ValueError("k_pwm must be positive.")
+    time_s = _times(samples)
+    speed = _series(samples, "speed_rpm")
+    period = _sample_period(time_s)
+    k = float(k_pwm)
+    duty_a = [value / k for value in _series(samples, "gamma_a")]
+    duty_b = [value / k for value in _series(samples, "gamma_b")]
+    duty_c = [value / k for value in _series(samples, "gamma_c")]
+    common_mode = [
+        (duty_a[index] + duty_b[index] + duty_c[index]) / 3.0 - 0.5
+        for index in range(len(samples))
+    ]
+    min_duty = min(min(duty_a), min(duty_b), min(duty_c))
+    max_duty = max(max(duty_a), max(duty_b), max(duty_c))
+    edge_margin = max(1.0 / k, max_duty_edge_margin_fraction)
+    clamped_fraction = sum(
+        1.0
+        for a, b, c in zip(duty_a, duty_b, duty_c)
+        if a <= edge_margin
+        or b <= edge_margin
+        or c <= edge_margin
+        or a >= 1.0 - edge_margin
+        or b >= 1.0 - edge_margin
+        or c >= 1.0 - edge_margin
+    ) / len(samples)
+    peak_common = max(abs(value) for value in common_mode)
+    # steady-state speed is evaluated on the tail, because the capture also
+    # contains the acceleration phase from drive start.
+    tail_start = _tail_start(len(samples))
+    speed_mean = _mean(speed[tail_start:])
+    metrics: dict[str, Any] = {
+        "samples": len(samples),
+        "sample_period_s": period,
+        "window_s": float(time_s[-1] - time_s[0]),
+        "k_pwm": int(k),
+        "min_duty_fraction": min_duty,
+        "max_duty_fraction": max_duty,
+        "duty_edge_margin_fraction": edge_margin,
+        "clamped_samples_fraction": clamped_fraction,
+        "peak_abs_common_mode_fraction": peak_common,
+        "steady_speed_mean_rpm": speed_mean,
+    }
+    criteria = {
+        "enough_samples": len(samples) >= min_samples,
+        "no_bus_clamping": clamped_fraction <= max_clamped_samples_fraction,
+        "zero_sequence_injection_present": peak_common > min_common_mode_fraction,
+        "speed_reached": abs(speed_mean - target_speed_rpm)
+        <= max_speed_deviation_rpm,
+    }
+    metrics["limits"] = {
+        "min_common_mode_fraction": min_common_mode_fraction,
+        "max_duty_edge_margin_fraction": max_duty_edge_margin_fraction,
+        "max_clamped_samples_fraction": max_clamped_samples_fraction,
+        "target_speed_rpm": target_speed_rpm,
+        "max_speed_deviation_rpm": max_speed_deviation_rpm,
+        "min_samples": min_samples,
+    }
+    metrics["criteria"] = criteria
+    metrics["passed"] = all(criteria.values())
+    return metrics
+
+
 def analyze_vector_500(
     samples: Sequence[Any],
     *,

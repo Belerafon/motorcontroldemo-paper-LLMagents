@@ -128,3 +128,44 @@ def plot_vector_500(path: Path, samples: list[Sample]) -> None:
     current_axis.legend()
     figure.savefig(path, dpi=170)
     plt.close(figure)
+
+
+def plot_svpwm_gamma(path: Path, samples: list[Sample]) -> None:
+    import matplotlib.pyplot as plt
+
+    time_s = [sample.time_s for sample in samples]
+    plt.style.use("seaborn-v0_8-whitegrid")
+    figure, (duty_axis, common_axis) = plt.subplots(
+        2, 1, figsize=(11, 7.2), sharex=True, constrained_layout=True
+    )
+    for name, label in (("gamma_a", "A"), ("gamma_b", "B"), ("gamma_c", "C")):
+        duty_axis.plot(time_s, [s.values[name] for s in samples], label=f"Phase {label}")
+    duty_axis.set_title(
+        "Continuous SVPWM: phase duty cycles and zero-sequence injection"
+    )
+    duty_axis.set_ylabel("Compare value (Gamma)")
+    duty_axis.legend()
+    common = [
+        (
+            s.values["gamma_a"] + s.values["gamma_b"] + s.values["gamma_c"]
+        )
+        / 3.0
+        - 0.0
+        for s in samples
+    ]
+    common_axis.plot(time_s, common, label="Common mode (raw)")
+    common_axis.set_xlabel("Time, s")
+    common_axis.set_ylabel("Common mode (raw)")
+    common_axis.legend()
+    speed_axis = common_axis.twinx()
+    speed_axis.plot(
+        time_s,
+        [s.values["speed_rpm"] for s in samples],
+        color="tab:red",
+        alpha=0.8,
+        label="Speed",
+    )
+    speed_axis.set_ylabel("Speed, rpm", color="tab:red")
+    speed_axis.tick_params(axis="y", labelcolor="tab:red")
+    figure.savefig(path, dpi=170)
+    plt.close(figure)

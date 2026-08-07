@@ -610,6 +610,96 @@ void PWM_Module_Sin_Update(TPWM_Module *p) {
 
 }
 
+//! Функция непрерывной векторной ШИМ (Space Vector PWM, SVPWM)
+
+//!В отличие от 6-ти секторной векторной ШИМ (PWM_Module_No_SV_Update)
+//!не привязывает ни одну из фаз к шине ЗПТ: все три фазы переключаются в каждом
+//!периоде ШИМ. При этом, как и 6-ти секторная ШИМ, формирует полное напряжение
+//!базового вектора (на 1/0.866 ~ 15.5% больше, чем синусоидальная ШИМ) за счёт
+//!введения в фазные задания оптимальной добавки нулевой последовательности
+//!(центрирующая вставка между минимумом и максимумом фазных напряжений).
+//!Добавка не создаёт тока в симметричной трёхфазной нагрузке, поэтому не искажает
+//!напряжение двигателя основной гармоники.
+//! \memberof TPWM_Module
+void PWM_Module_SVPWM_Update(TPWM_Module *p) {
+	_iq UalphaNorm;
+	_iq UbetaNorm;
+	_iq UA, UB, UC;
+	_iq Vmin, Vmax, Voff;
+	_iq knorm;
+
+	p->UalphaNorm = p->UalphaRef;
+	p->UbetaNorm = p->UbetaRef;
+
+	//находим амплитуду (без учета ограничения)
+	p->U_mag = _IQmag(p->UalphaNorm, p->UbetaNorm);
+
+	/* рассчитываем амплитуду вектора, который хотим отработать*/
+	knorm = p->U_mag;
+	if (knorm >= p->U_lim) { //он больше, чем наше ограничение?
+		knorm = _IQdiv(p->U_lim, knorm); //в эту же переменную, для экономии, рассчитываем нормировку
+		p->UalphaNorm = _IQmpy(knorm, p->UalphaNorm); //уменьшаем пропорционально нормировке
+		p->UbetaNorm = _IQmpy(knorm, p->UbetaNorm); //и это
+		p->ULimitation = 1; //флаг о том, что идет ограничение напряжения
+	} else
+		p->ULimitation = 0;
+
+	//Нормировка такая же, как в синусоидальной ШИМ: 1/0.866/2 = 1/sqrt(3).
+	//Непрерывная векторная ШИМ является синусоидальной ШИМ, в которую добавлена
+	//центрирующая добавка нулевой последовательности. Благодаря ей основная гармоника
+	//фазных напряжений может дорасти до полного базового вектора (1/0.866 раза больше,
+	//чем в чистой синусоидальной ШИМ), прежде чем скважность упрётся в шину.
+	UalphaNorm = _IQmpy(p->UalphaNorm, _IQ(1/0.866/2));
+	UbetaNorm = _IQmpy(p->UbetaNorm, _IQ(1/0.866/2));
+
+	/*фазные напряжения из системы альфа, бетта в a,b,c
+	  (нормированные к половине шины, диапазон -0.5..0.5) */
+	UA = UalphaNorm;
+	UB = _IQmpy(UbetaNorm, _IQ(0.8660254)) - (UalphaNorm >> 1);
+	UC = -_IQmpy(UbetaNorm, _IQ(0.8660254)) - (UalphaNorm >> 1);
+
+	//минимум и максимум фазных напряжений
+	if (UA < UB) Vmin = UA; else Vmin = UB;
+	if (UC < Vmin) Vmin = UC;
+	if (UA > UB) Vmax = UA; else Vmax = UB;
+	if (UC > Vmax) Vmax = UC;
+
+	//центрирующая добавка нулевой последовательности. Сдвигает тройку фазных
+	//напряжений в середину диапазона скважностей, обеспечивая максимальное
+	//использование напряжения ЗПТ без привязки фаз к шинам.
+	Voff = -_IQmpy((Vmax + Vmin), _IQ(0.5));
+
+	//диагностика: мгновенное значение добавки нулевой последовательности (IQ).
+	//В синусоидальной ШИМ оно равно нулю, в непрерывной векторной - отлично от нуля.
+	Debug1 = Voff;
+
+	//переход к скважностям (сравнительным уставкам) с учётом добавки
+	p->GammaA = _IQmpy(p->k_pwm, (_IQ(0.5) - (UA + Voff)));
+	p->GammaB = _IQmpy(p->k_pwm, (_IQ(0.5) - (UB + Voff)));
+	p->GammaC = _IQmpy(p->k_pwm, (_IQ(0.5) - (UC + Voff)));
+
+	/*насыщения */
+
+	if (p->GammaA < 0)
+		p->GammaA = 0;
+	if (p->GammaB < 0)
+		p->GammaB = 0;
+	if (p->GammaC < 0)
+		p->GammaC = 0;
+
+	if (p->GammaA > p->k_pwm)
+		p->GammaA = p->k_pwm + 1;
+	if (p->GammaB > p->k_pwm)
+		p->GammaB = p->k_pwm + 1;
+	if (p->GammaC > p->k_pwm)
+		p->GammaC = p->k_pwm + 1;
+
+	NT_PWM0->CMPA_bit.CMPA = (Uint16) p->GammaA;
+	NT_PWM1->CMPA_bit.CMPA = (Uint16) p->GammaB;
+	NT_PWM2->CMPA_bit.CMPA = (Uint16) p->GammaC;
+
+}
+
 //! Функция ШИМ с раздельными фазами (для модели SRM)
 
 //! \memberof TPWM_Module
@@ -728,6 +818,10 @@ void PWM_Module_Update(TPWM_Module *p) {
 		}
 		case PWM_TYPE_SIN_PWM: {
 			PWM_Module_Sin_Update(p);
+			break;
+		}
+		case PWM_TYPE_SVPWM_CONT: {
+			PWM_Module_SVPWM_Update(p);
 			break;
 		}
 		case PWM_TYPE_DC_DRIVE: {
