@@ -12,6 +12,18 @@ def _series(samples: Sequence[Any], name: str) -> list[float]:
     return [float(sample.values[name]) for sample in samples]
 
 
+def _raw_series(samples: Sequence[Any], name: str) -> list[int]:
+    if not samples:
+        raise ValueError("At least one sample is required.")
+    return [int(sample.raw[name]) for sample in samples]
+
+
+def _signed(raw: int, width: int = 32) -> int:
+    if raw & (1 << (width - 1)):
+        return raw - (1 << width)
+    return raw
+
+
 def _times(samples: Sequence[Any]) -> list[float]:
     return [float(sample.time_s) for sample in samples]
 
@@ -339,6 +351,196 @@ def analyze_vector_500(
         "current_limit_margin_percent": current_limit_margin_percent,
         "allowed_peak_current_a": allowed_current,
         "settling_dwell_s": settling_dwell_s,
+    }
+    metrics["criteria"] = criteria
+    metrics["passed"] = all(criteria.values())
+    return metrics
+
+
+_IQ24 = 1 << 24
+
+
+def _high_speed_window(
+    speed: Sequence[float], target_speed_rpm: float, fraction: float
+) -> list[bool]:
+    threshold = abs(target_speed_rpm) * fraction
+    return [abs(value) >= threshold for value in speed]
+
+
+def decouple_metric(
+    samples: Sequence[Any],
+    *,
+    target_speed_rpm: float,
+    high_speed_fraction: float = 0.5,
+    speed_name: str = "speed_rpm",
+    ud_name: str = "ud_v",
+    iq_name: str = "iq_a",
+    id_name: str = "id_a",
+    dec_name: str = "dec_v",
+    min_iq_pu: float = 0.05,
+) -> dict[str, Any]:
+    """Coupling-region metrics, including the coupling-to-output slope.
+
+    The d-axis regulator output is ud = -K * w * Iq plus a ripple floor that
+    does not correlate with the coupling w*Iq.  Regressing ud against the
+    coupling isolates the cross-coupling component of ud and is robust to that
+    floor.  The returned coupling_coeff is the per-unit slope A of
+    ud_pu ~ A * (w_pu * Iq_pu).
+    """
+    speed = _series(samples, speed_name)
+    ud = _series(samples, ud_name)
+    speed_raw = _raw_series(samples, speed_name)
+    iq_raw = _raw_series(samples, iq_name)
+    ud_raw = _raw_series(samples, ud_name)
+    window = _high_speed_window(speed, target_speed_rpm, high_speed_fraction)
+    peak_speed = max(abs(value) for value in speed)
+    mean_abs_ud = _mean([abs(value) for value, keep in zip(ud, window) if keep])
+    peak_abs_ud = max(abs(value) for value in ud)
+    channel_names = samples[0].values
+    numerator = 0.0
+    denominator = 0.0
+    coupling_points = 0
+    for keep, ws, wu, wi in zip(window, speed_raw, ud_raw, iq_raw):
+        if not keep:
+            continue
+        ws_s = _signed(ws)
+        wi_s = _signed(wi)
+        wu_s = _signed(wu)
+        w_pu = ws_s / _IQ24
+        iq_pu = wi_s / _IQ24
+        if abs(iq_pu) < min_iq_pu:
+            continue
+        ud_pu = wu_s / _IQ24
+        coupling_pu = w_pu * iq_pu
+        numerator += ud_pu * coupling_pu
+        denominator += coupling_pu * coupling_pu
+        coupling_points += 1
+    coupling_coeff = (
+        numerator / denominator if denominator > 0 and coupling_points else None
+    )
+    id_abs = (
+        [abs(value) for value in _series(samples, id_name)]
+        if id_name in channel_names
+        else []
+    )
+    dec_abs = (
+        [abs(value) for value in _series(samples, dec_name)]
+        if dec_name in channel_names
+        else []
+    )
+    return {
+        "samples": len(samples),
+        "high_speed_points": sum(window),
+        "coupling_points": coupling_points,
+        "coupling_coeff": coupling_coeff,
+        "peak_abs_speed_rpm": peak_speed,
+        "mean_abs_ud_v": mean_abs_ud,
+        "peak_abs_ud_v": peak_abs_ud,
+        "peak_abs_id_a": max(id_abs) if id_abs else None,
+        "mean_abs_id_a": _mean(id_abs) if id_abs else None,
+        "peak_abs_dec_v": max(dec_abs) if dec_abs else None,
+        "mean_abs_dec_v": _mean(dec_abs) if dec_abs else None,
+    }
+
+
+def calibrate_decoupling_gain(
+    samples: Sequence[Any],
+    *,
+    speed_name: str = "speed_rpm",
+    ud_name: str = "ud_v",
+    iq_name: str = "iq_a",
+    high_speed_fraction: float = 0.5,
+    max_gain: float = 2.0,
+) -> float:
+    """Estimate the per-unit d-axis coupling coefficient K from a capture.
+
+    In the synchronous frame with Id ~ 0 the d-axis regulator must output
+    ud = -K * w * Iq to cancel the cross-coupling -w*Lq*Iq.  The firmware
+    applies vd_dec = -DebugW2 * w * Iq, so from the raw IQ24 words the
+    per-unit gain is DebugW2 = -ud_raw * 2^24 / (w_raw * Iq_raw).  The
+    returned value is the per-unit gain to write into DebugW2.
+    """
+    speed_raw = _raw_series(samples, speed_name)
+    ud_raw = _raw_series(samples, ud_name)
+    iq_raw = _raw_series(samples, iq_name)
+    peak_speed = max(abs(_signed(raw)) for raw in speed_raw)
+    speed_threshold = peak_speed * high_speed_fraction
+    current_threshold = _IQ24 // 10
+    numerator = 0.0
+    denominator = 0.0
+    count = 0
+    for ws, wu, wi in zip(speed_raw, ud_raw, iq_raw):
+        ws_s = _signed(ws)
+        wu_s = _signed(wu)
+        wi_s = _signed(wi)
+        if abs(ws_s) < speed_threshold or abs(wi_s) < current_threshold:
+            continue
+        w_pu = ws_s / _IQ24
+        iq_pu = wi_s / _IQ24
+        ud_pu = wu_s / _IQ24
+        coupling_pu = w_pu * iq_pu
+        numerator += ud_pu * coupling_pu
+        denominator += coupling_pu * coupling_pu
+        count += 1
+    if count == 0 or denominator <= 0:
+        raise ValueError("No valid high-speed coupling points for calibration.")
+    # ud_pu = -K * w_pu * Iq_pu, so K = -sum(ud*coupling)/sum(coupling^2).
+    gain = -numerator / denominator
+    if not math.isfinite(gain) or not 0.0 < gain <= max_gain:
+        raise ValueError(
+            f"Calibrated decoupling gain out of range: {gain:g}."
+        )
+    return float(gain)
+
+
+def analyze_decoupling(
+    off: dict[str, Any],
+    on: dict[str, Any],
+    *,
+    target_speed_rpm: float,
+    max_ud_ratio: float = 0.6,
+    max_id_a: float = 1.0,
+    min_coupling_v: float = 0.5,
+) -> dict[str, Any]:
+    reached = 0.8 * abs(target_speed_rpm)
+    mean_abs_ud_ratio = (
+        None
+        if off["mean_abs_ud_v"] <= 0
+        else on["mean_abs_ud_v"] / off["mean_abs_ud_v"]
+    )
+    coupling_ratio = None
+    if (
+        off["coupling_coeff"] is not None
+        and on["coupling_coeff"] is not None
+        and abs(off["coupling_coeff"]) > 1e-6
+    ):
+        coupling_ratio = abs(on["coupling_coeff"]) / abs(off["coupling_coeff"])
+    metrics: dict[str, Any] = {
+        "off": off,
+        "on": on,
+        "mean_abs_ud_ratio": mean_abs_ud_ratio,
+        "coupling_coeff_ratio": coupling_ratio,
+    }
+    criteria = {
+        "off_reached_high_speed": off["peak_abs_speed_rpm"] >= reached,
+        "on_reached_high_speed": on["peak_abs_speed_rpm"] >= reached,
+        "coupling_present": off["peak_abs_ud_v"] >= min_coupling_v,
+        "decoupling_active": (
+            on["peak_abs_dec_v"] is not None and on["peak_abs_dec_v"] > 1e-4
+        ),
+        "id_stays_zero": (
+            off["peak_abs_id_a"] is not None
+            and off["peak_abs_id_a"] <= max_id_a
+        ),
+        "d_regulator_relieved": (
+            coupling_ratio is not None and coupling_ratio <= max_ud_ratio
+        ),
+    }
+    metrics["limits"] = {
+        "target_speed_rpm": target_speed_rpm,
+        "max_ud_ratio": max_ud_ratio,
+        "max_id_a": max_id_a,
+        "min_coupling_v": min_coupling_v,
     }
     metrics["criteria"] = criteria
     metrics["passed"] = all(criteria.values())

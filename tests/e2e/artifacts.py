@@ -128,3 +128,50 @@ def plot_vector_500(path: Path, samples: list[Sample]) -> None:
     current_axis.legend()
     figure.savefig(path, dpi=170)
     plt.close(figure)
+
+
+def plot_decoupling(
+    path: Path,
+    off_samples: list[Sample],
+    on_samples: list[Sample],
+) -> None:
+    import matplotlib.pyplot as plt
+
+    plt.style.use("seaborn-v0_8-whitegrid")
+    figure, (off_axis, on_axis) = plt.subplots(
+        2, 1, figsize=(11, 7.2), sharex=False, constrained_layout=True
+    )
+
+    def _fill(axis: Any, samples: list[Sample], title: str, color: str) -> None:
+        time_s = [s.time_s for s in samples]
+        speed = [s.values["speed_rpm"] for s in samples]
+        ud = [s.values["ud_v"] for s in samples]
+        axis.plot(time_s, speed, color="tab:red", alpha=0.8, label="Speed, rpm")
+        axis.set_xlabel("Time, s")
+        axis.set_ylabel("Speed, rpm", color="tab:red")
+        axis.tick_params(axis="y", labelcolor="tab:red")
+        voltage_axis = axis.twinx()
+        voltage_axis.plot(
+            time_s, ud, color=color, label="d-regulator output ud, V"
+        )
+        voltage_axis.set_ylabel("ud, V", color=color)
+        voltage_axis.tick_params(axis="y", labelcolor=color)
+        lines, labels = axis.get_legend_handles_labels()
+        v_lines, v_labels = voltage_axis.get_legend_handles_labels()
+        axis.legend(lines + v_lines, labels + v_labels, loc="upper right")
+        axis.set_title(title)
+
+    _fill(
+        off_axis,
+        off_samples,
+        "Decoupling OFF: d-axis regulator carries the cross-coupling",
+        "tab:blue",
+    )
+    _fill(
+        on_axis,
+        on_samples,
+        "Decoupling ON: feed-forward carries the cross-coupling",
+        "tab:green",
+    )
+    figure.savefig(path, dpi=170)
+    plt.close(figure)
