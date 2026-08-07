@@ -343,3 +343,106 @@ def analyze_vector_500(
     metrics["criteria"] = criteria
     metrics["passed"] = all(criteria.values())
     return metrics
+
+
+def _run_summary(samples: Sequence[Any]) -> dict[str, float]:
+    """Compact per-capture summary used to compare baseline and field weakening."""
+    speed = _series(samples, "speed_rpm")
+    id_ref = _series(samples, "id_ref_a")
+    tail_start = _tail_start(len(samples))
+    has_voltage = "voltage_v" in samples[0].values
+    has_id = "id_a" in samples[0].values
+    voltage = (
+        _series(samples, "voltage_v") if has_voltage else None
+    )
+    id_actual = _series(samples, "id_a") if has_id else None
+    return {
+        "peak_speed_rpm": max(speed),
+        "min_speed_rpm": min(speed),
+        "final_speed_rpm": float(statistics.fmean(speed[tail_start:])),
+        "min_id_ref_a": min(id_ref),
+        "steady_id_ref_a": float(statistics.fmean(id_ref[tail_start:])),
+        "min_id_a": min(id_actual) if id_actual is not None else None,
+        "steady_id_a": (
+            float(statistics.fmean(id_actual[tail_start:]))
+            if id_actual is not None
+            else None
+        ),
+        "steady_speed_rpm": float(statistics.fmean(speed[tail_start:])),
+        "peak_voltage_v": max(voltage) if voltage is not None else None,
+    }
+
+
+def analyze_field_weakening(
+    baseline_samples: Sequence[Any],
+    fw_samples: Sequence[Any],
+    *,
+    target_speed_rpm: float,
+    iq_limit_a: float,
+    min_fw_id_fraction: float = 0.05,
+    fw_speed_gain_fraction: float = 0.10,
+    max_id_noise_a: float = 0.02,
+) -> dict[str, Any]:
+    """Compares an FW-off baseline with an FW-on run at the same high-speed ref.
+
+    Field weakening should (a) inject a clearly negative d-axis current reference
+    only when it is enabled, and (b) raise the reachable (voltage-limited) speed
+    above the no-field-weakening ceiling at the same speed reference.
+    """
+    if len(baseline_samples) < 64 or len(fw_samples) < 64:
+        raise ValueError("Each capture must contain at least 64 samples.")
+    baseline = _run_summary(baseline_samples)
+    fw = _run_summary(fw_samples)
+    baseline_reached = baseline["peak_speed_rpm"] >= target_speed_rpm * 0.95
+    fw_reached = fw["peak_speed_rpm"] >= target_speed_rpm * 0.95
+
+    id_threshold = max(max_id_noise_a, min_fw_id_fraction * abs(iq_limit_a))
+    expected_speed_gain = baseline["final_speed_rpm"] * (
+        1.0 + fw_speed_gain_fraction
+    )
+
+    metrics: dict[str, Any] = {
+        "target_speed_rpm": target_speed_rpm,
+        "iq_limit_a": abs(iq_limit_a),
+        "baseline": baseline,
+        "field_weakening": fw,
+        "baseline_reached_target": baseline_reached,
+        "fw_reached_target": fw_reached,
+        "fw_voltage_saturated": (
+            fw.get("peak_voltage_v") is not None
+            and fw.get("peak_voltage_v", 0.0) >= 0.866 * 20.0
+        ),
+        "fw_id_tracks_negative": (
+            fw.get("min_id_a") is not None and fw["min_id_a"] < 0.0
+        ),
+        "min_fw_id_threshold_a": id_threshold,
+        "expected_fw_speed_rpm": expected_speed_gain,
+        "speed_gain_rpm": fw["final_speed_rpm"] - baseline["final_speed_rpm"],
+        "speed_gain_fraction": (
+            fw["final_speed_rpm"] - baseline["final_speed_rpm"]
+        )
+        / baseline["final_speed_rpm"]
+        if baseline["final_speed_rpm"]
+        else math.inf,
+    }
+    criteria = {
+        "baseline_voltage_limited": not baseline_reached,
+        "baseline_no_negative_id": (
+            baseline["min_id_ref_a"] >= -max_id_noise_a
+        ),
+        "fw_injected_negative_id": fw["min_id_ref_a"] <= -id_threshold,
+        "fw_voltage_saturated": metrics["fw_voltage_saturated"],
+        "fw_id_tracks_negative": metrics["fw_id_tracks_negative"],
+        "fw_increased_speed": (
+            fw["final_speed_rpm"] >= expected_speed_gain
+            and fw["final_speed_rpm"] > baseline["final_speed_rpm"]
+        ),
+    }
+    metrics["limits"] = {
+        "min_fw_id_fraction": min_fw_id_fraction,
+        "fw_speed_gain_fraction": fw_speed_gain_fraction,
+        "max_id_noise_a": max_id_noise_a,
+    }
+    metrics["criteria"] = criteria
+    metrics["passed"] = all(criteria.values())
+    return metrics

@@ -4,7 +4,11 @@ import math
 import unittest
 from dataclasses import dataclass
 
-from tests.e2e.metrics import analyze_current_mode4, analyze_vector_500
+from tests.e2e.metrics import (
+    analyze_current_mode4,
+    analyze_field_weakening,
+    analyze_vector_500,
+)
 
 
 @dataclass(frozen=True)
@@ -98,6 +102,91 @@ class Vector500MetricsTests(unittest.TestCase):
 
         self.assertFalse(metrics["passed"])
         self.assertFalse(metrics["criteria"]["overshoot"])
+
+
+class FieldWeakeningMetricsTests(unittest.TestCase):
+    @staticmethod
+    def samples(
+        *,
+        peak_speed_rpm: float,
+        id_ref_a: float,
+        voltage_v: float = 22.0,
+    ) -> list[SyntheticSample]:
+        result = []
+        for number in range(300):
+            time_s = number * 0.01
+            speed = peak_speed_rpm * (1.0 - math.exp(-time_s / 0.5))
+            result.append(
+                SyntheticSample(
+                    number,
+                    time_s,
+                    {
+                        "speed_rpm": speed,
+                        "id_ref_a": id_ref_a,
+                        "id_a": id_ref_a + 0.005 * math.sin(time_s),
+                        "voltage_v": voltage_v,
+                    },
+                )
+            )
+        return result
+
+    def test_field_weakening_raises_speed_with_negative_id(self) -> None:
+        baseline = self.samples(peak_speed_rpm=800.0, id_ref_a=0.0)
+        fw = self.samples(peak_speed_rpm=1500.0, id_ref_a=-0.3)
+
+        metrics = analyze_field_weakening(
+            baseline,
+            fw,
+            target_speed_rpm=2000.0,
+            iq_limit_a=1.0,
+        )
+
+        self.assertTrue(metrics["passed"])
+        self.assertTrue(metrics["criteria"]["fw_injected_negative_id"])
+        self.assertTrue(metrics["criteria"]["fw_increased_speed"])
+        self.assertTrue(metrics["criteria"]["baseline_voltage_limited"])
+
+    def test_no_speed_gain_fails_acceptance(self) -> None:
+        baseline = self.samples(peak_speed_rpm=800.0, id_ref_a=0.0)
+        fw = self.samples(peak_speed_rpm=820.0, id_ref_a=-0.3)
+
+        metrics = analyze_field_weakening(
+            baseline,
+            fw,
+            target_speed_rpm=2000.0,
+            iq_limit_a=1.0,
+        )
+
+        self.assertFalse(metrics["passed"])
+        self.assertFalse(metrics["criteria"]["fw_increased_speed"])
+
+    def test_no_negative_id_with_fw_off(self) -> None:
+        baseline = self.samples(peak_speed_rpm=800.0, id_ref_a=-0.3)
+        fw = self.samples(peak_speed_rpm=1500.0, id_ref_a=-0.3)
+
+        metrics = analyze_field_weakening(
+            baseline,
+            fw,
+            target_speed_rpm=2000.0,
+            iq_limit_a=1.0,
+        )
+
+        self.assertFalse(metrics["passed"])
+        self.assertFalse(metrics["criteria"]["baseline_no_negative_id"])
+
+    def test_baseline_already_reaches_target_is_rejected(self) -> None:
+        baseline = self.samples(peak_speed_rpm=2000.0, id_ref_a=0.0)
+        fw = self.samples(peak_speed_rpm=2100.0, id_ref_a=-0.3)
+
+        metrics = analyze_field_weakening(
+            baseline,
+            fw,
+            target_speed_rpm=2000.0,
+            iq_limit_a=1.0,
+        )
+
+        self.assertFalse(metrics["passed"])
+        self.assertFalse(metrics["criteria"]["baseline_voltage_limited"])
 
 
 if __name__ == "__main__":

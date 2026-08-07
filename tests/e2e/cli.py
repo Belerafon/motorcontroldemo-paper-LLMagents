@@ -5,12 +5,13 @@ from pathlib import Path
 
 from motor_debug_core.project import ProjectPaths
 
-from . import current_mode4, vector_500
+from . import current_mode4, vector_500, vector_field_weakening
 
 
 SCENARIOS = {
     current_mode4.NAME: current_mode4,
     vector_500.NAME: vector_500,
+    vector_field_weakening.NAME: vector_field_weakening,
 }
 
 
