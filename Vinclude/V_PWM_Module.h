@@ -41,6 +41,8 @@ extern "C"
 #define PWM_TYPE_6SECT_NO_SV 	0
 //!Синусоидальная ШИМ
 #define PWM_TYPE_SIN_PWM     	1
+//!Непрерывная векторная ШИМ с добавлением нулевой последовательности (без привязки к шинам)
+#define PWM_TYPE_ZERO_SEQ     	6
 //!Векторная 12-ти секторная ШИМ
 #define PWM_TYPE_12SECT_NO_SV 	2
 //!ШИМ методом вычисления фазных потенциалов 
@@ -151,6 +153,7 @@ void PWM_Module_Off(TPWM_Module *);
 
 //векторные функции из библиотеки
 void PWM_Module_No_SV_Update(TPWM_Module *);
+void PWM_Module_ZeroSeq_Update(TPWM_Module *);
 
 #ifdef __cplusplus
 }

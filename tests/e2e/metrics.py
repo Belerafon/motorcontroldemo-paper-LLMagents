@@ -343,3 +343,82 @@ def analyze_vector_500(
     metrics["criteria"] = criteria
     metrics["passed"] = all(criteria.values())
     return metrics
+
+
+def analyze_pwm_zero_seq(
+    samples: Sequence[Any],
+    *,
+    k_pwm: float,
+    target_speed_rpm: float = 500.0,
+    min_speed_fraction: float = 0.90,
+    max_centering_error_percent: float = 2.0,
+    bus_tie_margin_ticks: float = 2.0,
+    active_envelope_fraction: float = 0.05,
+) -> dict[str, Any]:
+    """Validate the centered zero-sequence vector PWM signature.
+
+    The new modulator injects a common-mode offset that centers the phase-duty
+    envelope, so at every PWM update ``min(Gamma) + max(Gamma) == k_pwm`` and
+    no phase is ever tied to a bus rail (unsaturated operation). Sinusoidal PWM
+    instead keeps ``min + max < k_pwm`` while modulating, so the centering
+    check discriminates the two algorithms.
+    """
+    time_s = _times(samples)
+    speed = _series(samples, "speed_rpm")
+    gammas = [
+        [
+            float(sample.values["gamma_a"]),
+            float(sample.values["gamma_b"]),
+            float(sample.values["gamma_c"]),
+        ]
+        for sample in samples
+    ]
+    if k_pwm <= 0:
+        raise ValueError("k_pwm must be positive.")
+    mn = [min(g) for g in gammas]
+    mx = [max(g) for g in gammas]
+    center_error_percent = [
+        abs((mn[i] + mx[i]) / k_pwm - 1.0) * 100.0 for i in range(len(samples))
+    ]
+    envelope_fraction = [(mx[i] - mn[i]) / k_pwm for i in range(len(samples))]
+    bus_tie_violations = sum(
+        1
+        for i in range(len(samples))
+        if mn[i] <= bus_tie_margin_ticks or mx[i] >= k_pwm - bus_tie_margin_ticks
+    )
+    period = _sample_period(time_s)
+    max_speed = max(speed)
+    final_speed = _mean(speed[_tail_start(len(samples)):])
+    centering_error_max_percent = max(center_error_percent)
+    envelope_modulated = max(envelope_fraction) >= active_envelope_fraction
+    speed_reached = max_speed >= abs(target_speed_rpm) * min_speed_fraction
+    criteria = {
+        "enough_samples": len(samples) >= 64,
+        "speed_reached_target": speed_reached,
+        "envelope_modulated": envelope_modulated,
+        "centering_ok": (
+            centering_error_max_percent <= max_centering_error_percent
+        ),
+        "no_bus_tie": bus_tie_violations == 0,
+    }
+    metrics: dict[str, Any] = {
+        "samples": len(samples),
+        "sample_period_s": period,
+        "window_s": float(time_s[-1] - time_s[0]),
+        "k_pwm_ticks": k_pwm,
+        "target_speed_rpm": target_speed_rpm,
+        "max_speed_rpm": max_speed,
+        "final_speed_rpm": final_speed,
+        "max_envelope_fraction": max(envelope_fraction),
+        "centering_error_max_percent": centering_error_max_percent,
+        "bus_tie_violations": bus_tie_violations,
+    }
+    metrics["limits"] = {
+        "min_speed_fraction": min_speed_fraction,
+        "max_centering_error_percent": max_centering_error_percent,
+        "bus_tie_margin_ticks": bus_tie_margin_ticks,
+        "active_envelope_fraction": active_envelope_fraction,
+    }
+    metrics["criteria"] = criteria
+    metrics["passed"] = all(criteria.values())
+    return metrics

@@ -128,3 +128,43 @@ def plot_vector_500(path: Path, samples: list[Sample]) -> None:
     current_axis.legend()
     figure.savefig(path, dpi=170)
     plt.close(figure)
+
+
+def plot_pwm_zero_seq(path: Path, samples: list[Sample], k_pwm: float) -> None:
+    import matplotlib.pyplot as plt
+
+    time_s = [sample.time_s for sample in samples]
+    plt.style.use("seaborn-v0_8-whitegrid")
+    figure, (duty_axis, speed_axis) = plt.subplots(
+        2, 1, figsize=(11, 7.2), sharex=True, constrained_layout=True
+    )
+    duty_axis.axhline(0.0, color="gray", linewidth=0.8)
+    duty_axis.axhline(1.0, color="gray", linewidth=0.8)
+    for phase in ("gamma_a", "gamma_b", "gamma_c"):
+        duty_axis.plot(
+            time_s,
+            [s.values[phase] / k_pwm for s in samples],
+            label=phase.replace("gamma_", "duty ").upper(),
+        )
+    center = [
+        (min(s.values["gamma_a"], s.values["gamma_b"], s.values["gamma_c"])
+         + max(s.values["gamma_a"], s.values["gamma_b"], s.values["gamma_c"]))
+        / k_pwm
+        for s in samples
+    ]
+    duty_axis.plot(
+        time_s, center, "--", color="black", linewidth=1.0, label="(min+max)/k_pwm"
+    )
+    duty_axis.set_title(
+        "Centered zero-sequence PWM: duty envelopes and (min+max)/k_pwm"
+    )
+    duty_axis.set_ylabel("Duty fraction of k_pwm")
+    duty_axis.legend()
+    speed_axis.plot(
+        time_s, [s.values["speed_rpm"] for s in samples], label="Measured speed"
+    )
+    speed_axis.set_xlabel("Time, s")
+    speed_axis.set_ylabel("Speed, rpm")
+    speed_axis.legend()
+    figure.savefig(path, dpi=170)
+    plt.close(figure)

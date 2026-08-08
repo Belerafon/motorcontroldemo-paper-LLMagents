@@ -4,7 +4,11 @@ import math
 import unittest
 from dataclasses import dataclass
 
-from tests.e2e.metrics import analyze_current_mode4, analyze_vector_500
+from tests.e2e.metrics import (
+    analyze_current_mode4,
+    analyze_pwm_zero_seq,
+    analyze_vector_500,
+)
 
 
 @dataclass(frozen=True)
@@ -98,6 +102,99 @@ class Vector500MetricsTests(unittest.TestCase):
 
         self.assertFalse(metrics["passed"])
         self.assertFalse(metrics["criteria"]["overshoot"])
+
+
+class PwmZeroSeqMetricsTests(unittest.TestCase):
+    KPWM = 2500.0
+
+    @staticmethod
+    def centered_samples(
+        *,
+        max_speed_rpm: float = 500.0,
+        max_envelope_ticks: float = 0.8 * 2500.0,
+    ) -> list[SyntheticSample]:
+        k = 2500.0
+        result = []
+        for number in range(300):
+            time_s = number * 0.01
+            speed = max_speed_rpm * (1.0 - math.exp(-time_s / 0.30))
+            half = max_envelope_ticks / 2.0 * (1.0 - math.exp(-time_s / 0.5))
+            gamma_a = k / 2.0 + half
+            gamma_b = k / 2.0 - half
+            gamma_c = k / 2.0 - half / 3.0
+            result.append(
+                SyntheticSample(
+                    number,
+                    time_s,
+                    {
+                        "gamma_a": gamma_a,
+                        "gamma_b": gamma_b,
+                        "gamma_c": gamma_c,
+                        "speed_rpm": speed,
+                    },
+                )
+            )
+        return result
+
+    @staticmethod
+    def constant_samples(gamma: tuple[float, float, float]) -> list[SyntheticSample]:
+        return [
+            SyntheticSample(
+                number,
+                number * 0.01,
+                {
+                    "gamma_a": gamma[0],
+                    "gamma_b": gamma[1],
+                    "gamma_c": gamma[2],
+                    "speed_rpm": 500.0,
+                },
+            )
+            for number in range(200)
+        ]
+
+    def test_centered_modulation_passes(self) -> None:
+        metrics = analyze_pwm_zero_seq(
+            self.centered_samples(), k_pwm=self.KPWM
+        )
+
+        self.assertTrue(metrics["passed"])
+        self.assertLess(metrics["centering_error_max_percent"], 1e-6)
+        self.assertEqual(metrics["bus_tie_violations"], 0)
+        self.assertTrue(metrics["criteria"]["speed_reached_target"])
+        self.assertTrue(metrics["criteria"]["envelope_modulated"])
+
+    def test_uncentered_signature_fails_centering(self) -> None:
+        # Sinusoidal PWM keeps min + max < k_pwm while modulating (e.g. 0.9 k).
+        metrics = analyze_pwm_zero_seq(
+            self.constant_samples((0.3 * self.KPWM, 0.3 * self.KPWM,
+                                   0.6 * self.KPWM)),
+            k_pwm=self.KPWM,
+        )
+
+        self.assertFalse(metrics["passed"])
+        self.assertFalse(metrics["criteria"]["centering_ok"])
+        self.assertLess(metrics["centering_error_max_percent"] - 10.0, 1e-6)
+
+    def test_bus_tie_fails_no_bus_tie(self) -> None:
+        # Overmodulated (phase pinned to a rail) still centers, but violates
+        # the "no bus tie" requirement.
+        metrics = analyze_pwm_zero_seq(
+            self.constant_samples((0.0, self.KPWM, 0.0)),
+            k_pwm=self.KPWM,
+        )
+
+        self.assertFalse(metrics["passed"])
+        self.assertTrue(metrics["criteria"]["centering_ok"])
+        self.assertFalse(metrics["criteria"]["no_bus_tie"])
+        self.assertGreater(metrics["bus_tie_violations"], 0)
+
+    def test_slow_drive_fails_speed_criterion(self) -> None:
+        metrics = analyze_pwm_zero_seq(
+            self.centered_samples(max_speed_rpm=300.0), k_pwm=self.KPWM
+        )
+
+        self.assertFalse(metrics["passed"])
+        self.assertFalse(metrics["criteria"]["speed_reached_target"])
 
 
 if __name__ == "__main__":
