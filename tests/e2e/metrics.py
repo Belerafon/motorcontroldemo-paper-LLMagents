@@ -343,3 +343,112 @@ def analyze_vector_500(
     metrics["criteria"] = criteria
     metrics["passed"] = all(criteria.values())
     return metrics
+
+
+def analyze_power_limit(
+    samples: Sequence[Any],
+    *,
+    power_limit_w: float,
+    target_speed_rpm: float = 500.0,
+    power_limit_margin_percent: float = 25.0,
+    min_limited_power_percent: float = 80.0,
+    max_constant_power_variation_percent: float = 30.0,
+    min_limited_window_s: float = 0.20,
+    min_speed_fraction: float = 0.5,
+) -> dict[str, Any]:
+    """Validate power-limited (constant-power) acceleration.
+
+    Expects a capture containing ``speed_rpm``, ``speed_ref_rpm``,
+    ``iq_ref_a`` and ``power_w``. The power limiter must keep the measured
+    power at or below ``power_limit_w`` while the motor accelerates, holding
+    power near the limit over the limited window (constant power).
+    """
+    time_s = _times(samples)
+    speed = _series(samples, "speed_rpm")
+    speed_ref = _series(samples, "speed_ref_rpm")
+    iq_ref = _series(samples, "iq_ref_a")
+    power = _series(samples, "power_w")
+    period = _sample_period(time_s)
+    tail_start = _tail_start(len(samples))
+    start = _event_start(speed_ref, target_speed_rpm)
+    window_power = power[start:]
+    peak_power = max(window_power)
+    final_speed = max(abs(value) for value in speed[tail_start:])
+
+    # Samples where the limiter is binding: measured power close to the limit.
+    lower_band = power_limit_w * min_limited_power_percent / 100.0
+    limited_idx = [
+        index
+        for index in range(start, len(samples))
+        if power[index] >= lower_band
+    ]
+    limited_window_s = (
+        (time_s[limited_idx[-1]] - time_s[limited_idx[0]])
+        if len(limited_idx) >= 2
+        else 0.0
+    )
+    limited_power = [power[index] for index in limited_idx] if limited_idx else []
+    limited_speed = [speed[index] for index in limited_idx] if limited_idx else []
+    limited_iq = [iq_ref[index] for index in limited_idx] if limited_idx else []
+
+    if limited_power:
+        limited_median = _mean(limited_power)
+        limited_stddev = statistics.pstdev(limited_power)
+        limited_variation_percent = (
+            limited_stddev / limited_median * 100.0 if limited_median else None
+        )
+    else:
+        limited_median = None
+        limited_stddev = None
+        limited_variation_percent = None
+
+    allowed_power = power_limit_w * (1.0 + power_limit_margin_percent / 100.0)
+
+    metrics: dict[str, Any] = {
+        "samples": len(samples),
+        "sample_period_s": period,
+        "window_s": float(time_s[-1] - time_s[0]),
+        "target_speed_rpm": target_speed_rpm,
+        "final_abs_speed_rpm": final_speed,
+        "peak_power_w": peak_power,
+        "power_limit_w": power_limit_w,
+        "allowed_power_w": allowed_power,
+        "power_limited_window_s": limited_window_s,
+        "limited_power_median_w": limited_median,
+        "limited_power_stddev_w": limited_stddev,
+        "limited_power_variation_percent": limited_variation_percent,
+        "limited_speed_min_rpm": min(limited_speed) if limited_speed else None,
+        "limited_speed_max_rpm": max(limited_speed) if limited_speed else None,
+        "limited_iq_min_a": min(limited_iq) if limited_iq else None,
+        "limited_iq_max_a": max(limited_iq) if limited_iq else None,
+    }
+    criteria = {
+        "enough_samples": len(samples) >= 64,
+        "motor_moved": final_speed >= target_speed_rpm * min_speed_fraction,
+        "power_within_limit": peak_power <= allowed_power,
+        "power_limited_engaged": peak_power >= lower_band,
+        "power_limited_window": (
+            len(limited_idx) >= 8 and limited_window_s >= min_limited_window_s
+        ),
+        "constant_power": (
+            limited_median is not None
+            and limited_variation_percent is not None
+            and limited_variation_percent <= max_constant_power_variation_percent
+        ),
+    }
+    metrics["limits"] = {
+        "power_limit_w": power_limit_w,
+        "power_limit_margin_percent": power_limit_margin_percent,
+        "allowed_power_w": allowed_power,
+        "min_limited_power_percent": min_limited_power_percent,
+        "lower_power_band_w": lower_band,
+        "min_limited_window_s": min_limited_window_s,
+        "max_constant_power_variation_percent": (
+            max_constant_power_variation_percent
+        ),
+        "min_speed_fraction": min_speed_fraction,
+        "target_speed_rpm": target_speed_rpm,
+    }
+    metrics["criteria"] = criteria
+    metrics["passed"] = all(criteria.values())
+    return metrics

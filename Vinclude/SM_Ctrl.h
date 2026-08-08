@@ -54,6 +54,10 @@ extern "C"
     int E;//!<Флаг первого вхождения.
     long AnglePrev;//!< Предыдущее значение угла для режима автонастройки ДПР
     long AngleDemo;//!< Угол для демо-режима контура положения
+    long plim_out;//!< Действующий предел тока по оси q после ограничителя мощности (Q24, о.е. I_nom)
+    long plim_power;//!< Измеренная мощность, использованная ограничителем мощности (Q24, о.е. P_nom)
+    long plim_pw;//!< Быстрый фильтр мощности ограничителя (Q24, о.е. P_nom)
+    long plim_enabled;//!< Признак активности ограничителя мощности (0 - выключен)
     void (*init)(struct SSM_Ctrl*);     //!< Pointer to the init funcion
     void (*slow_calc)(struct SSM_Ctrl*);//!< Pointer to the calc funtion
     void (*fast_calc)(struct SSM_Ctrl*); //!< Pointer to the calc funtion

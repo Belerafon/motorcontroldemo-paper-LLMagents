@@ -128,3 +128,47 @@ def plot_vector_500(path: Path, samples: list[Sample]) -> None:
     current_axis.legend()
     figure.savefig(path, dpi=170)
     plt.close(figure)
+
+
+def plot_power_limit(
+    path: Path, samples: list[Sample], power_limit_w: float | None = None
+) -> None:
+    import matplotlib.pyplot as plt
+
+    time_s = [sample.time_s for sample in samples]
+    plt.style.use("seaborn-v0_8-whitegrid")
+    figure, (power_axis, speed_axis, current_axis) = plt.subplots(
+        3, 1, figsize=(11, 9.5), sharex=True, constrained_layout=True
+    )
+    power = [s.values["power_w"] for s in samples]
+    power_axis.plot(time_s, power, label="Measured power")
+    if power_limit_w is not None:
+        power_axis.axhline(
+            power_limit_w, color="tab:red", linestyle="--", label="Power limit"
+        )
+    power_axis.set_title("Vector control: power-limited (constant power) acceleration")
+    power_axis.set_ylabel("Power, W")
+    power_axis.legend()
+    speed_axis.plot(
+        time_s,
+        [s.values["speed_ref_rpm"] for s in samples],
+        "--",
+        label="Speed reference",
+    )
+    speed_axis.plot(
+        time_s,
+        [s.values["speed_rpm"] for s in samples],
+        label="Measured speed",
+    )
+    speed_axis.set_ylabel("Speed, rpm")
+    speed_axis.legend()
+    current_axis.plot(
+        time_s,
+        [s.values["iq_ref_a"] for s in samples],
+        label="Iq reference",
+    )
+    current_axis.set_xlabel("Time, s")
+    current_axis.set_ylabel("q-axis current reference, A")
+    current_axis.legend()
+    figure.savefig(path, dpi=170)
+    plt.close(figure)

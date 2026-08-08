@@ -4,7 +4,11 @@ import math
 import unittest
 from dataclasses import dataclass
 
-from tests.e2e.metrics import analyze_current_mode4, analyze_vector_500
+from tests.e2e.metrics import (
+    analyze_current_mode4,
+    analyze_power_limit,
+    analyze_vector_500,
+)
 
 
 @dataclass(frozen=True)
@@ -98,6 +102,60 @@ class Vector500MetricsTests(unittest.TestCase):
 
         self.assertFalse(metrics["passed"])
         self.assertFalse(metrics["criteria"]["overshoot"])
+
+
+class PowerLimitMetricsTests(unittest.TestCase):
+    @staticmethod
+    def samples(
+        *, limit_w: float = 150.0, violation_w: float | None = None
+    ) -> list[SyntheticSample]:
+        result = []
+        for number in range(3001):
+            time_s = number * 0.001
+            speed = 500.0 * min(time_s / 2.5, 1.0)
+            hold = limit_w * min(time_s / 0.6, 1.0)
+            power = hold * (1.0 + 0.02 * math.sin(2 * math.pi * 3 * time_s))
+            if violation_w is not None:
+                if 1.0 <= time_s <= 1.1:
+                    power = violation_w
+            speed_guard = max(speed, 5.0)
+            iq = 3.0 if speed < 5.0 else limit_w * 500.0 / speed_guard
+            result.append(
+                SyntheticSample(
+                    number,
+                    time_s,
+                    {
+                        "speed_rpm": speed,
+                        "speed_ref_rpm": 500.0,
+                        "iq_ref_a": iq,
+                        "power_w": power,
+                    },
+                )
+            )
+        return result
+
+    def test_power_limited_acceleration_passes(self) -> None:
+        metrics = analyze_power_limit(self.samples(), power_limit_w=150.0)
+
+        self.assertTrue(metrics["passed"])
+        self.assertTrue(metrics["criteria"]["power_within_limit"])
+        self.assertTrue(metrics["criteria"]["power_limited_engaged"])
+        self.assertTrue(metrics["criteria"]["constant_power"])
+        self.assertLess(metrics["limited_power_variation_percent"], 30.0)
+
+    def test_power_exceeding_limit_fails(self) -> None:
+        metrics = analyze_power_limit(
+            self.samples(violation_w=300.0), power_limit_w=150.0
+        )
+
+        self.assertFalse(metrics["passed"])
+        self.assertFalse(metrics["criteria"]["power_within_limit"])
+
+    def test_limiter_never_engages_fails(self) -> None:
+        metrics = analyze_power_limit(self.samples(), power_limit_w=600.0)
+
+        self.assertFalse(metrics["passed"])
+        self.assertFalse(metrics["criteria"]["power_limited_engaged"])
 
 
 if __name__ == "__main__":
