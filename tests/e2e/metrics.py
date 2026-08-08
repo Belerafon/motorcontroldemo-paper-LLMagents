@@ -214,6 +214,57 @@ def analyze_current_mode4(
     return metrics
 
 
+def analyze_field_weakening(
+    samples: Sequence[Any],
+    *,
+    target_speed_rpm: float = 700.0,
+    min_negative_id_a: float = 0.02,
+    min_voltage_pu: float = 0.80,
+    speed_tolerance_percent: float = 5.0,
+) -> dict[str, Any]:
+    """Validate that field weakening injects a negative d-axis current above base speed."""
+    time_s = _times(samples)
+    speed = _series(samples, "speed_rpm")
+    id_a = _series(samples, "id_a")
+    id_ref_a = _series(samples, "id_ref_a")
+    umag = _series(samples, "fw_umag_pu")
+    tail_start = _tail_start(len(samples))
+    peak_speed = max(speed)
+    final_speed = speed[-1]
+    min_id = min(id_a)
+    min_id_ref = min(id_ref_a)
+    peak_umag = max(umag)
+    min_req_speed = target_speed_rpm * (1.0 - speed_tolerance_percent / 100.0)
+    metrics: dict[str, Any] = {
+        "samples": len(samples),
+        "sample_period_s": _sample_period(time_s),
+        "window_s": float(time_s[-1] - time_s[0]),
+        "target_speed_rpm": target_speed_rpm,
+        "peak_speed_rpm": peak_speed,
+        "final_speed_rpm": final_speed,
+        "steady_speed_rpm": _mean(speed[tail_start:]),
+        "min_measured_id_a": min_id,
+        "min_id_reference_a": min_id_ref,
+        "peak_voltage_magnitude_pu": peak_umag,
+        "required_min_speed_rpm": min_req_speed,
+    }
+    criteria = {
+        "enough_samples": len(samples) >= 64,
+        "field_weakening_id_reference": min_id_ref <= -min_negative_id_a,
+        "negative_d_axis_current": min_id <= -min_negative_id_a,
+        "voltage_at_limit": peak_umag >= min_voltage_pu,
+        "speed_reached_above_base": peak_speed >= min_req_speed,
+    }
+    metrics["limits"] = {
+        "min_negative_id_a": min_negative_id_a,
+        "min_voltage_pu": min_voltage_pu,
+        "speed_tolerance_percent": speed_tolerance_percent,
+    }
+    metrics["criteria"] = criteria
+    metrics["passed"] = all(criteria.values())
+    return metrics
+
+
 def analyze_vector_500(
     samples: Sequence[Any],
     *,

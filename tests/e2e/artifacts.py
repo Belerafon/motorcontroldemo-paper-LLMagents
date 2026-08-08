@@ -89,6 +89,46 @@ def plot_current_mode4(path: Path, samples: list[Sample]) -> None:
     plt.close(figure)
 
 
+def plot_field_weakening(path: Path, samples: list[Sample]) -> None:
+    import matplotlib.pyplot as plt
+
+    time_s = [sample.time_s for sample in samples]
+    plt.style.use("seaborn-v0_8-whitegrid")
+    figure, (speed_axis, current_axis, voltage_axis) = plt.subplots(
+        3, 1, figsize=(11, 9.2), sharex=True, constrained_layout=True
+    )
+    speed_axis.plot(time_s, [s.values["speed_rpm"] for s in samples], label="Speed")
+    speed_axis.set_title("Vector control: field weakening above base speed")
+    speed_axis.set_ylabel("Speed, rpm")
+    speed_axis.legend()
+    current_axis.plot(
+        time_s,
+        [s.values["id_ref_a"] for s in samples],
+        "--",
+        label="Id reference",
+    )
+    current_axis.plot(
+        time_s,
+        [s.values["id_a"] for s in samples],
+        label="Measured Id",
+    )
+    current_axis.axhline(0.0, color="gray", linestyle=":", linewidth=0.8)
+    current_axis.set_xlabel("Time, s")
+    current_axis.set_ylabel("d-axis current, A")
+    current_axis.legend()
+    voltage_axis.plot(
+        time_s,
+        [s.values["fw_umag_pu"] for s in samples],
+        label="Voltage magnitude (pu)",
+    )
+    voltage_axis.axhline(0.866, color="red", linestyle=":", label="Voltage limit (0.866 pu)")
+    voltage_axis.set_xlabel("Time, s")
+    voltage_axis.set_ylabel("Voltage magnitude, pu")
+    voltage_axis.legend()
+    figure.savefig(path, dpi=170)
+    plt.close(figure)
+
+
 def plot_vector_500(path: Path, samples: list[Sample]) -> None:
     import matplotlib.pyplot as plt
 

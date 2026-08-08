@@ -4,7 +4,11 @@ import math
 import unittest
 from dataclasses import dataclass
 
-from tests.e2e.metrics import analyze_current_mode4, analyze_vector_500
+from tests.e2e.metrics import (
+    analyze_current_mode4,
+    analyze_field_weakening,
+    analyze_vector_500,
+)
 
 
 @dataclass(frozen=True)
@@ -98,6 +102,53 @@ class Vector500MetricsTests(unittest.TestCase):
 
         self.assertFalse(metrics["passed"])
         self.assertFalse(metrics["criteria"]["overshoot"])
+
+
+class FieldWeakeningMetricsTests(unittest.TestCase):
+    @staticmethod
+    def samples(*, negative_id: bool = True, voltage_saturated: bool = True) -> list[SyntheticSample]:
+        result = []
+        for number in range(351):
+            time_s = number * 0.02
+            speed = 700.0 * (1.0 - math.exp(-time_s / 0.8))
+            id_ref = -0.10 if negative_id else 0.0
+            id_actual = id_ref * (1.0 - math.exp(-time_s / 0.3))
+            umag = (0.87 if voltage_saturated else 0.5) if time_s > 1.5 else 0.6
+            result.append(
+                SyntheticSample(
+                    number,
+                    time_s,
+                    {
+                        "speed_rpm": speed,
+                        "id_a": id_actual,
+                        "id_ref_a": id_ref,
+                        "fw_umag_pu": umag,
+                    },
+                )
+            )
+        return result
+
+    def test_field_weakening_injects_negative_id_and_reaches_speed(self) -> None:
+        metrics = analyze_field_weakening(self.samples())
+
+        self.assertTrue(metrics["passed"])
+        self.assertTrue(metrics["criteria"]["negative_d_axis_current"])
+        self.assertTrue(metrics["criteria"]["field_weakening_id_reference"])
+        self.assertTrue(metrics["criteria"]["voltage_at_limit"])
+        self.assertTrue(metrics["criteria"]["speed_reached_above_base"])
+
+    def test_no_negative_id_fails_field_weakening(self) -> None:
+        metrics = analyze_field_weakening(self.samples(negative_id=False))
+
+        self.assertFalse(metrics["passed"])
+        self.assertFalse(metrics["criteria"]["negative_d_axis_current"])
+        self.assertFalse(metrics["criteria"]["field_weakening_id_reference"])
+
+    def test_voltage_below_limit_indicates_fw_not_needed(self) -> None:
+        metrics = analyze_field_weakening(self.samples(voltage_saturated=False))
+
+        self.assertFalse(metrics["passed"])
+        self.assertFalse(metrics["criteria"]["voltage_at_limit"])
 
 
 if __name__ == "__main__":
