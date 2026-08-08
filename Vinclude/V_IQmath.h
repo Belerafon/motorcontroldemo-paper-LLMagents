@@ -1,5 +1,5 @@
 /*!
-     Copyright 2017 	АО "НИИЭТ" и ООО "НПФ ВЕКТОР"
+     Copyright 2017 	РђРћ "РќРРР­Рў" Рё РћРћРћ "РќРџР¤ Р’Р•РљРўРћР "
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -14,11 +14,11 @@
    limitations under the License.
 
  \file      V_IQmath.h
- \brief     Библиотека функций целочисленной математики
- \author    ООО "НПФ Вектор". Все права защищены. http://motorcontrol.ru
+ \brief     Р‘РёР±Р»РёРѕС‚РµРєР° С„СѓРЅРєС†РёР№ С†РµР»РѕС‡РёСЃР»РµРЅРЅРѕР№ РјР°С‚РµРјР°С‚РёРєРё
+ \author    РћРћРћ "РќРџР¤ Р’РµРєС‚РѕСЂ". Р’СЃРµ РїСЂР°РІР° Р·Р°С‰РёС‰РµРЅС‹. http://motorcontrol.ru
  \version   v 2.0 25/03/2016
 
- \defgroup  V_IQmath Библиотека функций целочисленной математики
+ \defgroup  V_IQmath Р‘РёР±Р»РёРѕС‚РµРєР° С„СѓРЅРєС†РёР№ С†РµР»РѕС‡РёСЃР»РµРЅРЅРѕР№ РјР°С‚РµРјР°С‚РёРєРё
 
  \addtogroup V_IQmath 
 @{*/
@@ -48,7 +48,7 @@ static const int32 fix16_one = 0x00010000;
 typedef int32 _iq;
 
 
-//Преобразование данных в формате с плавающей точкой в целочисленные форматы от IQ1 до IQ30.
+//РџСЂРµРѕР±СЂР°Р·РѕРІР°РЅРёРµ РґР°РЅРЅС‹С… РІ С„РѕСЂРјР°С‚Рµ СЃ РїР»Р°РІР°СЋС‰РµР№ С‚РѕС‡РєРѕР№ РІ С†РµР»РѕС‡РёСЃР»РµРЅРЅС‹Рµ С„РѕСЂРјР°С‚С‹ РѕС‚ IQ1 РґРѕ IQ30.
 #define   _IQ30(A)      (long) ((A) * 1073741824.0f)
 #define   _IQ29(A)      (long) ((A) * 536870912.0f)
 #define   _IQ28(A)      (long) ((A) * 268435456.0f)
@@ -80,7 +80,7 @@ typedef int32 _iq;
 #define   _IQ2(A)       (long) ((A) * 4.0f)
 #define   _IQ1(A)       (long) ((A) * 2.0f)
 
-//по умолчанию формат IQ24
+//РїРѕ СѓРјРѕР»С‡Р°РЅРёСЋ С„РѕСЂРјР°С‚ IQ24
 #define   _IQ(A)  _IQ24(A)
 #define   _IQmpy(A,B)  _IQ24mpy(A,B)
 #define   _IQmpyI32(A,B)  _IQ24mpyI32(A,B)
@@ -106,7 +106,7 @@ int32 _IQ21div(int32 a, int32 b);
 int32 _IQ10div(int32 a, int32 b);
 int32 _IQ24mag(int32 a, int32 b);
 
-//! Преобразует из целочисленного 8.24 в формат float
+//! РџСЂРµРѕР±СЂР°Р·СѓРµС‚ РёР· С†РµР»РѕС‡РёСЃР»РµРЅРЅРѕРіРѕ 8.24 РІ С„РѕСЂРјР°С‚ float
 //! \memberof V_IQmath
 #if defined (__GNUC__)
 __attribute__((always_inline))
@@ -137,7 +137,7 @@ inline float _IQ12toF(int32_t a) {
     return (float)(a)*(1.0/4096.0f);
 }
 
-//! Преобразует из целочисленного 22.10 в формат float
+//! РџСЂРµРѕР±СЂР°Р·СѓРµС‚ РёР· С†РµР»РѕС‡РёСЃР»РµРЅРЅРѕРіРѕ 22.10 РІ С„РѕСЂРјР°С‚ float
 
 //! \memberof V_IQmath
 #if defined (__GNUC__)
@@ -149,7 +149,7 @@ inline float _IQ10toF(int32_t a) {
     return (float)(a)*(1.0/1024.0f);
 }
 
-//! Преобразует из целочисленного 26.6 в формат float
+//! РџСЂРµРѕР±СЂР°Р·СѓРµС‚ РёР· С†РµР»РѕС‡РёСЃР»РµРЅРЅРѕРіРѕ 26.6 РІ С„РѕСЂРјР°С‚ float
 
 //! \memberof V_IQmath
 #if defined (__GNUC__)
@@ -161,7 +161,7 @@ inline float _IQ6toF(int32_t a) {
     return (float)(a)*(1.0/64.0f);
 }
 
-//! Умножение двух чисел в формате 8.24
+//! РЈРјРЅРѕР¶РµРЅРёРµ РґРІСѓС… С‡РёСЃРµР» РІ С„РѕСЂРјР°С‚Рµ 8.24
 
 //! \memberof V_IQmath
 #if defined (__GNUC__)
@@ -196,7 +196,7 @@ inline int32 _IQ20mpy(int32 inArg0, int32 inArg1) {
 
 
 
-//! Умножение двух чисел в формате 32.0
+//! РЈРјРЅРѕР¶РµРЅРёРµ РґРІСѓС… С‡РёСЃРµР» РІ С„РѕСЂРјР°С‚Рµ 32.0
 
 //! \memberof V_IQmath
 #if defined (__GNUC__)
@@ -208,7 +208,7 @@ inline int32 _IQ24mpyI32(int32 inArg0, int32 inArg1) {
     return (inArg0 * inArg1);
 }
 
-//! Умножение двух чисел в формате 16.16
+//! РЈРјРЅРѕР¶РµРЅРёРµ РґРІСѓС… С‡РёСЃРµР» РІ С„РѕСЂРјР°С‚Рµ 16.16
 
 //! \memberof V_IQmath
 #if defined (__GNUC__)
@@ -219,11 +219,11 @@ __STATIC_INLINE
 inline int32 _IQ16mpy(int32 inArg0, int32 inArg1) {
     int64_t product = (int64_t)inArg0 * inArg1;
     int32 result = product >> 16;
-//  result += (product & 0x8000) >> 15; //Непонтяно для чего. Написано для округления
+//  result += (product & 0x8000) >> 15; //РќРµРїРѕРЅС‚СЏРЅРѕ РґР»СЏ С‡РµРіРѕ. РќР°РїРёСЃР°РЅРѕ РґР»СЏ РѕРєСЂСѓРіР»РµРЅРёСЏ
     return result;
 }
 
-//! Умножение двух чисел в формате 28.4
+//! РЈРјРЅРѕР¶РµРЅРёРµ РґРІСѓС… С‡РёСЃРµР» РІ С„РѕСЂРјР°С‚Рµ 28.4
 
 //! \memberof V_IQmath
 #if defined (__GNUC__)
@@ -236,7 +236,7 @@ inline int32 _IQ4mpy(int32 inArg0, int32 inArg1) {
 }
 
 
-//! Функция косинуса, вызывает функцию синуса
+//! Р¤СѓРЅРєС†РёСЏ РєРѕСЃРёРЅСѓСЃР°, РІС‹Р·С‹РІР°РµС‚ С„СѓРЅРєС†РёСЋ СЃРёРЅСѓСЃР°
 
 //! \memberof V_IQmath
 #if defined (__GNUC__)
@@ -270,7 +270,7 @@ inline int32 _IQ18cosPU(int32 inAngle) {
 }
 
 
-//! Функция тангенса, вызывает функции синуса и косинуса.
+//! Р¤СѓРЅРєС†РёСЏ С‚Р°РЅРіРµРЅСЃР°, РІС‹Р·С‹РІР°РµС‚ С„СѓРЅРєС†РёРё СЃРёРЅСѓСЃР° Рё РєРѕСЃРёРЅСѓСЃР°.
 
 //! \memberof V_IQmath
 #if defined (__GNUC__)

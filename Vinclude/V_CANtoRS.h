@@ -1,5 +1,5 @@
 /*!
-    Copyright 2017 	АО "НИИЭТ" и ООО "НПФ ВЕКТОР"
+    Copyright 2017 	РђРћ "РќРРР­Рў" Рё РћРћРћ "РќРџР¤ Р’Р•РљРўРћР "
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -14,10 +14,10 @@
    limitations under the License.
 
  \file      v_CANtoRS.h
- \brief     Преобразователь посылок CAN в RS/USB и обратно. Работает
-совместно с драйвером CANOpen
+ \brief     РџСЂРµРѕР±СЂР°Р·РѕРІР°С‚РµР»СЊ РїРѕСЃС‹Р»РѕРє CAN РІ RS/USB Рё РѕР±СЂР°С‚РЅРѕ. Р Р°Р±РѕС‚Р°РµС‚
+СЃРѕРІРјРµСЃС‚РЅРѕ СЃ РґСЂР°Р№РІРµСЂРѕРј CANOpen
 
- \author    ООО "НПФ Вектор". http://motorcontrol.ru
+ \author    РћРћРћ "РќРџР¤ Р’РµРєС‚РѕСЂ". http://motorcontrol.ru
  \version   v 3.0 08/08/2017
 
 */
@@ -42,18 +42,18 @@ extern "C" {
 #include "CANOpen_drv.h"
 
 struct SCANtoRS {
-				Uint16 lastActiveConnection;	// Определяет, какой интерфейс был активен в последний раз - USB или RS
-				Uint8 tempBuf[13];		// Временный буфер для данных
-                Uint16 test_dbg; //для отладки
+				Uint16 lastActiveConnection;	// РћРїСЂРµРґРµР»СЏРµС‚, РєР°РєРѕР№ РёРЅС‚РµСЂС„РµР№СЃ Р±С‹Р» Р°РєС‚РёРІРµРЅ РІ РїРѕСЃР»РµРґРЅРёР№ СЂР°Р· - USB РёР»Рё RS
+				Uint8 tempBuf[13];		// Р’СЂРµРјРµРЅРЅС‹Р№ Р±СѓС„РµСЂ РґР»СЏ РґР°РЅРЅС‹С…
+                Uint16 test_dbg; //РґР»СЏ РѕС‚Р»Р°РґРєРё
                 Uint16 APIpacketMode;
-                int16 HeartBeatGo;//пропустите сердцебиение!
-                Uint16 callback_go; //флаг для вызова callback
-                Uint16 TransmBusy; //флаг занятости передатчика
-                Uint16 PacketInWait; //флаг если есть что-то в буфере отправки
-                Uint16 HeartCounter; //счетчик для отправки HeartBeat
-                Uint16 TransmBusyTimeCount; //счетчик таймаута занятости передатчика
-                Uint16 ReadPackDataCounter; //счетчик данных в пакете
-                Uint16 ReadCRCCounter; //счетчик данных в пакете
+                int16 HeartBeatGo;//РїСЂРѕРїСѓСЃС‚РёС‚Рµ СЃРµСЂРґС†РµР±РёРµРЅРёРµ!
+                Uint16 callback_go; //С„Р»Р°Рі РґР»СЏ РІС‹Р·РѕРІР° callback
+                Uint16 TransmBusy; //С„Р»Р°Рі Р·Р°РЅСЏС‚РѕСЃС‚Рё РїРµСЂРµРґР°С‚С‡РёРєР°
+                Uint16 PacketInWait; //С„Р»Р°Рі РµСЃР»Рё РµСЃС‚СЊ С‡С‚Рѕ-С‚Рѕ РІ Р±СѓС„РµСЂРµ РѕС‚РїСЂР°РІРєРё
+                Uint16 HeartCounter; //СЃС‡РµС‚С‡РёРє РґР»СЏ РѕС‚РїСЂР°РІРєРё HeartBeat
+                Uint16 TransmBusyTimeCount; //СЃС‡РµС‚С‡РёРє С‚Р°Р№РјР°СѓС‚Р° Р·Р°РЅСЏС‚РѕСЃС‚Рё РїРµСЂРµРґР°С‚С‡РёРєР°
+                Uint16 ReadPackDataCounter; //СЃС‡РµС‚С‡РёРє РґР°РЅРЅС‹С… РІ РїР°РєРµС‚Рµ
+                Uint16 ReadCRCCounter; //СЃС‡РµС‚С‡РёРє РґР°РЅРЅС‹С… РІ РїР°РєРµС‚Рµ
                 Uint16 SendTimeoutCounter;
                 Uint16 all_len; //transmit buf len
                 Uint16 tr_counter; //transmit counter
@@ -72,11 +72,11 @@ struct SCANtoRS {
                 Uint16 temp_buf[CANTORS_BUFSIZE];
 				TZCanMsg MSG;
 				TZCanMsg bufMSG;
-				Uint16 ReadPackData[CANTORS_BUFSIZE]; //буфер для API посылки
-				Uint16 ReadCRC[2]; //буфер для СRC
+				Uint16 ReadPackData[CANTORS_BUFSIZE]; //Р±СѓС„РµСЂ РґР»СЏ API РїРѕСЃС‹Р»РєРё
+				Uint16 ReadCRC[2]; //Р±СѓС„РµСЂ РґР»СЏ РЎRC
 				Uint16 TempData[10];
 				Uint16* nodeID;
-				NT_UART_TypeDef *NT_UART;//!Указатель на используемый модуль UART
+				NT_UART_TypeDef *NT_UART;//!РЈРєР°Р·Р°С‚РµР»СЊ РЅР° РёСЃРїРѕР»СЊР·СѓРµРјС‹Р№ РјРѕРґСѓР»СЊ UART
 				};
 
 typedef volatile struct SCANtoRS TCANtoRS;
@@ -93,7 +93,7 @@ Uint16 CANtoRS_C_CRC(TCANtoRS *p,Uint16 *Data,Uint16 len);
 void CANtoRS_Analysis(TCANtoRS*);
 
 
-//если добавляем в струкуру переменные то добавляем значения по умолчанию
+//РµСЃР»Рё РґРѕР±Р°РІР»СЏРµРј РІ СЃС‚СЂСѓРєСѓСЂСѓ РїРµСЂРµРјРµРЅРЅС‹Рµ С‚Рѕ РґРѕР±Р°РІР»СЏРµРј Р·РЅР°С‡РµРЅРёСЏ РїРѕ СѓРјРѕР»С‡Р°РЅРёСЋ
 #define CAN_TO_RS_DEFAULTS { .init = CANtoRS_init,\
 							 .calc = CANtoRS_calc,\
 							 .receive = CANtoRS_Receive,\

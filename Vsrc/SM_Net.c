@@ -1,5 +1,5 @@
 /*!
-    Copyright 2017 	АО "НИИЭТ" и ООО "НПФ ВЕКТОР"
+    Copyright 2017 	РђРћ "РќРРР­Рў" Рё РћРћРћ "РќРџР¤ Р’Р•РљРўРћР "
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -14,8 +14,8 @@
    limitations under the License.
 
  \file      SMNet.c
- \brief     Модуль общего назначения для работы с сетью.  (см. TSM_Net)
- \author    ООО "НПФ Вектор". http://motorcontrol.ru
+ \brief     РњРѕРґСѓР»СЊ РѕР±С‰РµРіРѕ РЅР°Р·РЅР°С‡РµРЅРёСЏ РґР»СЏ СЂР°Р±РѕС‚С‹ СЃ СЃРµС‚СЊСЋ.  (СЃРј. TSM_Net)
+ \author    РћРћРћ "РќРџР¤ Р’РµРєС‚РѕСЂ". http://motorcontrol.ru
  \version   v 2.0 25/03/2016
 
  */
@@ -27,9 +27,9 @@
 #include "V_IQmath.h"
 #include "main.h"
 
-//!Инициализация.
+//!РРЅРёС†РёР°Р»РёР·Р°С†РёСЏ.
 
-//!Присвоение масштабирующих коэффициентов, инициализация других модулей.
+//!РџСЂРёСЃРІРѕРµРЅРёРµ РјР°СЃС€С‚Р°Р±РёСЂСѓСЋС‰РёС… РєРѕСЌС„С„РёС†РёРµРЅС‚РѕРІ, РёРЅРёС†РёР°Р»РёР·Р°С†РёСЏ РґСЂСѓРіРёС… РјРѕРґСѓР»РµР№.
 //! \memberof TSM_Net
 void SM_Net_Init(TSM_Net *p) {
 
@@ -37,86 +37,86 @@ void SM_Net_Init(TSM_Net *p) {
 	p->state_prev = 0xff;
 
 #ifdef CAN_1_ENABLE
-	//тип и версия устройства для драйвера CANOpen
+	//С‚РёРї Рё РІРµСЂСЃРёСЏ СѓСЃС‚СЂРѕР№СЃС‚РІР° РґР»СЏ РґСЂР°Р№РІРµСЂР° CANOpen
 	co1_vars.co_productCode = 51;
 	co1_vars.co_revisionNumber = 1;
 
-	//Настройка драйвера CANOpen_1
-    co1_vars.settings.LoadParamsFromUserMemory_ena = 1;//Разрешить загружать значения параметров из ЭНОЗУ
-    co1_vars.CAN_REGS = (NT_CAN_TypeDef *)NT_CAN_BASE;//Передаем драйверу адрес структуры регистров CAN
-    co1_vars.settings.CAN_ISR_priority = IRQ_PRIORITY_CAN;//Присвоение приоритета перывания CAN (обработчик внутри библиотеки)
-    co1_vars.settings.CAN_IRQn = CAN1_IRQn;//Передаем номер прерывания CAN2 из таблицы прерываний в драйвер CANOpen
-    co1_vars.settings.MultiPDO_ena = 0;//Отключение обработки PDO без учета номера узла (спец. функция)
-    co1_vars.settings.RX_PDO_Callback_ena = 0; //Не вызывать функции обратного вызова при приеме PDO
-    co1_vars.settings.AutoBusON_ena = 1; //Автоматически перезапускать CAN при ошибках на линии
-    co1_vars.settings.BlockTransfer_ena = 1;//Разрешить блочную передачу (нужна для осциллографа)
-    co1_vars.settings.speedCANTablePointer = &canSpeedTable;//Передаем драйверу параметры для настройки скорости CAN
-    co1_vars.settings.resetCPU = propReset;//Передаем драйверу адрес функции ресета микроконтроллера
-    co1_Init(&co1_vars); //Инициализация драйвера CANOpen
+	//РќР°СЃС‚СЂРѕР№РєР° РґСЂР°Р№РІРµСЂР° CANOpen_1
+    co1_vars.settings.LoadParamsFromUserMemory_ena = 1;//Р Р°Р·СЂРµС€РёС‚СЊ Р·Р°РіСЂСѓР¶Р°С‚СЊ Р·РЅР°С‡РµРЅРёСЏ РїР°СЂР°РјРµС‚СЂРѕРІ РёР· Р­РќРћР—РЈ
+    co1_vars.CAN_REGS = (NT_CAN_TypeDef *)NT_CAN_BASE;//РџРµСЂРµРґР°РµРј РґСЂР°Р№РІРµСЂСѓ Р°РґСЂРµСЃ СЃС‚СЂСѓРєС‚СѓСЂС‹ СЂРµРіРёСЃС‚СЂРѕРІ CAN
+    co1_vars.settings.CAN_ISR_priority = IRQ_PRIORITY_CAN;//РџСЂРёСЃРІРѕРµРЅРёРµ РїСЂРёРѕСЂРёС‚РµС‚Р° РїРµСЂС‹РІР°РЅРёСЏ CAN (РѕР±СЂР°Р±РѕС‚С‡РёРє РІРЅСѓС‚СЂРё Р±РёР±Р»РёРѕС‚РµРєРё)
+    co1_vars.settings.CAN_IRQn = CAN1_IRQn;//РџРµСЂРµРґР°РµРј РЅРѕРјРµСЂ РїСЂРµСЂС‹РІР°РЅРёСЏ CAN2 РёР· С‚Р°Р±Р»РёС†С‹ РїСЂРµСЂС‹РІР°РЅРёР№ РІ РґСЂР°Р№РІРµСЂ CANOpen
+    co1_vars.settings.MultiPDO_ena = 0;//РћС‚РєР»СЋС‡РµРЅРёРµ РѕР±СЂР°Р±РѕС‚РєРё PDO Р±РµР· СѓС‡РµС‚Р° РЅРѕРјРµСЂР° СѓР·Р»Р° (СЃРїРµС†. С„СѓРЅРєС†РёСЏ)
+    co1_vars.settings.RX_PDO_Callback_ena = 0; //РќРµ РІС‹Р·С‹РІР°С‚СЊ С„СѓРЅРєС†РёРё РѕР±СЂР°С‚РЅРѕРіРѕ РІС‹Р·РѕРІР° РїСЂРё РїСЂРёРµРјРµ PDO
+    co1_vars.settings.AutoBusON_ena = 1; //РђРІС‚РѕРјР°С‚РёС‡РµСЃРєРё РїРµСЂРµР·Р°РїСѓСЃРєР°С‚СЊ CAN РїСЂРё РѕС€РёР±РєР°С… РЅР° Р»РёРЅРёРё
+    co1_vars.settings.BlockTransfer_ena = 1;//Р Р°Р·СЂРµС€РёС‚СЊ Р±Р»РѕС‡РЅСѓСЋ РїРµСЂРµРґР°С‡Сѓ (РЅСѓР¶РЅР° РґР»СЏ РѕСЃС†РёР»Р»РѕРіСЂР°С„Р°)
+    co1_vars.settings.speedCANTablePointer = &canSpeedTable;//РџРµСЂРµРґР°РµРј РґСЂР°Р№РІРµСЂСѓ РїР°СЂР°РјРµС‚СЂС‹ РґР»СЏ РЅР°СЃС‚СЂРѕР№РєРё СЃРєРѕСЂРѕСЃС‚Рё CAN
+    co1_vars.settings.resetCPU = propReset;//РџРµСЂРµРґР°РµРј РґСЂР°Р№РІРµСЂСѓ Р°РґСЂРµСЃ С„СѓРЅРєС†РёРё СЂРµСЃРµС‚Р° РјРёРєСЂРѕРєРѕРЅС‚СЂРѕР»Р»РµСЂР°
+    co1_Init(&co1_vars); //РРЅРёС†РёР°Р»РёР·Р°С†РёСЏ РґСЂР°Р№РІРµСЂР° CANOpen
 #endif
 
 #ifdef CAN_2_ENABLE
-	//тип и версия устройства для драйвера CANOpen
+	//С‚РёРї Рё РІРµСЂСЃРёСЏ СѓСЃС‚СЂРѕР№СЃС‚РІР° РґР»СЏ РґСЂР°Р№РІРµСЂР° CANOpen
 	co2_vars.co_productCode = 51;
 	co2_vars.co_revisionNumber = 1;
 
-    //Настройка драйвера CANOpen_2
-    co2_vars.settings.LoadParamsFromUserMemory_ena = 1;//Разрешить загружать значения параметров из ЭНОЗУ
-    co2_vars.CAN_REGS = (NT_CAN_TypeDef *)NT_CAN_BASE;//Передаем драйверу адрес структуры регистров CAN
-    co2_vars.settings.CAN_ISR_priority = IRQ_PRIORITY_CAN;//Присвоение приоритета перывания CAN (обработчик внутри библиотеки)
-    co2_vars.settings.CAN_IRQn = CAN2_IRQn;//Передаем номер прерывания CAN2 из таблицы прерываний в драйвер CANOpen
-    co2_vars.settings.MultiPDO_ena = 0;//Отключение обработки PDO без учета номера узла (спец. функция)
-    co2_vars.settings.RX_PDO_Callback_ena = 0; //Не вызывать функции обратного вызова при приеме PDO
-    co2_vars.settings.AutoBusON_ena = 1; //Автоматически перезапускать CAN при ошибках на линии
-    co2_vars.settings.BlockTransfer_ena = 1;//Разрешить блочную передачу (нужна для осциллографа)
-    co2_vars.settings.speedCANTablePointer = &canSpeedTable;//Передаем драйверу параметры для настройки скорости CAN
-    co2_vars.settings.resetCPU = propReset;//Передаем драйверу адрес функции ресета микроконтроллера
-    co2_Init(&co2_vars); //Инициализация драйвера CANOpen
+    //РќР°СЃС‚СЂРѕР№РєР° РґСЂР°Р№РІРµСЂР° CANOpen_2
+    co2_vars.settings.LoadParamsFromUserMemory_ena = 1;//Р Р°Р·СЂРµС€РёС‚СЊ Р·Р°РіСЂСѓР¶Р°С‚СЊ Р·РЅР°С‡РµРЅРёСЏ РїР°СЂР°РјРµС‚СЂРѕРІ РёР· Р­РќРћР—РЈ
+    co2_vars.CAN_REGS = (NT_CAN_TypeDef *)NT_CAN_BASE;//РџРµСЂРµРґР°РµРј РґСЂР°Р№РІРµСЂСѓ Р°РґСЂРµСЃ СЃС‚СЂСѓРєС‚СѓСЂС‹ СЂРµРіРёСЃС‚СЂРѕРІ CAN
+    co2_vars.settings.CAN_ISR_priority = IRQ_PRIORITY_CAN;//РџСЂРёСЃРІРѕРµРЅРёРµ РїСЂРёРѕСЂРёС‚РµС‚Р° РїРµСЂС‹РІР°РЅРёСЏ CAN (РѕР±СЂР°Р±РѕС‚С‡РёРє РІРЅСѓС‚СЂРё Р±РёР±Р»РёРѕС‚РµРєРё)
+    co2_vars.settings.CAN_IRQn = CAN2_IRQn;//РџРµСЂРµРґР°РµРј РЅРѕРјРµСЂ РїСЂРµСЂС‹РІР°РЅРёСЏ CAN2 РёР· С‚Р°Р±Р»РёС†С‹ РїСЂРµСЂС‹РІР°РЅРёР№ РІ РґСЂР°Р№РІРµСЂ CANOpen
+    co2_vars.settings.MultiPDO_ena = 0;//РћС‚РєР»СЋС‡РµРЅРёРµ РѕР±СЂР°Р±РѕС‚РєРё PDO Р±РµР· СѓС‡РµС‚Р° РЅРѕРјРµСЂР° СѓР·Р»Р° (СЃРїРµС†. С„СѓРЅРєС†РёСЏ)
+    co2_vars.settings.RX_PDO_Callback_ena = 0; //РќРµ РІС‹Р·С‹РІР°С‚СЊ С„СѓРЅРєС†РёРё РѕР±СЂР°С‚РЅРѕРіРѕ РІС‹Р·РѕРІР° РїСЂРё РїСЂРёРµРјРµ PDO
+    co2_vars.settings.AutoBusON_ena = 1; //РђРІС‚РѕРјР°С‚РёС‡РµСЃРєРё РїРµСЂРµР·Р°РїСѓСЃРєР°С‚СЊ CAN РїСЂРё РѕС€РёР±РєР°С… РЅР° Р»РёРЅРёРё
+    co2_vars.settings.BlockTransfer_ena = 1;//Р Р°Р·СЂРµС€РёС‚СЊ Р±Р»РѕС‡РЅСѓСЋ РїРµСЂРµРґР°С‡Сѓ (РЅСѓР¶РЅР° РґР»СЏ РѕСЃС†РёР»Р»РѕРіСЂР°С„Р°)
+    co2_vars.settings.speedCANTablePointer = &canSpeedTable;//РџРµСЂРµРґР°РµРј РґСЂР°Р№РІРµСЂСѓ РїР°СЂР°РјРµС‚СЂС‹ РґР»СЏ РЅР°СЃС‚СЂРѕР№РєРё СЃРєРѕСЂРѕСЃС‚Рё CAN
+    co2_vars.settings.resetCPU = propReset;//РџРµСЂРµРґР°РµРј РґСЂР°Р№РІРµСЂСѓ Р°РґСЂРµСЃ С„СѓРЅРєС†РёРё СЂРµСЃРµС‚Р° РјРёРєСЂРѕРєРѕРЅС‚СЂРѕР»Р»РµСЂР°
+    co2_Init(&co2_vars); //РРЅРёС†РёР°Р»РёР·Р°С†РёСЏ РґСЂР°Р№РІРµСЂР° CANOpen
 #endif
 
-	//логгер событий:
-	//	размер буфера: 50
-	//	стартовый адрес в SPI: 3000
-	FaultLog.init((TLogger*)&FaultLog, 50, 3000,(Uint32*) &RTCclock.packed_time);//ниже указатель на время может быть переопределен в зависимости от работы часов
+	//Р»РѕРіРіРµСЂ СЃРѕР±С‹С‚РёР№:
+	//	СЂР°Р·РјРµСЂ Р±СѓС„РµСЂР°: 50
+	//	СЃС‚Р°СЂС‚РѕРІС‹Р№ Р°РґСЂРµСЃ РІ SPI: 3000
+	FaultLog.init((TLogger*)&FaultLog, 50, 3000,(Uint32*) &RTCclock.packed_time);//РЅРёР¶Рµ СѓРєР°Р·Р°С‚РµР»СЊ РЅР° РІСЂРµРјСЏ РјРѕР¶РµС‚ Р±С‹С‚СЊ РїРµСЂРµРѕРїСЂРµРґРµР»РµРЅ РІ Р·Р°РІРёСЃРёРјРѕСЃС‚Рё РѕС‚ СЂР°Р±РѕС‚С‹ С‡Р°СЃРѕРІ
 
 #if (defined(CANTORS_ENA)) || (defined(CANTOUSB_ENA))
-//Работа с CANopen через UART (параллельно с CAN, нет конфликта)
+//Р Р°Р±РѕС‚Р° СЃ CANopen С‡РµСЂРµР· UART (РїР°СЂР°Р»Р»РµР»СЊРЅРѕ СЃ CAN, РЅРµС‚ РєРѕРЅС„Р»РёРєС‚Р°)
 #ifdef CAN_1_ENABLE
-	CANtoRS.nodeID = (Uint16*)&co1_vars.co_nodeID; //Номер узла из CANopen
+	CANtoRS.nodeID = (Uint16*)&co1_vars.co_nodeID; //РќРѕРјРµСЂ СѓР·Р»Р° РёР· CANopen
 #else
-	CANtoRS.nodeID = (Uint16*)&co2_vars.co_nodeID; //Номер узла из CANopen
+	CANtoRS.nodeID = (Uint16*)&co2_vars.co_nodeID; //РќРѕРјРµСЂ СѓР·Р»Р° РёР· CANopen
 #endif
-    CANtoRS.callback = Z_co_receiveSDOrequest;//Указатель на функцию обратного вызова из драйвера CANopen по приходу SDO сообщения
+    CANtoRS.callback = Z_co_receiveSDOrequest;//РЈРєР°Р·Р°С‚РµР»СЊ РЅР° С„СѓРЅРєС†РёСЋ РѕР±СЂР°С‚РЅРѕРіРѕ РІС‹Р·РѕРІР° РёР· РґСЂР°Р№РІРµСЂР° CANopen РїРѕ РїСЂРёС…РѕРґСѓ SDO СЃРѕРѕР±С‰РµРЅРёСЏ
 	CANtoRS.init(&CANtoRS);
 #endif
 #ifdef MODBUS_ENA
-	// Настраиваем MODBUS
-	ModBus.ExecutionFreq = 10000;//Частота вызова расчета модуля модбас в кГц
+	// РќР°СЃС‚СЂР°РёРІР°РµРј MODBUS
+	ModBus.ExecutionFreq = 10000;//Р§Р°СЃС‚РѕС‚Р° РІС‹Р·РѕРІР° СЂР°СЃС‡РµС‚Р° РјРѕРґСѓР»СЏ РјРѕРґР±Р°СЃ РІ РєР“С†
 	ModBus.Init(&ModBus);
 	MBVarsConv.init(&MBVarsConv);
 #endif
 }
 
-//!Медленный расчет.
+//!РњРµРґР»РµРЅРЅС‹Р№ СЂР°СЃС‡РµС‚.
 
-//! Присвоение масштабирующих коэффициентов, фоновый расчет некоторых модулей.
+//! РџСЂРёСЃРІРѕРµРЅРёРµ РјР°СЃС€С‚Р°Р±РёСЂСѓСЋС‰РёС… РєРѕСЌС„С„РёС†РёРµРЅС‚РѕРІ, С„РѕРЅРѕРІС‹Р№ СЂР°СЃС‡РµС‚ РЅРµРєРѕС‚РѕСЂС‹С… РјРѕРґСѓР»РµР№.
 
 //! \memberof TSM_Net
 void SM_Net_Slow_Calc(TSM_Net *p) {
 
 
 #ifdef CAN_1_ENABLE
-	co1_vars.co_scaleNum0 = 1; //без масштабирования
+	co1_vars.co_scaleNum0 = 1; //Р±РµР· РјР°СЃС€С‚Р°Р±РёСЂРѕРІР°РЅРёСЏ
 	co1_vars.co_scaleNum1 = 100;	// %
-	co1_vars.co_scaleNum2 = drv_params.freq_nom;	//Гц
-	co1_vars.co_scaleNum3 = drv_params.U_nom;//напряжение фазное номинальное амплитудное
-	co1_vars.co_scaleNum4 = drv_params.I_nom; //Ток фазный базовый
+	co1_vars.co_scaleNum2 = drv_params.freq_nom;	//Р“С†
+	co1_vars.co_scaleNum3 = drv_params.U_nom;//РЅР°РїСЂСЏР¶РµРЅРёРµ С„Р°Р·РЅРѕРµ РЅРѕРјРёРЅР°Р»СЊРЅРѕРµ Р°РјРїР»РёС‚СѓРґРЅРѕРµ
+	co1_vars.co_scaleNum4 = drv_params.I_nom; //РўРѕРє С„Р°Р·РЅС‹Р№ Р±Р°Р·РѕРІС‹Р№
 	co1_vars.co_scaleNum5 = 1;
 	co1_vars.co_scaleNum6 = 1;
-	co1_vars.co_scaleNum7 = drv_params.Udc_nom; //напряжение ЗПТ базовое
-	co1_vars.co_scaleNum8 = drv_params.power; //18 в формате 9.6 //Мощность
+	co1_vars.co_scaleNum7 = drv_params.Udc_nom; //РЅР°РїСЂСЏР¶РµРЅРёРµ Р—РџРў Р±Р°Р·РѕРІРѕРµ
+	co1_vars.co_scaleNum8 = drv_params.power; //18 РІ С„РѕСЂРјР°С‚Рµ 9.6 //РњРѕС‰РЅРѕСЃС‚СЊ
 	co1_vars.co_scaleNum9 = 1;
-	co1_vars.co_scaleNumA = 20; //температура
+	co1_vars.co_scaleNumA = 20; //С‚РµРјРїРµСЂР°С‚СѓСЂР°
 	co1_vars.co_scaleNumB = 1;
 	co1_vars.co_scaleNumC = 1;
 	co1_vars.co_scaleNumD = 1;
@@ -124,12 +124,12 @@ void SM_Net_Slow_Calc(TSM_Net *p) {
 	co1_vars.co_scaleNumF = 1;
 	co1_vars.co_scaleNum10 = 1; //
 	co1_vars.co_scaleNum11 = 1; //
-	co1_vars.co_scaleNum12 = drv_params.power; //18 в формате 10.6 //Мощность
+	co1_vars.co_scaleNum12 = drv_params.power; //18 РІ С„РѕСЂРјР°С‚Рµ 10.6 //РњРѕС‰РЅРѕСЃС‚СЊ
 	co1_vars.co_scaleNum13 = 360; //
-	co1_vars.co_scaleNum14 = drv_params.speed_nom; //номинальная частота вращения
+	co1_vars.co_scaleNum14 = drv_params.speed_nom; //РЅРѕРјРёРЅР°Р»СЊРЅР°СЏ С‡Р°СЃС‚РѕС‚Р° РІСЂР°С‰РµРЅРёСЏ
 	co1_vars.co_scaleNum15 = 1; //
 	co1_vars.co_scaleNum16 = 1; //
-	co1_vars.co_scaleNum17 = ((((long) drv_params.Udc_nom) << 6) / (long) drv_params.I_nom); //Rбаз 10.6
+	co1_vars.co_scaleNum17 = ((((long) drv_params.Udc_nom) << 6) / (long) drv_params.I_nom); //RР±Р°Р· 10.6
 	co1_vars.co_scaleNum18 = 1000;
 	co1_vars.co_scaleNum19 = 1;
 	co1_vars.co_scaleNum1A = 1;
@@ -139,23 +139,23 @@ void SM_Net_Slow_Calc(TSM_Net *p) {
 	co1_vars.co_scaleNum1E = 1;
 	co1_vars.co_scaleNum1F = 1;
 
-	co_background_calc(&co1_vars); //Расчет драйвера CANOpen_1 фоновый
-	Can1BTInterface.slow_calc(&Can1BTInterface);//интерфейс блочной передачи CANopen, медленный расчет
+	co_background_calc(&co1_vars); //Р Р°СЃС‡РµС‚ РґСЂР°Р№РІРµСЂР° CANOpen_1 С„РѕРЅРѕРІС‹Р№
+	Can1BTInterface.slow_calc(&Can1BTInterface);//РёРЅС‚РµСЂС„РµР№СЃ Р±Р»РѕС‡РЅРѕР№ РїРµСЂРµРґР°С‡Рё CANopen, РјРµРґР»РµРЅРЅС‹Р№ СЂР°СЃС‡РµС‚
 #endif
 
 
 #ifdef CAN_2_ENABLE
-	co2_vars.co_scaleNum0 = 1; //без масштабирования
+	co2_vars.co_scaleNum0 = 1; //Р±РµР· РјР°СЃС€С‚Р°Р±РёСЂРѕРІР°РЅРёСЏ
 	co2_vars.co_scaleNum1 = 100;	// %
-	co2_vars.co_scaleNum2 = drv_params.freq_nom;	//Гц
-	co2_vars.co_scaleNum3 = drv_params.U_nom;//напряжение фазное номинальное амплитудное
-	co2_vars.co_scaleNum4 = drv_params.I_nom; //Ток фазный базовый
+	co2_vars.co_scaleNum2 = drv_params.freq_nom;	//Р“С†
+	co2_vars.co_scaleNum3 = drv_params.U_nom;//РЅР°РїСЂСЏР¶РµРЅРёРµ С„Р°Р·РЅРѕРµ РЅРѕРјРёРЅР°Р»СЊРЅРѕРµ Р°РјРїР»РёС‚СѓРґРЅРѕРµ
+	co2_vars.co_scaleNum4 = drv_params.I_nom; //РўРѕРє С„Р°Р·РЅС‹Р№ Р±Р°Р·РѕРІС‹Р№
 	co2_vars.co_scaleNum5 = 1;
 	co2_vars.co_scaleNum6 = 1;
-	co2_vars.co_scaleNum7 = drv_params.Udc_nom; //напряжение ЗПТ базовое
-	co2_vars.co_scaleNum8 = drv_params.power; //18 в формате 9.6 //Мощность
+	co2_vars.co_scaleNum7 = drv_params.Udc_nom; //РЅР°РїСЂСЏР¶РµРЅРёРµ Р—РџРў Р±Р°Р·РѕРІРѕРµ
+	co2_vars.co_scaleNum8 = drv_params.power; //18 РІ С„РѕСЂРјР°С‚Рµ 9.6 //РњРѕС‰РЅРѕСЃС‚СЊ
 	co2_vars.co_scaleNum9 = 1;
-	co2_vars.co_scaleNumA = 20; //температура
+	co2_vars.co_scaleNumA = 20; //С‚РµРјРїРµСЂР°С‚СѓСЂР°
 	co2_vars.co_scaleNumB = 1;
 	co2_vars.co_scaleNumC = 1;
 	co2_vars.co_scaleNumD = 1;
@@ -163,12 +163,12 @@ void SM_Net_Slow_Calc(TSM_Net *p) {
 	co2_vars.co_scaleNumF = 1;
 	co2_vars.co_scaleNum10 = 1; //
 	co2_vars.co_scaleNum11 = 1; //
-	co2_vars.co_scaleNum12 = drv_params.power; //18 в формате 10.6 //Мощность
+	co2_vars.co_scaleNum12 = drv_params.power; //18 РІ С„РѕСЂРјР°С‚Рµ 10.6 //РњРѕС‰РЅРѕСЃС‚СЊ
 	co2_vars.co_scaleNum13 = 360; //
-	co2_vars.co_scaleNum14 = drv_params.speed_nom; //номинальная частота вращения
+	co2_vars.co_scaleNum14 = drv_params.speed_nom; //РЅРѕРјРёРЅР°Р»СЊРЅР°СЏ С‡Р°СЃС‚РѕС‚Р° РІСЂР°С‰РµРЅРёСЏ
 	co2_vars.co_scaleNum15 = 1; //
 	co2_vars.co_scaleNum16 = 1; //
-	co2_vars.co_scaleNum17 = ((((long) drv_params.Udc_nom) << 6) / (long) drv_params.I_nom); //Rбаз 10.6
+	co2_vars.co_scaleNum17 = ((((long) drv_params.Udc_nom) << 6) / (long) drv_params.I_nom); //RР±Р°Р· 10.6
 	co2_vars.co_scaleNum18 = 1000;
 	co2_vars.co_scaleNum19 = 1;
 	co2_vars.co_scaleNum1A = 1;
@@ -178,13 +178,13 @@ void SM_Net_Slow_Calc(TSM_Net *p) {
 	co2_vars.co_scaleNum1E = 1;
 	co2_vars.co_scaleNum1F = 1;
 
-	co_background_calc(&co2_vars); //Расчет драйвера CANOpen_2 фоновый
-	Can2BTInterface.slow_calc(&Can2BTInterface);//интерфейс блочной передачи CANopen, медленный расчет
+	co_background_calc(&co2_vars); //Р Р°СЃС‡РµС‚ РґСЂР°Р№РІРµСЂР° CANOpen_2 С„РѕРЅРѕРІС‹Р№
+	Can2BTInterface.slow_calc(&Can2BTInterface);//РёРЅС‚РµСЂС„РµР№СЃ Р±Р»РѕС‡РЅРѕР№ РїРµСЂРµРґР°С‡Рё CANopen, РјРµРґР»РµРЅРЅС‹Р№ СЂР°СЃС‡РµС‚
 #endif
 
-	drv_params.U_nom = 0.5759 * drv_params.Udc_nom;//номинальное фазное напряжение
-	drv_params.power = ((long) 300) << 6; //приведем к формату 10.6
-	drv_params.freq_nom = ((float) drv_params.speed_nom * drv_params.p) / 60 + 0.5; //номин частота
+	drv_params.U_nom = 0.5759 * drv_params.Udc_nom;//РЅРѕРјРёРЅР°Р»СЊРЅРѕРµ С„Р°Р·РЅРѕРµ РЅР°РїСЂСЏР¶РµРЅРёРµ
+	drv_params.power = ((long) 300) << 6; //РїСЂРёРІРµРґРµРј Рє С„РѕСЂРјР°С‚Сѓ 10.6
+	drv_params.freq_nom = ((float) drv_params.speed_nom * drv_params.p) / 60 + 0.5; //РЅРѕРјРёРЅ С‡Р°СЃС‚РѕС‚Р°
 	drv_interface.calc(&drv_interface);
 	FaultLog.background_calc(&FaultLog);
 
@@ -192,19 +192,19 @@ void SM_Net_Slow_Calc(TSM_Net *p) {
 	MBVarsConv.slow_calc(&MBVarsConv);
 #endif
 
-	if (RTCclock.ClockOk)//часы работают?
-		FaultLog.time_ptr = (Uint32*) &RTCclock.packed_time; //время для банка аварий из часов
+	if (RTCclock.ClockOk)//С‡Р°СЃС‹ СЂР°Р±РѕС‚Р°СЋС‚?
+		FaultLog.time_ptr = (Uint32*) &RTCclock.packed_time; //РІСЂРµРјСЏ РґР»СЏ Р±Р°РЅРєР° Р°РІР°СЂРёР№ РёР· С‡Р°СЃРѕРІ
 	else
-		FaultLog.time_ptr = (Uint32*) &global_time.PowerOn_time;//если не работают, то из модуля подсчета времени наработки
+		FaultLog.time_ptr = (Uint32*) &global_time.PowerOn_time;//РµСЃР»Рё РЅРµ СЂР°Р±РѕС‚Р°СЋС‚, С‚Рѕ РёР· РјРѕРґСѓР»СЏ РїРѕРґСЃС‡РµС‚Р° РІСЂРµРјРµРЅРё РЅР°СЂР°Р±РѕС‚РєРё
 }
 
-//!Быстрый расчет
+//!Р‘С‹СЃС‚СЂС‹Р№ СЂР°СЃС‡РµС‚
 
-//!Быстрый расчет некоторых сетевых модулей, вызов методов "пролистывания" кодов аварий и предупреждений
+//!Р‘С‹СЃС‚СЂС‹Р№ СЂР°СЃС‡РµС‚ РЅРµРєРѕС‚РѕСЂС‹С… СЃРµС‚РµРІС‹С… РјРѕРґСѓР»РµР№, РІС‹Р·РѕРІ РјРµС‚РѕРґРѕРІ "РїСЂРѕР»РёСЃС‚С‹РІР°РЅРёСЏ" РєРѕРґРѕРІ Р°РІР°СЂРёР№ Рё РїСЂРµРґСѓРїСЂРµР¶РґРµРЅРёР№
 //! \memberof TSM_Net
 void SM_Net_ms_Calc(TSM_Net *p) {
-	//Перевод битового состояния системы управления в константу.
-	//По drv_status_code отображается статус привода в UniCON
+	//РџРµСЂРµРІРѕРґ Р±РёС‚РѕРІРѕРіРѕ СЃРѕСЃС‚РѕСЏРЅРёСЏ СЃРёСЃС‚РµРјС‹ СѓРїСЂР°РІР»РµРЅРёСЏ РІ РєРѕРЅСЃС‚Р°РЅС‚Сѓ.
+	//РџРѕ drv_status_code РѕС‚РѕР±СЂР°Р¶Р°РµС‚СЃСЏ СЃС‚Р°С‚СѓСЃ РїСЂРёРІРѕРґР° РІ UniCON
 	if (drv_status.bit.ready == 1)
 		drv_status_code = DRV_STATUS_READY;
 	if (drv_status.bit.running == 1)
@@ -221,20 +221,20 @@ void SM_Net_ms_Calc(TSM_Net *p) {
 		drv_status_code = DRV_STATUS_OVERHEAT;
 	else
 		drv_status_code &= ~DRV_STATUS_OVERHEAT;
-	//функция листания аварий для пульта (UniCON)
+	//С„СѓРЅРєС†РёСЏ Р»РёСЃС‚Р°РЅРёСЏ Р°РІР°СЂРёР№ РґР»СЏ РїСѓР»СЊС‚Р° (UniCON)
 	pult_faults_lister.calc(&pult_faults_lister);
 	sm_prot.Main_ErrorCode = 0xFF & pult_faults_lister.output;
 
 
 #ifdef CAN_1_ENABLE
-	co_1ms_calc(&co1_vars);    //Расчет драйвера CANOpen_1
-	//блочная передача драйвера CANopen. Через неё, в частности, грузятся осциллограммы dlog
+	co_1ms_calc(&co1_vars);    //Р Р°СЃС‡РµС‚ РґСЂР°Р№РІРµСЂР° CANOpen_1
+	//Р±Р»РѕС‡РЅР°СЏ РїРµСЂРµРґР°С‡Р° РґСЂР°Р№РІРµСЂР° CANopen. Р§РµСЂРµР· РЅРµС‘, РІ С‡Р°СЃС‚РЅРѕСЃС‚Рё, РіСЂСѓР·СЏС‚СЃСЏ РѕСЃС†РёР»Р»РѕРіСЂР°РјРјС‹ dlog
 	Can1BTInterface.ms_calc(&Can1BTInterface, NT_TIMER2->VALUE, &co1_vars);
 #endif
 
 #ifdef CAN_2_ENABLE
-	co_1ms_calc(&co2_vars);    //Расчет драйвера CANOpen_2
-	//блочная передача драйвера CANopen. Через неё, в частности, грузятся осциллограммы dlog
+	co_1ms_calc(&co2_vars);    //Р Р°СЃС‡РµС‚ РґСЂР°Р№РІРµСЂР° CANOpen_2
+	//Р±Р»РѕС‡РЅР°СЏ РїРµСЂРµРґР°С‡Р° РґСЂР°Р№РІРµСЂР° CANopen. Р§РµСЂРµР· РЅРµС‘, РІ С‡Р°СЃС‚РЅРѕСЃС‚Рё, РіСЂСѓР·СЏС‚СЃСЏ РѕСЃС†РёР»Р»РѕРіСЂР°РјРјС‹ dlog
 	Can2BTInterface.ms_calc(&Can2BTInterface, NT_TIMER2->VALUE, &co2_vars);
 #endif
 

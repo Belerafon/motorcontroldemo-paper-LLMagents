@@ -1,4 +1,4 @@
-/*    Copyright 2017 	АО "НИИЭТ" и ООО "НПФ ВЕКТОР"
+/*    Copyright 2017 	РђРћ "РќРРР­Рў" Рё РћРћРћ "РќРџР¤ Р’Р•РљРўРћР "
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -12,7 +12,7 @@
    See the License for the specific language governing permissions and
    limitations under the License.
 
- \author    ООО "НПФ Вектор". http://motorcontrol.ru
+ \author    РћРћРћ "РќРџР¤ Р’РµРєС‚РѕСЂ". http://motorcontrol.ru
 */
 
 #ifndef MBOD_H
@@ -22,17 +22,17 @@
 
 
 
-#define MB_VAR_WRITE	1	// признак записи в ModBus-переменную
-#define MB_VAR_READ		2	// признак чтения из ModBus-переменной
+#define MB_VAR_WRITE	1	// РїСЂРёР·РЅР°Рє Р·Р°РїРёСЃРё РІ ModBus-РїРµСЂРµРјРµРЅРЅСѓСЋ
+#define MB_VAR_READ		2	// РїСЂРёР·РЅР°Рє С‡С‚РµРЅРёСЏ РёР· ModBus-РїРµСЂРµРјРµРЅРЅРѕР№
 
 typedef struct
 {
-	Uint16 index;	// ModBus-адрес
-	Uint16 type_or_acc;	// номер бита для битовых переменных или признак записи/чтения
-						// для HR/IR-переменных (должен сбрасываться пользователем):
-						// 1 - произошла запись
-						// 2 - произошло чтение
-	Uint32 addr;	// адрес переменной в контроллере
+	Uint16 index;	// ModBus-Р°РґСЂРµСЃ
+	Uint16 type_or_acc;	// РЅРѕРјРµСЂ Р±РёС‚Р° РґР»СЏ Р±РёС‚РѕРІС‹С… РїРµСЂРµРјРµРЅРЅС‹С… РёР»Рё РїСЂРёР·РЅР°Рє Р·Р°РїРёСЃРё/С‡С‚РµРЅРёСЏ
+						// РґР»СЏ HR/IR-РїРµСЂРµРјРµРЅРЅС‹С… (РґРѕР»Р¶РµРЅ СЃР±СЂР°СЃС‹РІР°С‚СЊСЃСЏ РїРѕР»СЊР·РѕРІР°С‚РµР»РµРј):
+						// 1 - РїСЂРѕРёР·РѕС€Р»Р° Р·Р°РїРёСЃСЊ
+						// 2 - РїСЂРѕРёР·РѕС€Р»Рѕ С‡С‚РµРЅРёРµ
+	Uint32 addr;	// Р°РґСЂРµСЃ РїРµСЂРµРјРµРЅРЅРѕР№ РІ РєРѕРЅС‚СЂРѕР»Р»РµСЂРµ
 } MB_Record;
 				 
 extern volatile MB_Record mbodHR[];

@@ -1,5 +1,5 @@
 /*!
-     Copyright 2017 	АО "НИИЭТ" и ООО "НПФ ВЕКТОР"
+     Copyright 2017 	РђРћ "РќРРР­Рў" Рё РћРћРћ "РќРџР¤ Р’Р•РљРўРћР "
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -14,11 +14,11 @@
    limitations under the License.
 
  \file      CANBlockTransferInterface.h
- \brief     Блочная передача данных для CANopen
- \author    ООО "НПФ Вектор". http://motorcontrol.ru
+ \brief     Р‘Р»РѕС‡РЅР°СЏ РїРµСЂРµРґР°С‡Р° РґР°РЅРЅС‹С… РґР»СЏ CANopen
+ \author    РћРћРћ "РќРџР¤ Р’РµРєС‚РѕСЂ". http://motorcontrol.ru
  \version   v 2.0 25/03/2016
 
- \defgroup  CANOpen_drv Драйвер CANOpen
+ \defgroup  CANOpen_drv Р”СЂР°Р№РІРµСЂ CANOpen
  @{
 */
 #ifndef CANBLOCKTRANS_INTERFACE_H
@@ -34,15 +34,15 @@ extern "C"
 #define CANBT_INTERFACE_BUSY 0x8000
 #define CANBT_INTERFACE_FLASH_PROG  1
 #define CANBT_INTERFACE_DATALOG1  	2
-#define CANBT_INTERFACE_DATALOG2  	3	// используется для 32-битного даталоггера
+#define CANBT_INTERFACE_DATALOG2  	3	// РёСЃРїРѕР»СЊР·СѓРµС‚СЃСЏ РґР»СЏ 32-Р±РёС‚РЅРѕРіРѕ РґР°С‚Р°Р»РѕРіРіРµСЂР°
 
 struct SCanBTInterface{
-		Uint16 alreadyInit;	//признак первого вызова дискетного автомата.
-	    Uint16 state_shadow;//Теневое состояние.
-	    Uint16 state_prev;	//Предыдущее сосяние (на один такт)
-	    Uint16 E;			//Флаг первого вхождения.
+		Uint16 alreadyInit;	//РїСЂРёР·РЅР°Рє РїРµСЂРІРѕРіРѕ РІС‹Р·РѕРІР° РґРёСЃРєРµС‚РЅРѕРіРѕ Р°РІС‚РѕРјР°С‚Р°.
+	    Uint16 state_shadow;//РўРµРЅРµРІРѕРµ СЃРѕСЃС‚РѕСЏРЅРёРµ.
+	    Uint16 state_prev;	//РџСЂРµРґС‹РґСѓС‰РµРµ СЃРѕСЃСЏРЅРёРµ (РЅР° РѕРґРёРЅ С‚Р°РєС‚)
+	    Uint16 E;			//Р¤Р»Р°Рі РїРµСЂРІРѕРіРѕ РІС…РѕР¶РґРµРЅРёСЏ.
 	    Uint32 time_prev;
-	    Uint64 state_time;	//время нахождения в текущем состоянии, в тиках проца. Для 150Мгц максимальное время около 4тыс. лет :)
+	    Uint64 state_time;	//РІСЂРµРјСЏ РЅР°С…РѕР¶РґРµРЅРёСЏ РІ С‚РµРєСѓС‰РµРј СЃРѕСЃС‚РѕСЏРЅРёРё, РІ С‚РёРєР°С… РїСЂРѕС†Р°. Р”Р»СЏ 150РњРіС† РјР°РєСЃРёРјР°Р»СЊРЅРѕРµ РІСЂРµРјСЏ РѕРєРѕР»Рѕ 4С‚С‹СЃ. Р»РµС‚ :)
 		Uint16 BlockTransferCommand;
 		void (*ms_calc)(volatile struct SCanBTInterface* p, Uint32 time, TCo_OdVars* co_ptr);
 		void (*slow_calc)(volatile struct SCanBTInterface* p);
@@ -57,7 +57,7 @@ typedef volatile struct SCanBTInterface TCanBTInterface;
 void SMCanBTInterface_ms(volatile struct SCanBTInterface* p, Uint32 time, TCo_OdVars* co_ptr);
 void SMCanBTInterface_slow(volatile struct SCanBTInterface* p);
 
-//колбэки длЯ 2700.00
+//РєРѕР»Р±СЌРєРё РґР»РЇ 2700.00
 void callback_BTcmd(Uint16 par, Uint16 tag_CANnum);
 
 #ifdef __cplusplus

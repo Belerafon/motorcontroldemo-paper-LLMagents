@@ -1,5 +1,5 @@
 /*!
-    Copyright 2017 	АО "НИИЭТ" и ООО "НПФ ВЕКТОР"
+    Copyright 2017 	РђРћ "РќРРР­Рў" Рё РћРћРћ "РќРџР¤ Р’Р•РљРўРћР "
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -14,8 +14,8 @@
    limitations under the License.
  
  \file    park.c
- \brief   Модуль  координатных преобразований координат (см. TPark)
- \author    ООО "НПФ Вектор". http://motorcontrol.ru
+ \brief   РњРѕРґСѓР»СЊ  РєРѕРѕСЂРґРёРЅР°С‚РЅС‹С… РїСЂРµРѕР±СЂР°Р·РѕРІР°РЅРёР№ РєРѕРѕСЂРґРёРЅР°С‚ (СЃРј. TPark)
+ \author    РћРћРћ "РќРџР¤ Р’РµРєС‚РѕСЂ". http://motorcontrol.ru
  \version   v 2.0 25/03/2016
 
  \addtogroup Park
@@ -25,10 +25,10 @@
 #include "V_IQmath.h"         /* Include header for IQmath library */
 #include "park.h"
 
-//! Функция  преобразований координат 
+//! Р¤СѓРЅРєС†РёСЏ  РїСЂРµРѕР±СЂР°Р·РѕРІР°РЅРёР№ РєРѕРѕСЂРґРёРЅР°С‚ 
 
-//!На входе угол ang, вектор (ds,qs).
-//!На выходе повернутый на заданный угол вектор (de,qe)
+//!РќР° РІС…РѕРґРµ СѓРіРѕР» ang, РІРµРєС‚РѕСЂ (ds,qs).
+//!РќР° РІС‹С…РѕРґРµ РїРѕРІРµСЂРЅСѓС‚С‹Р№ РЅР° Р·Р°РґР°РЅРЅС‹Р№ СѓРіРѕР» РІРµРєС‚РѕСЂ (de,qe)
 //! \memberof TPark
 void park_calc(TPark *v) {
 

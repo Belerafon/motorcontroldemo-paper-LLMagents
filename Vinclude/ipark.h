@@ -1,5 +1,5 @@
 /*!
-    Copyright 2017 	АО "НИИЭТ" и ООО "НПФ ВЕКТОР"
+    Copyright 2017 	РђРћ "РќРРР­Рў" Рё РћРћРћ "РќРџР¤ Р’Р•РљРўРћР "
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -14,11 +14,11 @@
    limitations under the License.
 
  \file    ipark.h
- \brief   Модуль инверсных координатных преобразований координат (см. TIPark)
- \author    ООО "НПФ Вектор". http://motorcontrol.ru
+ \brief   РњРѕРґСѓР»СЊ РёРЅРІРµСЂСЃРЅС‹С… РєРѕРѕСЂРґРёРЅР°С‚РЅС‹С… РїСЂРµРѕР±СЂР°Р·РѕРІР°РЅРёР№ РєРѕРѕСЂРґРёРЅР°С‚ (СЃРј. TIPark)
+ \author    РћРћРћ "РќРџР¤ Р’РµРєС‚РѕСЂ". http://motorcontrol.ru
  \version   v 2.0 25/03/2016
 
- \defgroup  IPark Инверсные координатные преобразования (см. TIPark)
+ \defgroup  IPark РРЅРІРµСЂСЃРЅС‹Рµ РєРѕРѕСЂРґРёРЅР°С‚РЅС‹Рµ РїСЂРµРѕР±СЂР°Р·РѕРІР°РЅРёСЏ (СЃРј. TIPark)
  @{
 */
 
@@ -30,14 +30,14 @@ extern "C" {
 #endif
 
   /*! \class TIPark
-      \brief Инверсные координатные преобразования
+      \brief РРЅРІРµСЂСЃРЅС‹Рµ РєРѕРѕСЂРґРёРЅР°С‚РЅС‹Рµ РїСЂРµРѕР±СЂР°Р·РѕРІР°РЅРёСЏ
       
-      Класс \a TIPark, основанный на структуре SIPark, обеспечивает
-      поворот вектора, заданного в ортогональных осях, на требуемый угол
-      поворота ang. Инверсия заключается в обратном угле поворота по сравнению
-      с модулем TPark.*/
+      РљР»Р°СЃСЃ \a TIPark, РѕСЃРЅРѕРІР°РЅРЅС‹Р№ РЅР° СЃС‚СЂСѓРєС‚СѓСЂРµ SIPark, РѕР±РµСЃРїРµС‡РёРІР°РµС‚
+      РїРѕРІРѕСЂРѕС‚ РІРµРєС‚РѕСЂР°, Р·Р°РґР°РЅРЅРѕРіРѕ РІ РѕСЂС‚РѕРіРѕРЅР°Р»СЊРЅС‹С… РѕСЃСЏС…, РЅР° С‚СЂРµР±СѓРµРјС‹Р№ СѓРіРѕР»
+      РїРѕРІРѕСЂРѕС‚Р° ang. РРЅРІРµСЂСЃРёСЏ Р·Р°РєР»СЋС‡Р°РµС‚СЃСЏ РІ РѕР±СЂР°С‚РЅРѕРј СѓРіР»Рµ РїРѕРІРѕСЂРѕС‚Р° РїРѕ СЃСЂР°РІРЅРµРЅРёСЋ
+      СЃ РјРѕРґСѓР»РµРј TPark.*/
 
-//! см. TIPark
+//! СЃРј. TIPark
 struct SIPark{  _iq  ds;//!< Output: stationary d-axis stator variable
                 _iq  qs;//!< Output: stationary q-axis stator variable
                 _iq  ang;//!< Input: rotating angle (pu)
@@ -48,7 +48,7 @@ struct SIPark{  _iq  ds;//!< Output: stationary d-axis stator variable
 
 typedef struct SIPark TIPark;
 
-  //! инициализатор по-умолчанию
+  //! РёРЅРёС†РёР°Р»РёР·Р°С‚РѕСЂ РїРѕ-СѓРјРѕР»С‡Р°РЅРёСЋ
 #define IPARK_DEFAULTS { .calc = ipark_calc }
 
  //! \memberof TIPark

@@ -1,5 +1,5 @@
 /*!
-    Copyright 2017 	АО "НИИЭТ" и ООО "НПФ ВЕКТОР"
+    Copyright 2017 	РђРћ "РќРРР­Рў" Рё РћРћРћ "РќРџР¤ Р’Р•РљРўРћР "
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -14,8 +14,8 @@
    limitations under the License.
 
  \file      v_rotor_observer.h
- \brief     Наблюдатель ротора АД  (см. TRotorObserver)
- \author	ООО НПФ Вектор
+ \brief     РќР°Р±Р»СЋРґР°С‚РµР»СЊ СЂРѕС‚РѕСЂР° РђР”  (СЃРј. TRotorObserver)
+ \author	РћРћРћ РќРџР¤ Р’РµРєС‚РѕСЂ
  \version   v 1.0 28/06/2016
 
  */
@@ -34,10 +34,10 @@ struct SRotorObserver{
 			_iq iq;
 			_iq psi_d;
 			_iq psi_q;
-			_iq theta_psi_elec;		//!< Угол потокосцепления ротора относительно ДПР
-			_iq Tr; 				//!< Постоянная времени АД
-			_iq FluxCurrentRatio;	//!< Соотношение тока возбуждения оси x к моментообразующему току оси y
-			_iq FluxCurrentMin;		//!< Минимум тока возбуждения
+			_iq theta_psi_elec;		//!< РЈРіРѕР» РїРѕС‚РѕРєРѕСЃС†РµРїР»РµРЅРёСЏ СЂРѕС‚РѕСЂР° РѕС‚РЅРѕСЃРёС‚РµР»СЊРЅРѕ Р”РџР 
+			_iq Tr; 				//!< РџРѕСЃС‚РѕСЏРЅРЅР°СЏ РІСЂРµРјРµРЅРё РђР”
+			_iq FluxCurrentRatio;	//!< РЎРѕРѕС‚РЅРѕС€РµРЅРёРµ С‚РѕРєР° РІРѕР·Р±СѓР¶РґРµРЅРёСЏ РѕСЃРё x Рє РјРѕРјРµРЅС‚РѕРѕР±СЂР°Р·СѓСЋС‰РµРјСѓ С‚РѕРєСѓ РѕСЃРё y
+			_iq FluxCurrentMin;		//!< РњРёРЅРёРјСѓРј С‚РѕРєР° РІРѕР·Р±СѓР¶РґРµРЅРёСЏ
 			void (*calc)(struct SRotorObserver*);
 			void (*slow_calc)(struct SRotorObserver*);
 			};

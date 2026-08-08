@@ -1,5 +1,5 @@
 /*!
-    Copyright 2018 	АО "НИИЭТ" и ООО "НПФ ВЕКТОР"
+    Copyright 2018 	РђРћ "РќРРР­Рў" Рё РћРћРћ "РќРџР¤ Р’Р•РљРўРћР "
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -14,8 +14,8 @@
    limitations under the License.
 
  \file      startup.h
- \brief     Заголовочный файл с векторами прерываний
- \author    ООО "НПФ Вектор". http://motorcontrol.ru
+ \brief     Р—Р°РіРѕР»РѕРІРѕС‡РЅС‹Р№ С„Р°Р№Р» СЃ РІРµРєС‚РѕСЂР°РјРё РїСЂРµСЂС‹РІР°РЅРёР№
+ \author    РћРћРћ "РќРџР¤ Р’РµРєС‚РѕСЂ". http://motorcontrol.ru
  \version   v 1.0 04/09/2018
 
  */
@@ -31,16 +31,16 @@ typedef unsigned char Uint8;
 typedef unsigned short int Uint16;
 typedef unsigned int Uint32;
 
-// Символы из линкера
+// РЎРёРјРІРѕР»С‹ РёР· Р»РёРЅРєРµСЂР°
 extern int _estack;
 int main (void);
 
-// Дефолтный обработчик
+// Р”РµС„РѕР»С‚РЅС‹Р№ РѕР±СЂР°Р±РѕС‚С‡РёРє
 void defaultISRhandler (void) {
 
 };
 
-// Функции прерываний, объявленные как "weak"
+// Р¤СѓРЅРєС†РёРё РїСЂРµСЂС‹РІР°РЅРёР№, РѕР±СЉСЏРІР»РµРЅРЅС‹Рµ РєР°Рє "weak"
 //void _estack(void) __attribute__ ((weak, alias("defaultISRhandler")));
 void Reset_Handler(void) __attribute__ ((naked));
 void NMI_Handler(void) __attribute__ ((weak, alias("defaultISRhandler")));
@@ -348,7 +348,7 @@ struct SisrVectors {
 	void (*USBOTG_IRQHandler)(void);
 };
 
-// Заполнитель массива векторов
+// Р—Р°РїРѕР»РЅРёС‚РµР»СЊ РјР°СЃСЃРёРІР° РІРµРєС‚РѕСЂРѕРІ
 #define ISR_VECTORS {\
    (void(*)(void))&_estack,\
    Reset_Handler,\

@@ -1,5 +1,5 @@
 /*!
-     Copyright 2017 	АО "НИИЭТ" и ООО "НПФ ВЕКТОР"
+     Copyright 2017 	РђРћ "РќРРР­Рў" Рё РћРћРћ "РќРџР¤ Р’Р•РљРўРћР "
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -14,8 +14,8 @@
    limitations under the License.
 
  \file		v_MBVarsConv.h
- \brief		Модуль преобразования данных Modbus
- \author	ООО "НПФ ВЕКТОР"
+ \brief		РњРѕРґСѓР»СЊ РїСЂРµРѕР±СЂР°Р·РѕРІР°РЅРёСЏ РґР°РЅРЅС‹С… Modbus
+ \author	РћРћРћ "РќРџР¤ Р’Р•РљРўРћР "
  \version	v.1.1. 02/03/2017
 
  \addtogroup v_ModBus
@@ -35,10 +35,10 @@
 #include "DSP.h"
 
 /*! \class TMBVarsConv
-  \brief Модуль преобразования данных Modbus
+  \brief РњРѕРґСѓР»СЊ РїСЂРµРѕР±СЂР°Р·РѕРІР°РЅРёСЏ РґР°РЅРЅС‹С… Modbus
 
-  Класс \a TMBVarsConv, основанный на структуре SMBVarsConv, предназначен
-  для преобразования данных из формата 16 разрядов Modbus в формат системы управления (IQ 24).
+  РљР»Р°СЃСЃ \a TMBVarsConv, РѕСЃРЅРѕРІР°РЅРЅС‹Р№ РЅР° СЃС‚СЂСѓРєС‚СѓСЂРµ SMBVarsConv, РїСЂРµРґРЅР°Р·РЅР°С‡РµРЅ
+  РґР»СЏ РїСЂРµРѕР±СЂР°Р·РѕРІР°РЅРёСЏ РґР°РЅРЅС‹С… РёР· С„РѕСЂРјР°С‚Р° 16 СЂР°Р·СЂСЏРґРѕРІ Modbus РІ С„РѕСЂРјР°С‚ СЃРёСЃС‚РµРјС‹ СѓРїСЂР°РІР»РµРЅРёСЏ (IQ 24).
 */
 
 
@@ -51,7 +51,7 @@ struct SMBVars{
 	int Main_ErrorCode;
 	int Umax_protect;
 	};
-//!см. TMBVarsConv	MBVars
+//!СЃРј. TMBVarsConv	MBVars
 #define SMBVARS_DEFAULTS { \
     .Command = 0, \
     .CommandPrev = 0, \
@@ -73,7 +73,7 @@ struct SMBVarsConv{
 
 typedef volatile struct SMBVarsConv TMBVarsConv;
 
-//!Инициализатор по умолчанию
+//!РРЅРёС†РёР°Р»РёР·Р°С‚РѕСЂ РїРѕ СѓРјРѕР»С‡Р°РЅРёСЋ
 #define MBVARSCONV_DEFAULTS { \
     .Vars = SMBVARS_DEFAULTS, \
     .init = MBVarsConv_init, \

@@ -1,4 +1,4 @@
-/*    Copyright 2017 	¿Œ "Õ»»›“" Ë ŒŒŒ "Õœ‘ ¬≈ “Œ–"
+/*    Copyright 2017 	–ê–û "–ù–ò–ò–≠–¢" –∏ –û–û–û "–ù–ü–§ –í–ï–ö–¢–û–†"
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.

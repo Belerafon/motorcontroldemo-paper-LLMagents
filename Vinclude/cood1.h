@@ -1,5 +1,5 @@
 /*!
-     Copyright 2017 	АО "НИИЭТ" и ООО "НПФ ВЕКТОР"
+     Copyright 2017 	РђРћ "РќРРР­Рў" Рё РћРћРћ "РќРџР¤ Р’Р•РљРўРћР "
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -14,8 +14,8 @@
    limitations under the License.
 
  \file      cood2.h
- \brief     Объявляет некоторые служебные переменные, соторые должны быть определены в cood2.c
- \author    ООО "НПФ Вектор". http://motorcontrol.ru
+ \brief     РћР±СЉСЏРІР»СЏРµС‚ РЅРµРєРѕС‚РѕСЂС‹Рµ СЃР»СѓР¶РµР±РЅС‹Рµ РїРµСЂРµРјРµРЅРЅС‹Рµ, СЃРѕС‚РѕСЂС‹Рµ РґРѕР»Р¶РЅС‹ Р±С‹С‚СЊ РѕРїСЂРµРґРµР»РµРЅС‹ РІ cood2.c
+ \author    РћРћРћ "РќРџР¤ Р’РµРєС‚РѕСЂ". http://motorcontrol.ru
  \version   v 1.0 2017_01_25
 
  @{
@@ -24,7 +24,7 @@
 #include "DSP.h"
 
 //********************************************************************************************************
-//глобальные переменные 1-го CAN-а
+//РіР»РѕР±Р°Р»СЊРЅС‹Рµ РїРµСЂРµРјРµРЅРЅС‹Рµ 1-РіРѕ CAN-Р°
 extern  int16 const CO1_OD_TBL1[];
 extern  Uint16 const CO1_OD_TBL2[];
 extern  long const CO1_OD_TBL3[];

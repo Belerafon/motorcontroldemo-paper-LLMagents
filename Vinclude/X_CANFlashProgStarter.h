@@ -1,5 +1,5 @@
 /*!
-    Copyright 2017 	АО "НИИЭТ" и ООО "НПФ ВЕКТОР"
+    Copyright 2017 	РђРћ "РќРРР­Рў" Рё РћРћРћ "РќРџР¤ Р’Р•РљРўРћР "
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -14,8 +14,8 @@
    limitations under the License.
 
  \file      X_CANFlashProgStarter.h
- \brief     Инициализирует процесс прожига по CANу
- \author	Алямкин Д.
+ \brief     РРЅРёС†РёР°Р»РёР·РёСЂСѓРµС‚ РїСЂРѕС†РµСЃСЃ РїСЂРѕР¶РёРіР° РїРѕ CANСѓ
+ \author	РђР»СЏРјРєРёРЅ Р”.
  \version   v 1.0 30/05/2017
 
  \defgroup TCANFlashProgStarter */
@@ -37,18 +37,18 @@ extern "C"
 //#define FP_DEVICE_28069
 #define FP_DEVICE_M4F
 
-//ПереопределЯемые пользователем макросы
-#define FP_BLOCK_PWM 	pwm.Off(&pwm);	//выключение ШИМ
+//РџРµСЂРµРѕРїСЂРµРґРµР»РЇРµРјС‹Рµ РїРѕР»СЊР·РѕРІР°С‚РµР»РµРј РјР°РєСЂРѕСЃС‹
+#define FP_BLOCK_PWM 	pwm.Off(&pwm);	//РІС‹РєР»СЋС‡РµРЅРёРµ РЁРРњ
 #define FP_CTRL_STOP 	sm_ctrl.state=CTRL_STOP
 #define FP_FAULT_SET 	sm_prot.bit_fault2|= F_FLASH_PROGRAM
 
 
 struct SFlashProgSettings{
 	Uint16 magic_number;
-	Uint16 CANa_nodeID;				//2000.0 номер данного узла
+	Uint16 CANa_nodeID;				//2000.0 РЅРѕРјРµСЂ РґР°РЅРЅРѕРіРѕ СѓР·Р»Р°
     Uint16 CANa_bitRate;			//2001.0
 	Uint16 CANa_enable;
-	Uint16 CANb_nodeID;				//2000.0 номер данного узла
+	Uint16 CANb_nodeID;				//2000.0 РЅРѕРјРµСЂ РґР°РЅРЅРѕРіРѕ СѓР·Р»Р°
     Uint16 CANb_bitRate;			//2001.0
 	Uint16 CANb_enable;
 };

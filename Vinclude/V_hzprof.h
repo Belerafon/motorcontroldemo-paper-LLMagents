@@ -1,5 +1,5 @@
 /*!
-     Copyright 2017 	АО "НИИЭТ" и ООО "НПФ ВЕКТОР"
+     Copyright 2017 	РђРћ "РќРРР­Рў" Рё РћРћРћ "РќРџР¤ Р’Р•РљРўРћР "
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -14,11 +14,11 @@
    limitations under the License.
  
  \file      vhzprof.h
- \brief     Кривая U(f) (см. TVhzProf)
- \author    ООО "НПФ Вектор". http://motorcontrol.ru
+ \brief     РљСЂРёРІР°СЏ U(f) (СЃРј. TVhzProf)
+ \author    РћРћРћ "РќРџР¤ Р’РµРєС‚РѕСЂ". http://motorcontrol.ru
  \version   v 2.0 25/03/2016
 
- \defgroup  vhzprof Модуль кривой U(f) (см. TVhzProf)
+ \defgroup  vhzprof РњРѕРґСѓР»СЊ РєСЂРёРІРѕР№ U(f) (СЃРј. TVhzProf)
 
 */
 
@@ -31,15 +31,15 @@ extern "C" {
 #endif
 
   /*! \class TVhzProf
-      \brief Кривая U(f)
+      \brief РљСЂРёРІР°СЏ U(f)
       
-      Класс \a TVhzProf, основанный на структуре SVhzProf, 
-      представляет собой двумерную зависимость напряжения U (vout) от 
-      частоты f (freq). Модуль нужен при скалярном управлении двигателем,
-      без контуров тока - когда напряжение растет вместе с частотой. Данный модуль
-      позволяет настроить линейную зависимость напряжения от частоты по двум точкам.  */
+      РљР»Р°СЃСЃ \a TVhzProf, РѕСЃРЅРѕРІР°РЅРЅС‹Р№ РЅР° СЃС‚СЂСѓРєС‚СѓСЂРµ SVhzProf, 
+      РїСЂРµРґСЃС‚Р°РІР»СЏРµС‚ СЃРѕР±РѕР№ РґРІСѓРјРµСЂРЅСѓСЋ Р·Р°РІРёСЃРёРјРѕСЃС‚СЊ РЅР°РїСЂСЏР¶РµРЅРёСЏ U (vout) РѕС‚ 
+      С‡Р°СЃС‚РѕС‚С‹ f (freq). РњРѕРґСѓР»СЊ РЅСѓР¶РµРЅ РїСЂРё СЃРєР°Р»СЏСЂРЅРѕРј СѓРїСЂР°РІР»РµРЅРёРё РґРІРёРіР°С‚РµР»РµРј,
+      Р±РµР· РєРѕРЅС‚СѓСЂРѕРІ С‚РѕРєР° - РєРѕРіРґР° РЅР°РїСЂСЏР¶РµРЅРёРµ СЂР°СЃС‚РµС‚ РІРјРµСЃС‚Рµ СЃ С‡Р°СЃС‚РѕС‚РѕР№. Р”Р°РЅРЅС‹Р№ РјРѕРґСѓР»СЊ
+      РїРѕР·РІРѕР»СЏРµС‚ РЅР°СЃС‚СЂРѕРёС‚СЊ Р»РёРЅРµР№РЅСѓСЋ Р·Р°РІРёСЃРёРјРѕСЃС‚СЊ РЅР°РїСЂСЏР¶РµРЅРёСЏ РѕС‚ С‡Р°СЃС‚РѕС‚С‹ РїРѕ РґРІСѓРј С‚РѕС‡РєР°Рј.  */
 
-//! см. TVhzProf
+//! СЃРј. TVhzProf
 struct 	SVhzProf{ _iq  freq;//!< Input: Input frequency (pu)
                   _iq  vout;//!< Output: Output voltage (pu) 
                   _iq  FL;//!<  Parameter: Low frequency (pu)			
@@ -52,7 +52,7 @@ struct 	SVhzProf{ _iq  freq;//!< Input: Input frequency (pu)
 				               
 typedef struct 	SVhzProf TVhzProf;
 
-//! Инициализатор по-умолчанию
+//! РРЅРёС†РёР°Р»РёР·Р°С‚РѕСЂ РїРѕ-СѓРјРѕР»С‡Р°РЅРёСЋ
 #define VHZPROF_DEFAULTS { .calc = vhz_prof_calc }
 
 //! \memberof TVhzProf

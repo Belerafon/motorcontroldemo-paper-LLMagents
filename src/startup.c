@@ -1,5 +1,5 @@
 /*!
-    Copyright 2018 	АО "НИИЭТ" и ООО "НПФ ВЕКТОР"
+    Copyright 2018 	РђРћ "РќРРР­Рў" Рё РћРћРћ "РќРџР¤ Р’Р•РљРўРћР "
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -14,8 +14,8 @@
    limitations under the License.
 
  \file      startup.c
- \brief     Стартовый файл
- \author    ООО "НПФ Вектор". http://motorcontrol.ru
+ \brief     РЎС‚Р°СЂС‚РѕРІС‹Р№ С„Р°Р№Р»
+ \author    РћРћРћ "РќРџР¤ Р’РµРєС‚РѕСЂ". http://motorcontrol.ru
  \version   v 1.0 04/09/2018
 
  */
@@ -28,47 +28,47 @@ typedef unsigned char Uint8;
 typedef unsigned short int Uint16;
 typedef unsigned int Uint32;
 
-// Массив из 148 указателей на функции
+// РњР°СЃСЃРёРІ РёР· 148 СѓРєР°Р·Р°С‚РµР»РµР№ РЅР° С„СѓРЅРєС†РёРё
 //void (*g_pfnVectors[148])(void) __attribute__((section (".isr_vector"))) = ISR_VECTORS;
 TisrVectors g_pfnVectors __attribute__((section (".isr_vector"))) = ISR_VECTORS;
 
-// Обработчик Reset_Handler
-// Копирует константы для инициализации переменных,
-// заполняет нулями то, что должно быть нулями
+// РћР±СЂР°Р±РѕС‚С‡РёРє Reset_Handler
+// РљРѕРїРёСЂСѓРµС‚ РєРѕРЅСЃС‚Р°РЅС‚С‹ РґР»СЏ РёРЅРёС†РёР°Р»РёР·Р°С†РёРё РїРµСЂРµРјРµРЅРЅС‹С…,
+// Р·Р°РїРѕР»РЅСЏРµС‚ РЅСѓР»СЏРјРё С‚Рѕ, С‡С‚Рѕ РґРѕР»Р¶РЅРѕ Р±С‹С‚СЊ РЅСѓР»СЏРјРё
 extern int _estack;
 extern int _sidata, _sdata, _edata, _sbss, _ebss;
 void Reset_Handler (void) {
-    // Копируем константы
+    // РљРѕРїРёСЂСѓРµРј РєРѕРЅСЃС‚Р°РЅС‚С‹
     Uint32 i;
     Uint8   *from, *to;
     Uint32 size;
 
-    // Теперь правильно расположить стек (если программа выполняется из RAM)
+    // РўРµРїРµСЂСЊ РїСЂР°РІРёР»СЊРЅРѕ СЂР°СЃРїРѕР»РѕР¶РёС‚СЊ СЃС‚РµРє (РµСЃР»Рё РїСЂРѕРіСЂР°РјРјР° РІС‹РїРѕР»РЅСЏРµС‚СЃСЏ РёР· RAM)
     __set_MSP((Uint32)&_estack);
 
-    // Определяем, откуда-куда-сколько
+    // РћРїСЂРµРґРµР»СЏРµРј, РѕС‚РєСѓРґР°-РєСѓРґР°-СЃРєРѕР»СЊРєРѕ
     from = (Uint8*)&_sidata;
     to = (Uint8*)&_sdata;
     size = (Uint32)((Uint8*)&_edata - (Uint8*)&_sdata);
 
-    // Копируем
+    // РљРѕРїРёСЂСѓРµРј
     for (i = 0; i < size; i++) {
         *to = *from;
         to++;
         from++;
     }
 
-    // Теперь тоже самое для ZeroBss
+    // РўРµРїРµСЂСЊ С‚РѕР¶Рµ СЃР°РјРѕРµ РґР»СЏ ZeroBss
     to = (Uint8*)&_sbss;
     size = (Uint32)((Uint8*)&_ebss - (Uint8*)&_sbss);
 
-    // Копируем
+    // РљРѕРїРёСЂСѓРµРј
     for (i = 0; i < size; i++) {
         *to = 0;
         to++;
     }
 
-    // Теперь нужно включить плавающую точку
+    // РўРµРїРµСЂСЊ РЅСѓР¶РЅРѕ РІРєР»СЋС‡РёС‚СЊ РїР»Р°РІР°СЋС‰СѓСЋ С‚РѕС‡РєСѓ
     SCB->CPACR |= 0b11 << 20;
     SCB->CPACR |= 0b11 << 22;
     __DSB();
@@ -76,10 +76,10 @@ void Reset_Handler (void) {
 
 
 
-    // А теперь переходим к main()
+    // Рђ С‚РµРїРµСЂСЊ РїРµСЂРµС…РѕРґРёРј Рє main()
     Uint16 mainRet = main();
 
-    // А если вдруг main закончился - зацикливаемся
+    // Рђ РµСЃР»Рё РІРґСЂСѓРі main Р·Р°РєРѕРЅС‡РёР»СЃСЏ - Р·Р°С†РёРєР»РёРІР°РµРјСЃСЏ
     while(1){};
 }
 

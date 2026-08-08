@@ -1,5 +1,5 @@
 /*!
-    Copyright 2017 	АО "НИИЭТ" и ООО "НПФ ВЕКТОР"
+    Copyright 2017 	РђРћ "РќРРР­Рў" Рё РћРћРћ "РќРџР¤ Р’Р•РљРўРћР "
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -14,8 +14,8 @@
    limitations under the License.
 
  \file      V_excitation.h
- \brief     Модуль возбудителя
- \author    ООО "НПФ Вектор". http://motorcontrol.ru
+ \brief     РњРѕРґСѓР»СЊ РІРѕР·Р±СѓРґРёС‚РµР»СЏ
+ \author    РћРћРћ "РќРџР¤ Р’РµРєС‚РѕСЂ". http://motorcontrol.ru
  \version   v 1.0 28/03/2017
 
 \defgroup  V_excitation
@@ -32,20 +32,20 @@ extern "C" {
 #endif
 
   /*! \class Texcitation
-    \brief Модуль возбудителя
+    \brief РњРѕРґСѓР»СЊ РІРѕР·Р±СѓРґРёС‚РµР»СЏ
 
-    Класс \a Texcitation, основанный на структуре Sexcitation, представляет
-    собой модуль возбудителя.
+    РљР»Р°СЃСЃ \a Texcitation, РѕСЃРЅРѕРІР°РЅРЅС‹Р№ РЅР° СЃС‚СЂСѓРєС‚СѓСЂРµ Sexcitation, РїСЂРµРґСЃС‚Р°РІР»СЏРµС‚
+    СЃРѕР±РѕР№ РјРѕРґСѓР»СЊ РІРѕР·Р±СѓРґРёС‚РµР»СЏ.
   
   */
 
-//! см. Texcitation
-typedef struct Sexcitation{  long  ref; //!< Задание
+//! СЃРј. Texcitation
+typedef struct Sexcitation{  long  ref; //!< Р—Р°РґР°РЅРёРµ
 		 	 	  void  (*calc)(struct Sexcitation*);//!< Pointer to calculation function
 				 }Texcitation;
 
 
-//! Инициализатор по-умолчанию
+//! РРЅРёС†РёР°Р»РёР·Р°С‚РѕСЂ РїРѕ-СѓРјРѕР»С‡Р°РЅРёСЋ
 #define excitation_DEFAULTS { .calc = excitation_calc }
 
 

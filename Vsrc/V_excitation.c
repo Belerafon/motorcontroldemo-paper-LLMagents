@@ -1,5 +1,5 @@
 /*!
-    Copyright 2017 	¿Œ "Õ»»›“" Ë ŒŒŒ "Õœ‘ ¬≈ “Œ–"
+    Copyright 2017 	–ê–û "–ù–ò–ò–≠–¢" –∏ –û–û–û "–ù–ü–§ –í–ï–ö–¢–û–†"
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -14,8 +14,8 @@
    limitations under the License.
  
  \file      V_excitation.c
- \brief     ÃÓ‰ÛÎ¸ ‚ÓÁ·Û‰ËÚÂÎˇ
- \author    ŒŒŒ "Õœ‘ ¬ÂÍÚÓ". http://motorcontrol.ru
+ \brief     –ú–æ–¥—É–ª—å –≤–æ–∑–±—É–¥–∏—Ç–µ–ª—è
+ \author    –û–û–û "–ù–ü–§ –í–µ–∫—Ç–æ—Ä". http://motorcontrol.ru
  \version   v 1.0 28/03/2017
 
  \addtogroup V_excitation
@@ -24,13 +24,13 @@
 #include "V_IQmath.h"         // Include header for IQmath library
 #include "V_excitation.h"
 #include "main.h"
-//! ‘ÛÌÍˆËˇ ‡Ò˜ÂÚ‡ ÂÎÂÈÌÓ„Ó Â„ÛÎˇÚÓ‡
+//! –§—É–Ω–∫—Ü–∏—è —Ä–∞—Å—á–µ—Ç–∞ —Ä–µ–ª–µ–π–Ω–æ–≥–æ —Ä–µ–≥—É–ª—è—Ç–æ—Ä–∞
 
 //! \memberof TRelayReg
 void excitation_calc(Texcitation *v)
 {
-	//Œ·ÏÓÚÍ‡ ‚ÓÁ·ÛÊ‰ÂÌËˇ —ƒ
-	//‚ ÏÓ‰ÛÎÂ ÿ»Ã ÚÓÎ¸ÍÓ 3 Í‡Ì‡Î‡. œÓ˝ÚÓÏÛ ‰Îˇ ÏÓ‰ÂÎË —ƒ Ò Ó·ÏÓÚÍÓÈ ‚ÓÁ·ÛÊ‰ÂÌËˇ ÔÓÒ˜ËÚ‡ÂÏ ÒÍ‚‡ÊÌÓÒÚ¸ ÚÛÚ.
+	//–û–±–º–æ—Ç–∫–∞ –≤–æ–∑–±—É–∂–¥–µ–Ω–∏—è –°–î
+	//–≤ –º–æ–¥—É–ª–µ –®–ò–ú —Ç–æ–ª—å–∫–æ 3 –∫–∞–Ω–∞–ª–∞. –ü–æ—ç—Ç–æ–º—É –¥–ª—è –º–æ–¥–µ–ª–∏ –°–î —Å –æ–±–º–æ—Ç–∫–æ–π –≤–æ–∑–±—É–∂–¥–µ–Ω–∏—è –ø–æ—Å—á–∏—Ç–∞–µ–º —Å–∫–≤–∞–∂–Ω–æ—Å—Ç—å —Ç—É—Ç.
 	volatile int32 GammaF;
 	if (v->ref < _IQ(0))
 		v->ref = _IQ(0);
@@ -38,9 +38,9 @@ void excitation_calc(Texcitation *v)
 	if (v->ref > _IQ(1))
 		v->ref = _IQ(1);
 
-	GammaF = v->ref >> 8; // (IQ16) ÔÂÂ‚Ó‰ËÏ ÚÓ, ˜ÚÓ ‚˚¯Â, ‚ iq16.
-	GammaF = _IQ16mpy(GammaF, _IQ16(pwm.k_pwm)); // (IQ16) ÔÂÂ‚Ó‰ËÏ ÒÍ‚‡ÊÌÓÒÚ¸ ‚ ‚ÂÎË˜ËÌÛ ‰Îˇ Á‡„ÛÁÍË ‚ Â„ËÒÚ Ò‡‚ÌÂÌËˇ.
-	GammaF = pwm.k_pwm - (GammaF >> 16); // (IQ0) «‡„ÛÊÂÏ ˆÂÎÛ˛ ˜‡ÒÚ¸ ‚ Â„ËÒÚ Ò‡‚ÌÂÌËˇ.
+	GammaF = v->ref >> 8; // (IQ16) –ø–µ—Ä–µ–≤–æ–¥–∏–º —Ç–æ, —á—Ç–æ –≤—ã—à–µ, –≤ iq16.
+	GammaF = _IQ16mpy(GammaF, _IQ16(pwm.k_pwm)); // (IQ16) –ø–µ—Ä–µ–≤–æ–¥–∏–º —Å–∫–≤–∞–∂–Ω–æ—Å—Ç—å –≤ –≤–µ–ª–∏—á–∏–Ω—É –¥–ª—è –∑–∞–≥—Ä—É–∑–∫–∏ –≤ —Ä–µ–≥–∏—Å—Ç—Ä —Å—Ä–∞–≤–Ω–µ–Ω–∏—è.
+	GammaF = pwm.k_pwm - (GammaF >> 16); // (IQ0) –ó–∞–≥—Ä—É–∂–µ–º —Ü–µ–ª—É—é —á–∞—Å—Ç—å –≤ —Ä–µ–≥–∏—Å—Ç—Ä —Å—Ä–∞–≤–Ω–µ–Ω–∏—è.
 
 #if defined(HW_VECTORCARD_SIMULATOR) || defined(HW_NIIET_BOARD_SIMULATOR) || defined (HW_MOTORCONTROLBOARD_SIMULATOR)
 	model.cmpr3 = (Uint16) GammaF;

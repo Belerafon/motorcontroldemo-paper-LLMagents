@@ -3,31 +3,31 @@
   ******************************************************************************
   * @file    usb_dev.c
   *
-  * @brief   Файл с исходным кодом для работы с USB Device.
+  * @brief   Р¤Р°Р№Р» СЃ РёСЃС…РѕРґРЅС‹Рј РєРѕРґРѕРј РґР»СЏ СЂР°Р±РѕС‚С‹ СЃ USB Device.
   *
-  *          Компилятор: GCC ARM 4.9.3
-  *          Среда: Qt Creator 3.4.2
+  *          РљРѕРјРїРёР»СЏС‚РѕСЂ: GCC ARM 4.9.3
+  *          РЎСЂРµРґР°: Qt Creator 3.4.2
   *
-  * @author  НИИЭТ
-  *             - Дмитрий Сериков, lonie@niiet.ru
-  *             - Богдан Колбов, kolbov@niiet.ru
+  * @author  РќРРР­Рў
+  *             - Р”РјРёС‚СЂРёР№ РЎРµСЂРёРєРѕРІ, lonie@niiet.ru
+  *             - Р‘РѕРіРґР°РЅ РљРѕР»Р±РѕРІ, kolbov@niiet.ru
   * @date    21.09.2013
   *
   ******************************************************************************
   * @attention
   *
-  * ДАННОЕ ПРОГРАММНОЕ ОБЕСПЕЧЕНИЕ ПРЕДОСТАВЛЯЕТСЯ «КАК ЕСТЬ», БЕЗ КАКИХ-ЛИБО
-  * ГАРАНТИЙ, ЯВНО ВЫРАЖЕННЫХ ИЛИ ПОДРАЗУМЕВАЕМЫХ, ВКЛЮЧАЯ ГАРАНТИИ ТОВАРНОЙ
-  * ПРИГОДНОСТИ, СООТВЕТСТВИЯ ПО ЕГО КОНКРЕТНОМУ НАЗНАЧЕНИЮ И ОТСУТСТВИЯ
-  * НАРУШЕНИЙ, НО НЕ ОГРАНИЧИВАЯСЬ ИМИ. ДАННОЕ ПРОГРАММНОЕ ОБЕСПЕЧЕНИЕ
-  * ПРЕДНАЗНАЧЕНО ДЛЯ ОЗНАКОМИТЕЛЬНЫХ ЦЕЛЕЙ И НАПРАВЛЕНО ТОЛЬКО НА
-  * ПРЕДОСТАВЛЕНИЕ ДОПОЛНИТЕЛЬНОЙ ИНФОРМАЦИИ О ПРОДУКТЕ, С ЦЕЛЬЮ СОХРАНИТЬ ВРЕМЯ
-  * ПОТРЕБИТЕЛЮ. НИ В КАКОМ СЛУЧАЕ АВТОРЫ ИЛИ ПРАВООБЛАДАТЕЛИ НЕ НЕСУТ
-  * ОТВЕТСТВЕННОСТИ ПО КАКИМ-ЛИБО ИСКАМ, ЗА ПРЯМОЙ ИЛИ КОСВЕННЫЙ УЩЕРБ, ИЛИ
-  * ПО ИНЫМ ТРЕБОВАНИЯМ, ВОЗНИКШИМ ИЗ-ЗА ИСПОЛЬЗОВАНИЯ ПРОГРАММНОГО ОБЕСПЕЧЕНИЯ
-  * ИЛИ ИНЫХ ДЕЙСТВИЙ С ПРОГРАММНЫМ ОБЕСПЕЧЕНИЕМ.
+  * Р”РђРќРќРћР• РџР РћР“Р РђРњРњРќРћР• РћР‘Р•РЎРџР•Р§Р•РќРР• РџР Р•Р”РћРЎРўРђР’Р›РЇР•РўРЎРЇ В«РљРђРљ Р•РЎРўР¬В», Р‘Р•Р— РљРђРљРРҐ-Р›РР‘Рћ
+  * Р“РђР РђРќРўРР™, РЇР’РќРћ Р’Р«Р РђР–Р•РќРќР«РҐ РР›Р РџРћР”Р РђР—РЈРњР•Р’РђР•РњР«РҐ, Р’РљР›Р®Р§РђРЇ Р“РђР РђРќРўРР РўРћР’РђР РќРћР™
+  * РџР РР“РћР”РќРћРЎРўР, РЎРћРћРўР’Р•РўРЎРўР’РРЇ РџРћ Р•Р“Рћ РљРћРќРљР Р•РўРќРћРњРЈ РќРђР—РќРђР§Р•РќРР® Р РћРўРЎРЈРўРЎРўР’РРЇ
+  * РќРђР РЈРЁР•РќРР™, РќРћ РќР• РћР“Р РђРќРР§РР’РђРЇРЎР¬ РРњР. Р”РђРќРќРћР• РџР РћР“Р РђРњРњРќРћР• РћР‘Р•РЎРџР•Р§Р•РќРР•
+  * РџР Р•Р”РќРђР—РќРђР§Р•РќРћ Р”Р›РЇ РћР—РќРђРљРћРњРРўР•Р›Р¬РќР«РҐ Р¦Р•Р›Р•Р™ Р РќРђРџР РђР’Р›Р•РќРћ РўРћР›Р¬РљРћ РќРђ
+  * РџР Р•Р”РћРЎРўРђР’Р›Р•РќРР• Р”РћРџРћР›РќРРўР•Р›Р¬РќРћР™ РРќР¤РћР РњРђР¦РР Рћ РџР РћР”РЈРљРўР•, РЎ Р¦Р•Р›Р¬Р® РЎРћРҐР РђРќРРўР¬ Р’Р Р•РњРЇ
+  * РџРћРўР Р•Р‘РРўР•Р›Р®. РќР Р’ РљРђРљРћРњ РЎР›РЈР§РђР• РђР’РўРћР Р« РР›Р РџР РђР’РћРћР‘Р›РђР”РђРўР•Р›Р РќР• РќР•РЎРЈРў
+  * РћРўР’Р•РўРЎРўР’Р•РќРќРћРЎРўР РџРћ РљРђРљРРњ-Р›РР‘Рћ РРЎРљРђРњ, Р—Рђ РџР РЇРњРћР™ РР›Р РљРћРЎР’Р•РќРќР«Р™ РЈР©Р•Р Р‘, РР›Р
+  * РџРћ РРќР«Рњ РўР Р•Р‘РћР’РђРќРРЇРњ, Р’РћР—РќРРљРЁРРњ РР—-Р—Рђ РРЎРџРћР›Р¬Р—РћР’РђРќРРЇ РџР РћР“Р РђРњРњРќРћР“Рћ РћР‘Р•РЎРџР•Р§Р•РќРРЇ
+  * РР›Р РРќР«РҐ Р”Р•Р™РЎРўР’РР™ РЎ РџР РћР“Р РђРњРњРќР«Рњ РћР‘Р•РЎРџР•Р§Р•РќРР•Рњ.
   *
-  * <h2><center>&copy; 2016 ОАО "НИИЭТ"</center></h2>
+  * <h2><center>&copy; 2016 РћРђРћ "РќРРР­Рў"</center></h2>
   ******************************************************************************
   */
 
@@ -127,23 +127,23 @@ uint32_t USBDev_Ep_Handler(uint32_t epnum)
 {
     USBDev_EP_TypeDef *ep;
     //uint32_t len;
-    //если управляющая точка
+    //РµСЃР»Рё СѓРїСЂР°РІР»СЏСЋС‰Р°СЏ С‚РѕС‡РєР°
     if(epnum == 0)
     {
-        //если преывание по приему setup пакета
+        //РµСЃР»Рё РїСЂРµС‹РІР°РЅРёРµ РїРѕ РїСЂРёРµРјСѓ setup РїР°РєРµС‚Р°
         if(USBDev_GetEPIntStatus(epnum) & CEP_IRQ_STAT_SETUP_PACKET)
         {
-            //сбросим бит прерывания
+            //СЃР±СЂРѕСЃРёРј Р±РёС‚ РїСЂРµСЂС‹РІР°РЅРёСЏ
             USBDev_ClearEPIntBit(epnum, CEP_IRQ_STAT_SETUP_PACKET);
-            //парсим пакет setup
+            //РїР°СЂСЃРёРј РїР°РєРµС‚ setup
             USBDev_ParseSetupPacket(&USBDevice.USB_SETUP_PACKET);
-            //обрабатываем пакет
+            //РѕР±СЂР°Р±Р°С‚С‹РІР°РµРј РїР°РєРµС‚
             USBD_Setup_Stage();
         }
 
         if(USBDev_GetEPIntStatus(epnum) & CEP_IRQ_STAT_DATA_PACK_TX) //data transmitted
         {
-            //сбросим бит прерывания
+            //СЃР±СЂРѕСЃРёРј Р±РёС‚ РїСЂРµСЂС‹РІР°РЅРёСЏ
             USBDev_ClearEPIntBit(epnum, CEP_IRQ_STAT_DATA_PACK_TX);
 
             ep = &USBDevice.in_ep[0];
@@ -175,58 +175,58 @@ uint32_t USBDev_Ep_Handler(uint32_t epnum)
                     //send zerolen packet
                     USBDev_CEPSendResponse(CEP_ZEROLEN);
                 }
-                //сбросим бит прерывания
+                //СЃР±СЂРѕСЃРёРј Р±РёС‚ РїСЂРµСЂС‹РІР°РЅРёСЏ
                 USBDev_ClearEPIntBit(epnum, CEP_IRQ_STAT_DATA_PACK_RX);
             }
         }
 
         if(USBDev_GetEPIntStatus(epnum) & CEP_IRQ_STAT_USB_ERROR)
         {
-            //сбросим бит прерывания
+            //СЃР±СЂРѕСЃРёРј Р±РёС‚ РїСЂРµСЂС‹РІР°РЅРёСЏ
             USBDev_ClearEPIntBit(epnum, CEP_IRQ_STAT_USB_ERROR);
             // TODO
         }
 
         if(USBDev_GetEPIntStatus(epnum) & CEP_IRQ_STAT_STAT_COMP) //status completion
         {
-            //сбросим бит прерывания
+            //СЃР±СЂРѕСЃРёРј Р±РёС‚ РїСЂРµСЂС‹РІР°РЅРёСЏ
             USBDev_ClearEPIntBit(epnum, CEP_IRQ_STAT_STAT_COMP);
 
             if((USBDevice.USB_SETUP_PACKET.bmRequestType == 0x00) & (USBDevice.USB_SETUP_PACKET.bRequest == USB_REQ_SET_ADDRESS))
             {
-                //записываем новый адрес, выданный нам
+                //Р·Р°РїРёСЃС‹РІР°РµРј РЅРѕРІС‹Р№ Р°РґСЂРµСЃ, РІС‹РґР°РЅРЅС‹Р№ РЅР°Рј
                 USBDev_SetAddress(USBDevice.address);
             }
-            // разрешаем прием следующего setup пакета
+            // СЂР°Р·СЂРµС€Р°РµРј РїСЂРёРµРј СЃР»РµРґСѓСЋС‰РµРіРѕ setup РїР°РєРµС‚Р°
             USBDev_CEPSendResponse(CEP_ACK);
         }
     }
     else //endpoints 1...4
     {
-        //если точка IN
+        //РµСЃР»Рё С‚РѕС‡РєР° IN
         if(USBDev_IsEPTypeIN(epnum) != 0)
         {
             ep = &USBDevice.in_ep[epnum];
-            //обрабатываем прерывания
-            if(USBDev_GetEPIntStatus(epnum) & EP_IRQ_STAT_DATA_PKT_TX) // прерывание по передаче пакета хосту
+            //РѕР±СЂР°Р±Р°С‚С‹РІР°РµРј РїСЂРµСЂС‹РІР°РЅРёСЏ
+            if(USBDev_GetEPIntStatus(epnum) & EP_IRQ_STAT_DATA_PKT_TX) // РїСЂРµСЂС‹РІР°РЅРёРµ РїРѕ РїРµСЂРµРґР°С‡Рµ РїР°РєРµС‚Р° С…РѕСЃС‚Сѓ
             {
-                //сбрасываем прерывание
+                //СЃР±СЂР°СЃС‹РІР°РµРј РїСЂРµСЂС‹РІР°РЅРёРµ
                 USBDev_ClearEPIntBit(epnum, EP_IRQ_STAT_DATA_PKT_TX);
                 //TODO
                 USBDevice.class_cb->DataIn(ep);
             }
         }
-        else //тогда точка OUT
+        else //С‚РѕРіРґР° С‚РѕС‡РєР° OUT
         {
             ep = &USBDevice.out_ep[epnum];
-            //обрабаываем прерывания
-            if(USBDev_GetEPIntStatus(epnum) & EP_IRQ_STAT_DATA_PKT_RX) // прерывание по приему пакета от хоста
+            //РѕР±СЂР°Р±Р°С‹РІР°РµРј РїСЂРµСЂС‹РІР°РЅРёСЏ
+            if(USBDev_GetEPIntStatus(epnum) & EP_IRQ_STAT_DATA_PKT_RX) // РїСЂРµСЂС‹РІР°РЅРёРµ РїРѕ РїСЂРёРµРјСѓ РїР°РєРµС‚Р° РѕС‚ С…РѕСЃС‚Р°
             {
-                //ставим NAK на точку
+                //СЃС‚Р°РІРёРј NAK РЅР° С‚РѕС‡РєСѓ
                 USBDev_EPSetResponse(EP_SETNAK,epnum);
-                //отдаем данные на обработку уровня выше
+                //РѕС‚РґР°РµРј РґР°РЅРЅС‹Рµ РЅР° РѕР±СЂР°Р±РѕС‚РєСѓ СѓСЂРѕРІРЅСЏ РІС‹С€Рµ
                 USBDevice.class_cb->DataOut(ep);
-                //если данных в точке больше нет, то сбрасываем прерывание
+                //РµСЃР»Рё РґР°РЅРЅС‹С… РІ С‚РѕС‡РєРµ Р±РѕР»СЊС€Рµ РЅРµС‚, С‚Рѕ СЃР±СЂР°СЃС‹РІР°РµРј РїСЂРµСЂС‹РІР°РЅРёРµ
                 if(USBDev_EP_AvailCnt(epnum) == 0)
                 {
                     USBDev_ClearEPIntBit(epnum, EP_IRQ_STAT_DATA_PKT_RX);
@@ -247,16 +247,16 @@ uint32_t USBDev_SOF_Handler(void)
 
 uint32_t USBDev_ResetDone(void)
 {
-    //настраиваем контрольную точку для приема управляющих посылок
+    //РЅР°СЃС‚СЂР°РёРІР°РµРј РєРѕРЅС‚СЂРѕР»СЊРЅСѓСЋ С‚РѕС‡РєСѓ РґР»СЏ РїСЂРёРµРјР° СѓРїСЂР°РІР»СЏСЋС‰РёС… РїРѕСЃС‹Р»РѕРє
     USBDev_EP0Activate();
-    //переводим usb device в состояние DEFAULT
+    //РїРµСЂРµРІРѕРґРёРј usb device РІ СЃРѕСЃС‚РѕСЏРЅРёРµ DEFAULT
     USBDevice.state = USBDev_Default;
     return 0;
 }
 
 uint32_t USBDev_Resume(void)
 {
-    //выполняем пользовательский обработчик перехода в рабочее состояние
+    //РІС‹РїРѕР»РЅСЏРµРј РїРѕР»СЊР·РѕРІР°С‚РµР»СЊСЃРєРёР№ РѕР±СЂР°Р±РѕС‚С‡РёРє РїРµСЂРµС…РѕРґР° РІ СЂР°Р±РѕС‡РµРµ СЃРѕСЃС‚РѕСЏРЅРёРµ
     //FUNC()
 
     //usbdev_state = USBDEV_CONFIGURED;
@@ -268,7 +268,7 @@ uint32_t USBDev_Suspend(void)
 {
     //usbdev_state = USBDEV_SUSPENDED;
 
-    //выполняем пользовательский обработчик перехода в SUSPEND
+    //РІС‹РїРѕР»РЅСЏРµРј РїРѕР»СЊР·РѕРІР°С‚РµР»СЊСЃРєРёР№ РѕР±СЂР°Р±РѕС‚С‡РёРє РїРµСЂРµС…РѕРґР° РІ SUSPEND
     //FUNC()
 
     return 0;
@@ -276,10 +276,10 @@ uint32_t USBDev_Suspend(void)
 
 uint32_t USBDev_Disconnected(void)
 {
-    //выполняем обработку пользовательской части при отключении устройства от хоста
+    //РІС‹РїРѕР»РЅСЏРµРј РѕР±СЂР°Р±РѕС‚РєСѓ РїРѕР»СЊР·РѕРІР°С‚РµР»СЊСЃРєРѕР№ С‡Р°СЃС‚Рё РїСЂРё РѕС‚РєР»СЋС‡РµРЅРёРё СѓСЃС‚СЂРѕР№СЃС‚РІР° РѕС‚ С…РѕСЃС‚Р°
     //DEV_DISCONNECT();
 
-    //выполняем деинициализацию устройства
+    //РІС‹РїРѕР»РЅСЏРµРј РґРµРёРЅРёС†РёР°Р»РёР·Р°С†РёСЋ СѓСЃС‚СЂРѕР№СЃС‚РІР°
     USBDevice.class_cb->DeInit(1/*confignum*/);
 
     return 0;
@@ -292,7 +292,7 @@ uint32_t USBDev_Disconnected(void)
 
 uint32_t USBD_Setup_Stage (void)
 {
-    //смотрим тип запроса
+    //СЃРјРѕС‚СЂРёРј С‚РёРї Р·Р°РїСЂРѕСЃР°
     switch(USBDevice.USB_SETUP_PACKET.bmRequestType & 0x60)
     {
     case 0x00: //STANDART REQUEST
@@ -332,25 +332,25 @@ uint32_t USBDev_CEPSendResponse(CEP_RESPONSE resp)
 
 uint32_t USBDev_EP0Activate(void)
 { 
-    //настраиваем область USB RAM памяти для контрольной точки
+    //РЅР°СЃС‚СЂР°РёРІР°РµРј РѕР±Р»Р°СЃС‚СЊ USB RAM РїР°РјСЏС‚Рё РґР»СЏ РєРѕРЅС‚СЂРѕР»СЊРЅРѕР№ С‚РѕС‡РєРё
     NT_USBDevice->CEP_START_ADDR = 0x00;
     NT_USBDevice->CEP_END_ADDR = NT_USBDevice->CEP_START_ADDR + USB_MAX_EP0_SIZE - 1;
 
     if(USBDevice.state == USBDev_Powered)
     {
-        //настраиваем необходимые прерывания
-        NT_USBDevice->CEP_IRQ_ENB |= (1<<1)|  // setup packet int (прерывание по приему setup пакета)
+        //РЅР°СЃС‚СЂР°РёРІР°РµРј РЅРµРѕР±С…РѕРґРёРјС‹Рµ РїСЂРµСЂС‹РІР°РЅРёСЏ
+        NT_USBDevice->CEP_IRQ_ENB |= (1<<1)|  // setup packet int (РїСЂРµСЂС‹РІР°РЅРёРµ РїРѕ РїСЂРёРµРјСѓ setup РїР°РєРµС‚Р°)
                 (1<<5)|  // data packet transmitted
                 (1<<6)|  // data packet received
-                (1<<9)|  // USB error int (прерывание по ошибке передачи)
-                (1<<10); // Status completion int (прерывание по завершению цикла управляющего трансфера)
+                (1<<9)|  // USB error int (РїСЂРµСЂС‹РІР°РЅРёРµ РїРѕ РѕС€РёР±РєРµ РїРµСЂРµРґР°С‡Рё)
+                (1<<10); // Status completion int (РїСЂРµСЂС‹РІР°РЅРёРµ РїРѕ Р·Р°РІРµСЂС€РµРЅРёСЋ С†РёРєР»Р° СѓРїСЂР°РІР»СЏСЋС‰РµРіРѕ С‚СЂР°РЅСЃС„РµСЂР°)
 
-        //разрешаем прерывание на контрольную точку
+        //СЂР°Р·СЂРµС€Р°РµРј РїСЂРµСЂС‹РІР°РЅРёРµ РЅР° РєРѕРЅС‚СЂРѕР»СЊРЅСѓСЋ С‚РѕС‡РєСѓ
         NT_USBDevice->IRQ_ENB_L |= (1<<1);
     }
     else
     {
-        //присваиваем адрес по-умолчанию
+        //РїСЂРёСЃРІР°РёРІР°РµРј Р°РґСЂРµСЃ РїРѕ-СѓРјРѕР»С‡Р°РЅРёСЋ
         NT_USBDevice->USB_ADDR = 0;
     }
 
@@ -561,9 +561,9 @@ uint32_t USBDev_GetNextCEPPacket(void)
 {
     uint32_t data_size;
     USBDev_EP_TypeDef *ep;
-    //получаем количество пришедших данных
+    //РїРѕР»СѓС‡Р°РµРј РєРѕР»РёС‡РµСЃС‚РІРѕ РїСЂРёС€РµРґС€РёС… РґР°РЅРЅС‹С…
     data_size = NT_USBDevice->CEP_OUT_XFRCNT;
-    //получаем точку и инфу о ней
+    //РїРѕР»СѓС‡Р°РµРј С‚РѕС‡РєСѓ Рё РёРЅС„Сѓ Рѕ РЅРµР№
     ep = &USBDevice.out_ep[0];
 
     if(data_size > 0)
@@ -587,7 +587,7 @@ uint32_t USBD_SetAddressReq(void)
         else
         {
             USBDevice.address = (uint8_t)(USBDevice.USB_SETUP_PACKET.wValue) & 0x7F;
-            // нулевой пакет подтверждения
+            // РЅСѓР»РµРІРѕР№ РїР°РєРµС‚ РїРѕРґС‚РІРµСЂР¶РґРµРЅРёСЏ
             USBDev_CEPSendResponse(CEP_ZEROLEN);
 
             if(USBDevice.address != 0) USBDevice.state = USBDev_Addressed;
@@ -611,7 +611,7 @@ uint32_t USBD_SetConfigReq(void)
         switch(USBDevice.state)
         {
         case USBDev_Addressed:
-            if(USBDevice.USB_SETUP_PACKET.wValue) //если номер полученной конфигурации больше нулевой
+            if(USBDevice.USB_SETUP_PACKET.wValue) //РµСЃР»Рё РЅРѕРјРµСЂ РїРѕР»СѓС‡РµРЅРЅРѕР№ РєРѕРЅС„РёРіСѓСЂР°С†РёРё Р±РѕР»СЊС€Рµ РЅСѓР»РµРІРѕР№
             {
                 USBDevice.config = USBDevice.USB_SETUP_PACKET.wValue;
 
@@ -623,7 +623,7 @@ uint32_t USBD_SetConfigReq(void)
 
             break;
         case USBDev_Configured:
-            //если полученная конфигурация равна нулю - деконфигурируем
+            //РµСЃР»Рё РїРѕР»СѓС‡РµРЅРЅР°СЏ РєРѕРЅС„РёРіСѓСЂР°С†РёСЏ СЂР°РІРЅР° РЅСѓР»СЋ - РґРµРєРѕРЅС„РёРіСѓСЂРёСЂСѓРµРј
             if(USBDevice.USB_SETUP_PACKET.wValue == 0)
             {
                 USBDevice.config = USBDevice.USB_SETUP_PACKET.wValue;
@@ -631,7 +631,7 @@ uint32_t USBD_SetConfigReq(void)
 
                 USBD_ClrCfg(USBDevice.config);
             }
-            //если заданная конфигурация отличается от запрашиваемой, то реконфигурируем
+            //РµСЃР»Рё Р·Р°РґР°РЅРЅР°СЏ РєРѕРЅС„РёРіСѓСЂР°С†РёСЏ РѕС‚Р»РёС‡Р°РµС‚СЃСЏ РѕС‚ Р·Р°РїСЂР°С€РёРІР°РµРјРѕР№, С‚Рѕ СЂРµРєРѕРЅС„РёРіСѓСЂРёСЂСѓРµРј
             else if (USBDevice.config != USBDevice.USB_SETUP_PACKET.wValue)
             {
                 USBD_ClrCfg(USBDevice.config);
@@ -642,7 +642,7 @@ uint32_t USBD_SetConfigReq(void)
 
                 USBDev_CEPSendResponse(CEP_ZEROLEN);
             }
-            //else //иначе стоит та же самая конфигурация
+            //else //РёРЅР°С‡Рµ СЃС‚РѕРёС‚ С‚Р° Р¶Рµ СЃР°РјР°СЏ РєРѕРЅС„РёРіСѓСЂР°С†РёСЏ
 
             USBDev_CEPSendResponse(CEP_ZEROLEN);
 
@@ -674,7 +674,7 @@ uint32_t USBD_ClrCfg(uint8_t config_num)
     return 0;
 }
 
-// открытие точек 0..4 
+// РѕС‚РєСЂС‹С‚РёРµ С‚РѕС‡РµРє 0..4 
 uint32_t USBDev_EP_Open(uint8_t  ep_addr,
                         uint32_t ep_mps,
                         uint8_t  ep_type)
@@ -686,7 +686,7 @@ uint32_t USBDev_EP_Open(uint8_t  ep_addr,
         ep = &USBDevice.in_ep[epnum];
     else
         ep = &USBDevice.out_ep[epnum];
-    //настраиваем необходимые параметры
+    //РЅР°СЃС‚СЂР°РёРІР°РµРј РЅРµРѕР±С…РѕРґРёРјС‹Рµ РїР°СЂР°РјРµС‚СЂС‹
     ep->epnum      = epnum;
     ep->is_in      = (ep_addr & 0x80) != 0;
     ep->max_packet = ep_mps;
@@ -707,7 +707,7 @@ uint32_t USBDev_EP_Open(uint8_t  ep_addr,
 
     return 0;
 }
-//закрытие точек 1..4
+//Р·Р°РєСЂС‹С‚РёРµ С‚РѕС‡РµРє 1..4
 uint32_t USBDev_EP_Close(uint8_t ep_addr)
 {
     USBDev_EP_TypeDef *ep;
@@ -727,28 +727,28 @@ uint32_t USBDev_EP_Close(uint8_t ep_addr)
 
 uint32_t USBDev_EPActivate(USBDev_EP_TypeDef *ep)
 {
-    //смотрим, активна ли точка уже
+    //СЃРјРѕС‚СЂРёРј, Р°РєС‚РёРІРЅР° Р»Рё С‚РѕС‡РєР° СѓР¶Рµ
     if((NT_USBDevice->USB_EP[ep->epnum - 1].USB_EP_CFG & 0x0001) == 0)
     {
-        //и если не активна, то настраиваем ее
+        //Рё РµСЃР»Рё РЅРµ Р°РєС‚РёРІРЅР°, С‚Рѕ РЅР°СЃС‚СЂР°РёРІР°РµРј РµРµ
 
-        //задаем максимальный размер пакета
+        //Р·Р°РґР°РµРј РјР°РєСЃРёРјР°Р»СЊРЅС‹Р№ СЂР°Р·РјРµСЂ РїР°РєРµС‚Р°
         NT_USBDevice->USB_EP[ep->epnum - 1].MPS    = ep->max_packet;
-        //конфигурируем точку
-        NT_USBDevice->USB_EP[ep->epnum - 1].USB_EP_CFG =  (ep->epnum  << 4) // номер конечной точки
-                |(ep->is_in  << 3) // направление передачи
-                |(ep->type   << 1) // тип конечной точки
-                | 1;               // активируем точку
-        //настраиваем адресное пространство буфера
+        //РєРѕРЅС„РёРіСѓСЂРёСЂСѓРµРј С‚РѕС‡РєСѓ
+        NT_USBDevice->USB_EP[ep->epnum - 1].USB_EP_CFG =  (ep->epnum  << 4) // РЅРѕРјРµСЂ РєРѕРЅРµС‡РЅРѕР№ С‚РѕС‡РєРё
+                |(ep->is_in  << 3) // РЅР°РїСЂР°РІР»РµРЅРёРµ РїРµСЂРµРґР°С‡Рё
+                |(ep->type   << 1) // С‚РёРї РєРѕРЅРµС‡РЅРѕР№ С‚РѕС‡РєРё
+                | 1;               // Р°РєС‚РёРІРёСЂСѓРµРј С‚РѕС‡РєСѓ
+        //РЅР°СЃС‚СЂР°РёРІР°РµРј Р°РґСЂРµСЃРЅРѕРµ РїСЂРѕСЃС‚СЂР°РЅСЃС‚РІРѕ Р±СѓС„РµСЂР°
         NT_USBDevice->USB_EP[ep->epnum - 1].START_ADDR = USBDevice.tmp_config_buf_start_address;
         USBDevice.tmp_config_buf_start_address =
                 NT_USBDevice->USB_EP[ep->epnum - 1].START_ADDR + (NT_USBDevice->USB_EP[ep->epnum - 1].MPS >> 1) + 1;
         NT_USBDevice->USB_EP[ep->epnum - 1].END_ADDR   = USBDevice.tmp_config_buf_start_address - 1;
 
-        //сбрасываем буфер конечной точки
+        //СЃР±СЂР°СЃС‹РІР°РµРј Р±СѓС„РµСЂ РєРѕРЅРµС‡РЅРѕР№ С‚РѕС‡РєРё
         NT_USBDevice->USB_EP[ep->epnum - 1].RSP_SC = 1;
 
-        //настраиваем прерывания по типу точки
+        //РЅР°СЃС‚СЂР°РёРІР°РµРј РїСЂРµСЂС‹РІР°РЅРёСЏ РїРѕ С‚РёРїСѓ С‚РѕС‡РєРё
         if(ep->is_in)
         {
             NT_USBDevice->USB_EP[ep->epnum - 1].IRQ_ENB =  (1<<3)  //data packet transmitted int
@@ -764,7 +764,7 @@ uint32_t USBDev_EPActivate(USBDev_EP_TypeDef *ep)
             NT_USBDevice->USB_EP[ep->epnum - 1].IRQ_ENB = (1<<4); //data packet receive int
         }
 
-        //включаем прерывание на конечную точку
+        //РІРєР»СЋС‡Р°РµРј РїСЂРµСЂС‹РІР°РЅРёРµ РЅР° РєРѕРЅРµС‡РЅСѓСЋ С‚РѕС‡РєСѓ
         USBDev_EPIntEnable(ep->epnum);
     }
 
@@ -780,20 +780,20 @@ uint32_t USBDev_EPDeactivate(USBDev_EP_TypeDef *ep)
 
 uint32_t USBDev_Init(void)
 {
-    //переводим usb device в состояние powered
+    //РїРµСЂРµРІРѕРґРёРј usb device РІ СЃРѕСЃС‚РѕСЏРЅРёРµ powered
     USBDevice.state   = USBDev_Powered;
     USBDevice.speed   = USBDev_Speed_Full;
     USBDevice.address = 0;
     USBDevice.config  = 0;
     USBDevice.tmp_config_buf_start_address = USB_DEVICE_MAX_EP0_SIZE;
-    //настраиваем прерывания на usb device
+    //РЅР°СЃС‚СЂР°РёРІР°РµРј РїСЂРµСЂС‹РІР°РЅРёСЏ РЅР° usb device
     NT_USBDevice->USB_IRQ_ENB = (1<<0)| //SOF int
             (1<<1)| //reset int
             (1<<2)| //resume int
             (1<<3);//| //suspend req int
     //(1<<4)| //HS settle int
     //(1<<5); //DMA complete int
-    //включаем прерывание на usb device
+    //РІРєР»СЋС‡Р°РµРј РїСЂРµСЂС‹РІР°РЅРёРµ РЅР° usb device
     NT_USBDevice->IRQ_ENB_L |= (1<<0); //usb interrupt enable
 
     USBDev_SetOpSpeed(USBDev_Speed_Full);
@@ -882,7 +882,7 @@ uint32_t USBDev_DMAOpStart(uint8_t *pbuf, uint32_t len, uint8_t epnum, uint32_t 
     NT_USBDevice->DMA_CNT       = len;
     NT_USBDevice->DMA_CTRL_STS  = op|epnum;
 
-    //ждем окончания работы DMA
+    //Р¶РґРµРј РѕРєРѕРЅС‡Р°РЅРёСЏ СЂР°Р±РѕС‚С‹ DMA
     while(NT_USBDevice->DMA_CTRL_STS & USBDMA_OP_MASK_DONE){};
 
     if(wr_to_ep == 0)
@@ -906,7 +906,7 @@ uint32_t USBDev_WritePacket(uint8_t *src, uint32_t len, uint8_t epnum)
     if(len > 0)
     {
         USBDev_DMAOpStart(src, len, epnum_mask, USBDMA_OP_WRITE_TO_EP | USBDMA_OP_START);
-        //отправляем пакет
+        //РѕС‚РїСЂР°РІР»СЏРµРј РїР°РєРµС‚
         if(epnum_mask == 0)
             NT_USBDevice->CEP_IN_XFRCNT = len;
         else if(len < ep->max_packet)
@@ -933,7 +933,7 @@ uint32_t USBDev_ReadPacket(uint8_t *dst, uint32_t len, uint8_t epnum)
 }
 
 /////////////////////////
-//возвращает количество байт в буфере конечной точки
+//РІРѕР·РІСЂР°С‰Р°РµС‚ РєРѕР»РёС‡РµСЃС‚РІРѕ Р±Р°Р№С‚ РІ Р±СѓС„РµСЂРµ РєРѕРЅРµС‡РЅРѕР№ С‚РѕС‡РєРё
 uint32_t USBDev_EP_AvailCnt(uint8_t epnum)
 {
     if(epnum > 0)
@@ -1006,7 +1006,7 @@ uint32_t USBDev_EPPrepareRx(uint8_t *pbuf, uint32_t len, uint8_t epnum)
     USBDevice.out_ep[epnum].out_nak_active = 0;
 
     if(epnum != 0)
-        //отключаем автоответ NAK от точки
+        //РѕС‚РєР»СЋС‡Р°РµРј Р°РІС‚РѕРѕС‚РІРµС‚ NAK РѕС‚ С‚РѕС‡РєРё
         USBDev_EPSetResponse(EP_CLRNAK, epnum);
 
     return 0;

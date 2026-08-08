@@ -1,5 +1,5 @@
 /*!
-    Copyright 2017 	АО "НИИЭТ" и ООО "НПФ ВЕКТОР"
+    Copyright 2017 	РђРћ "РќРРР­Рў" Рё РћРћРћ "РќРџР¤ Р’Р•РљРўРћР "
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -14,15 +14,15 @@
    limitations under the License.
 
  \file      main.h
- \brief     Главный заголовочный файл проекта. 
-Подключает в себе все заголовочные файлы всех модулей,
-Содержит объявления (extern) всех наиболее важных
-глобальных структур и переменных.
+ \brief     Р“Р»Р°РІРЅС‹Р№ Р·Р°РіРѕР»РѕРІРѕС‡РЅС‹Р№ С„Р°Р№Р» РїСЂРѕРµРєС‚Р°. 
+РџРѕРґРєР»СЋС‡Р°РµС‚ РІ СЃРµР±Рµ РІСЃРµ Р·Р°РіРѕР»РѕРІРѕС‡РЅС‹Рµ С„Р°Р№Р»С‹ РІСЃРµС… РјРѕРґСѓР»РµР№,
+РЎРѕРґРµСЂР¶РёС‚ РѕР±СЉСЏРІР»РµРЅРёСЏ (extern) РІСЃРµС… РЅР°РёР±РѕР»РµРµ РІР°Р¶РЅС‹С…
+РіР»РѕР±Р°Р»СЊРЅС‹С… СЃС‚СЂСѓРєС‚СѓСЂ Рё РїРµСЂРµРјРµРЅРЅС‹С….
 
- \author    ООО "НПФ Вектор". http://motorcontrol.ru
+ \author    РћРћРћ "РќРџР¤ Р’РµРєС‚РѕСЂ". http://motorcontrol.ru
  \version   v 2.0 25/03/2016
 
- \defgroup  MAIN Главный файл проекта
+ \defgroup  MAIN Р“Р»Р°РІРЅС‹Р№ С„Р°Р№Р» РїСЂРѕРµРєС‚Р°
 
 @{*/
 
@@ -37,7 +37,7 @@ extern "C" {
 #include "DSP.h"
 #include "build.h"
 #include "V_common.h"
-#include <stdlib.h> //для labs
+#include <stdlib.h> //РґР»СЏ labs
 #include "V_IQmath.h"
 #include "SM_Sys.h"
 #include "SM_Net.h"
@@ -153,7 +153,7 @@ volatile extern float DebugF2;
 volatile extern float DebugF3;
 volatile extern float DebugF4;
 
-//Счетчики прерываний модуля захвата
+//РЎС‡РµС‚С‡РёРєРё РїСЂРµСЂС‹РІР°РЅРёР№ РјРѕРґСѓР»СЏ Р·Р°С…РІР°С‚Р°
 extern Uint16 CounterCAP_isr;
 extern Uint16 cap0_counter;
 extern Uint16 cap1_counter;
@@ -173,7 +173,7 @@ void callback_dlog(Uint16 par, Uint16 tag_CANnum);
 void callback_RTC(Uint16 par, Uint16 tag_CANnum);
 void propReset(void);
 
-// Объявление ISR-ов. В CodeMaster-ском и GCC-шном стартапе они назиываются по-разному
+// РћР±СЉСЏРІР»РµРЅРёРµ ISR-РѕРІ. Р’ CodeMaster-СЃРєРѕРј Рё GCC-С€РЅРѕРј СЃС‚Р°СЂС‚Р°РїРµ РѕРЅРё РЅР°Р·РёС‹РІР°СЋС‚СЃСЏ РїРѕ-СЂР°Р·РЅРѕРјСѓ
 #if defined (__GNUC__)
 void TIM1_IRQHandler(void);
 void TIM0_IRQHandler(void);

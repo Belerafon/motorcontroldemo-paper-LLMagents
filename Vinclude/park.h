@@ -1,5 +1,5 @@
 /*!
-     Copyright 2017 	АО "НИИЭТ" и ООО "НПФ ВЕКТОР"
+     Copyright 2017 	РђРћ "РќРРР­Рў" Рё РћРћРћ "РќРџР¤ Р’Р•РљРўРћР "
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -14,11 +14,11 @@
    limitations under the License.
  
  \file    park.h
- \brief   Модуль координатных преобразований координат (см. TPark)
- \author    ООО "НПФ Вектор". http://motorcontrol.ru
+ \brief   РњРѕРґСѓР»СЊ РєРѕРѕСЂРґРёРЅР°С‚РЅС‹С… РїСЂРµРѕР±СЂР°Р·РѕРІР°РЅРёР№ РєРѕРѕСЂРґРёРЅР°С‚ (СЃРј. TPark)
+ \author    РћРћРћ "РќРџР¤ Р’РµРєС‚РѕСЂ". http://motorcontrol.ru
  \version   v 2.0 25/03/2016
 
- \defgroup  Park Координатные преобразования (см. TPark)
+ \defgroup  Park РљРѕРѕСЂРґРёРЅР°С‚РЅС‹Рµ РїСЂРµРѕР±СЂР°Р·РѕРІР°РЅРёСЏ (СЃРј. TPark)
  @{
 */
 #ifndef PARK_H
@@ -31,13 +31,13 @@ extern "C" {
 #include "V_IQmath.h"
   
   /*! \class TPark
-      \brief Координатные преобразования
+      \brief РљРѕРѕСЂРґРёРЅР°С‚РЅС‹Рµ РїСЂРµРѕР±СЂР°Р·РѕРІР°РЅРёСЏ
       
-      Класс \a TPark, основанный на структуре SPark, обеспечивает
-      поворот вектора (ds,qs), заданного в ортогональных осях, на требуемый угол
-      поворота ang. Выходной повернутый вектор сохраняется в переменных de,qe. */
+      РљР»Р°СЃСЃ \a TPark, РѕСЃРЅРѕРІР°РЅРЅС‹Р№ РЅР° СЃС‚СЂСѓРєС‚СѓСЂРµ SPark, РѕР±РµСЃРїРµС‡РёРІР°РµС‚
+      РїРѕРІРѕСЂРѕС‚ РІРµРєС‚РѕСЂР° (ds,qs), Р·Р°РґР°РЅРЅРѕРіРѕ РІ РѕСЂС‚РѕРіРѕРЅР°Р»СЊРЅС‹С… РѕСЃСЏС…, РЅР° С‚СЂРµР±СѓРµРјС‹Р№ СѓРіРѕР»
+      РїРѕРІРѕСЂРѕС‚Р° ang. Р’С‹С…РѕРґРЅРѕР№ РїРѕРІРµСЂРЅСѓС‚С‹Р№ РІРµРєС‚РѕСЂ СЃРѕС…СЂР°РЅСЏРµС‚СЃСЏ РІ РїРµСЂРµРјРµРЅРЅС‹С… de,qe. */
 
-//! см. TPark
+//! СЃРј. TPark
 struct SPark{  _iq  ds;  //!<  Input: stationary d-axis stator variable
               _iq  qs;	//!<  Input: stationary q-axis stator variable
               _iq  ang;	//!<  Input: rotating angle (pu)
@@ -48,7 +48,7 @@ struct SPark{  _iq  ds;  //!<  Input: stationary d-axis stator variable
 
 typedef struct SPark TPark;
 
-//! инициализатор по-умолчанию
+//! РёРЅРёС†РёР°Р»РёР·Р°С‚РѕСЂ РїРѕ-СѓРјРѕР»С‡Р°РЅРёСЋ
 #define PARK_DEFAULTS { .calc = park_calc }
 
  //! \memberof TPark

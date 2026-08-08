@@ -1,5 +1,5 @@
 /*!
- Copyright 2017 	ÀÎ "ÍÈÈÝÒ" è ÎÎÎ "ÍÏÔ ÂÅÊÒÎÐ"
+ Copyright 2017 	ÐÐž "ÐÐ˜Ð˜Ð­Ð¢" Ð¸ ÐžÐžÐž "ÐÐŸÐ¤ Ð’Ð•ÐšÐ¢ÐžÐ "
 
  Licensed under the Apache License, Version 2.0 (the "License");
  you may not use this file except in compliance with the License.
@@ -14,8 +14,8 @@
  limitations under the License.
 
  \file      Vled.c
- \brief     Óïðàâëåíèå ñâåòîäèîäàìè
- \author    ÎÎÎ "ÍÏÔ Âåêòîð". http://motorcontrol.ru
+ \brief     Ð£Ð¿Ñ€Ð°Ð²Ð»ÐµÐ½Ð¸Ðµ ÑÐ²ÐµÑ‚Ð¾Ð´Ð¸Ð¾Ð´Ð°Ð¼Ð¸
+ \author    ÐžÐžÐž "ÐÐŸÐ¤ Ð’ÐµÐºÑ‚Ð¾Ñ€". http://motorcontrol.ru
  \version   v 2.0 25/03/2016
 
  \addtogroup led
@@ -24,7 +24,7 @@
 #include "DSP.h"
 #include "main.h"
 
-//Äëÿ  VectorCARD
+//Ð”Ð»Ñ  VectorCARD
 #if defined (HW_VECTORCARD_DRV8301_EVM) || defined (HW_VECTORCARD_DRV8312_EVM) || defined (HW_VECTORCARD_SIMULATOR)
 
 #define VD1_ON NT_GPIOC->MASKLOWBYTE_bit[4].MASKLB = 0			//NT_GPIOC->DATA &= ~(1 << 2)
@@ -45,7 +45,7 @@
 #define VD6_ON NT_GPIOB->MASKHIGHBYTE_bit[1].MASKHB = 0			//NT_GPIOB->DATA &= ~(1 << 8)
 #define VD6_OFF NT_GPIOB->MASKHIGHBYTE_bit[1].MASKHB = 1		//NT_GPIOB->DATA |= (1 << 8)
 
-//Äèîäû íà ïëàòå èíâåðòîðà TI (ñèíåé)
+//Ð”Ð¸Ð¾Ð´Ñ‹ Ð½Ð° Ð¿Ð»Ð°Ñ‚Ðµ Ð¸Ð½Ð²ÐµÑ€Ñ‚Ð¾Ñ€Ð° TI (ÑÐ¸Ð½ÐµÐ¹)
 #define VDSTATUS_ON NT_GPIOG->MASKHIGHBYTE_bit[2].MASKHB = 2			//NT_GPIOG->DATA.bit.GPIO9 = 1
 #define VDSTATUS_OFF NT_GPIOG->MASKHIGHBYTE_bit[2].MASKHB = 0			//NT_GPIOG->DATA.bit.GPIO9 = 0
 
@@ -58,10 +58,10 @@
 
 #if defined (HW_VECTOR_MK_40_4)
 
-#define VD1_ON NT_GPIOA->MASKHIGHBYTE_bit[8].MASKLB = 0				//NT_GPIOA->DATA &= ~(1 << 11)	Æåëòûé ñâåòîäèîä
+#define VD1_ON NT_GPIOA->MASKHIGHBYTE_bit[8].MASKLB = 0				//NT_GPIOA->DATA &= ~(1 << 11)	Ð–ÐµÐ»Ñ‚Ñ‹Ð¹ ÑÐ²ÐµÑ‚Ð¾Ð´Ð¸Ð¾Ð´
 #define VD1_OFF NT_GPIOA->MASKHIGHBYTE_bit[8].MASKLB = 8			//NT_GPIOA->DATA |= (1 << 11)
 
-#define VD2_ON NT_GPIOA->MASKHIGHBYTE_bit[16].MASKLB = 0			//NT_GPIOA->DATA &= ~(1 << 12)	Êðàñíûé ñâåòîäèîä
+#define VD2_ON NT_GPIOA->MASKHIGHBYTE_bit[16].MASKLB = 0			//NT_GPIOA->DATA &= ~(1 << 12)	ÐšÑ€Ð°ÑÐ½Ñ‹Ð¹ ÑÐ²ÐµÑ‚Ð¾Ð´Ð¸Ð¾Ð´
 #define VD2_OFF NT_GPIOA->MASKHIGHBYTE_bit[16].MASKLB = 16			//NT_GPIOA->DATA |= (1 << 12)
 
 #define VD3_ON
@@ -74,16 +74,16 @@
 
 #if defined (HW_MOTORCONTROLBOARD) || defined (HW_MOTORCONTROLBOARD_SIMULATOR)
 
-#define VD1_ON NT_GPIOA->MASKLOWBYTE_bit[2].MASKLB = 0			//NT_GPIOA->DATA &= ~(1 << 1)	Êðàñíûé ñâåòîäèîä	VD18
+#define VD1_ON NT_GPIOA->MASKLOWBYTE_bit[2].MASKLB = 0			//NT_GPIOA->DATA &= ~(1 << 1)	ÐšÑ€Ð°ÑÐ½Ñ‹Ð¹ ÑÐ²ÐµÑ‚Ð¾Ð´Ð¸Ð¾Ð´	VD18
 #define VD1_OFF NT_GPIOA->MASKLOWBYTE_bit[2].MASKLB = 2			//NT_GPIOA->DATA |= (1 << 1)
 
-#define VD2_ON NT_GPIOA->MASKLOWBYTE_bit[1].MASKLB = 0			//NT_GPIOA->DATA &= ~(1 << 0)	Æåëòûé ñâåòîäèîä	VD19
+#define VD2_ON NT_GPIOA->MASKLOWBYTE_bit[1].MASKLB = 0			//NT_GPIOA->DATA &= ~(1 << 0)	Ð–ÐµÐ»Ñ‚Ñ‹Ð¹ ÑÐ²ÐµÑ‚Ð¾Ð´Ð¸Ð¾Ð´	VD19
 #define VD2_OFF NT_GPIOA->MASKLOWBYTE_bit[1].MASKLB = 1			//NT_GPIOA->DATA |= (1 << 0)
 
-#define VD3_ON NT_GPIOH->MASKLOWBYTE_bit[128].MASKLB = 0	 	//NT_GPIOH->DATA &= ~(1 << 7)	Çåëåíûé ñâåòîäèîä	VD1
+#define VD3_ON NT_GPIOH->MASKLOWBYTE_bit[128].MASKLB = 0	 	//NT_GPIOH->DATA &= ~(1 << 7)	Ð—ÐµÐ»ÐµÐ½Ñ‹Ð¹ ÑÐ²ÐµÑ‚Ð¾Ð´Ð¸Ð¾Ð´	VD1
 #define VD3_OFF NT_GPIOH->MASKLOWBYTE_bit[128].MASKLB = 128		//NT_GPIOH->DATA |= (1 << 7)
 
-#define VD4_ON NT_GPIOH->MASKLOWBYTE_bit[1].MASKLB = 0			//NT_GPIOH->DATA &= ~(1 << 0)	Çåëåíûé ñâåòîäèîä	VD2
+#define VD4_ON NT_GPIOH->MASKLOWBYTE_bit[1].MASKLB = 0			//NT_GPIOH->DATA &= ~(1 << 0)	Ð—ÐµÐ»ÐµÐ½Ñ‹Ð¹ ÑÐ²ÐµÑ‚Ð¾Ð´Ð¸Ð¾Ð´	VD2
 #define VD4_OFF NT_GPIOH->MASKLOWBYTE_bit[1].MASKLB = 1			//NT_GPIOH->DATA |= (1 << 0)
 
 
@@ -91,9 +91,9 @@
 #endif
 
 void LED_init(Tled *p) {
-//Äëÿ  VectorCARD
+//Ð”Ð»Ñ  VectorCARD
 #if defined (HW_VECTORCARD_DRV8301_EVM) || defined (HW_VECTORCARD_DRV8312_EVM) || defined (HW_VECTORCARD_SIMULATOR)
-	/* Ðàçðåøèòü íîãàì ðàáîòàòü íà âûõîä */
+	/* Ð Ð°Ð·Ñ€ÐµÑˆÐ¸Ñ‚ÑŒ Ð½Ð¾Ð³Ð°Ð¼ Ñ€Ð°Ð±Ð¾Ñ‚Ð°Ñ‚ÑŒ Ð½Ð° Ð²Ñ‹Ñ…Ð¾Ð´ */
 	NT_GPIOA->ALTFUNCCLR = (1 << 9);
 	NT_GPIOB->ALTFUNCCLR = (1 << 5) | (1 << 6) | (1 << 7) | (1 << 8);
 	NT_GPIOC->ALTFUNCCLR = (1 << 2) | (1 << 3);
@@ -110,23 +110,23 @@ void LED_init(Tled *p) {
 	NT_GPIOD->ALTFUNCCLR = (1 << 3) | (1 << 4) | (1 << 5) | (1 << 6);
 	NT_GPIOD->OUTENCLR = (1 << 3) | (1 << 4) | (1 << 5) | (1 << 6);
 
-	leds.mode = 2; //íàèáîëåå êðàñèâûé òèï ìèãàíèÿ
+	leds.mode = 2; //Ð½Ð°Ð¸Ð±Ð¾Ð»ÐµÐµ ÐºÑ€Ð°ÑÐ¸Ð²Ñ‹Ð¹ Ñ‚Ð¸Ð¿ Ð¼Ð¸Ð³Ð°Ð½Ð¸Ñ
 #endif
 
 #if defined (HW_VECTOR_MK_40_4)
-	/* Ðàçðåøèòü íîãàì ðàáîòàòü íà âûõîä */
-	NT_GPIOA->ALTFUNCCLR = (1 << 11) | (1 << 12);	//Æåëòûé è êðàñíûé
+	/* Ð Ð°Ð·Ñ€ÐµÑˆÐ¸Ñ‚ÑŒ Ð½Ð¾Ð³Ð°Ð¼ Ñ€Ð°Ð±Ð¾Ñ‚Ð°Ñ‚ÑŒ Ð½Ð° Ð²Ñ‹Ñ…Ð¾Ð´ */
+	NT_GPIOA->ALTFUNCCLR = (1 << 11) | (1 << 12);	//Ð–ÐµÐ»Ñ‚Ñ‹Ð¹ Ð¸ ÐºÑ€Ð°ÑÐ½Ñ‹Ð¹
 
 	NT_GPIOA->OUTENSET |= (1 << 11) | (1 << 12);
 #endif
 
 #if defined (HW_MOTORCONTROLBOARD) || defined (HW_MOTORCONTROLBOARD_SIMULATOR)
-	/* Ðàçðåøèòü íîãàì ðàáîòàòü íà âûõîä */
-	NT_GPIOA->ALTFUNCCLR = (1 << 0) | (1 << 1);	//Æåëòûé è êðàñíûé
-	NT_GPIOH->ALTFUNCCLR = (1 << 0) | (1 << 7);	//Çåëåíûé è çåëåíûé
+	/* Ð Ð°Ð·Ñ€ÐµÑˆÐ¸Ñ‚ÑŒ Ð½Ð¾Ð³Ð°Ð¼ Ñ€Ð°Ð±Ð¾Ñ‚Ð°Ñ‚ÑŒ Ð½Ð° Ð²Ñ‹Ñ…Ð¾Ð´ */
+	NT_GPIOA->ALTFUNCCLR = (1 << 0) | (1 << 1);	//Ð–ÐµÐ»Ñ‚Ñ‹Ð¹ Ð¸ ÐºÑ€Ð°ÑÐ½Ñ‹Ð¹
+	NT_GPIOH->ALTFUNCCLR = (1 << 0) | (1 << 7);	//Ð—ÐµÐ»ÐµÐ½Ñ‹Ð¹ Ð¸ Ð·ÐµÐ»ÐµÐ½Ñ‹Ð¹
 
-	NT_GPIOA->OUTENSET |= (1 << 0) | (1 << 1);	//Æåëòûé è êðàñíûé
-	NT_GPIOH->OUTENSET |= (1 << 0) | (1 << 7);	//Çåëåíûé è çåëåíûé
+	NT_GPIOA->OUTENSET |= (1 << 0) | (1 << 1);	//Ð–ÐµÐ»Ñ‚Ñ‹Ð¹ Ð¸ ÐºÑ€Ð°ÑÐ½Ñ‹Ð¹
+	NT_GPIOH->OUTENSET |= (1 << 0) | (1 << 7);	//Ð—ÐµÐ»ÐµÐ½Ñ‹Ð¹ Ð¸ Ð·ÐµÐ»ÐµÐ½Ñ‹Ð¹
 
 	NT_GPIOB->ALTFUNCCLR = (1 << 6) | (1 << 15);
 	NT_GPIOB->OUTENSET |= (1 << 6) | (1 << 15);
@@ -135,7 +135,7 @@ void LED_init(Tled *p) {
 }
 
 void LED_toggle(Tled *p, Uint16 led) {
-//Äëÿ  VectorCARD
+//Ð”Ð»Ñ  VectorCARD
 #if defined (HW_VECTORCARD_DRV8301_EVM) || defined (HW_VECTORCARD_DRV8312_EVM) || defined (HW_VECTORCARD_SIMULATOR)
 
 	switch (led) {
@@ -159,7 +159,7 @@ void LED_toggle(Tled *p, Uint16 led) {
 }
 
 void LED_on(Tled *p, Uint16 led) {
-//Äëÿ  VectorCARD
+//Ð”Ð»Ñ  VectorCARD
 #if defined (HW_VECTORCARD_DRV8301_EVM) || defined (HW_VECTORCARD_DRV8312_EVM) || defined (HW_VECTORCARD_SIMULATOR)
 
 	switch (led) {
@@ -200,7 +200,7 @@ void LED_on(Tled *p, Uint16 led) {
 }
 
 void LED_off(Tled *p, Uint16 led) {
-//Äëÿ  VectorCARD
+//Ð”Ð»Ñ  VectorCARD
 #if defined (HW_VECTORCARD_DRV8301_EVM) || defined (HW_VECTORCARD_DRV8312_EVM) || defined (HW_VECTORCARD_SIMULATOR)
 
 	switch (led) {
@@ -241,7 +241,7 @@ void LED_off(Tled *p, Uint16 led) {
 }
 
 void LED_clearAll(Tled *p) {
-//Äëÿ  VectorCARD
+//Ð”Ð»Ñ  VectorCARD
 #if defined (HW_VECTORCARD_DRV8301_EVM) || defined (HW_VECTORCARD_DRV8312_EVM) || defined (HW_VECTORCARD_SIMULATOR)
 	p->timer1 = p->timer2 = p->timer3 = p->timer4 = p->timer5 = p->timer6 = 0;
 	p->mode3counter = 0;
@@ -255,7 +255,7 @@ void LED_clearAll(Tled *p) {
 }
 
 void LED_mode0(Tled *p) {
-//Äëÿ  VectorCARD
+//Ð”Ð»Ñ  VectorCARD
 #if defined (HW_VECTORCARD_DRV8301_EVM) || defined (HW_VECTORCARD_DRV8312_EVM) || defined (HW_VECTORCARD_SIMULATOR)
 
 	if (p->timer1 >= 300) {
@@ -297,7 +297,7 @@ void LED_mode0(Tled *p) {
 }
 
 void LED_mode1(Tled *p) {
-//Äëÿ  VectorCARD
+//Ð”Ð»Ñ  VectorCARD
 #if defined (HW_VECTORCARD_DRV8301_EVM) || defined (HW_VECTORCARD_DRV8312_EVM) || defined (HW_VECTORCARD_SIMULATOR)
 
 	if (p->timer1 >= 400) {
@@ -328,7 +328,7 @@ void LED_mode1(Tled *p) {
 }
 
 void LED_mode2(Tled *p) {
-//Äëÿ  VectorCARD
+//Ð”Ð»Ñ  VectorCARD
 #if defined (HW_VECTORCARD_DRV8301_EVM) || defined (HW_VECTORCARD_DRV8312_EVM) || defined (HW_VECTORCARD_SIMULATOR)
 
 	if (p->timer1 >= 720) {
@@ -370,7 +370,7 @@ void LED_mode2(Tled *p) {
 }
 
 void LED_mode3(Tled *p) {
-//Äëÿ  VectorCARD
+//Ð”Ð»Ñ  VectorCARD
 #if defined (HW_VECTORCARD_DRV8301_EVM) || defined (HW_VECTORCARD_DRV8312_EVM) || defined (HW_VECTORCARD_SIMULATOR)
 
 	if (p->timer1 >= (300 - p->mode3counter * 50)) {
@@ -523,10 +523,10 @@ void LED_mode3(Tled *p) {
 }
 
 void LED_msCalc(Tled *p) {
-//Äëÿ  VectorCARD
+//Ð”Ð»Ñ  VectorCARD
 #if defined (HW_VECTORCARD_DRV8301_EVM) || defined (HW_VECTORCARD_DRV8312_EVM) || defined (HW_VECTORCARD_SIMULATOR)
 
-	// Â çàâèñèìîñòè îò íàæàòîé êíîïêè ïåðåêëþ÷àåì ñïîñîá ñâåòîäèîäåíüÿ
+	// Ð’ Ð·Ð°Ð²Ð¸ÑÐ¸Ð¼Ð¾ÑÑ‚Ð¸ Ð¾Ñ‚ Ð½Ð°Ð¶Ð°Ñ‚Ð¾Ð¹ ÐºÐ½Ð¾Ð¿ÐºÐ¸ Ð¿ÐµÑ€ÐµÐºÐ»ÑŽÑ‡Ð°ÐµÐ¼ ÑÐ¿Ð¾ÑÐ¾Ð± ÑÐ²ÐµÑ‚Ð¾Ð´Ð¸Ð¾Ð´ÐµÐ½ÑŒÑ
 	if ((NT_GPIOD->DATA_bit.DATA & (1 << 3)) == 0)
 	p->mode = 0;
 	if ((NT_GPIOD->DATA_bit.DATA & (1 << 4)) == 0)
@@ -586,8 +586,8 @@ void LED_msCalc(Tled *p) {
 #endif
 
 #if defined (HW_VECTOR_MK_40_4)
-	//ñâåòîäèîäíàß èíòèêàöèß íà ïëàòå êîíòðîëëåðà
-	if (sm_prot.state == PROT_ON_OK)//åñëè íåò àâàðèè
+	//ÑÐ²ÐµÑ‚Ð¾Ð´Ð¸Ð¾Ð´Ð½Ð°Ð¯ Ð¸Ð½Ñ‚Ð¸ÐºÐ°Ñ†Ð¸Ð¯ Ð½Ð° Ð¿Ð»Ð°Ñ‚Ðµ ÐºÐ¾Ð½Ñ‚Ñ€Ð¾Ð»Ð»ÐµÑ€Ð°
+	if (sm_prot.state == PROT_ON_OK)//ÐµÑÐ»Ð¸ Ð½ÐµÑ‚ Ð°Ð²Ð°Ñ€Ð¸Ð¸
 	{
 		p->timer1++;
 		if (p->timer1 > 500) {
@@ -598,7 +598,7 @@ void LED_msCalc(Tled *p) {
 		NT_GPIOA->MASKHIGHBYTE_bit[1 << (12 - 8)].MASKHB = 0xFF;
 		else
 		NT_GPIOA->MASKHIGHBYTE_bit[1 << (12 - 8)].MASKHB = 0;
-	} else  	//åñëè åñòü àâàðèß
+	} else  	//ÐµÑÐ»Ð¸ ÐµÑÑ‚ÑŒ Ð°Ð²Ð°Ñ€Ð¸Ð¯
 	{
 		p->timer1++;
 		if (p->timer1 > 200) {
@@ -614,8 +614,8 @@ void LED_msCalc(Tled *p) {
 #endif
 
 #if defined (HW_MOTORCONTROLBOARD) || defined (HW_MOTORCONTROLBOARD_SIMULATOR)
-	//ñâåòîäèîäíàß èíòèêàöèß íà ïëàòå êîíòðîëëåðà
-	if (sm_prot.state == PROT_ON_OK)   //åñëè íåò àâàðèè
+	//ÑÐ²ÐµÑ‚Ð¾Ð´Ð¸Ð¾Ð´Ð½Ð°Ð¯ Ð¸Ð½Ñ‚Ð¸ÐºÐ°Ñ†Ð¸Ð¯ Ð½Ð° Ð¿Ð»Ð°Ñ‚Ðµ ÐºÐ¾Ð½Ñ‚Ñ€Ð¾Ð»Ð»ÐµÑ€Ð°
+	if (sm_prot.state == PROT_ON_OK)   //ÐµÑÐ»Ð¸ Ð½ÐµÑ‚ Ð°Ð²Ð°Ñ€Ð¸Ð¸
 	{
 		p->timer1++;
 		p->timer2++;
@@ -635,7 +635,7 @@ void LED_msCalc(Tled *p) {
 			VD4_ON;
 		else
 			VD4_OFF;
-	} else  	//åñëè åñòü àâàðèÿ
+	} else  	//ÐµÑÐ»Ð¸ ÐµÑÑ‚ÑŒ Ð°Ð²Ð°Ñ€Ð¸Ñ
 	{
 		p->timer1++;
 		p->timer2++;
@@ -659,7 +659,7 @@ void LED_msCalc(Tled *p) {
 
 
 
-	if (sm_ctrl.state == CMD_LOGIC_TURNED_OFF) //âûêëþ÷åí
+	if (sm_ctrl.state == CMD_LOGIC_TURNED_OFF) //Ð²Ñ‹ÐºÐ»ÑŽÑ‡ÐµÐ½
 	{
 		D_OUT2_ON;
 		D_OUT1_OFF;

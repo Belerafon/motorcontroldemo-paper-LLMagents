@@ -1,5 +1,5 @@
 /*!
-    Copyright 2017 	АО "НИИЭТ" и ООО "НПФ ВЕКТОР"
+    Copyright 2017 	РђРћ "РќРРР­Рў" Рё РћРћРћ "РќРџР¤ Р’Р•РљРўРћР "
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -14,11 +14,11 @@
    limitations under the License.
 
  \file      V_pid_reg3.h
- \brief     ПИД-регулятор (см. TPidReg3)
- \author    ООО "НПФ Вектор". http://motorcontrol.ru
+ \brief     РџРР”-СЂРµРіСѓР»СЏС‚РѕСЂ (СЃРј. TPidReg3)
+ \author    РћРћРћ "РќРџР¤ Р’РµРєС‚РѕСЂ". http://motorcontrol.ru
  \version   v 2.0 25/03/2016
 
-\defgroup  V_pid_reg3 ПИД-регулятор
+\defgroup  V_pid_reg3 РџРР”-СЂРµРіСѓР»СЏС‚РѕСЂ
 
 @{*/
 
@@ -32,15 +32,15 @@ extern "C" {
 #endif
 
   /*! \class TPidReg3
-    \brief Модуль ПИД-регулятора
+    \brief РњРѕРґСѓР»СЊ РџРР”-СЂРµРіСѓР»СЏС‚РѕСЂР°
 
-    Класс \a TPidReg3, основанный на структуре SPidReg3, представляет
-    собой пропорционально - интегрально - дифференциальный регулятор.
-    Все коэффициенты настраиваемые, дифференциальная часть имеет настраиваемый фильтр.
+    РљР»Р°СЃСЃ \a TPidReg3, РѕСЃРЅРѕРІР°РЅРЅС‹Р№ РЅР° СЃС‚СЂСѓРєС‚СѓСЂРµ SPidReg3, РїСЂРµРґСЃС‚Р°РІР»СЏРµС‚
+    СЃРѕР±РѕР№ РїСЂРѕРїРѕСЂС†РёРѕРЅР°Р»СЊРЅРѕ - РёРЅС‚РµРіСЂР°Р»СЊРЅРѕ - РґРёС„С„РµСЂРµРЅС†РёР°Р»СЊРЅС‹Р№ СЂРµРіСѓР»СЏС‚РѕСЂ.
+    Р’СЃРµ РєРѕСЌС„С„РёС†РёРµРЅС‚С‹ РЅР°СЃС‚СЂР°РёРІР°РµРјС‹Рµ, РґРёС„С„РµСЂРµРЅС†РёР°Р»СЊРЅР°СЏ С‡Р°СЃС‚СЊ РёРјРµРµС‚ РЅР°СЃС‚СЂР°РёРІР°РµРјС‹Р№ С„РёР»СЊС‚СЂ.
   
   */
 
-//! см. TPidReg3
+//! СЃРј. TPidReg3
 typedef struct SPidReg3_pos{  long  pid_ref_reg3; //!< Input: Reference input
 				  long  pid_fdb_reg3;//!< Input: Feedback input  
 				  long  e_reg3;//!<Variable: Error
@@ -50,7 +50,7 @@ typedef struct SPidReg3_pos{  long  pid_ref_reg3; //!< Input: Reference input
 				  long  ui_reg3;//!< Variable: Integral output    
 				  long  ud_reg3;//!< Variable: Derivative output    
 				  long  uprsat_reg3;//!< Variable: Pre-saturated output  
-				  long  saterr_reg3Add;//!< Variable: Дополнительная ошибка насыщения от "верхнего уровня"
+				  long  saterr_reg3Add;//!< Variable: Р”РѕРїРѕР»РЅРёС‚РµР»СЊРЅР°СЏ РѕС€РёР±РєР° РЅР°СЃС‹С‰РµРЅРёСЏ РѕС‚ "РІРµСЂС…РЅРµРіРѕ СѓСЂРѕРІРЅСЏ"
 				  long  pid_out_max;//!< Parameter: Maximum output    
 				  long  pid_out_min;//!< Parameter: Minimum output    
 				  long  pid_out_reg3;//!< Output: PID output    */
@@ -60,18 +60,18 @@ typedef struct SPidReg3_pos{  long  pid_ref_reg3; //!< Input: Reference input
 				  long  Kd_reg3;//!< Parameter: Derivative gain   
 				  long  up1_reg3;//!< History: Previous proportional output
 				  long  pid_out_test;//!< Output: PID output for test   
-				  long  DeadZone;//!< Мертвая зона
-				  long  Kf_d;//!<Фильтр дифференциальной части
-				  long  e_reg3_filterOut;//!<Выход фильтра дифференциальной части
-				  long  DiffDelim;//!<Делитель для тактирования расчета производной
-				  long  DiffCounter;//!<Счетчик для делителя
-				  int   KdFilterInitFlag;//!<Флаг первого запуска для инициализации фильтра дифф. части
+				  long  DeadZone;//!< РњРµСЂС‚РІР°СЏ Р·РѕРЅР°
+				  long  Kf_d;//!<Р¤РёР»СЊС‚СЂ РґРёС„С„РµСЂРµРЅС†РёР°Р»СЊРЅРѕР№ С‡Р°СЃС‚Рё
+				  long  e_reg3_filterOut;//!<Р’С‹С…РѕРґ С„РёР»СЊС‚СЂР° РґРёС„С„РµСЂРµРЅС†РёР°Р»СЊРЅРѕР№ С‡Р°СЃС‚Рё
+				  long  DiffDelim;//!<Р”РµР»РёС‚РµР»СЊ РґР»СЏ С‚Р°РєС‚РёСЂРѕРІР°РЅРёСЏ СЂР°СЃС‡РµС‚Р° РїСЂРѕРёР·РІРѕРґРЅРѕР№
+				  long  DiffCounter;//!<РЎС‡РµС‚С‡РёРє РґР»СЏ РґРµР»РёС‚РµР»СЏ
+				  int   KdFilterInitFlag;//!<Р¤Р»Р°Рі РїРµСЂРІРѕРіРѕ Р·Р°РїСѓСЃРєР° РґР»СЏ РёРЅРёС†РёР°Р»РёР·Р°С†РёРё С„РёР»СЊС‚СЂР° РґРёС„С„. С‡Р°СЃС‚Рё
 		 	 	  void  (*calc)(struct SPidReg3_pos*);//!< Pointer to calculation function
 		 	 	  void  (*reset)(struct SPidReg3_pos*);//!< Pointer to reset function
 				 }TPidReg3_pos;
 
 
-//! Инициализатор по-умолчанию
+//! РРЅРёС†РёР°Р»РёР·Р°С‚РѕСЂ РїРѕ-СѓРјРѕР»С‡Р°РЅРёСЋ
 #define PIDREG3_DEFAULTS_POS { \
     .pid_out_max = _IQ(1), \
     .pid_out_min = _IQ(-1), \

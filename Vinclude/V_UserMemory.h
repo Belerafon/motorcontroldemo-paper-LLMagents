@@ -1,5 +1,5 @@
 /*!
-    Copyright 2017 	АО "НИИЭТ" и ООО "НПФ ВЕКТОР"
+    Copyright 2017 	РђРћ "РќРРР­Рў" Рё РћРћРћ "РќРџР¤ Р’Р•РљРўРћР "
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -14,11 +14,11 @@
    limitations under the License.
 
  \file      V_UserMemory.h
- \brief     Работа с энергонезависимой памятью 1921BK01 (см. TUserMemory)
- \author    ООО "НПФ Вектор". http://motorcontrol.ru
+ \brief     Р Р°Р±РѕС‚Р° СЃ СЌРЅРµСЂРіРѕРЅРµР·Р°РІРёСЃРёРјРѕР№ РїР°РјСЏС‚СЊСЋ 1921BK01 (СЃРј. TUserMemory)
+ \author    РћРћРћ "РќРџР¤ Р’РµРєС‚РѕСЂ". http://motorcontrol.ru
  \version   v 2.0 25/03/2016
 
- \defgroup  V_UserMemory Работа с энергонезависимой памятью (см. TUserMemory)
+ \defgroup  V_UserMemory Р Р°Р±РѕС‚Р° СЃ СЌРЅРµСЂРіРѕРЅРµР·Р°РІРёСЃРёРјРѕР№ РїР°РјСЏС‚СЊСЋ (СЃРј. TUserMemory)
  @{
 */
 
@@ -35,15 +35,15 @@ extern "C" {
 
 
 /*! \class TUserMemory
-      \brief Работа с пользовательской энергонезависимой памятью МС01
+      \brief Р Р°Р±РѕС‚Р° СЃ РїРѕР»СЊР·РѕРІР°С‚РµР»СЊСЃРєРѕР№ СЌРЅРµСЂРіРѕРЅРµР·Р°РІРёСЃРёРјРѕР№ РїР°РјСЏС‚СЊСЋ РњРЎ01
 
-      Класс \a TUserMemory, основанный на структуре TUserMemory, представляет собой драйвер для работы с
-       flash памятью.\n
-        пример использования:\n
-        для инициализации\n
+      РљР»Р°СЃСЃ \a TUserMemory, РѕСЃРЅРѕРІР°РЅРЅС‹Р№ РЅР° СЃС‚СЂСѓРєС‚СѓСЂРµ TUserMemory, РїСЂРµРґСЃС‚Р°РІР»СЏРµС‚ СЃРѕР±РѕР№ РґСЂР°Р№РІРµСЂ РґР»СЏ СЂР°Р±РѕС‚С‹ СЃ
+       flash РїР°РјСЏС‚СЊСЋ.\n
+        РїСЂРёРјРµСЂ РёСЃРїРѕР»СЊР·РѕРІР°РЅРёСЏ:\n
+        РґР»СЏ РёРЅРёС†РёР°Р»РёР·Р°С†РёРё\n
         spimem.init.(&spimem);\n
 
-        для записи\n
+        РґР»СЏ Р·Р°РїРёСЃРё\n
         UserMem.spiaddr=0;\n
         UserMem.startaddr=buff;\n
         UserMem.data_length=1000;\n
@@ -51,7 +51,7 @@ extern "C" {
 
        */
 
-//! см. TUserMemory
+//! СЃРј. TUserMemory
 #define USERMEMORY_USERFLASH_KEY 0xA4420000
 #define USERMEMORY_MAX_WAITCLOCKS 2000
 #define USERMEMORY_WRITE_HARDFAULT 0x1
@@ -71,17 +71,17 @@ extern "C" {
 
 
 
-struct SUserMemory {Uint16 MemStartAddr;//!Адрес на flash
-				Uint8 *MCUStartAddr8; //!адрес на массив с данными как байтовый указатель
-				Uint16 *MCUStartAddr; //!адрес на массив с данными
-				Uint16 data_length;//!длина данных
-				int16 receivedCode;//!Статус операции
-				Uint16 waitClocks;//!Счетчик для ожидания таймаута операции
-				Uint16 PageInCache;//!Номер текущей закешированной страницы
-				Uint16 autoFlushCounter;//!Счетчик для сохранения кеша на флеш по таймауту
-				Uint8 PageRAM_and_FLASH_IdenticalFlag;//!Флаг о том, что данные в кеше и на флеше идентичны
-				Uint8 NeedFlushRequest;//флаг запроса на запись данных из кеша на флеш
-				Uint8  cacheArr[USERMEMORY_PAGE_SIZE];//кеш данных - одна страница памяти
+struct SUserMemory {Uint16 MemStartAddr;//!РђРґСЂРµСЃ РЅР° flash
+				Uint8 *MCUStartAddr8; //!Р°РґСЂРµСЃ РЅР° РјР°СЃСЃРёРІ СЃ РґР°РЅРЅС‹РјРё РєР°Рє Р±Р°Р№С‚РѕРІС‹Р№ СѓРєР°Р·Р°С‚РµР»СЊ
+				Uint16 *MCUStartAddr; //!Р°РґСЂРµСЃ РЅР° РјР°СЃСЃРёРІ СЃ РґР°РЅРЅС‹РјРё
+				Uint16 data_length;//!РґР»РёРЅР° РґР°РЅРЅС‹С…
+				int16 receivedCode;//!РЎС‚Р°С‚СѓСЃ РѕРїРµСЂР°С†РёРё
+				Uint16 waitClocks;//!РЎС‡РµС‚С‡РёРє РґР»СЏ РѕР¶РёРґР°РЅРёСЏ С‚Р°Р№РјР°СѓС‚Р° РѕРїРµСЂР°С†РёРё
+				Uint16 PageInCache;//!РќРѕРјРµСЂ С‚РµРєСѓС‰РµР№ Р·Р°РєРµС€РёСЂРѕРІР°РЅРЅРѕР№ СЃС‚СЂР°РЅРёС†С‹
+				Uint16 autoFlushCounter;//!РЎС‡РµС‚С‡РёРє РґР»СЏ СЃРѕС…СЂР°РЅРµРЅРёСЏ РєРµС€Р° РЅР° С„Р»РµС€ РїРѕ С‚Р°Р№РјР°СѓС‚Сѓ
+				Uint8 PageRAM_and_FLASH_IdenticalFlag;//!Р¤Р»Р°Рі Рѕ С‚РѕРј, С‡С‚Рѕ РґР°РЅРЅС‹Рµ РІ РєРµС€Рµ Рё РЅР° С„Р»РµС€Рµ РёРґРµРЅС‚РёС‡РЅС‹
+				Uint8 NeedFlushRequest;//С„Р»Р°Рі Р·Р°РїСЂРѕСЃР° РЅР° Р·Р°РїРёСЃСЊ РґР°РЅРЅС‹С… РёР· РєРµС€Р° РЅР° С„Р»РµС€
+				Uint8  cacheArr[USERMEMORY_PAGE_SIZE];//РєРµС€ РґР°РЅРЅС‹С… - РѕРґРЅР° СЃС‚СЂР°РЅРёС†Р° РїР°РјСЏС‚Рё
                 void (*init)(struct SUserMemory*);
                 void (*write)(struct SUserMemory*);
                 void (*read)(struct SUserMemory*);
@@ -93,7 +93,7 @@ struct SUserMemory {Uint16 MemStartAddr;//!Адрес на flash
 
 typedef struct SUserMemory TUserMemory;
 
-//!Инициализатор по умолчанию
+//!РРЅРёС†РёР°Р»РёР·Р°С‚РѕСЂ РїРѕ СѓРјРѕР»С‡Р°РЅРёСЋ
 #define USERMEMORY_DEFAULTS { \
     .cacheArr = {0}, \
     .init = USERMEMORY_Init, \

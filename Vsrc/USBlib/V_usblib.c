@@ -1,5 +1,5 @@
 /*!
-    Copyright 2017 	АО "НИИЭТ" и ООО "НПФ ВЕКТОР"
+    Copyright 2017 	РђРћ "РќРРР­Рў" Рё РћРћРћ "РќРџР¤ Р’Р•РљРўРћР "
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -14,12 +14,12 @@
    limitations under the License.
 
  \file      V_usblib.c
- \brief     Набор функций для инициализации драйвера USB. Основан на примере
- 			USB VCP" от НИИЭТ:
+ \brief     РќР°Р±РѕСЂ С„СѓРЅРєС†РёР№ РґР»СЏ РёРЅРёС†РёР°Р»РёР·Р°С†РёРё РґСЂР°Р№РІРµСЂР° USB. РћСЃРЅРѕРІР°РЅ РЅР° РїСЂРёРјРµСЂРµ
+ 			USB VCP" РѕС‚ РќРРР­Рў:
  			https://bitbucket.org/niietcm4/
  			---> / chip / K1921VK01T / GCC / USB / CDC_VCP /
 
- \author    ООО "НПФ Вектор". http://motorcontrol.ru
+ \author    РћРћРћ "РќРџР¤ Р’РµРєС‚РѕСЂ". http://motorcontrol.ru
  \version   v 1.0 08/08/2017
 
  \addtogroup V_usblib
@@ -84,13 +84,13 @@ void InitPLL (unsigned int PLL_OD, unsigned int PLL_NR, unsigned int PLL_NF)
 }
 
 
-/* Функция вызывается по опустошению передающего буфера */
+/* Р¤СѓРЅРєС†РёСЏ РІС‹Р·С‹РІР°РµС‚СЃСЏ РїРѕ РѕРїСѓСЃС‚РѕС€РµРЅРёСЋ РїРµСЂРµРґР°СЋС‰РµРіРѕ Р±СѓС„РµСЂР° */
 void VCP_TxHandler(void)
 {
 
 }
 
-/* Функция вызывается при появлении данных в приемном буфере */
+/* Р¤СѓРЅРєС†РёСЏ РІС‹Р·С‹РІР°РµС‚СЃСЏ РїСЂРё РїРѕСЏРІР»РµРЅРёРё РґР°РЅРЅС‹С… РІ РїСЂРёРµРјРЅРѕРј Р±СѓС„РµСЂРµ */
 void VCP_RxHandler(void)
 {
 

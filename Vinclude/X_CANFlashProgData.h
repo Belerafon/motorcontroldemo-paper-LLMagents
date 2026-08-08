@@ -1,5 +1,5 @@
 /*!
-    Copyright 2017 	АО "НИИЭТ" и ООО "НПФ ВЕКТОР"
+    Copyright 2017 	РђРћ "РќРРР­Рў" Рё РћРћРћ "РќРџР¤ Р’Р•РљРўРћР "
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -14,8 +14,8 @@
    limitations under the License.
 
  \file      X_CANFlashProgData.h
- \brief     Бинарный файл прошивальщика - грузится в ОЗУ и ему передается управление, далее по CANopen можно обновить программу по flash.
- \author	Алямкин Д.
+ \brief     Р‘РёРЅР°СЂРЅС‹Р№ С„Р°Р№Р» РїСЂРѕС€РёРІР°Р»СЊС‰РёРєР° - РіСЂСѓР·РёС‚СЃСЏ РІ РћР—РЈ Рё РµРјСѓ РїРµСЂРµРґР°РµС‚СЃСЏ СѓРїСЂР°РІР»РµРЅРёРµ, РґР°Р»РµРµ РїРѕ CANopen РјРѕР¶РЅРѕ РѕР±РЅРѕРІРёС‚СЊ РїСЂРѕРіСЂР°РјРјСѓ РїРѕ flash.
+ \author	РђР»СЏРјРєРёРЅ Р”.
  \version   v 1.0 30/05/2017
 
  \defgroup X_CANFlashProgData */
@@ -30,17 +30,17 @@
 extern "C"
 {
 #endif
-//адрес структуры настроек
+//Р°РґСЂРµСЃ СЃС‚СЂСѓРєС‚СѓСЂС‹ РЅР°СЃС‚СЂРѕРµРє
 extern Uint32 const FPSettingsAddr;
-//адрес начала программы прошивальщика
+//Р°РґСЂРµСЃ РЅР°С‡Р°Р»Р° РїСЂРѕРіСЂР°РјРјС‹ РїСЂРѕС€РёРІР°Р»СЊС‰РёРєР°
 extern Uint32 const FPStartAddr;
-//количество адресов в массиве FPAddrs
+//РєРѕР»РёС‡РµСЃС‚РІРѕ Р°РґСЂРµСЃРѕРІ РІ РјР°СЃСЃРёРІРµ FPAddrs
 extern Uint16 const FPNumOfAddrs;
-//адреса начала частей прошивальщика
+//Р°РґСЂРµСЃР° РЅР°С‡Р°Р»Р° С‡Р°СЃС‚РµР№ РїСЂРѕС€РёРІР°Р»СЊС‰РёРєР°
 extern Uint32 const FPAddrs[];
-//длина частей прошивальщика
+//РґР»РёРЅР° С‡Р°СЃС‚РµР№ РїСЂРѕС€РёРІР°Р»СЊС‰РёРєР°
 extern Uint16 const FPPartsLength[];
-//данные прошивальщика
+//РґР°РЅРЅС‹Рµ РїСЂРѕС€РёРІР°Р»СЊС‰РёРєР°
 extern Uint16 const FPData[];
 #ifdef __cplusplus
 }

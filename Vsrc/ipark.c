@@ -1,5 +1,5 @@
 /*!
-    Copyright 2017 	АО "НИИЭТ" и ООО "НПФ ВЕКТОР"
+    Copyright 2017 	РђРћ "РќРРР­Рў" Рё РћРћРћ "РќРџР¤ Р’Р•РљРўРћР "
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -14,8 +14,8 @@
    limitations under the License.
  
  \file    ipark.c
- \brief   Модуль инверсных координатных преобразований координат (см. TIPark)
- \author    ООО "НПФ Вектор". http://motorcontrol.ru
+ \brief   РњРѕРґСѓР»СЊ РёРЅРІРµСЂСЃРЅС‹С… РєРѕРѕСЂРґРёРЅР°С‚РЅС‹С… РїСЂРµРѕР±СЂР°Р·РѕРІР°РЅРёР№ РєРѕРѕСЂРґРёРЅР°С‚ (СЃРј. TIPark)
+ \author    РћРћРћ "РќРџР¤ Р’РµРєС‚РѕСЂ". http://motorcontrol.ru
  \version   v 2.0 25/03/2016
 
  \addtogroup IPark
@@ -25,10 +25,10 @@
 #include "V_IQmath.h"         /* Include header for IQmath library */
 #include "ipark.h"
 
-//! Функция инверсных преобразований координат 
+//! Р¤СѓРЅРєС†РёСЏ РёРЅРІРµСЂСЃРЅС‹С… РїСЂРµРѕР±СЂР°Р·РѕРІР°РЅРёР№ РєРѕРѕСЂРґРёРЅР°С‚ 
 
-//!На входе угол ang, вектор (de,qe).
-//!На выходе повернутый на заданный угол вектор (ds,qs)
+//!РќР° РІС…РѕРґРµ СѓРіРѕР» ang, РІРµРєС‚РѕСЂ (de,qe).
+//!РќР° РІС‹С…РѕРґРµ РїРѕРІРµСЂРЅСѓС‚С‹Р№ РЅР° Р·Р°РґР°РЅРЅС‹Р№ СѓРіРѕР» РІРµРєС‚РѕСЂ (ds,qs)
 //! \memberof TIPark
 void ipark_calc(TIPark *v) {
 

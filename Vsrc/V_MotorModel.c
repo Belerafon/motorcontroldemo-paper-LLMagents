@@ -1,5 +1,5 @@
 /*!
-     Copyright 2017 	АО "НИИЭТ" и ООО "НПФ ВЕКТОР"
+     Copyright 2017 	РђРћ "РќРРР­Рў" Рё РћРћРћ "РќРџР¤ Р’Р•РљРўРћР "
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -13,9 +13,9 @@
    See the License for the specific language governing permissions and
    limitations under the License.
 
- \file      V_MotorModel.с
- \brief     Модуль моделей электродвигателей (см. TMotorModel)
- \author    ООО "НПФ Вектор". http://motorcontrol.ru
+ \file      V_MotorModel.СЃ
+ \brief     РњРѕРґСѓР»СЊ РјРѕРґРµР»РµР№ СЌР»РµРєС‚СЂРѕРґРІРёРіР°С‚РµР»РµР№ (СЃРј. TMotorModel)
+ \author    РћРћРћ "РќРџР¤ Р’РµРєС‚РѕСЂ". http://motorcontrol.ru
  \version   v 2.0 25/03/2017
 
  \addtogroup V_MotorModel
@@ -31,57 +31,57 @@
 #define ADC_MAX_VALUE 4095
 #define ADC_HALF_VALUE 2047
 
-//функция случайного "шума" для АЦП
+//С„СѓРЅРєС†РёСЏ СЃР»СѓС‡Р°Р№РЅРѕРіРѕ "С€СѓРјР°" РґР»СЏ РђР¦Рџ
 int MotorModel_fastrand() {
 	static unsigned long g_seed;
 	g_seed = (214013 * g_seed + 2531011);
 	return ((g_seed >> 16) & 0x3) -2;
 }
 
-//инициализация переменных модели
+//РёРЅРёС†РёР°Р»РёР·Р°С†РёСЏ РїРµСЂРµРјРµРЅРЅС‹С… РјРѕРґРµР»Рё
 void MotorModel_Init(TMotorModel *p) {
 	Uint16 MotorParametersValid=0;
 	int i=0;
 
-	p->hallSensor = 1;		//инициализация датчика Холла при нулевом угле
-	p->motorInternals.dt = p->dt;			//длительность мертвого времени
-	p->motorInternals.tpr = p->tpr;		//период ШИМ
-	p->motorInternals.cmpr0 = p->motorInternals.tpr-p->cmpr0;	//уставки сравнения ШИМ. С инверсией, потому что так настроен модуль ШИМ
+	p->hallSensor = 1;		//РёРЅРёС†РёР°Р»РёР·Р°С†РёСЏ РґР°С‚С‡РёРєР° РҐРѕР»Р»Р° РїСЂРё РЅСѓР»РµРІРѕРј СѓРіР»Рµ
+	p->motorInternals.dt = p->dt;			//РґР»РёС‚РµР»СЊРЅРѕСЃС‚СЊ РјРµСЂС‚РІРѕРіРѕ РІСЂРµРјРµРЅРё
+	p->motorInternals.tpr = p->tpr;		//РїРµСЂРёРѕРґ РЁРРњ
+	p->motorInternals.cmpr0 = p->motorInternals.tpr-p->cmpr0;	//СѓСЃС‚Р°РІРєРё СЃСЂР°РІРЅРµРЅРёСЏ РЁРРњ. РЎ РёРЅРІРµСЂСЃРёРµР№, РїРѕС‚РѕРјСѓ С‡С‚Рѕ С‚Р°Рє РЅР°СЃС‚СЂРѕРµРЅ РјРѕРґСѓР»СЊ РЁРРњ
 	p->motorInternals.cmpr1 = p->motorInternals.tpr-p->cmpr1;
 	p->motorInternals.cmpr2 = p->motorInternals.tpr-p->cmpr2;
 	p->motorInternals.cmpr3 = p->motorInternals.tpr-p->cmpr3;
-	//шаг дискретизации модели (считается в прерывании 10кГц)
+	//С€Р°Рі РґРёСЃРєСЂРµС‚РёР·Р°С†РёРё РјРѕРґРµР»Рё (СЃС‡РёС‚Р°РµС‚СЃСЏ РІ РїСЂРµСЂС‹РІР°РЅРёРё 10РєР“С†)
 	p->motorInternals.t = 1.0 / 10000;
 
 	p->motorInternals.cos30 = cos(30.0/360*MOTOR_MODEL_PI*2);
-	p->fault = 0;				//код ошибки модели
+	p->fault = 0;				//РєРѕРґ РѕС€РёР±РєРё РјРѕРґРµР»Рё
 	p->motorInternals.udSenseK = ADC_HALF_VALUE/540.0;
-	p->motorInternals.type=p->MotorType&0x7;//передаем тип двигателя вниз в структуру параметров двигателя
+	p->motorInternals.type=p->MotorType&0x7;//РїРµСЂРµРґР°РµРј С‚РёРї РґРІРёРіР°С‚РµР»СЏ РІРЅРёР· РІ СЃС‚СЂСѓРєС‚СѓСЂСѓ РїР°СЂР°РјРµС‚СЂРѕРІ РґРІРёРіР°С‚РµР»СЏ
 
-	// Поиск макcимального номера набора параметров двигателя из массива
-	// Нужно для защиты от введения номера несуществующего элемента массива
-	// НАЧАЛО //
+	// РџРѕРёСЃРє РјР°РєcРёРјР°Р»СЊРЅРѕРіРѕ РЅРѕРјРµСЂР° РЅР°Р±РѕСЂР° РїР°СЂР°РјРµС‚СЂРѕРІ РґРІРёРіР°С‚РµР»СЏ РёР· РјР°СЃСЃРёРІР°
+	// РќСѓР¶РЅРѕ РґР»СЏ Р·Р°С‰РёС‚С‹ РѕС‚ РІРІРµРґРµРЅРёСЏ РЅРѕРјРµСЂР° РЅРµСЃСѓС‰РµСЃС‚РІСѓСЋС‰РµРіРѕ СЌР»РµРјРµРЅС‚Р° РјР°СЃСЃРёРІР°
+	// РќРђР§РђР›Рћ //
 	if (p->motorInternals.type==MODEL_INDUCTION_MOTOR){
-			// Если r_s, l_s, j одновременно равны нулю, значит наткнулись на нулевой набор параметров.
-			// Значит предыдущий набор - последний рабочий в массиве, и номер больше, чем у него выбирать нельзя.
+			// Р•СЃР»Рё r_s, l_s, j РѕРґРЅРѕРІСЂРµРјРµРЅРЅРѕ СЂР°РІРЅС‹ РЅСѓР»СЋ, Р·РЅР°С‡РёС‚ РЅР°С‚РєРЅСѓР»РёСЃСЊ РЅР° РЅСѓР»РµРІРѕР№ РЅР°Р±РѕСЂ РїР°СЂР°РјРµС‚СЂРѕРІ.
+			// Р—РЅР°С‡РёС‚ РїСЂРµРґС‹РґСѓС‰РёР№ РЅР°Р±РѕСЂ - РїРѕСЃР»РµРґРЅРёР№ СЂР°Р±РѕС‡РёР№ РІ РјР°СЃСЃРёРІРµ, Рё РЅРѕРјРµСЂ Р±РѕР»СЊС€Рµ, С‡РµРј Сѓ РЅРµРіРѕ РІС‹Р±РёСЂР°С‚СЊ РЅРµР»СЊР·СЏ.
 			while ((IMDATA[i].r_s != 0) && (IMDATA[i].l_s != 0) && (IMDATA[i].j != 0) && (i < 50)) i++;}
 	else if (p->motorInternals.type==MODEL_SYNC_MOTOR){
-			// Если l_sd, l_sq, j одновременно равны нулю, значит наткнулись на нулевой набор параметров.
-			// Значит предыдущий набор - последний рабочий в массиве, и номер больше, чем у него выбирать нельзя.
+			// Р•СЃР»Рё l_sd, l_sq, j РѕРґРЅРѕРІСЂРµРјРµРЅРЅРѕ СЂР°РІРЅС‹ РЅСѓР»СЋ, Р·РЅР°С‡РёС‚ РЅР°С‚РєРЅСѓР»РёСЃСЊ РЅР° РЅСѓР»РµРІРѕР№ РЅР°Р±РѕСЂ РїР°СЂР°РјРµС‚СЂРѕРІ.
+			// Р—РЅР°С‡РёС‚ РїСЂРµРґС‹РґСѓС‰РёР№ РЅР°Р±РѕСЂ - РїРѕСЃР»РµРґРЅРёР№ СЂР°Р±РѕС‡РёР№ РІ РјР°СЃСЃРёРІРµ, Рё РЅРѕРјРµСЂ Р±РѕР»СЊС€Рµ, С‡РµРј Сѓ РЅРµРіРѕ РІС‹Р±РёСЂР°С‚СЊ РЅРµР»СЊР·СЏ.
 			while ((SMDATA[i].l_sd != 0) && (SMDATA[i].l_sq != 0) && (SMDATA[i].j != 0) && (i < 50)) i++;}
 	else if (p->motorInternals.type==MODEL_DC_MOTOR){
-			// Если r_a, l_a, j одновременно равны нулю, значит наткнулись на нулевой набор параметров.
-			// Значит предыдущий набор - последний рабочий в массиве, и номер больше, чем у него выбирать нельзя.
+			// Р•СЃР»Рё r_a, l_a, j РѕРґРЅРѕРІСЂРµРјРµРЅРЅРѕ СЂР°РІРЅС‹ РЅСѓР»СЋ, Р·РЅР°С‡РёС‚ РЅР°С‚РєРЅСѓР»РёСЃСЊ РЅР° РЅСѓР»РµРІРѕР№ РЅР°Р±РѕСЂ РїР°СЂР°РјРµС‚СЂРѕРІ.
+			// Р—РЅР°С‡РёС‚ РїСЂРµРґС‹РґСѓС‰РёР№ РЅР°Р±РѕСЂ - РїРѕСЃР»РµРґРЅРёР№ СЂР°Р±РѕС‡РёР№ РІ РјР°СЃСЃРёРІРµ, Рё РЅРѕРјРµСЂ Р±РѕР»СЊС€Рµ, С‡РµРј Сѓ РЅРµРіРѕ РІС‹Р±РёСЂР°С‚СЊ РЅРµР»СЊР·СЏ.
 			while ((DCMDATA[i].r_a != 0) && (DCMDATA[i].l_a != 0) && (DCMDATA[i].j != 0) && (i < 50)) i++;}
 	else if (p->motorInternals.type==MODEL_SRD_MOTOR){
-			// Если r_s, pp, j одновременно равны нулю, значит наткнулись на нулевой набор параметров.
-			// Значит предыдущий набор - последний рабочий в массиве, и номер больше, чем у него выбирать нельзя.
+			// Р•СЃР»Рё r_s, pp, j РѕРґРЅРѕРІСЂРµРјРµРЅРЅРѕ СЂР°РІРЅС‹ РЅСѓР»СЋ, Р·РЅР°С‡РёС‚ РЅР°С‚РєРЅСѓР»РёСЃСЊ РЅР° РЅСѓР»РµРІРѕР№ РЅР°Р±РѕСЂ РїР°СЂР°РјРµС‚СЂРѕРІ.
+			// Р—РЅР°С‡РёС‚ РїСЂРµРґС‹РґСѓС‰РёР№ РЅР°Р±РѕСЂ - РїРѕСЃР»РµРґРЅРёР№ СЂР°Р±РѕС‡РёР№ РІ РјР°СЃСЃРёРІРµ, Рё РЅРѕРјРµСЂ Р±РѕР»СЊС€Рµ, С‡РµРј Сѓ РЅРµРіРѕ РІС‹Р±РёСЂР°С‚СЊ РЅРµР»СЊР·СЏ.
 			while ((SRMDATA[i].r_s != 0) && (SRMDATA[i].pp != 0) && (SRMDATA[i].j != 0) && (i < 50)) i++;}
 	p->MotorParametersNumMax = i;
-	// КОНЕЦ //
+	// РљРћРќР•Р¦ //
 
-	// проверка валидности введенного номера набора параметров
-	// НАЧАЛО //
+	// РїСЂРѕРІРµСЂРєР° РІР°Р»РёРґРЅРѕСЃС‚Рё РІРІРµРґРµРЅРЅРѕРіРѕ РЅРѕРјРµСЂР° РЅР°Р±РѕСЂР° РїР°СЂР°РјРµС‚СЂРѕРІ
+	// РќРђР§РђР›Рћ //
 	if ((p->MotorParametersNum > 0) && (p->MotorParametersNum <= p->MotorParametersNumMax)) MotorParametersValid = 1;
 	else
 	{
@@ -90,226 +90,226 @@ void MotorModel_Init(TMotorModel *p) {
 			MotorParametersValid = 1;}
 		else if (p->MotorParametersNum == 0) MotorParametersValid = 0;
 	}
-	// КОНЕЦ //
+	// РљРћРќР•Р¦ //
 
-	// Инициализация параметров двигателей
-	if (p->motorInternals.type==MODEL_INDUCTION_MOTOR){//тип двигателя - асинхронный
+	// РРЅРёС†РёР°Р»РёР·Р°С†РёСЏ РїР°СЂР°РјРµС‚СЂРѕРІ РґРІРёРіР°С‚РµР»РµР№
+	if (p->motorInternals.type==MODEL_INDUCTION_MOTOR){//С‚РёРї РґРІРёРіР°С‚РµР»СЏ - Р°СЃРёРЅС…СЂРѕРЅРЅС‹Р№
 		if (MotorParametersValid){
-			p->motorInternals.ls = IMDATA[p->MotorParametersNum-1].l_s;		//индуктивность статора
-			p->motorInternals.lr = IMDATA[p->MotorParametersNum-1].l_r;		//индуктивность ротора
-			p->motorInternals.lm = IMDATA[p->MotorParametersNum-1].l_m;		//взаимная индуктивность
-			//Внимание: в параметрах ls и lr должна быть полная индуктивность статора и ротора. Иногда в параметрах двигателя приводятся индуктивности рассеяния
-			//статора и ротора, которые меньше, чем l_m. Чтобы получить полную индуктивность статора или ротора, нужно прибавить l_m к l_s или l_r соответственно.
-			//Проверим правильность ввода индуктивностей:
+			p->motorInternals.ls = IMDATA[p->MotorParametersNum-1].l_s;		//РёРЅРґСѓРєС‚РёРІРЅРѕСЃС‚СЊ СЃС‚Р°С‚РѕСЂР°
+			p->motorInternals.lr = IMDATA[p->MotorParametersNum-1].l_r;		//РёРЅРґСѓРєС‚РёРІРЅРѕСЃС‚СЊ СЂРѕС‚РѕСЂР°
+			p->motorInternals.lm = IMDATA[p->MotorParametersNum-1].l_m;		//РІР·Р°РёРјРЅР°СЏ РёРЅРґСѓРєС‚РёРІРЅРѕСЃС‚СЊ
+			//Р’РЅРёРјР°РЅРёРµ: РІ РїР°СЂР°РјРµС‚СЂР°С… ls Рё lr РґРѕР»Р¶РЅР° Р±С‹С‚СЊ РїРѕР»РЅР°СЏ РёРЅРґСѓРєС‚РёРІРЅРѕСЃС‚СЊ СЃС‚Р°С‚РѕСЂР° Рё СЂРѕС‚РѕСЂР°. РРЅРѕРіРґР° РІ РїР°СЂР°РјРµС‚СЂР°С… РґРІРёРіР°С‚РµР»СЏ РїСЂРёРІРѕРґСЏС‚СЃСЏ РёРЅРґСѓРєС‚РёРІРЅРѕСЃС‚Рё СЂР°СЃСЃРµСЏРЅРёСЏ
+			//СЃС‚Р°С‚РѕСЂР° Рё СЂРѕС‚РѕСЂР°, РєРѕС‚РѕСЂС‹Рµ РјРµРЅСЊС€Рµ, С‡РµРј l_m. Р§С‚РѕР±С‹ РїРѕР»СѓС‡РёС‚СЊ РїРѕР»РЅСѓСЋ РёРЅРґСѓРєС‚РёРІРЅРѕСЃС‚СЊ СЃС‚Р°С‚РѕСЂР° РёР»Рё СЂРѕС‚РѕСЂР°, РЅСѓР¶РЅРѕ РїСЂРёР±Р°РІРёС‚СЊ l_m Рє l_s РёР»Рё l_r СЃРѕРѕС‚РІРµС‚СЃС‚РІРµРЅРЅРѕ.
+			//РџСЂРѕРІРµСЂРёРј РїСЂР°РІРёР»СЊРЅРѕСЃС‚СЊ РІРІРѕРґР° РёРЅРґСѓРєС‚РёРІРЅРѕСЃС‚РµР№:
 			if ((p->motorInternals.ls < p->motorInternals.lm) || (p->motorInternals.lr < p->motorInternals.lm))
 				p->fault = MODEL_WRONG_PARAMETERS;
-			p->motorInternals.rs = IMDATA[p->MotorParametersNum-1].r_s;				//сопротивление статора
-			p->motorInternals.rr = IMDATA[p->MotorParametersNum-1].r_r;				//сопротивление ротора
-			p->motorInternals.pp = IMDATA[p->MotorParametersNum-1].pp;				//число пар полюсов
-			p->motorInternals.j = IMDATA[p->MotorParametersNum-1].j;				//момент инерции
-			p->motorInternals.QEPResolution = IMDATA[p->MotorParametersNum-1].qep;	//разрешение энкодера
-			p->motorInternals.RatedPower = IMDATA[p->MotorParametersNum-1].RatedPower; //номинальная мощность (справочная величина, не используется в расчетах)
-			p->motorInternals.RatedSpeed = IMDATA[p->MotorParametersNum-1].RatedSpeed; //номинальная скорость (справочная величина, не используется в расчетах)
-			p->motorInternals.RatedCurrent = IMDATA[p->MotorParametersNum-1].RatedCurrent; //номинальный действующий ток
-			p->motorInternals.MechLoss = p->motorInternals.j * 10; 		//механические потери
+			p->motorInternals.rs = IMDATA[p->MotorParametersNum-1].r_s;				//СЃРѕРїСЂРѕС‚РёРІР»РµРЅРёРµ СЃС‚Р°С‚РѕСЂР°
+			p->motorInternals.rr = IMDATA[p->MotorParametersNum-1].r_r;				//СЃРѕРїСЂРѕС‚РёРІР»РµРЅРёРµ СЂРѕС‚РѕСЂР°
+			p->motorInternals.pp = IMDATA[p->MotorParametersNum-1].pp;				//С‡РёСЃР»Рѕ РїР°СЂ РїРѕР»СЋСЃРѕРІ
+			p->motorInternals.j = IMDATA[p->MotorParametersNum-1].j;				//РјРѕРјРµРЅС‚ РёРЅРµСЂС†РёРё
+			p->motorInternals.QEPResolution = IMDATA[p->MotorParametersNum-1].qep;	//СЂР°Р·СЂРµС€РµРЅРёРµ СЌРЅРєРѕРґРµСЂР°
+			p->motorInternals.RatedPower = IMDATA[p->MotorParametersNum-1].RatedPower; //РЅРѕРјРёРЅР°Р»СЊРЅР°СЏ РјРѕС‰РЅРѕСЃС‚СЊ (СЃРїСЂР°РІРѕС‡РЅР°СЏ РІРµР»РёС‡РёРЅР°, РЅРµ РёСЃРїРѕР»СЊР·СѓРµС‚СЃСЏ РІ СЂР°СЃС‡РµС‚Р°С…)
+			p->motorInternals.RatedSpeed = IMDATA[p->MotorParametersNum-1].RatedSpeed; //РЅРѕРјРёРЅР°Р»СЊРЅР°СЏ СЃРєРѕСЂРѕСЃС‚СЊ (СЃРїСЂР°РІРѕС‡РЅР°СЏ РІРµР»РёС‡РёРЅР°, РЅРµ РёСЃРїРѕР»СЊР·СѓРµС‚СЃСЏ РІ СЂР°СЃС‡РµС‚Р°С…)
+			p->motorInternals.RatedCurrent = IMDATA[p->MotorParametersNum-1].RatedCurrent; //РЅРѕРјРёРЅР°Р»СЊРЅС‹Р№ РґРµР№СЃС‚РІСѓСЋС‰РёР№ С‚РѕРє
+			p->motorInternals.MechLoss = p->motorInternals.j * 10; 		//РјРµС…Р°РЅРёС‡РµСЃРєРёРµ РїРѕС‚РµСЂРё
 		}
 
-		// Инициализация коэффициентов и расчетных величин, завязанных на параметры двигателя
+		// РРЅРёС†РёР°Р»РёР·Р°С†РёСЏ РєРѕСЌС„С„РёС†РёРµРЅС‚РѕРІ Рё СЂР°СЃС‡РµС‚РЅС‹С… РІРµР»РёС‡РёРЅ, Р·Р°РІСЏР·Р°РЅРЅС‹С… РЅР° РїР°СЂР°РјРµС‚СЂС‹ РґРІРёРіР°С‚РµР»СЏ
 
-		p->motorInternals.speedK = 60/(4*MOTOR_MODEL_PI); //коэффициент датчика скорости
+		p->motorInternals.speedK = 60/(4*MOTOR_MODEL_PI); //РєРѕСЌС„С„РёС†РёРµРЅС‚ РґР°С‚С‡РёРєР° СЃРєРѕСЂРѕСЃС‚Рё
 
-		p->motorInternals.iADCk = p->motorInternals.RatedCurrent*1.414*3; 			// Расчетный коэффициент АЦП равен троекратной амплитуде номинального тока
-		p->motorInternals.iSenseK = (ADC_HALF_VALUE*1.0)/p->motorInternals.iADCk;	//коэффициент датчика тока для преобразования тока в амперах в код АЦП
+		p->motorInternals.iADCk = p->motorInternals.RatedCurrent*1.414*3; 			// Р Р°СЃС‡РµС‚РЅС‹Р№ РєРѕСЌС„С„РёС†РёРµРЅС‚ РђР¦Рџ СЂР°РІРµРЅ С‚СЂРѕРµРєСЂР°С‚РЅРѕР№ Р°РјРїР»РёС‚СѓРґРµ РЅРѕРјРёРЅР°Р»СЊРЅРѕРіРѕ С‚РѕРєР°
+		p->motorInternals.iSenseK = (ADC_HALF_VALUE*1.0)/p->motorInternals.iADCk;	//РєРѕСЌС„С„РёС†РёРµРЅС‚ РґР°С‚С‡РёРєР° С‚РѕРєР° РґР»СЏ РїСЂРµРѕР±СЂР°Р·РѕРІР°РЅРёСЏ С‚РѕРєР° РІ Р°РјРїРµСЂР°С… РІ РєРѕРґ РђР¦Рџ
 
-		p->motorInternals.ks = -(p->motorInternals.lr/1000.0) / (p->motorInternals.lm/1000.0 * p->motorInternals.lm/1000.0 - p->motorInternals.ls/1000.0 * p->motorInternals.lr/1000.0);	//коэффициенты обратной матрицы индуктивностей
+		p->motorInternals.ks = -(p->motorInternals.lr/1000.0) / (p->motorInternals.lm/1000.0 * p->motorInternals.lm/1000.0 - p->motorInternals.ls/1000.0 * p->motorInternals.lr/1000.0);	//РєРѕСЌС„С„РёС†РёРµРЅС‚С‹ РѕР±СЂР°С‚РЅРѕР№ РјР°С‚СЂРёС†С‹ РёРЅРґСѓРєС‚РёРІРЅРѕСЃС‚РµР№
 		p->motorInternals.kr = -(p->motorInternals.ls/1000.0) / (p->motorInternals.lm/1000.0 * p->motorInternals.lm/1000.0 - p->motorInternals.ls/1000.0 * p->motorInternals.lr/1000.0);
 		p->motorInternals.km = (p->motorInternals.lm/1000.0) / (p->motorInternals.lm/1000.0 * p->motorInternals.lm/1000.0 - p->motorInternals.ls/1000.0 * p->motorInternals.lr/1000.0);
 
-		p->motorInternals.psa = 0;				//потокосцепления статора в осях альфа,бета
+		p->motorInternals.psa = 0;				//РїРѕС‚РѕРєРѕСЃС†РµРїР»РµРЅРёСЏ СЃС‚Р°С‚РѕСЂР° РІ РѕСЃСЏС… Р°Р»СЊС„Р°,Р±РµС‚Р°
 		p->motorInternals.psb = 0;
 	}
 
-	if (p->motorInternals.type==MODEL_SYNC_MOTOR){//тип двигателя - синхронный
+	if (p->motorInternals.type==MODEL_SYNC_MOTOR){//С‚РёРї РґРІРёРіР°С‚РµР»СЏ - СЃРёРЅС…СЂРѕРЅРЅС‹Р№
 		if (MotorParametersValid){
-			p->motorInternals.r_f = SMDATA[p->MotorParametersNum-1].r_f;			//сопротивление ОВ
-			p->motorInternals.l_f = SMDATA[p->MotorParametersNum-1].l_f;			//индуктивность ОВ
-			p->motorInternals.l_m = SMDATA[p->MotorParametersNum-1].l_m;			//коэффициент магнитного потока (взаимная индуктивность)
-			p->motorInternals.rs = SMDATA[p->MotorParametersNum-1].r_s;				//сопротивление статора
-			p->motorInternals.lsd = SMDATA[p->MotorParametersNum-1].l_sd;			//индуктивность статора
-			p->motorInternals.lsq = SMDATA[p->MotorParametersNum-1].l_sq;			//индуктивность статора
-			p->motorInternals.pp = SMDATA[p->MotorParametersNum-1].pp;				//число пар полюсов
-			p->motorInternals.j = SMDATA[p->MotorParametersNum-1].j;				//момент инерции
-			p->motorInternals.QEPResolution = SMDATA[p->MotorParametersNum-1].qep;	//разрешение энкодера
-			p->motorInternals.m = SMDATA[p->MotorParametersNum-1].psi_pm;			//потокосцепление ротора равно потоку постоянных магнитов
-			p->motorInternals.RatedPower = SMDATA[p->MotorParametersNum-1].RatedPower; //номинальная мощность (справочная величина, не используется в расчетах)
-			p->motorInternals.RatedSpeed = SMDATA[p->MotorParametersNum-1].RatedSpeed; //номинальная скорость (справочная величина, не используется в расчетах)
-			p->motorInternals.RatedCurrent = SMDATA[p->MotorParametersNum-1].RatedCurrent; //номинальный действующий ток
-			p->motorInternals.RatedFluxCurrent = SMDATA[p->MotorParametersNum-1].RatedFluxCurrent; //номинальный ток ОВ
-			p->motorInternals.MechLoss = p->motorInternals.j * 10; 		//механические потери
+			p->motorInternals.r_f = SMDATA[p->MotorParametersNum-1].r_f;			//СЃРѕРїСЂРѕС‚РёРІР»РµРЅРёРµ РћР’
+			p->motorInternals.l_f = SMDATA[p->MotorParametersNum-1].l_f;			//РёРЅРґСѓРєС‚РёРІРЅРѕСЃС‚СЊ РћР’
+			p->motorInternals.l_m = SMDATA[p->MotorParametersNum-1].l_m;			//РєРѕСЌС„С„РёС†РёРµРЅС‚ РјР°РіРЅРёС‚РЅРѕРіРѕ РїРѕС‚РѕРєР° (РІР·Р°РёРјРЅР°СЏ РёРЅРґСѓРєС‚РёРІРЅРѕСЃС‚СЊ)
+			p->motorInternals.rs = SMDATA[p->MotorParametersNum-1].r_s;				//СЃРѕРїСЂРѕС‚РёРІР»РµРЅРёРµ СЃС‚Р°С‚РѕСЂР°
+			p->motorInternals.lsd = SMDATA[p->MotorParametersNum-1].l_sd;			//РёРЅРґСѓРєС‚РёРІРЅРѕСЃС‚СЊ СЃС‚Р°С‚РѕСЂР°
+			p->motorInternals.lsq = SMDATA[p->MotorParametersNum-1].l_sq;			//РёРЅРґСѓРєС‚РёРІРЅРѕСЃС‚СЊ СЃС‚Р°С‚РѕСЂР°
+			p->motorInternals.pp = SMDATA[p->MotorParametersNum-1].pp;				//С‡РёСЃР»Рѕ РїР°СЂ РїРѕР»СЋСЃРѕРІ
+			p->motorInternals.j = SMDATA[p->MotorParametersNum-1].j;				//РјРѕРјРµРЅС‚ РёРЅРµСЂС†РёРё
+			p->motorInternals.QEPResolution = SMDATA[p->MotorParametersNum-1].qep;	//СЂР°Р·СЂРµС€РµРЅРёРµ СЌРЅРєРѕРґРµСЂР°
+			p->motorInternals.m = SMDATA[p->MotorParametersNum-1].psi_pm;			//РїРѕС‚РѕРєРѕСЃС†РµРїР»РµРЅРёРµ СЂРѕС‚РѕСЂР° СЂР°РІРЅРѕ РїРѕС‚РѕРєСѓ РїРѕСЃС‚РѕСЏРЅРЅС‹С… РјР°РіРЅРёС‚РѕРІ
+			p->motorInternals.RatedPower = SMDATA[p->MotorParametersNum-1].RatedPower; //РЅРѕРјРёРЅР°Р»СЊРЅР°СЏ РјРѕС‰РЅРѕСЃС‚СЊ (СЃРїСЂР°РІРѕС‡РЅР°СЏ РІРµР»РёС‡РёРЅР°, РЅРµ РёСЃРїРѕР»СЊР·СѓРµС‚СЃСЏ РІ СЂР°СЃС‡РµС‚Р°С…)
+			p->motorInternals.RatedSpeed = SMDATA[p->MotorParametersNum-1].RatedSpeed; //РЅРѕРјРёРЅР°Р»СЊРЅР°СЏ СЃРєРѕСЂРѕСЃС‚СЊ (СЃРїСЂР°РІРѕС‡РЅР°СЏ РІРµР»РёС‡РёРЅР°, РЅРµ РёСЃРїРѕР»СЊР·СѓРµС‚СЃСЏ РІ СЂР°СЃС‡РµС‚Р°С…)
+			p->motorInternals.RatedCurrent = SMDATA[p->MotorParametersNum-1].RatedCurrent; //РЅРѕРјРёРЅР°Р»СЊРЅС‹Р№ РґРµР№СЃС‚РІСѓСЋС‰РёР№ С‚РѕРє
+			p->motorInternals.RatedFluxCurrent = SMDATA[p->MotorParametersNum-1].RatedFluxCurrent; //РЅРѕРјРёРЅР°Р»СЊРЅС‹Р№ С‚РѕРє РћР’
+			p->motorInternals.MechLoss = p->motorInternals.j * 10; 		//РјРµС…Р°РЅРёС‡РµСЃРєРёРµ РїРѕС‚РµСЂРё
 		}
-		// Инициализация коэффициентов и расчетных величин, завязанных на параметры двигателя
+		// РРЅРёС†РёР°Р»РёР·Р°С†РёСЏ РєРѕСЌС„С„РёС†РёРµРЅС‚РѕРІ Рё СЂР°СЃС‡РµС‚РЅС‹С… РІРµР»РёС‡РёРЅ, Р·Р°РІСЏР·Р°РЅРЅС‹С… РЅР° РїР°СЂР°РјРµС‚СЂС‹ РґРІРёРіР°С‚РµР»СЏ
 
-		p->motorInternals.speedK = 60/(4*MOTOR_MODEL_PI); //коэффициент датчика скорости
+		p->motorInternals.speedK = 60/(4*MOTOR_MODEL_PI); //РєРѕСЌС„С„РёС†РёРµРЅС‚ РґР°С‚С‡РёРєР° СЃРєРѕСЂРѕСЃС‚Рё
 
-		p->motorInternals.iADCk = p->motorInternals.RatedCurrent*1.414*3; 			// Расчетный коэффициент АЦП равен троекратной амплитуде номинального тока
-		p->motorInternals.iSenseK = (ADC_HALF_VALUE*1.0)/p->motorInternals.iADCk;	//коэффициент датчика тока для преобразования тока в амперах в код АЦП
+		p->motorInternals.iADCk = p->motorInternals.RatedCurrent*1.414*3; 			// Р Р°СЃС‡РµС‚РЅС‹Р№ РєРѕСЌС„С„РёС†РёРµРЅС‚ РђР¦Рџ СЂР°РІРµРЅ С‚СЂРѕРµРєСЂР°С‚РЅРѕР№ Р°РјРїР»РёС‚СѓРґРµ РЅРѕРјРёРЅР°Р»СЊРЅРѕРіРѕ С‚РѕРєР°
+		p->motorInternals.iSenseK = (ADC_HALF_VALUE*1.0)/p->motorInternals.iADCk;	//РєРѕСЌС„С„РёС†РёРµРЅС‚ РґР°С‚С‡РёРєР° С‚РѕРєР° РґР»СЏ РїСЂРµРѕР±СЂР°Р·РѕРІР°РЅРёСЏ С‚РѕРєР° РІ Р°РјРїРµСЂР°С… РІ РєРѕРґ РђР¦Рџ
 
-		p->motorInternals.ifADCk = p->motorInternals.RatedFluxCurrent*3; 			// Расчетный коэффициент АЦП равен троекратному номинальному току ОВ
-		p->motorInternals.ifSenseK = (ADC_HALF_VALUE*1.0)/p->motorInternals.ifADCk;	//коэффициент датчика тока для преобразования тока в амперах в код АЦП
+		p->motorInternals.ifADCk = p->motorInternals.RatedFluxCurrent*3; 			// Р Р°СЃС‡РµС‚РЅС‹Р№ РєРѕСЌС„С„РёС†РёРµРЅС‚ РђР¦Рџ СЂР°РІРµРЅ С‚СЂРѕРµРєСЂР°С‚РЅРѕРјСѓ РЅРѕРјРёРЅР°Р»СЊРЅРѕРјСѓ С‚РѕРєСѓ РћР’
+		p->motorInternals.ifSenseK = (ADC_HALF_VALUE*1.0)/p->motorInternals.ifADCk;	//РєРѕСЌС„С„РёС†РёРµРЅС‚ РґР°С‚С‡РёРєР° С‚РѕРєР° РґР»СЏ РїСЂРµРѕР±СЂР°Р·РѕРІР°РЅРёСЏ С‚РѕРєР° РІ Р°РјРїРµСЂР°С… РІ РєРѕРґ РђР¦Рџ
 
-		p->motorInternals._1_lsd = 1.0/(p->motorInternals.lsd/1000);			//обратная величина
-		p->motorInternals._1_lsq = 1.0/(p->motorInternals.lsq/1000);			//обратная величина
+		p->motorInternals._1_lsd = 1.0/(p->motorInternals.lsd/1000);			//РѕР±СЂР°С‚РЅР°СЏ РІРµР»РёС‡РёРЅР°
+		p->motorInternals._1_lsq = 1.0/(p->motorInternals.lsq/1000);			//РѕР±СЂР°С‚РЅР°СЏ РІРµР»РёС‡РёРЅР°
 
-		if (p->motorInternals.l_f != 0)	//С обмоткой возбуждения
+		if (p->motorInternals.l_f != 0)	//РЎ РѕР±РјРѕС‚РєРѕР№ РІРѕР·Р±СѓР¶РґРµРЅРёСЏ
 		{
-			p->motorInternals._1_l_f = 1.0/(p->motorInternals.l_f/1000); // Обратная величина (переведенная из мГн в Гн)
+			p->motorInternals._1_l_f = 1.0/(p->motorInternals.l_f/1000); // РћР±СЂР°С‚РЅР°СЏ РІРµР»РёС‡РёРЅР° (РїРµСЂРµРІРµРґРµРЅРЅР°СЏ РёР· РјР“РЅ РІ Р“РЅ)
 			p->motorInternals.syncm_pm = 0;
-			p->motorInternals.m = 0;			//потокосцепление ротора равно нулю
+			p->motorInternals.m = 0;			//РїРѕС‚РѕРєРѕСЃС†РµРїР»РµРЅРёРµ СЂРѕС‚РѕСЂР° СЂР°РІРЅРѕ РЅСѓР»СЋ
 		}
-		else							//С постоянными магнитами
+		else							//РЎ РїРѕСЃС‚РѕСЏРЅРЅС‹РјРё РјР°РіРЅРёС‚Р°РјРё
 		{
 			p->motorInternals.syncm_pm = 1;
-			p->motorInternals.ifADCk = 0; // Расчетный коэффициент АЦП тока ОВ
+			p->motorInternals.ifADCk = 0; // Р Р°СЃС‡РµС‚РЅС‹Р№ РєРѕСЌС„С„РёС†РёРµРЅС‚ РђР¦Рџ С‚РѕРєР° РћР’
 		}
 
-		p->motorInternals.psd = p->motorInternals.m;//потокосцепления статора в осях d,q
+		p->motorInternals.psd = p->motorInternals.m;//РїРѕС‚РѕРєРѕСЃС†РµРїР»РµРЅРёСЏ СЃС‚Р°С‚РѕСЂР° РІ РѕСЃСЏС… d,q
 		p->motorInternals.psq = 0;
 		p->motorInternals.i_f = 0;
 	}
 
-	if (p->motorInternals.type==MODEL_DC_MOTOR){//тип двигателя - коллекторный двигатель постоянного тока
+	if (p->motorInternals.type==MODEL_DC_MOTOR){//С‚РёРї РґРІРёРіР°С‚РµР»СЏ - РєРѕР»Р»РµРєС‚РѕСЂРЅС‹Р№ РґРІРёРіР°С‚РµР»СЊ РїРѕСЃС‚РѕСЏРЅРЅРѕРіРѕ С‚РѕРєР°
 		if (MotorParametersValid){
-			p->motorInternals.pp = 2;				//число пар полюсов (параметр не нужен, просто чтобы не мусор)
-			p->motorInternals.r_f = DCMDATA[p->MotorParametersNum-1].r_f;			//сопротивление ОВ
-			p->motorInternals.l_f = DCMDATA[p->MotorParametersNum-1].l_f;			//индуктивность ОВ
-			p->motorInternals.l_m = DCMDATA[p->MotorParametersNum-1].l_m;			//коэффициент магнитного потока (взаимная индуктивность)
-			p->motorInternals.r_a = DCMDATA[p->MotorParametersNum-1].r_a;			//сопротивление якоря
-			p->motorInternals.l_a = DCMDATA[p->MotorParametersNum-1].l_a;			//индуктивность якоря
-			p->motorInternals.RatedFluxCurrent = DCMDATA[p->MotorParametersNum-1].RatedFluxCurrent;			//Номинальный ток ОВ
-			p->motorInternals.RatedCurrent = DCMDATA[p->MotorParametersNum-1].RatedCurrent;			//Номинальный ток якоря
-			p->motorInternals.j = DCMDATA[p->MotorParametersNum-1].j;				//момент инерции
-			p->motorInternals.QEPResolution = DCMDATA[p->MotorParametersNum-1].qep;	//разрешение энкодера
-			p->motorInternals.RatedPower = DCMDATA[p->MotorParametersNum-1].RatedPower; //номинальная мощность (справочная величина, не используется в расчетах)
-			p->motorInternals.RatedSpeed = DCMDATA[p->MotorParametersNum-1].RatedSpeed; //номинальная скорость (справочная величина, не используется в расчетах)
-			p->motorInternals.MechLoss = p->motorInternals.j * 10; 					//механические потери
+			p->motorInternals.pp = 2;				//С‡РёСЃР»Рѕ РїР°СЂ РїРѕР»СЋСЃРѕРІ (РїР°СЂР°РјРµС‚СЂ РЅРµ РЅСѓР¶РµРЅ, РїСЂРѕСЃС‚Рѕ С‡С‚РѕР±С‹ РЅРµ РјСѓСЃРѕСЂ)
+			p->motorInternals.r_f = DCMDATA[p->MotorParametersNum-1].r_f;			//СЃРѕРїСЂРѕС‚РёРІР»РµРЅРёРµ РћР’
+			p->motorInternals.l_f = DCMDATA[p->MotorParametersNum-1].l_f;			//РёРЅРґСѓРєС‚РёРІРЅРѕСЃС‚СЊ РћР’
+			p->motorInternals.l_m = DCMDATA[p->MotorParametersNum-1].l_m;			//РєРѕСЌС„С„РёС†РёРµРЅС‚ РјР°РіРЅРёС‚РЅРѕРіРѕ РїРѕС‚РѕРєР° (РІР·Р°РёРјРЅР°СЏ РёРЅРґСѓРєС‚РёРІРЅРѕСЃС‚СЊ)
+			p->motorInternals.r_a = DCMDATA[p->MotorParametersNum-1].r_a;			//СЃРѕРїСЂРѕС‚РёРІР»РµРЅРёРµ СЏРєРѕСЂСЏ
+			p->motorInternals.l_a = DCMDATA[p->MotorParametersNum-1].l_a;			//РёРЅРґСѓРєС‚РёРІРЅРѕСЃС‚СЊ СЏРєРѕСЂСЏ
+			p->motorInternals.RatedFluxCurrent = DCMDATA[p->MotorParametersNum-1].RatedFluxCurrent;			//РќРѕРјРёРЅР°Р»СЊРЅС‹Р№ С‚РѕРє РћР’
+			p->motorInternals.RatedCurrent = DCMDATA[p->MotorParametersNum-1].RatedCurrent;			//РќРѕРјРёРЅР°Р»СЊРЅС‹Р№ С‚РѕРє СЏРєРѕСЂСЏ
+			p->motorInternals.j = DCMDATA[p->MotorParametersNum-1].j;				//РјРѕРјРµРЅС‚ РёРЅРµСЂС†РёРё
+			p->motorInternals.QEPResolution = DCMDATA[p->MotorParametersNum-1].qep;	//СЂР°Р·СЂРµС€РµРЅРёРµ СЌРЅРєРѕРґРµСЂР°
+			p->motorInternals.RatedPower = DCMDATA[p->MotorParametersNum-1].RatedPower; //РЅРѕРјРёРЅР°Р»СЊРЅР°СЏ РјРѕС‰РЅРѕСЃС‚СЊ (СЃРїСЂР°РІРѕС‡РЅР°СЏ РІРµР»РёС‡РёРЅР°, РЅРµ РёСЃРїРѕР»СЊР·СѓРµС‚СЃСЏ РІ СЂР°СЃС‡РµС‚Р°С…)
+			p->motorInternals.RatedSpeed = DCMDATA[p->MotorParametersNum-1].RatedSpeed; //РЅРѕРјРёРЅР°Р»СЊРЅР°СЏ СЃРєРѕСЂРѕСЃС‚СЊ (СЃРїСЂР°РІРѕС‡РЅР°СЏ РІРµР»РёС‡РёРЅР°, РЅРµ РёСЃРїРѕР»СЊР·СѓРµС‚СЃСЏ РІ СЂР°СЃС‡РµС‚Р°С…)
+			p->motorInternals.MechLoss = p->motorInternals.j * 10; 					//РјРµС…Р°РЅРёС‡РµСЃРєРёРµ РїРѕС‚РµСЂРё
 		}
-		// Инициализация коэффициентов и расчетных величин, завязанных на параметры двигателя
+		// РРЅРёС†РёР°Р»РёР·Р°С†РёСЏ РєРѕСЌС„С„РёС†РёРµРЅС‚РѕРІ Рё СЂР°СЃС‡РµС‚РЅС‹С… РІРµР»РёС‡РёРЅ, Р·Р°РІСЏР·Р°РЅРЅС‹С… РЅР° РїР°СЂР°РјРµС‚СЂС‹ РґРІРёРіР°С‚РµР»СЏ
 
-		p->motorInternals.speedK = 60/(4*MOTOR_MODEL_PI); //коэффициент датчика скорости
-		p->motorInternals.iADCk = (ADC_HALF_VALUE*1.0)/p->motorInternals.iSenseK; // Расчетный коэффициент АЦП тока Оя
+		p->motorInternals.speedK = 60/(4*MOTOR_MODEL_PI); //РєРѕСЌС„С„РёС†РёРµРЅС‚ РґР°С‚С‡РёРєР° СЃРєРѕСЂРѕСЃС‚Рё
+		p->motorInternals.iADCk = (ADC_HALF_VALUE*1.0)/p->motorInternals.iSenseK; // Р Р°СЃС‡РµС‚РЅС‹Р№ РєРѕСЌС„С„РёС†РёРµРЅС‚ РђР¦Рџ С‚РѕРєР° РћСЏ
 
-		p->motorInternals.iADCk = p->motorInternals.RatedCurrent*1.414*3; 			// Расчетный коэффициент АЦП равен троекратной амплитуде номинального тока
-		p->motorInternals.iSenseK = (ADC_HALF_VALUE*1.0)/p->motorInternals.iADCk;	//коэффициент датчика тока для преобразования тока в амперах в код АЦП
+		p->motorInternals.iADCk = p->motorInternals.RatedCurrent*1.414*3; 			// Р Р°СЃС‡РµС‚РЅС‹Р№ РєРѕСЌС„С„РёС†РёРµРЅС‚ РђР¦Рџ СЂР°РІРµРЅ С‚СЂРѕРµРєСЂР°С‚РЅРѕР№ Р°РјРїР»РёС‚СѓРґРµ РЅРѕРјРёРЅР°Р»СЊРЅРѕРіРѕ С‚РѕРєР°
+		p->motorInternals.iSenseK = (ADC_HALF_VALUE*1.0)/p->motorInternals.iADCk;	//РєРѕСЌС„С„РёС†РёРµРЅС‚ РґР°С‚С‡РёРєР° С‚РѕРєР° РґР»СЏ РїСЂРµРѕР±СЂР°Р·РѕРІР°РЅРёСЏ С‚РѕРєР° РІ Р°РјРїРµСЂР°С… РІ РєРѕРґ РђР¦Рџ
 
-		p->motorInternals.ifADCk = p->motorInternals.RatedFluxCurrent*3; 			// Расчетный коэффициент АЦП равен троекратному номинальному току ОВ
-		p->motorInternals.ifSenseK = (ADC_MAX_VALUE*1.0)/p->motorInternals.ifADCk;	//коэффициент датчика тока для преобразования тока в амперах в код АЦП
+		p->motorInternals.ifADCk = p->motorInternals.RatedFluxCurrent*3; 			// Р Р°СЃС‡РµС‚РЅС‹Р№ РєРѕСЌС„С„РёС†РёРµРЅС‚ РђР¦Рџ СЂР°РІРµРЅ С‚СЂРѕРµРєСЂР°С‚РЅРѕРјСѓ РЅРѕРјРёРЅР°Р»СЊРЅРѕРјСѓ С‚РѕРєСѓ РћР’
+		p->motorInternals.ifSenseK = (ADC_MAX_VALUE*1.0)/p->motorInternals.ifADCk;	//РєРѕСЌС„С„РёС†РёРµРЅС‚ РґР°С‚С‡РёРєР° С‚РѕРєР° РґР»СЏ РїСЂРµРѕР±СЂР°Р·РѕРІР°РЅРёСЏ С‚РѕРєР° РІ Р°РјРїРµСЂР°С… РІ РєРѕРґ РђР¦Рџ
 
 		p->motorInternals.r_ad = 0;
 
-		p->motorInternals._1_l_a = 1.0/(p->motorInternals.l_a/1000); // Обратная величина (переведенная из мГн в Гн)
-		if (p->motorInternals.l_f != 0)	// если ДПТ с обмоткой возбуждения
+		p->motorInternals._1_l_a = 1.0/(p->motorInternals.l_a/1000); // РћР±СЂР°С‚РЅР°СЏ РІРµР»РёС‡РёРЅР° (РїРµСЂРµРІРµРґРµРЅРЅР°СЏ РёР· РјР“РЅ РІ Р“РЅ)
+		if (p->motorInternals.l_f != 0)	// РµСЃР»Рё Р”РџРў СЃ РѕР±РјРѕС‚РєРѕР№ РІРѕР·Р±СѓР¶РґРµРЅРёСЏ
 		{
-			// Расчитываем необходимые коэффициенты для работы ОВ
-			p->motorInternals._1_l_f = 1.0/(p->motorInternals.l_f/1000); // Обратная величина (переведенная из мГн в Гн)
-			p->motorInternals.ifADCk = (ADC_HALF_VALUE*1.0)/p->motorInternals.ifSenseK; // Расчетный коэффициент АЦП тока ОВ
-			p->motorInternals.dcm_pm = 0;	// Сбрасываем флаг возбуждения от ПМ
+			// Р Р°СЃС‡РёС‚С‹РІР°РµРј РЅРµРѕР±С…РѕРґРёРјС‹Рµ РєРѕСЌС„С„РёС†РёРµРЅС‚С‹ РґР»СЏ СЂР°Р±РѕС‚С‹ РћР’
+			p->motorInternals._1_l_f = 1.0/(p->motorInternals.l_f/1000); // РћР±СЂР°С‚РЅР°СЏ РІРµР»РёС‡РёРЅР° (РїРµСЂРµРІРµРґРµРЅРЅР°СЏ РёР· РјР“РЅ РІ Р“РЅ)
+			p->motorInternals.ifADCk = (ADC_HALF_VALUE*1.0)/p->motorInternals.ifSenseK; // Р Р°СЃС‡РµС‚РЅС‹Р№ РєРѕСЌС„С„РёС†РёРµРЅС‚ РђР¦Рџ С‚РѕРєР° РћР’
+			p->motorInternals.dcm_pm = 0;	// РЎР±СЂР°СЃС‹РІР°РµРј С„Р»Р°Рі РІРѕР·Р±СѓР¶РґРµРЅРёСЏ РѕС‚ РџРњ
 		}
-		else	// ДПТ с постоянными магнитами
+		else	// Р”РџРў СЃ РїРѕСЃС‚РѕСЏРЅРЅС‹РјРё РјР°РіРЅРёС‚Р°РјРё
 		{
-			// В этом случае обмотку возбуждения не считаем
-			p->motorInternals.dcm_pm = 1; // Устанавливаем флаг возбуждения от ПМ
-			p->motorInternals.ifADCk = 0; // Расчетный коэффициент АЦП тока ОВ устанавливаем нулю
+			// Р’ СЌС‚РѕРј СЃР»СѓС‡Р°Рµ РѕР±РјРѕС‚РєСѓ РІРѕР·Р±СѓР¶РґРµРЅРёСЏ РЅРµ СЃС‡РёС‚Р°РµРј
+			p->motorInternals.dcm_pm = 1; // РЈСЃС‚Р°РЅР°РІР»РёРІР°РµРј С„Р»Р°Рі РІРѕР·Р±СѓР¶РґРµРЅРёСЏ РѕС‚ РџРњ
+			p->motorInternals.ifADCk = 0; // Р Р°СЃС‡РµС‚РЅС‹Р№ РєРѕСЌС„С„РёС†РёРµРЅС‚ РђР¦Рџ С‚РѕРєР° РћР’ СѓСЃС‚Р°РЅР°РІР»РёРІР°РµРј РЅСѓР»СЋ
 		}
-		p->motorInternals.i_a = 0;					//ток ОВ
-		p->motorInternals.i_f = 0;					//поток якоря
+		p->motorInternals.i_a = 0;					//С‚РѕРє РћР’
+		p->motorInternals.i_f = 0;					//РїРѕС‚РѕРє СЏРєРѕСЂСЏ
 	}
 
-	if (p->motorInternals.type==MODEL_SRD_MOTOR){//тип двигателя - ВИД (Switched Reluctance Drive, SRD)
+	if (p->motorInternals.type==MODEL_SRD_MOTOR){//С‚РёРї РґРІРёРіР°С‚РµР»СЏ - Р’РР” (Switched Reluctance Drive, SRD)
 		if (MotorParametersValid){
-			p->motorInternals.rs = SRMDATA[p->MotorParametersNum-1].r_s;				//сопротивление фазной обмотки
-			p->motorInternals.pp = SRMDATA[p->MotorParametersNum-1].pp;				//число пар полюсов
-			p->motorInternals.j = SRMDATA[p->MotorParametersNum-1].j;					//момент инерции
-			p->motorInternals.QEPResolution = SRMDATA[p->MotorParametersNum-1].qep;	//разрешение энкодера
-			p->motorInternals.speedK = SRMDATA[p->MotorParametersNum-1].sk;			//коэффициент датчика скорости
-			p->motorInternals.RatedPower = SRMDATA[p->MotorParametersNum-1].RatedPower; //номинальная мощность (справочная величина, не используется в расчетах)
-			p->motorInternals.RatedSpeed = SRMDATA[p->MotorParametersNum-1].RatedSpeed; //номинальная скорость (справочная величина, не используется в расчетах)
-			p->motorInternals.RatedCurrent = SRMDATA[p->MotorParametersNum-1].RatedCurrent; //номинальный действующий ток (справочная величина, не используется в расчетах)
-			p->motorInternals.MechLoss = p->motorInternals.j * 10; 				//механические потери
+			p->motorInternals.rs = SRMDATA[p->MotorParametersNum-1].r_s;				//СЃРѕРїСЂРѕС‚РёРІР»РµРЅРёРµ С„Р°Р·РЅРѕР№ РѕР±РјРѕС‚РєРё
+			p->motorInternals.pp = SRMDATA[p->MotorParametersNum-1].pp;				//С‡РёСЃР»Рѕ РїР°СЂ РїРѕР»СЋСЃРѕРІ
+			p->motorInternals.j = SRMDATA[p->MotorParametersNum-1].j;					//РјРѕРјРµРЅС‚ РёРЅРµСЂС†РёРё
+			p->motorInternals.QEPResolution = SRMDATA[p->MotorParametersNum-1].qep;	//СЂР°Р·СЂРµС€РµРЅРёРµ СЌРЅРєРѕРґРµСЂР°
+			p->motorInternals.speedK = SRMDATA[p->MotorParametersNum-1].sk;			//РєРѕСЌС„С„РёС†РёРµРЅС‚ РґР°С‚С‡РёРєР° СЃРєРѕСЂРѕСЃС‚Рё
+			p->motorInternals.RatedPower = SRMDATA[p->MotorParametersNum-1].RatedPower; //РЅРѕРјРёРЅР°Р»СЊРЅР°СЏ РјРѕС‰РЅРѕСЃС‚СЊ (СЃРїСЂР°РІРѕС‡РЅР°СЏ РІРµР»РёС‡РёРЅР°, РЅРµ РёСЃРїРѕР»СЊР·СѓРµС‚СЃСЏ РІ СЂР°СЃС‡РµС‚Р°С…)
+			p->motorInternals.RatedSpeed = SRMDATA[p->MotorParametersNum-1].RatedSpeed; //РЅРѕРјРёРЅР°Р»СЊРЅР°СЏ СЃРєРѕСЂРѕСЃС‚СЊ (СЃРїСЂР°РІРѕС‡РЅР°СЏ РІРµР»РёС‡РёРЅР°, РЅРµ РёСЃРїРѕР»СЊР·СѓРµС‚СЃСЏ РІ СЂР°СЃС‡РµС‚Р°С…)
+			p->motorInternals.RatedCurrent = SRMDATA[p->MotorParametersNum-1].RatedCurrent; //РЅРѕРјРёРЅР°Р»СЊРЅС‹Р№ РґРµР№СЃС‚РІСѓСЋС‰РёР№ С‚РѕРє (СЃРїСЂР°РІРѕС‡РЅР°СЏ РІРµР»РёС‡РёРЅР°, РЅРµ РёСЃРїРѕР»СЊР·СѓРµС‚СЃСЏ РІ СЂР°СЃС‡РµС‚Р°С…)
+			p->motorInternals.MechLoss = p->motorInternals.j * 10; 				//РјРµС…Р°РЅРёС‡РµСЃРєРёРµ РїРѕС‚РµСЂРё
 		}
-		// Инициализация коэффициентов и расчетных величин, завязанных на параметры двигателя
+		// РРЅРёС†РёР°Р»РёР·Р°С†РёСЏ РєРѕСЌС„С„РёС†РёРµРЅС‚РѕРІ Рё СЂР°СЃС‡РµС‚РЅС‹С… РІРµР»РёС‡РёРЅ, Р·Р°РІСЏР·Р°РЅРЅС‹С… РЅР° РїР°СЂР°РјРµС‚СЂС‹ РґРІРёРіР°С‚РµР»СЏ
 
 		p->motorInternals.inv_pp=1.0/p->motorInternals.pp;
 
-		p->motorInternals.iADCk = p->motorInternals.RatedCurrent*1.414*3; 			// Расчетный коэффициент АЦП равен троекратной амплитуде номинального тока
-		p->motorInternals.iSenseK = (ADC_MAX_VALUE*1.0)/p->motorInternals.iADCk;	//коэффициент датчика тока для преобразования тока в амперах в код АЦП
+		p->motorInternals.iADCk = p->motorInternals.RatedCurrent*1.414*3; 			// Р Р°СЃС‡РµС‚РЅС‹Р№ РєРѕСЌС„С„РёС†РёРµРЅС‚ РђР¦Рџ СЂР°РІРµРЅ С‚СЂРѕРµРєСЂР°С‚РЅРѕР№ Р°РјРїР»РёС‚СѓРґРµ РЅРѕРјРёРЅР°Р»СЊРЅРѕРіРѕ С‚РѕРєР°
+		p->motorInternals.iSenseK = (ADC_MAX_VALUE*1.0)/p->motorInternals.iADCk;	//РєРѕСЌС„С„РёС†РёРµРЅС‚ РґР°С‚С‡РёРєР° С‚РѕРєР° РґР»СЏ РїСЂРµРѕР±СЂР°Р·РѕРІР°РЅРёСЏ С‚РѕРєР° РІ Р°РјРїРµСЂР°С… РІ РєРѕРґ РђР¦Рџ
 
-		p->motorInternals.ifADCk = p->motorInternals.RatedFluxCurrent*3; 			// Расчетный коэффициент АЦП равен троекратному номинальному току ОВ
-		p->motorInternals.ifSenseK = (ADC_MAX_VALUE*1.0)/p->motorInternals.ifADCk;	//коэффициент датчика тока для преобразования тока в амперах в код АЦП
+		p->motorInternals.ifADCk = p->motorInternals.RatedFluxCurrent*3; 			// Р Р°СЃС‡РµС‚РЅС‹Р№ РєРѕСЌС„С„РёС†РёРµРЅС‚ РђР¦Рџ СЂР°РІРµРЅ С‚СЂРѕРµРєСЂР°С‚РЅРѕРјСѓ РЅРѕРјРёРЅР°Р»СЊРЅРѕРјСѓ С‚РѕРєСѓ РћР’
+		p->motorInternals.ifSenseK = (ADC_MAX_VALUE*1.0)/p->motorInternals.ifADCk;	//РєРѕСЌС„С„РёС†РёРµРЅС‚ РґР°С‚С‡РёРєР° С‚РѕРєР° РґР»СЏ РїСЂРµРѕР±СЂР°Р·РѕРІР°РЅРёСЏ С‚РѕРєР° РІ Р°РјРїРµСЂР°С… РІ РєРѕРґ РђР¦Рџ
 
 
-		p->motorInternals.isPhaseA=0;	//фазные токи
+		p->motorInternals.isPhaseA=0;	//С„Р°Р·РЅС‹Рµ С‚РѕРєРё
 		p->motorInternals.isPhaseB=0;
 		p->motorInternals.isPhaseC=0;
-		p->motorInternals.psa=0;	//потокосцепления фаз
+		p->motorInternals.psa=0;	//РїРѕС‚РѕРєРѕСЃС†РµРїР»РµРЅРёСЏ С„Р°Р·
 		p->motorInternals.psb=0;
 		p->motorInternals.psc=0;
 
-		//Определим количество отрезков (номер последней точки) кривых намагничивания
+		//РћРїСЂРµРґРµР»РёРј РєРѕР»РёС‡РµСЃС‚РІРѕ РѕС‚СЂРµР·РєРѕРІ (РЅРѕРјРµСЂ РїРѕСЃР»РµРґРЅРµР№ С‚РѕС‡РєРё) РєСЂРёРІС‹С… РЅР°РјР°РіРЅРёС‡РёРІР°РЅРёСЏ
 		volatile int Psi_I_s_resolution = 0;
 		volatile int Psi_I_r_resolution = 0;
-		//в последней точке должны быть отрицательные значения, как маркер окончания массива
+		//РІ РїРѕСЃР»РµРґРЅРµР№ С‚РѕС‡РєРµ РґРѕР»Р¶РЅС‹ Р±С‹С‚СЊ РѕС‚СЂРёС†Р°С‚РµР»СЊРЅС‹Рµ Р·РЅР°С‡РµРЅРёСЏ, РєР°Рє РјР°СЂРєРµСЂ РѕРєРѕРЅС‡Р°РЅРёСЏ РјР°СЃСЃРёРІР°
 		while ((Psi_I_s[Psi_I_s_resolution].i >= 0) && (Psi_I_s_resolution < 50)) Psi_I_s_resolution++;
 		while ((Psi_I_r[Psi_I_r_resolution].i >= 0) && (Psi_I_r_resolution < 50)) Psi_I_r_resolution++;
-		Psi_I_s_resolution--;	//уменьшаем на 1, чтобы получить количество отрезков
-		Psi_I_r_resolution--;	//уменьшаем на 1, чтобы получить количество отрезков
+		Psi_I_s_resolution--;	//СѓРјРµРЅСЊС€Р°РµРј РЅР° 1, С‡С‚РѕР±С‹ РїРѕР»СѓС‡РёС‚СЊ РєРѕР»РёС‡РµСЃС‚РІРѕ РѕС‚СЂРµР·РєРѕРІ
+		Psi_I_r_resolution--;	//СѓРјРµРЅСЊС€Р°РµРј РЅР° 1, С‡С‚РѕР±С‹ РїРѕР»СѓС‡РёС‚СЊ РєРѕР»РёС‡РµСЃС‚РІРѕ РѕС‚СЂРµР·РєРѕРІ
 
-		//расчет пределов изменения переменных (угол, ток, потокосцепление) и шага дискретизации по ним
-		p->motorInternals.ThetaMax = 2*MOTOR_MODEL_PI;										//диапазон угла - 0..2Пи
-		p->motorInternals.IMax = Psi_I_s[Psi_I_s_resolution].i;				//Считаем, что максимальный ток лежит в последней точке кривой для согласованного положения
-		p->motorInternals.PsiMax = Psi_I_s[Psi_I_s_resolution].psi;			//Максимальный поток лежит в последней точке кривой для согласованного положения
-		p->motorInternals.ThetaStep = p->motorInternals.ThetaMax/(SRD_SURFACE_RESOLUTION+1);	//приращение угла. Здесь, в отличие от тока и потока, делится на SRD_SURFACE_RESOLUTION+1,
-																	//т.к. кривая зациклена, и не должно быть двух одинаковых соседних точек для углов 0 и 2пи. Т.е. точку 2пи в конце выкинули
+		//СЂР°СЃС‡РµС‚ РїСЂРµРґРµР»РѕРІ РёР·РјРµРЅРµРЅРёСЏ РїРµСЂРµРјРµРЅРЅС‹С… (СѓРіРѕР», С‚РѕРє, РїРѕС‚РѕРєРѕСЃС†РµРїР»РµРЅРёРµ) Рё С€Р°РіР° РґРёСЃРєСЂРµС‚РёР·Р°С†РёРё РїРѕ РЅРёРј
+		p->motorInternals.ThetaMax = 2*MOTOR_MODEL_PI;										//РґРёР°РїР°Р·РѕРЅ СѓРіР»Р° - 0..2РџРё
+		p->motorInternals.IMax = Psi_I_s[Psi_I_s_resolution].i;				//РЎС‡РёС‚Р°РµРј, С‡С‚Рѕ РјР°РєСЃРёРјР°Р»СЊРЅС‹Р№ С‚РѕРє Р»РµР¶РёС‚ РІ РїРѕСЃР»РµРґРЅРµР№ С‚РѕС‡РєРµ РєСЂРёРІРѕР№ РґР»СЏ СЃРѕРіР»Р°СЃРѕРІР°РЅРЅРѕРіРѕ РїРѕР»РѕР¶РµРЅРёСЏ
+		p->motorInternals.PsiMax = Psi_I_s[Psi_I_s_resolution].psi;			//РњР°РєСЃРёРјР°Р»СЊРЅС‹Р№ РїРѕС‚РѕРє Р»РµР¶РёС‚ РІ РїРѕСЃР»РµРґРЅРµР№ С‚РѕС‡РєРµ РєСЂРёРІРѕР№ РґР»СЏ СЃРѕРіР»Р°СЃРѕРІР°РЅРЅРѕРіРѕ РїРѕР»РѕР¶РµРЅРёСЏ
+		p->motorInternals.ThetaStep = p->motorInternals.ThetaMax/(SRD_SURFACE_RESOLUTION+1);	//РїСЂРёСЂР°С‰РµРЅРёРµ СѓРіР»Р°. Р—РґРµСЃСЊ, РІ РѕС‚Р»РёС‡РёРµ РѕС‚ С‚РѕРєР° Рё РїРѕС‚РѕРєР°, РґРµР»РёС‚СЃСЏ РЅР° SRD_SURFACE_RESOLUTION+1,
+																	//С‚.Рє. РєСЂРёРІР°СЏ Р·Р°С†РёРєР»РµРЅР°, Рё РЅРµ РґРѕР»Р¶РЅРѕ Р±С‹С‚СЊ РґРІСѓС… РѕРґРёРЅР°РєРѕРІС‹С… СЃРѕСЃРµРґРЅРёС… С‚РѕС‡РµРє РґР»СЏ СѓРіР»РѕРІ 0 Рё 2РїРё. Рў.Рµ. С‚РѕС‡РєСѓ 2РїРё РІ РєРѕРЅС†Рµ РІС‹РєРёРЅСѓР»Рё
 		p->motorInternals.ThetaStep_inv = 1.0/p->motorInternals.ThetaStep;
-		p->motorInternals.IStep = p->motorInternals.IMax/SRD_SURFACE_RESOLUTION;				//приращение тока
+		p->motorInternals.IStep = p->motorInternals.IMax/SRD_SURFACE_RESOLUTION;				//РїСЂРёСЂР°С‰РµРЅРёРµ С‚РѕРєР°
 		p->motorInternals.IStep_inv = 1.0/p->motorInternals.IStep;
-		p->motorInternals.PsiStep = p->motorInternals.PsiMax/SRD_SURFACE_RESOLUTION;			//приращение потока
+		p->motorInternals.PsiStep = p->motorInternals.PsiMax/SRD_SURFACE_RESOLUTION;			//РїСЂРёСЂР°С‰РµРЅРёРµ РїРѕС‚РѕРєР°
 		p->motorInternals.PsiStep_inv = 1.0/p->motorInternals.PsiStep;
-//		p->motorInternals.j = srm_j[p->MotorParametersNum-1];		//уже присвоен выше (Савкин)
-//		p->motorInternals.MechLoss = p->motorInternals.j * 10; 		//механические потери
+//		p->motorInternals.j = srm_j[p->MotorParametersNum-1];		//СѓР¶Рµ РїСЂРёСЃРІРѕРµРЅ РІС‹С€Рµ (РЎР°РІРєРёРЅ)
+//		p->motorInternals.MechLoss = p->motorInternals.j * 10; 		//РјРµС…Р°РЅРёС‡РµСЃРєРёРµ РїРѕС‚РµСЂРё
 
-		//Уточнение кривых намагничивания при помощи кубической интерполяции, инициализация поверхности psi=f(i,theta)
+		//РЈС‚РѕС‡РЅРµРЅРёРµ РєСЂРёРІС‹С… РЅР°РјР°РіРЅРёС‡РёРІР°РЅРёСЏ РїСЂРё РїРѕРјРѕС‰Рё РєСѓР±РёС‡РµСЃРєРѕР№ РёРЅС‚РµСЂРїРѕР»СЏС†РёРё, РёРЅРёС†РёР°Р»РёР·Р°С†РёСЏ РїРѕРІРµСЂС…РЅРѕСЃС‚Рё psi=f(i,theta)
 		for (int i=0; i<SRD_SURFACE_RESOLUTION+1; i++)
 		{
 			float TmpI = i*p->motorInternals.IStep;
-			Psi_I_s_acc[i] = MotorModel_FluxCubicInterpolation (TmpI, Psi_I_s, Psi_I_s_resolution);	//в принципе, эти две уточненные кривые можно убрать, т.к. из них тут же генерится поверхность, а
-			Psi_I_r_acc[i] = MotorModel_FluxCubicInterpolation (TmpI, Psi_I_r, Psi_I_r_resolution);	//сами кривые нигде не используются. Можно здесь просто оставить локальные переменные и сэкономить память
+			Psi_I_s_acc[i] = MotorModel_FluxCubicInterpolation (TmpI, Psi_I_s, Psi_I_s_resolution);	//РІ РїСЂРёРЅС†РёРїРµ, СЌС‚Рё РґРІРµ СѓС‚РѕС‡РЅРµРЅРЅС‹Рµ РєСЂРёРІС‹Рµ РјРѕР¶РЅРѕ СѓР±СЂР°С‚СЊ, С‚.Рє. РёР· РЅРёС… С‚СѓС‚ Р¶Рµ РіРµРЅРµСЂРёС‚СЃСЏ РїРѕРІРµСЂС…РЅРѕСЃС‚СЊ, Р°
+			Psi_I_r_acc[i] = MotorModel_FluxCubicInterpolation (TmpI, Psi_I_r, Psi_I_r_resolution);	//СЃР°РјРё РєСЂРёРІС‹Рµ РЅРёРіРґРµ РЅРµ РёСЃРїРѕР»СЊР·СѓСЋС‚СЃСЏ. РњРѕР¶РЅРѕ Р·РґРµСЃСЊ РїСЂРѕСЃС‚Рѕ РѕСЃС‚Р°РІРёС‚СЊ Р»РѕРєР°Р»СЊРЅС‹Рµ РїРµСЂРµРјРµРЅРЅС‹Рµ Рё СЃСЌРєРѕРЅРѕРјРёС‚СЊ РїР°РјСЏС‚СЊ
 			for (int t=0; t<SRD_SURFACE_RESOLUTION+1; t++)
 			{
 				float TmpTheta = t*p->motorInternals.ThetaStep;
-				Psi_ITheta[i][t] = (Psi_I_s_acc[i] + Psi_I_r_acc[i])*0.5 - (Psi_I_s_acc[i] - Psi_I_r_acc[i])*0.5*_IQtoF(_IQcos(_IQ(TmpTheta)));	//Эту поверхность тоже можно сделать локальной, она в расчете модели не участвует
+				Psi_ITheta[i][t] = (Psi_I_s_acc[i] + Psi_I_r_acc[i])*0.5 - (Psi_I_s_acc[i] - Psi_I_r_acc[i])*0.5*_IQtoF(_IQcos(_IQ(TmpTheta)));	//Р­С‚Сѓ РїРѕРІРµСЂС…РЅРѕСЃС‚СЊ С‚РѕР¶Рµ РјРѕР¶РЅРѕ СЃРґРµР»Р°С‚СЊ Р»РѕРєР°Р»СЊРЅРѕР№, РѕРЅР° РІ СЂР°СЃС‡РµС‚Рµ РјРѕРґРµР»Рё РЅРµ СѓС‡Р°СЃС‚РІСѓРµС‚
 			}
 		}
 
-		//Генерация поверхности i=f(psi,theta) из psi=f(i,theta)
+		//Р“РµРЅРµСЂР°С†РёСЏ РїРѕРІРµСЂС…РЅРѕСЃС‚Рё i=f(psi,theta) РёР· psi=f(i,theta)
 		for (int t=0; t<SRD_SURFACE_RESOLUTION+1; t++)
 		{
-			//точки по углу будут те же, переворачивать поверхность будем для какждого дискретного угла psi=f(i) -> i=f(psi)
+			//С‚РѕС‡РєРё РїРѕ СѓРіР»Сѓ Р±СѓРґСѓС‚ С‚Рµ Р¶Рµ, РїРµСЂРµРІРѕСЂР°С‡РёРІР°С‚СЊ РїРѕРІРµСЂС…РЅРѕСЃС‚СЊ Р±СѓРґРµРј РґР»СЏ РєР°РєР¶РґРѕРіРѕ РґРёСЃРєСЂРµС‚РЅРѕРіРѕ СѓРіР»Р° psi=f(i) -> i=f(psi)
 			for (int n=0; n<SRD_SURFACE_RESOLUTION+1; n++)
 			{
 				float TmpPsi = n*p->motorInternals.PsiStep;
-				if (TmpPsi <= Psi_ITheta[0][t])	//ограничиваем минимум (на всякий случай)
+				if (TmpPsi <= Psi_ITheta[0][t])	//РѕРіСЂР°РЅРёС‡РёРІР°РµРј РјРёРЅРёРјСѓРј (РЅР° РІСЃСЏРєРёР№ СЃР»СѓС‡Р°Р№)
 				{
 					I_PsiTheta[n][t] = 0;
 				}
-				else if (TmpPsi >= Psi_ITheta[SRD_SURFACE_RESOLUTION][t])	//ограничиваем максимум
+				else if (TmpPsi >= Psi_ITheta[SRD_SURFACE_RESOLUTION][t])	//РѕРіСЂР°РЅРёС‡РёРІР°РµРј РјР°РєСЃРёРјСѓРј
 				{
-					I_PsiTheta[n][t] = p->motorInternals.IMax;	//на кривой намагничивания для данного угла может вообще не быть максимального потока (будет он только в согласованном положении). Поэтому, будет насыщение
+					I_PsiTheta[n][t] = p->motorInternals.IMax;	//РЅР° РєСЂРёРІРѕР№ РЅР°РјР°РіРЅРёС‡РёРІР°РЅРёСЏ РґР»СЏ РґР°РЅРЅРѕРіРѕ СѓРіР»Р° РјРѕР¶РµС‚ РІРѕРѕР±С‰Рµ РЅРµ Р±С‹С‚СЊ РјР°РєСЃРёРјР°Р»СЊРЅРѕРіРѕ РїРѕС‚РѕРєР° (Р±СѓРґРµС‚ РѕРЅ С‚РѕР»СЊРєРѕ РІ СЃРѕРіР»Р°СЃРѕРІР°РЅРЅРѕРј РїРѕР»РѕР¶РµРЅРёРё). РџРѕСЌС‚РѕРјСѓ, Р±СѓРґРµС‚ РЅР°СЃС‹С‰РµРЅРёРµ
 				}
-				else	//в ограничения не попали, интерполируем линейно.
+				else	//РІ РѕРіСЂР°РЅРёС‡РµРЅРёСЏ РЅРµ РїРѕРїР°Р»Рё, РёРЅС‚РµСЂРїРѕР»РёСЂСѓРµРј Р»РёРЅРµР№РЅРѕ.
 				{
-					for (int i = 1; i < SRD_SURFACE_RESOLUTION+1; i++)	//Ищем отрезок в исходной кривой psi=f(i), куда попал дискретный поток p
+					for (int i = 1; i < SRD_SURFACE_RESOLUTION+1; i++)	//РС‰РµРј РѕС‚СЂРµР·РѕРє РІ РёСЃС…РѕРґРЅРѕР№ РєСЂРёРІРѕР№ psi=f(i), РєСѓРґР° РїРѕРїР°Р» РґРёСЃРєСЂРµС‚РЅС‹Р№ РїРѕС‚РѕРє p
 					{
-						if (Psi_ITheta[i][t] >= TmpPsi)	//поток в следующей точке больше заданного, значит попали в нужный отрезок
+						if (Psi_ITheta[i][t] >= TmpPsi)	//РїРѕС‚РѕРє РІ СЃР»РµРґСѓСЋС‰РµР№ С‚РѕС‡РєРµ Р±РѕР»СЊС€Рµ Р·Р°РґР°РЅРЅРѕРіРѕ, Р·РЅР°С‡РёС‚ РїРѕРїР°Р»Рё РІ РЅСѓР¶РЅС‹Р№ РѕС‚СЂРµР·РѕРє
 						{
 							I_PsiTheta[n][t] = p->motorInternals.IStep*i - (Psi_ITheta[i][t] - TmpPsi)*p->motorInternals.IStep/(Psi_ITheta[i][t] - Psi_ITheta[i-1][t]);
 							break;
@@ -319,16 +319,16 @@ void MotorModel_Init(TMotorModel *p) {
 			}
 		}
 
-		//Генерация поверхности момента M=f(i,theta)
+		//Р“РµРЅРµСЂР°С†РёСЏ РїРѕРІРµСЂС…РЅРѕСЃС‚Рё РјРѕРјРµРЅС‚Р° M=f(i,theta)
 		for (int t=0; t<SRD_SURFACE_RESOLUTION+1; t++)
 		{
-			float WcoPlus = 0;								//Коэнергия при угле Theta+
-			float WcoMinus = 0;								//Коэнергия при угле Theta-
-			M_ITheta[0][t] = 0;								//Момент при нулевом токе и любом угле - нулевой
+			float WcoPlus = 0;								//РљРѕСЌРЅРµСЂРіРёСЏ РїСЂРё СѓРіР»Рµ Theta+
+			float WcoMinus = 0;								//РљРѕСЌРЅРµСЂРіРёСЏ РїСЂРё СѓРіР»Рµ Theta-
+			M_ITheta[0][t] = 0;								//РњРѕРјРµРЅС‚ РїСЂРё РЅСѓР»РµРІРѕРј С‚РѕРєРµ Рё Р»СЋР±РѕРј СѓРіР»Рµ - РЅСѓР»РµРІРѕР№
 			float PsiPlus_prev = 0;
 			float PsiMinus_prev = 0;
 
-			//Ищем соседние точки по положению, при этом зацикливаем для непрерывности линейной интерполяции по углу в районе theta=0 и theta=2Pi
+			//РС‰РµРј СЃРѕСЃРµРґРЅРёРµ С‚РѕС‡РєРё РїРѕ РїРѕР»РѕР¶РµРЅРёСЋ, РїСЂРё СЌС‚РѕРј Р·Р°С†РёРєР»РёРІР°РµРј РґР»СЏ РЅРµРїСЂРµСЂС‹РІРЅРѕСЃС‚Рё Р»РёРЅРµР№РЅРѕР№ РёРЅС‚РµСЂРїРѕР»СЏС†РёРё РїРѕ СѓРіР»Сѓ РІ СЂР°Р№РѕРЅРµ theta=0 Рё theta=2Pi
 			int tPlus = t+1;
 			if (tPlus > SRD_SURFACE_RESOLUTION)
 				tPlus -= (SRD_SURFACE_RESOLUTION+1);
@@ -337,47 +337,47 @@ void MotorModel_Init(TMotorModel *p) {
 				tMinus += (SRD_SURFACE_RESOLUTION+1);
 			for (int i=1; i<SRD_SURFACE_RESOLUTION+1; i++)
 			{
-				//Ищем потокосцепление при заданном токе и угле чуть больше и чуть меньше (на SRD_DELTA_THETA) заданного при помощи линейной интерполяции
+				//РС‰РµРј РїРѕС‚РѕРєРѕСЃС†РµРїР»РµРЅРёРµ РїСЂРё Р·Р°РґР°РЅРЅРѕРј С‚РѕРєРµ Рё СѓРіР»Рµ С‡СѓС‚СЊ Р±РѕР»СЊС€Рµ Рё С‡СѓС‚СЊ РјРµРЅСЊС€Рµ (РЅР° SRD_DELTA_THETA) Р·Р°РґР°РЅРЅРѕРіРѕ РїСЂРё РїРѕРјРѕС‰Рё Р»РёРЅРµР№РЅРѕР№ РёРЅС‚РµСЂРїРѕР»СЏС†РёРё
 				float PsiPlus = Psi_ITheta[i][t] + (Psi_ITheta[i][tPlus] - Psi_ITheta[i][t])*SRD_DELTA_THETA*p->motorInternals.ThetaStep_inv;
 				float PsiMinus = Psi_ITheta[i][t] - (Psi_ITheta[i][t] - Psi_ITheta[i][tMinus])*SRD_DELTA_THETA*p->motorInternals.ThetaStep_inv;
-				//Считаем коэнергию - интеграл потокосцепления по току (методом трапеций)
+				//РЎС‡РёС‚Р°РµРј РєРѕСЌРЅРµСЂРіРёСЋ - РёРЅС‚РµРіСЂР°Р» РїРѕС‚РѕРєРѕСЃС†РµРїР»РµРЅРёСЏ РїРѕ С‚РѕРєСѓ (РјРµС‚РѕРґРѕРј С‚СЂР°РїРµС†РёР№)
 				WcoPlus += (PsiPlus + PsiPlus_prev)*0.5*p->motorInternals.IStep;
 				WcoMinus += (PsiMinus + PsiMinus_prev)*0.5*p->motorInternals.IStep;
 				PsiPlus_prev = PsiPlus;
 				PsiMinus_prev = PsiMinus;
-				//PhaseTorque = p->motorInternals.pp*(p->motorInternals.wm-p->motorInternals.wp)*50;	// 50 = inv_0.02 dTeta				так было в исходном варианте
-				M_ITheta[i][t] = p->motorInternals.pp*(WcoPlus - WcoMinus)*SRD_DELTA_THETA_INV*0.5;		//считаем момент, как производную коэнергии
+				//PhaseTorque = p->motorInternals.pp*(p->motorInternals.wm-p->motorInternals.wp)*50;	// 50 = inv_0.02 dTeta				С‚Р°Рє Р±С‹Р»Рѕ РІ РёСЃС…РѕРґРЅРѕРј РІР°СЂРёР°РЅС‚Рµ
+				M_ITheta[i][t] = p->motorInternals.pp*(WcoPlus - WcoMinus)*SRD_DELTA_THETA_INV*0.5;		//СЃС‡РёС‚Р°РµРј РјРѕРјРµРЅС‚, РєР°Рє РїСЂРѕРёР·РІРѕРґРЅСѓСЋ РєРѕСЌРЅРµСЂРіРёРё
 			}
 		}
 	}
 
-	// Расчет коэффициентов модели, неизменных во времени
+	// Р Р°СЃС‡РµС‚ РєРѕСЌС„С„РёС†РёРµРЅС‚РѕРІ РјРѕРґРµР»Рё, РЅРµРёР·РјРµРЅРЅС‹С… РІРѕ РІСЂРµРјРµРЅРё
 	p->motorInternals.inv_tpr=1.0/p->motorInternals.tpr;
 	p->motorInternals.inv_j=1.0/p->motorInternals.j;
 
-	p->motorInternals.t2 = p->motorInternals.t / 2;				//половина шага дискретизации
+	p->motorInternals.t2 = p->motorInternals.t / 2;				//РїРѕР»РѕРІРёРЅР° С€Р°РіР° РґРёСЃРєСЂРµС‚РёР·Р°С†РёРё
 
-	// Обнуление переменных состояния
-	p->motorInternals.tetaR = 0;			//угол положения ротора электрический
-	p->motorInternals.tetaRM = 0;				//угол положения ротора механический
-	p->motorInternals.omega = 0;						//скорость, рад/с
-	p->motorInternals.prd = 0;					//потокосцепления ротора в осях d,q
+	// РћР±РЅСѓР»РµРЅРёРµ РїРµСЂРµРјРµРЅРЅС‹С… СЃРѕСЃС‚РѕСЏРЅРёСЏ
+	p->motorInternals.tetaR = 0;			//СѓРіРѕР» РїРѕР»РѕР¶РµРЅРёСЏ СЂРѕС‚РѕСЂР° СЌР»РµРєС‚СЂРёС‡РµСЃРєРёР№
+	p->motorInternals.tetaRM = 0;				//СѓРіРѕР» РїРѕР»РѕР¶РµРЅРёСЏ СЂРѕС‚РѕСЂР° РјРµС…Р°РЅРёС‡РµСЃРєРёР№
+	p->motorInternals.omega = 0;						//СЃРєРѕСЂРѕСЃС‚СЊ, СЂР°Рґ/СЃ
+	p->motorInternals.prd = 0;					//РїРѕС‚РѕРєРѕСЃС†РµРїР»РµРЅРёСЏ СЂРѕС‚РѕСЂР° РІ РѕСЃСЏС… d,q
 	p->motorInternals.prq = 0;
-	p->motorInternals.isa = 0;						//токи статора в осях альфа,бета
+	p->motorInternals.isa = 0;						//С‚РѕРєРё СЃС‚Р°С‚РѕСЂР° РІ РѕСЃСЏС… Р°Р»СЊС„Р°,Р±РµС‚Р°
 	p->motorInternals.isb = 0;
-	p->motorInternals.ira = 0;						//токи ротора в осях альфа,бета
+	p->motorInternals.ira = 0;						//С‚РѕРєРё СЂРѕС‚РѕСЂР° РІ РѕСЃСЏС… Р°Р»СЊС„Р°,Р±РµС‚Р°
 	p->motorInternals.irb = 0;
-	p->motorInternals.ird = 0;						//токи ротора в осях d,q
+	p->motorInternals.ird = 0;						//С‚РѕРєРё СЂРѕС‚РѕСЂР° РІ РѕСЃСЏС… d,q
 	p->motorInternals.irq = 0;
 
 
 }
 
-//расчет напряжений для двухфазного двигателя
+//СЂР°СЃС‡РµС‚ РЅР°РїСЂСЏР¶РµРЅРёР№ РґР»СЏ РґРІСѓС…С„Р°Р·РЅРѕРіРѕ РґРІРёРіР°С‚РµР»СЏ
 void MotorModel_calcU42Phase(TMotorModel *p) {
-	if (p->InvertorEna) { //инвертор включен
-		// расчет напряжений питания
-		// перерасчет влияния мертвого времени на скважность фазы в зависимости от знака тока
+	if (p->InvertorEna) { //РёРЅРІРµСЂС‚РѕСЂ РІРєР»СЋС‡РµРЅ
+		// СЂР°СЃС‡РµС‚ РЅР°РїСЂСЏР¶РµРЅРёР№ РїРёС‚Р°РЅРёСЏ
+		// РїРµСЂРµСЂР°СЃС‡РµС‚ РІР»РёСЏРЅРёСЏ РјРµСЂС‚РІРѕРіРѕ РІСЂРµРјРµРЅРё РЅР° СЃРєРІР°Р¶РЅРѕСЃС‚СЊ С„Р°Р·С‹ РІ Р·Р°РІРёСЃРёРјРѕСЃС‚Рё РѕС‚ Р·РЅР°РєР° С‚РѕРєР°
 		if (p->motorInternals.i_a > 0) {
 			if (p->motorInternals.cmpr0 > p->motorInternals.dt)
 				p->motorInternals.dta = -p->motorInternals.dt;
@@ -400,10 +400,10 @@ void MotorModel_calcU42Phase(TMotorModel *p) {
 			else
 				p->motorInternals.dtb = p->motorInternals.tpr - p->motorInternals.cmpr1;
 		}
-		//расчет потенциалов с учетом влияния мертвого времени
+		//СЂР°СЃС‡РµС‚ РїРѕС‚РµРЅС†РёР°Р»РѕРІ СЃ СѓС‡РµС‚РѕРј РІР»РёСЏРЅРёСЏ РјРµСЂС‚РІРѕРіРѕ РІСЂРµРјРµРЅРё
 		p->motorInternals.fia = p->motorInternals.udc * (p->motorInternals.cmpr0 + (p->motorInternals.dta >> 1)) / p->motorInternals.tpr;
 		p->motorInternals.fib = p->motorInternals.udc * (p->motorInternals.cmpr1 + (p->motorInternals.dtb >> 1)) / p->motorInternals.tpr;
-		p->motorInternals.u_a = p->motorInternals.fia - p->motorInternals.fib;//Напряжение на якоре
+		p->motorInternals.u_a = p->motorInternals.fia - p->motorInternals.fib;//РќР°РїСЂСЏР¶РµРЅРёРµ РЅР° СЏРєРѕСЂРµ
 
 		if (p->motorInternals.i_f > 0) {
 			if (p->motorInternals.cmpr2 > p->motorInternals.dt)
@@ -416,15 +416,15 @@ void MotorModel_calcU42Phase(TMotorModel *p) {
 			else
 				p->motorInternals.dtc = p->motorInternals.tpr - p->motorInternals.cmpr2;
 		}
-		//расчет потенциалов с учетом влияния мертвого времени
+		//СЂР°СЃС‡РµС‚ РїРѕС‚РµРЅС†РёР°Р»РѕРІ СЃ СѓС‡РµС‚РѕРј РІР»РёСЏРЅРёСЏ РјРµСЂС‚РІРѕРіРѕ РІСЂРµРјРµРЅРё
 		p->motorInternals.fic = p->motorInternals.udc * (p->motorInternals.cmpr2 + (p->motorInternals.dtc >> 1)) / p->motorInternals.tpr;
-		p->motorInternals.u_f = p->motorInternals.fic;//Напряжение на ОВ
+		p->motorInternals.u_f = p->motorInternals.fic;//РќР°РїСЂСЏР¶РµРЅРёРµ РЅР° РћР’
 
 
 		p->motorInternals.isPhaseA_prev = p->motorInternals.isPhaseA;
 		p->motorInternals.CurrentInvertedFlag = 0;
 	} else
-	{//Инвертор выключен
+	{//РРЅРІРµСЂС‚РѕСЂ РІС‹РєР»СЋС‡РµРЅ
 /*
 		if (p->motorInternals.isPhaseA > 0)
 			p->motorInternals.u_a = -p->motorInternals.udc;
@@ -437,23 +437,23 @@ void MotorModel_calcU42Phase(TMotorModel *p) {
 		p->motorInternals.fib = 0;
 		p->motorInternals.fic = 0;
 
-		if (p->motorInternals.isPhaseA * p->motorInternals.isPhaseA_prev < 0)		//ток сменил свой знак с момента выклчюения инвертора
-			p->motorInternals.CurrentInvertedFlag = 7;//флаг, что все интересующие токи пересекли ноль
+		if (p->motorInternals.isPhaseA * p->motorInternals.isPhaseA_prev < 0)		//С‚РѕРє СЃРјРµРЅРёР» СЃРІРѕР№ Р·РЅР°Рє СЃ РјРѕРјРµРЅС‚Р° РІС‹РєР»С‡СЋРµРЅРёСЏ РёРЅРІРµСЂС‚РѕСЂР°
+			p->motorInternals.CurrentInvertedFlag = 7;//С„Р»Р°Рі, С‡С‚Рѕ РІСЃРµ РёРЅС‚РµСЂРµСЃСѓСЋС‰РёРµ С‚РѕРєРё РїРµСЂРµСЃРµРєР»Рё РЅРѕР»СЊ
 
-		if (p->motorInternals.CurrentInvertedFlag == 7) {//прикладываем нулевое напряжение, а в модели ДПТ обнулится формула тока
+		if (p->motorInternals.CurrentInvertedFlag == 7) {//РїСЂРёРєР»Р°РґС‹РІР°РµРј РЅСѓР»РµРІРѕРµ РЅР°РїСЂСЏР¶РµРЅРёРµ, Р° РІ РјРѕРґРµР»Рё Р”РџРў РѕР±РЅСѓР»РёС‚СЃСЏ С„РѕСЂРјСѓР»Р° С‚РѕРєР°
 			p->motorInternals.u_a=0;
 		}
-		p->motorInternals.u_f = 0;//Напряжение ОВ равно нулю
+		p->motorInternals.u_f = 0;//РќР°РїСЂСЏР¶РµРЅРёРµ РћР’ СЂР°РІРЅРѕ РЅСѓР»СЋ
 	}
 
 
 }
 
-//расчет напряжений для трехфазного двигателя
+//СЂР°СЃС‡РµС‚ РЅР°РїСЂСЏР¶РµРЅРёР№ РґР»СЏ С‚СЂРµС…С„Р°Р·РЅРѕРіРѕ РґРІРёРіР°С‚РµР»СЏ
 void MotorModel_calcU43Phase(TMotorModel *p) {
-	if (p->InvertorEna) { //инвертор включен
-		// расчет напряжений питания
-		// перерасчет влияния мертвого времени на скважность фазы в зависимости от знака тока
+	if (p->InvertorEna) { //РёРЅРІРµСЂС‚РѕСЂ РІРєР»СЋС‡РµРЅ
+		// СЂР°СЃС‡РµС‚ РЅР°РїСЂСЏР¶РµРЅРёР№ РїРёС‚Р°РЅРёСЏ
+		// РїРµСЂРµСЂР°СЃС‡РµС‚ РІР»РёСЏРЅРёСЏ РјРµСЂС‚РІРѕРіРѕ РІСЂРµРјРµРЅРё РЅР° СЃРєРІР°Р¶РЅРѕСЃС‚СЊ С„Р°Р·С‹ РІ Р·Р°РІРёСЃРёРјРѕСЃС‚Рё РѕС‚ Р·РЅР°РєР° С‚РѕРєР°
 		if (p->motorInternals.isPhaseA > 0) {
 			if (p->motorInternals.cmpr0 > p->motorInternals.dt)
 				p->motorInternals.dta = -p->motorInternals.dt;
@@ -488,16 +488,16 @@ void MotorModel_calcU43Phase(TMotorModel *p) {
 				p->motorInternals.dtc = p->motorInternals.tpr - p->motorInternals.cmpr2;
 		}
 
-		//расчет потенциалов с учетом влияния мертвого времени
+		//СЂР°СЃС‡РµС‚ РїРѕС‚РµРЅС†РёР°Р»РѕРІ СЃ СѓС‡РµС‚РѕРј РІР»РёСЏРЅРёСЏ РјРµСЂС‚РІРѕРіРѕ РІСЂРµРјРµРЅРё
 		p->motorInternals.fia = p->motorInternals.udc * (p->motorInternals.cmpr0 + (p->motorInternals.dta >> 1)) / p->motorInternals.tpr;
 		p->motorInternals.fib = p->motorInternals.udc * (p->motorInternals.cmpr1 + (p->motorInternals.dtb >> 1)) / p->motorInternals.tpr;
 		p->motorInternals.fic = p->motorInternals.udc * (p->motorInternals.cmpr2 + (p->motorInternals.dtc >> 1)) / p->motorInternals.tpr;
-		p->motorInternals.fiav = (p->motorInternals.fia + p->motorInternals.fib + p->motorInternals.fic) / 3;		//потенциал срежней точки
-		p->motorInternals.ua = p->motorInternals.fia - p->motorInternals.fiav;					//напряжения
+		p->motorInternals.fiav = (p->motorInternals.fia + p->motorInternals.fib + p->motorInternals.fic) / 3;		//РїРѕС‚РµРЅС†РёР°Р» СЃСЂРµР¶РЅРµР№ С‚РѕС‡РєРё
+		p->motorInternals.ua = p->motorInternals.fia - p->motorInternals.fiav;					//РЅР°РїСЂСЏР¶РµРЅРёСЏ
 		p->motorInternals.ub = p->motorInternals.fib - p->motorInternals.fiav;
 		p->motorInternals.uc = p->motorInternals.fic - p->motorInternals.fiav;
 
-		//напряжения в осях альфа,бета
+		//РЅР°РїСЂСЏР¶РµРЅРёСЏ РІ РѕСЃСЏС… Р°Р»СЊС„Р°,Р±РµС‚Р°
 		p->motorInternals.usa = p->motorInternals.ua;
 		p->motorInternals.usb = 0.577350269 * p->motorInternals.ua + 1.154700538 * p->motorInternals.ub;
 
@@ -506,10 +506,10 @@ void MotorModel_calcU43Phase(TMotorModel *p) {
 		p->motorInternals.isPhaseC_prev = p->motorInternals.isPhaseC;
 		p->motorInternals.CurrentInvertedFlag = 0;
 
-	} else { //инвертор выключен
-		//сложно рассчитать напряжение, которое приложено к двигателю, когда инвертор выключен.
-		//поэтому тут инвертор как бы в релейном режиме стремится поддерживать токи нулевыми, пока скорость не снизится до нуля,
-		//а потом "замыкает" фазы двигателя. Это отличается от реальности, конечно, но лучше, чем не делать ничего.
+	} else { //РёРЅРІРµСЂС‚РѕСЂ РІС‹РєР»СЋС‡РµРЅ
+		//СЃР»РѕР¶РЅРѕ СЂР°СЃСЃС‡РёС‚Р°С‚СЊ РЅР°РїСЂСЏР¶РµРЅРёРµ, РєРѕС‚РѕСЂРѕРµ РїСЂРёР»РѕР¶РµРЅРѕ Рє РґРІРёРіР°С‚РµР»СЋ, РєРѕРіРґР° РёРЅРІРµСЂС‚РѕСЂ РІС‹РєР»СЋС‡РµРЅ.
+		//РїРѕСЌС‚РѕРјСѓ С‚СѓС‚ РёРЅРІРµСЂС‚РѕСЂ РєР°Рє Р±С‹ РІ СЂРµР»РµР№РЅРѕРј СЂРµР¶РёРјРµ СЃС‚СЂРµРјРёС‚СЃСЏ РїРѕРґРґРµСЂР¶РёРІР°С‚СЊ С‚РѕРєРё РЅСѓР»РµРІС‹РјРё, РїРѕРєР° СЃРєРѕСЂРѕСЃС‚СЊ РЅРµ СЃРЅРёР·РёС‚СЃСЏ РґРѕ РЅСѓР»СЏ,
+		//Р° РїРѕС‚РѕРј "Р·Р°РјС‹РєР°РµС‚" С„Р°Р·С‹ РґРІРёРіР°С‚РµР»СЏ. Р­С‚Рѕ РѕС‚Р»РёС‡Р°РµС‚СЃСЏ РѕС‚ СЂРµР°Р»СЊРЅРѕСЃС‚Рё, РєРѕРЅРµС‡РЅРѕ, РЅРѕ Р»СѓС‡С€Рµ, С‡РµРј РЅРµ РґРµР»Р°С‚СЊ РЅРёС‡РµРіРѕ.
 
 		if (p->motorInternals.isPhaseA > 0)
 			p->motorInternals.fia = 0;
@@ -526,13 +526,13 @@ void MotorModel_calcU43Phase(TMotorModel *p) {
 		else
 			p->motorInternals.fic = p->motorInternals.udc;
 
-		if (p->motorInternals.isPhaseA * p->motorInternals.isPhaseA_prev < 0)		//ток сменил свой знак с момента выклчюения инвертора
+		if (p->motorInternals.isPhaseA * p->motorInternals.isPhaseA_prev < 0)		//С‚РѕРє СЃРјРµРЅРёР» СЃРІРѕР№ Р·РЅР°Рє СЃ РјРѕРјРµРЅС‚Р° РІС‹РєР»С‡СЋРµРЅРёСЏ РёРЅРІРµСЂС‚РѕСЂР°
 			p->motorInternals.CurrentInvertedFlag |= 1;
 
-		if (p->motorInternals.isPhaseB * p->motorInternals.isPhaseB_prev < 0)		//ток сменил свой знак с момента выклчюения инвертора
+		if (p->motorInternals.isPhaseB * p->motorInternals.isPhaseB_prev < 0)		//С‚РѕРє СЃРјРµРЅРёР» СЃРІРѕР№ Р·РЅР°Рє СЃ РјРѕРјРµРЅС‚Р° РІС‹РєР»С‡СЋРµРЅРёСЏ РёРЅРІРµСЂС‚РѕСЂР°
 			p->motorInternals.CurrentInvertedFlag |= 2;
 
-		if (p->motorInternals.isPhaseC * p->motorInternals.isPhaseC_prev < 0)		//ток сменил свой знак с момента выклчюения инвертора
+		if (p->motorInternals.isPhaseC * p->motorInternals.isPhaseC_prev < 0)		//С‚РѕРє СЃРјРµРЅРёР» СЃРІРѕР№ Р·РЅР°Рє СЃ РјРѕРјРµРЅС‚Р° РІС‹РєР»С‡СЋРµРЅРёСЏ РёРЅРІРµСЂС‚РѕСЂР°
 			p->motorInternals.CurrentInvertedFlag |= 4;
 
 		if (p->motorInternals.CurrentInvertedFlag == 7) {
@@ -541,22 +541,22 @@ void MotorModel_calcU43Phase(TMotorModel *p) {
 			p->motorInternals.fic = 0;
 		}
 
-		p->motorInternals.fiav = (p->motorInternals.fia + p->motorInternals.fib + p->motorInternals.fic) * (1.0/3);		//потенциал срежней точки
-		p->motorInternals.ua = p->motorInternals.fia - p->motorInternals.fiav;					//напряжения
+		p->motorInternals.fiav = (p->motorInternals.fia + p->motorInternals.fib + p->motorInternals.fic) * (1.0/3);		//РїРѕС‚РµРЅС†РёР°Р» СЃСЂРµР¶РЅРµР№ С‚РѕС‡РєРё
+		p->motorInternals.ua = p->motorInternals.fia - p->motorInternals.fiav;					//РЅР°РїСЂСЏР¶РµРЅРёСЏ
 		p->motorInternals.ub = p->motorInternals.fib - p->motorInternals.fiav;
 		p->motorInternals.uc = p->motorInternals.fic - p->motorInternals.fiav;
 
-		//напряжения в осях альфа,бета
+		//РЅР°РїСЂСЏР¶РµРЅРёСЏ РІ РѕСЃСЏС… Р°Р»СЊС„Р°,Р±РµС‚Р°
 		p->motorInternals.usa = p->motorInternals.ua;
 		p->motorInternals.usb = 0.577350269 * p->motorInternals.ua + 1.154700538 * p->motorInternals.ub;
 	}
 }
 
-//расчет напряжения для ОВ синхронного двигателя
+//СЂР°СЃС‡РµС‚ РЅР°РїСЂСЏР¶РµРЅРёСЏ РґР»СЏ РћР’ СЃРёРЅС…СЂРѕРЅРЅРѕРіРѕ РґРІРёРіР°С‚РµР»СЏ
 void MotorModel_calcU4SyncMFieldWinding(TMotorModel *p) {
-	if (p->InvertorEna) { //инвертор включен
-		// расчет напряжений питания
-		// перерасчет влияния мертвого времени на скважность фазы в зависимости от знака тока
+	if (p->InvertorEna) { //РёРЅРІРµСЂС‚РѕСЂ РІРєР»СЋС‡РµРЅ
+		// СЂР°СЃС‡РµС‚ РЅР°РїСЂСЏР¶РµРЅРёР№ РїРёС‚Р°РЅРёСЏ
+		// РїРµСЂРµСЂР°СЃС‡РµС‚ РІР»РёСЏРЅРёСЏ РјРµСЂС‚РІРѕРіРѕ РІСЂРµРјРµРЅРё РЅР° СЃРєРІР°Р¶РЅРѕСЃС‚СЊ С„Р°Р·С‹ РІ Р·Р°РІРёСЃРёРјРѕСЃС‚Рё РѕС‚ Р·РЅР°РєР° С‚РѕРєР°
 		if (p->motorInternals.i_f > 0) {
 			if (p->motorInternals.cmpr3 > p->motorInternals.dt)
 				p->motorInternals.dtf = -p->motorInternals.dt;
@@ -568,11 +568,11 @@ void MotorModel_calcU4SyncMFieldWinding(TMotorModel *p) {
 			else
 				p->motorInternals.dtf = p->motorInternals.tpr - p->motorInternals.cmpr3;
 		}
-		//расчет потенциалов с учетом влияния мертвого времени
-		p->motorInternals.u_f = p->motorInternals.udc * (p->motorInternals.cmpr3 + (p->motorInternals.dtf >> 1)) / p->motorInternals.tpr;//Напряжение на ОВ
+		//СЂР°СЃС‡РµС‚ РїРѕС‚РµРЅС†РёР°Р»РѕРІ СЃ СѓС‡РµС‚РѕРј РІР»РёСЏРЅРёСЏ РјРµСЂС‚РІРѕРіРѕ РІСЂРµРјРµРЅРё
+		p->motorInternals.u_f = p->motorInternals.udc * (p->motorInternals.cmpr3 + (p->motorInternals.dtf >> 1)) / p->motorInternals.tpr;//РќР°РїСЂСЏР¶РµРЅРёРµ РЅР° РћР’
 	} else
-	{//Инвертор выключен
-		p->motorInternals.u_f = 0;//Напряжение ОВ равно нулю
+	{//РРЅРІРµСЂС‚РѕСЂ РІС‹РєР»СЋС‡РµРЅ
+		p->motorInternals.u_f = 0;//РќР°РїСЂСЏР¶РµРЅРёРµ РћР’ СЂР°РІРЅРѕ РЅСѓР»СЋ
 	}
 
 
@@ -586,139 +586,139 @@ void MotorModel_MechModelExecute(TMotorModel *p) {
 	if (p->motorInternals.omega < 0)
 		p->loadTmp = -p->load - p->motorInternals.MechLoss;
 
-	d_omega = p->motorInternals.t / p->motorInternals.j * (p->motorInternals.torque - p->loadTmp);					//приращение скорости
+	d_omega = p->motorInternals.t / p->motorInternals.j * (p->motorInternals.torque - p->loadTmp);					//РїСЂРёСЂР°С‰РµРЅРёРµ СЃРєРѕСЂРѕСЃС‚Рё
 
 	if ((fabs(d_omega) > fabs(p->motorInternals.omega)) && (fabs(p->motorInternals.torque) < p->load)) {
 		p->motorInternals.omega = 0;
 		d_omega = 0;
 	}
 
-	p->motorInternals.omega = p->motorInternals.omega + d_omega;	//скорость
+	p->motorInternals.omega = p->motorInternals.omega + d_omega;	//СЃРєРѕСЂРѕСЃС‚СЊ
 
 
 }
 
-//кубическая интерполяция для кривых намагничивания SRD
+//РєСѓР±РёС‡РµСЃРєР°СЏ РёРЅС‚РµСЂРїРѕР»СЏС†РёСЏ РґР»СЏ РєСЂРёРІС‹С… РЅР°РјР°РіРЅРёС‡РёРІР°РЅРёСЏ SRD
 float MotorModel_FluxCubicInterpolation (volatile float Isource, volatile TFluxCurvePoint SourceArray[], volatile int SourceResolution)
 {
 	volatile float PsiResult=0;
-	if (Isource <= SourceArray[0].i)	//ток меньше или равен минимуму
+	if (Isource <= SourceArray[0].i)	//С‚РѕРє РјРµРЅСЊС€Рµ РёР»Рё СЂР°РІРµРЅ РјРёРЅРёРјСѓРјСѓ
 	{
 		PsiResult = SourceArray[0].psi;
 		return PsiResult;
 	}
-	if (Isource >= SourceArray[SourceResolution].i)	//ток больше или равен максимуму
+	if (Isource >= SourceArray[SourceResolution].i)	//С‚РѕРє Р±РѕР»СЊС€Рµ РёР»Рё СЂР°РІРµРЅ РјР°РєСЃРёРјСѓРјСѓ
 	{
 		PsiResult = SourceArray[SourceResolution].psi;
 		return PsiResult;
 	}
-	for (int count = 1; count < SourceResolution+1; count++)	//попали внутрь границ, ищем нужный отрезок
+	for (int count = 1; count < SourceResolution+1; count++)	//РїРѕРїР°Р»Рё РІРЅСѓС‚СЂСЊ РіСЂР°РЅРёС†, РёС‰РµРј РЅСѓР¶РЅС‹Р№ РѕС‚СЂРµР·РѕРє
 	{
-		if (SourceArray[count].i >= Isource)	//ток в следующей точке больше заданного, значит попали в нужный отрезок
+		if (SourceArray[count].i >= Isource)	//С‚РѕРє РІ СЃР»РµРґСѓСЋС‰РµР№ С‚РѕС‡РєРµ Р±РѕР»СЊС€Рµ Р·Р°РґР°РЅРЅРѕРіРѕ, Р·РЅР°С‡РёС‚ РїРѕРїР°Р»Рё РІ РЅСѓР¶РЅС‹Р№ РѕС‚СЂРµР·РѕРє
 		{
-			volatile float a, b, c, d;	//коэффициенты кубического полинома
-			volatile float f_d0, f_d1;	//производные в левой и правой точке отрезка
-			volatile float x_m;			//масштабированный икс: такой, чтобы левая точка отрезка оказалась в нуле, а правая - в единице
-			//Формула кубической интерполяции f(x)=a*x^3 + b*x^2 + c*x + d, производная: f(x)=3*a*x^2 + 2*b*x + c
-			//Чтобы найти коэффициенты кубического полинома, нужно найти значения полинома на границах отрезка справа и слева,
-			//а также производную полинома в этих точках. Для вычисления производных нужны значения исходной дискретной функции
-			//в 2 соседних точках (левее и правее границ отрезка). Считаем ток=0 - левая граница отрезка, ток=1 - правая граница
+			volatile float a, b, c, d;	//РєРѕСЌС„С„РёС†РёРµРЅС‚С‹ РєСѓР±РёС‡РµСЃРєРѕРіРѕ РїРѕР»РёРЅРѕРјР°
+			volatile float f_d0, f_d1;	//РїСЂРѕРёР·РІРѕРґРЅС‹Рµ РІ Р»РµРІРѕР№ Рё РїСЂР°РІРѕР№ С‚РѕС‡РєРµ РѕС‚СЂРµР·РєР°
+			volatile float x_m;			//РјР°СЃС€С‚Р°Р±РёСЂРѕРІР°РЅРЅС‹Р№ РёРєСЃ: С‚Р°РєРѕР№, С‡С‚РѕР±С‹ Р»РµРІР°СЏ С‚РѕС‡РєР° РѕС‚СЂРµР·РєР° РѕРєР°Р·Р°Р»Р°СЃСЊ РІ РЅСѓР»Рµ, Р° РїСЂР°РІР°СЏ - РІ РµРґРёРЅРёС†Рµ
+			//Р¤РѕСЂРјСѓР»Р° РєСѓР±РёС‡РµСЃРєРѕР№ РёРЅС‚РµСЂРїРѕР»СЏС†РёРё f(x)=a*x^3 + b*x^2 + c*x + d, РїСЂРѕРёР·РІРѕРґРЅР°СЏ: f(x)=3*a*x^2 + 2*b*x + c
+			//Р§С‚РѕР±С‹ РЅР°Р№С‚Рё РєРѕСЌС„С„РёС†РёРµРЅС‚С‹ РєСѓР±РёС‡РµСЃРєРѕРіРѕ РїРѕР»РёРЅРѕРјР°, РЅСѓР¶РЅРѕ РЅР°Р№С‚Рё Р·РЅР°С‡РµРЅРёСЏ РїРѕР»РёРЅРѕРјР° РЅР° РіСЂР°РЅРёС†Р°С… РѕС‚СЂРµР·РєР° СЃРїСЂР°РІР° Рё СЃР»РµРІР°,
+			//Р° С‚Р°РєР¶Рµ РїСЂРѕРёР·РІРѕРґРЅСѓСЋ РїРѕР»РёРЅРѕРјР° РІ СЌС‚РёС… С‚РѕС‡РєР°С…. Р”Р»СЏ РІС‹С‡РёСЃР»РµРЅРёСЏ РїСЂРѕРёР·РІРѕРґРЅС‹С… РЅСѓР¶РЅС‹ Р·РЅР°С‡РµРЅРёСЏ РёСЃС…РѕРґРЅРѕР№ РґРёСЃРєСЂРµС‚РЅРѕР№ С„СѓРЅРєС†РёРё
+			//РІ 2 СЃРѕСЃРµРґРЅРёС… С‚РѕС‡РєР°С… (Р»РµРІРµРµ Рё РїСЂР°РІРµРµ РіСЂР°РЅРёС† РѕС‚СЂРµР·РєР°). РЎС‡РёС‚Р°РµРј С‚РѕРє=0 - Р»РµРІР°СЏ РіСЂР°РЅРёС†Р° РѕС‚СЂРµР·РєР°, С‚РѕРє=1 - РїСЂР°РІР°СЏ РіСЂР°РЅРёС†Р°
 			//a = 2*f(0) - 2*f(1) + f'(0) + f'(1)
 			//b = -3*f(0) + 3*f(1) - 2*f'(0) - f'(1)
 			//c = f'(0)
 			//d = f(0)
-			//Т.к. шаг по току неравномерный, а x[1]-x[0]!=1, производные ищются по формулам:
-			//f'(0) = (f[1] - f[-1]) / {(x[1]-x[-1]) / (x[1]-x[0])}, т.е., исходная кривая растягивается по оси x, чтобы выполнялось x[1]-x[0]=1
+			//Рў.Рє. С€Р°Рі РїРѕ С‚РѕРєСѓ РЅРµСЂР°РІРЅРѕРјРµСЂРЅС‹Р№, Р° x[1]-x[0]!=1, РїСЂРѕРёР·РІРѕРґРЅС‹Рµ РёС‰СЋС‚СЃСЏ РїРѕ С„РѕСЂРјСѓР»Р°Рј:
+			//f'(0) = (f[1] - f[-1]) / {(x[1]-x[-1]) / (x[1]-x[0])}, С‚.Рµ., РёСЃС…РѕРґРЅР°СЏ РєСЂРёРІР°СЏ СЂР°СЃС‚СЏРіРёРІР°РµС‚СЃСЏ РїРѕ РѕСЃРё x, С‡С‚РѕР±С‹ РІС‹РїРѕР»РЅСЏР»РѕСЃСЊ x[1]-x[0]=1
 			//f'(1) = (f[2] - f[0]) / {(x[2]-x[0]) / (x[1]-x[0])}
-			//Упростим: f'(0) = (f[1] - f[-1]) *(x[1]-x[0]) / (x[1]-x[-1]), f'(1) = (f[2] - f[0]) *(x[1]-x[0]) / (x[2]-x[0])
-			//Посчитав, коэффициенты, нужно выдать результат по формуле:
+			//РЈРїСЂРѕСЃС‚РёРј: f'(0) = (f[1] - f[-1]) *(x[1]-x[0]) / (x[1]-x[-1]), f'(1) = (f[2] - f[0]) *(x[1]-x[0]) / (x[2]-x[0])
+			//РџРѕСЃС‡РёС‚Р°РІ, РєРѕСЌС„С„РёС†РёРµРЅС‚С‹, РЅСѓР¶РЅРѕ РІС‹РґР°С‚СЊ СЂРµР·СѓР»СЊС‚Р°С‚ РїРѕ С„РѕСЂРјСѓР»Рµ:
 			//f(x)= a*xm^3 + b*xm^2 + c*xm + d,
-			//где xm=(x-x[0])/(x[1]-x[0]), т.к. x[0] не равен 0, а x[1] не равен 1. Т.е., надо сдвинуть (вычитаем x[0]) и сжать обратно (делим на x[1]-x[0])
-			//точка -1: count-2
-			//точка 0: count-1
-			//точка 1: count
-			//точка 2: count+1
+			//РіРґРµ xm=(x-x[0])/(x[1]-x[0]), С‚.Рє. x[0] РЅРµ СЂР°РІРµРЅ 0, Р° x[1] РЅРµ СЂР°РІРµРЅ 1. Рў.Рµ., РЅР°РґРѕ СЃРґРІРёРЅСѓС‚СЊ (РІС‹С‡РёС‚Р°РµРј x[0]) Рё СЃР¶Р°С‚СЊ РѕР±СЂР°С‚РЅРѕ (РґРµР»РёРј РЅР° x[1]-x[0])
+			//С‚РѕС‡РєР° -1: count-2
+			//С‚РѕС‡РєР° 0: count-1
+			//С‚РѕС‡РєР° 1: count
+			//С‚РѕС‡РєР° 2: count+1
 
-			//считаем производные в точках 0 и 1 (на краях отрезка)
-			if (count == 1)	//крайний левый отрезок
+			//СЃС‡РёС‚Р°РµРј РїСЂРѕРёР·РІРѕРґРЅС‹Рµ РІ С‚РѕС‡РєР°С… 0 Рё 1 (РЅР° РєСЂР°СЏС… РѕС‚СЂРµР·РєР°)
+			if (count == 1)	//РєСЂР°Р№РЅРёР№ Р»РµРІС‹Р№ РѕС‚СЂРµР·РѕРє
 			{
-				//производную слева по-обычному посчитать нельзя, т.к. крайняя точка, посчитаем производную по самому отрезку
-				f_d0 = SourceArray[count].psi - SourceArray[count-1].psi;	//на разность токов на краях отрезка не делим, т.к. приняли ее за единицу
+				//РїСЂРѕРёР·РІРѕРґРЅСѓСЋ СЃР»РµРІР° РїРѕ-РѕР±С‹С‡РЅРѕРјСѓ РїРѕСЃС‡РёС‚Р°С‚СЊ РЅРµР»СЊР·СЏ, С‚.Рє. РєСЂР°Р№РЅСЏСЏ С‚РѕС‡РєР°, РїРѕСЃС‡РёС‚Р°РµРј РїСЂРѕРёР·РІРѕРґРЅСѓСЋ РїРѕ СЃР°РјРѕРјСѓ РѕС‚СЂРµР·РєСѓ
+				f_d0 = SourceArray[count].psi - SourceArray[count-1].psi;	//РЅР° СЂР°Р·РЅРѕСЃС‚СЊ С‚РѕРєРѕРІ РЅР° РєСЂР°СЏС… РѕС‚СЂРµР·РєР° РЅРµ РґРµР»РёРј, С‚.Рє. РїСЂРёРЅСЏР»Рё РµРµ Р·Р° РµРґРёРЅРёС†Сѓ
 			}
-			else	//считаем левую производную как обычно
+			else	//СЃС‡РёС‚Р°РµРј Р»РµРІСѓСЋ РїСЂРѕРёР·РІРѕРґРЅСѓСЋ РєР°Рє РѕР±С‹С‡РЅРѕ
 			{
 				f_d0 = (SourceArray[count].psi - SourceArray[count-2].psi)*(SourceArray[count].i - SourceArray[count-1].i)/(SourceArray[count].i - SourceArray[count-2].i);
 			}
-			if (count == SourceResolution)	//крайний правый отрезок
+			if (count == SourceResolution)	//РєСЂР°Р№РЅРёР№ РїСЂР°РІС‹Р№ РѕС‚СЂРµР·РѕРє
 			{
-				//производную справа по-обычному посчитать нельзя, т.к. крайняя точка, посчитаем производную по самому отрезку
-				f_d1 = SourceArray[count].psi - SourceArray[count-1].psi;	//на разность токов на краях отрезка не делим, т.к. приняли ее за единицу
+				//РїСЂРѕРёР·РІРѕРґРЅСѓСЋ СЃРїСЂР°РІР° РїРѕ-РѕР±С‹С‡РЅРѕРјСѓ РїРѕСЃС‡РёС‚Р°С‚СЊ РЅРµР»СЊР·СЏ, С‚.Рє. РєСЂР°Р№РЅСЏСЏ С‚РѕС‡РєР°, РїРѕСЃС‡РёС‚Р°РµРј РїСЂРѕРёР·РІРѕРґРЅСѓСЋ РїРѕ СЃР°РјРѕРјСѓ РѕС‚СЂРµР·РєСѓ
+				f_d1 = SourceArray[count].psi - SourceArray[count-1].psi;	//РЅР° СЂР°Р·РЅРѕСЃС‚СЊ С‚РѕРєРѕРІ РЅР° РєСЂР°СЏС… РѕС‚СЂРµР·РєР° РЅРµ РґРµР»РёРј, С‚.Рє. РїСЂРёРЅСЏР»Рё РµРµ Р·Р° РµРґРёРЅРёС†Сѓ
 			}
-			else	//считаем правую производную как обычно
+			else	//СЃС‡РёС‚Р°РµРј РїСЂР°РІСѓСЋ РїСЂРѕРёР·РІРѕРґРЅСѓСЋ РєР°Рє РѕР±С‹С‡РЅРѕ
 			{
 				f_d1 = (SourceArray[count+1].psi - SourceArray[count-1].psi)*(SourceArray[count].i - SourceArray[count-1].i)/(SourceArray[count+1].i - SourceArray[count-1].i);
 			}
 
-			//считаем коэффициенты полинома
+			//СЃС‡РёС‚Р°РµРј РєРѕСЌС„С„РёС†РёРµРЅС‚С‹ РїРѕР»РёРЅРѕРјР°
 			a = 2*SourceArray[count-1].psi - 2*SourceArray[count].psi + f_d0 + f_d1;
 			b = -3*SourceArray[count-1].psi + 3*SourceArray[count].psi - 2*f_d0 - f_d1;
 			c = f_d0;
 			d = SourceArray[count-1].psi;
 
-			//считаем ток с учетом сдвинутости и растянутости кубической параболы относительно исходного графика по оси икс
+			//СЃС‡РёС‚Р°РµРј С‚РѕРє СЃ СѓС‡РµС‚РѕРј СЃРґРІРёРЅСѓС‚РѕСЃС‚Рё Рё СЂР°СЃС‚СЏРЅСѓС‚РѕСЃС‚Рё РєСѓР±РёС‡РµСЃРєРѕР№ РїР°СЂР°Р±РѕР»С‹ РѕС‚РЅРѕСЃРёС‚РµР»СЊРЅРѕ РёСЃС…РѕРґРЅРѕРіРѕ РіСЂР°С„РёРєР° РїРѕ РѕСЃРё РёРєСЃ
 			x_m = (Isource - SourceArray[count-1].i)/(SourceArray[count].i - SourceArray[count-1].i);
 
-			PsiResult = a*x_m*x_m*x_m + b*x_m*x_m + c*x_m + d;	//считаем искомый поток
+			PsiResult = a*x_m*x_m*x_m + b*x_m*x_m + c*x_m + d;	//СЃС‡РёС‚Р°РµРј РёСЃРєРѕРјС‹Р№ РїРѕС‚РѕРє
 			return PsiResult;
 		}
 	}
-	return PsiResult;//сюда не дойдем на самом деле, но чтобы компилятор не ругался
+	return PsiResult;//СЃСЋРґР° РЅРµ РґРѕР№РґРµРј РЅР° СЃР°РјРѕРј РґРµР»Рµ, РЅРѕ С‡С‚РѕР±С‹ РєРѕРјРїРёР»СЏС‚РѕСЂ РЅРµ СЂСѓРіР°Р»СЃСЏ
 }
 
-//двухмерная интерполяция по поверхности для поиска тока в модели SRD
+//РґРІСѓС…РјРµСЂРЅР°СЏ РёРЅС‚РµСЂРїРѕР»СЏС†РёСЏ РїРѕ РїРѕРІРµСЂС…РЅРѕСЃС‚Рё РґР»СЏ РїРѕРёСЃРєР° С‚РѕРєР° РІ РјРѕРґРµР»Рё SRD
 float MotorModel_PhaseCurrentInterpolation (TMotorModel *p, volatile float Theta, volatile float PsiS)
 {
 	volatile float Current = 0;
 	volatile float Current1, Current2;
 	volatile int cntThetaMinus, cntThetaPlus, cntPsiMinus, cntPsiPlus;
 
-	//ограничиваем входные переменные
-	//по углу надо зациклить
+	//РѕРіСЂР°РЅРёС‡РёРІР°РµРј РІС…РѕРґРЅС‹Рµ РїРµСЂРµРјРµРЅРЅС‹Рµ
+	//РїРѕ СѓРіР»Сѓ РЅР°РґРѕ Р·Р°С†РёРєР»РёС‚СЊ
 	if (Theta < 0)
-		Theta += p->motorInternals.ThetaMax;	//прибавляем 2пи
+		Theta += p->motorInternals.ThetaMax;	//РїСЂРёР±Р°РІР»СЏРµРј 2РїРё
 	if (Theta > p->motorInternals.ThetaMax)
-		Theta -= p->motorInternals.ThetaMax;	//вычитаем 2пи
-	cntThetaMinus = Theta*p->motorInternals.ThetaStep_inv;	//индекс массива по углу (меньший из двух)
-	cntThetaPlus = cntThetaMinus + 1;			//больший из двух
-	if (cntThetaPlus > SRD_SURFACE_RESOLUTION)		//если вышел за границу массива, зацикливаем
+		Theta -= p->motorInternals.ThetaMax;	//РІС‹С‡РёС‚Р°РµРј 2РїРё
+	cntThetaMinus = Theta*p->motorInternals.ThetaStep_inv;	//РёРЅРґРµРєСЃ РјР°СЃСЃРёРІР° РїРѕ СѓРіР»Сѓ (РјРµРЅСЊС€РёР№ РёР· РґРІСѓС…)
+	cntThetaPlus = cntThetaMinus + 1;			//Р±РѕР»СЊС€РёР№ РёР· РґРІСѓС…
+	if (cntThetaPlus > SRD_SURFACE_RESOLUTION)		//РµСЃР»Рё РІС‹С€РµР» Р·Р° РіСЂР°РЅРёС†Сѓ РјР°СЃСЃРёРІР°, Р·Р°С†РёРєР»РёРІР°РµРј
 	{
 		cntThetaPlus -= (SRD_SURFACE_RESOLUTION+1);
 	}
-	//по потоку надо просто ограничить сверху и снизу
+	//РїРѕ РїРѕС‚РѕРєСѓ РЅР°РґРѕ РїСЂРѕСЃС‚Рѕ РѕРіСЂР°РЅРёС‡РёС‚СЊ СЃРІРµСЂС…Сѓ Рё СЃРЅРёР·Сѓ
 	if (PsiS < 0)
 		PsiS = 0;
 	if (PsiS > p->motorInternals.PsiMax)
 		PsiS = p->motorInternals.PsiMax;
-	cntPsiMinus = PsiS*p->motorInternals.PsiStep_inv;		//индекс массива по потоку (меньший из двух)
-	cntPsiPlus = cntPsiMinus + 1;				//больший из двух
+	cntPsiMinus = PsiS*p->motorInternals.PsiStep_inv;		//РёРЅРґРµРєСЃ РјР°СЃСЃРёРІР° РїРѕ РїРѕС‚РѕРєСѓ (РјРµРЅСЊС€РёР№ РёР· РґРІСѓС…)
+	cntPsiPlus = cntPsiMinus + 1;				//Р±РѕР»СЊС€РёР№ РёР· РґРІСѓС…
 
-	//первая интерполяция по углу
+	//РїРµСЂРІР°СЏ РёРЅС‚РµСЂРїРѕР»СЏС†РёСЏ РїРѕ СѓРіР»Сѓ
 	Current1 = I_PsiTheta[cntPsiMinus][cntThetaMinus] + (I_PsiTheta[cntPsiMinus][cntThetaPlus] - I_PsiTheta[cntPsiMinus][cntThetaMinus])*(Theta - (float)cntThetaMinus*p->motorInternals.ThetaStep)*p->motorInternals.ThetaStep_inv;
-	//если попали на верхнюю границу по потоку, надо интерполировать по сокращенным формулам, чтобы не выпасть за границы массива
-	if (cntPsiMinus >= SRD_SURFACE_RESOLUTION)	//по потоку оказались на верхней границе
+	//РµСЃР»Рё РїРѕРїР°Р»Рё РЅР° РІРµСЂС…РЅСЋСЋ РіСЂР°РЅРёС†Сѓ РїРѕ РїРѕС‚РѕРєСѓ, РЅР°РґРѕ РёРЅС‚РµСЂРїРѕР»РёСЂРѕРІР°С‚СЊ РїРѕ СЃРѕРєСЂР°С‰РµРЅРЅС‹Рј С„РѕСЂРјСѓР»Р°Рј, С‡С‚РѕР±С‹ РЅРµ РІС‹РїР°СЃС‚СЊ Р·Р° РіСЂР°РЅРёС†С‹ РјР°СЃСЃРёРІР°
+	if (cntPsiMinus >= SRD_SURFACE_RESOLUTION)	//РїРѕ РїРѕС‚РѕРєСѓ РѕРєР°Р·Р°Р»РёСЃСЊ РЅР° РІРµСЂС…РЅРµР№ РіСЂР°РЅРёС†Рµ
 	{
-		//интерполяция по потоку
-		Current = Current1;	//интерполировать на границе по потоку не надо, момент будет равен моменту от первой интерполяции по углу
+		//РёРЅС‚РµСЂРїРѕР»СЏС†РёСЏ РїРѕ РїРѕС‚РѕРєСѓ
+		Current = Current1;	//РёРЅС‚РµСЂРїРѕР»РёСЂРѕРІР°С‚СЊ РЅР° РіСЂР°РЅРёС†Рµ РїРѕ РїРѕС‚РѕРєСѓ РЅРµ РЅР°РґРѕ, РјРѕРјРµРЅС‚ Р±СѓРґРµС‚ СЂР°РІРµРЅ РјРѕРјРµРЅС‚Сѓ РѕС‚ РїРµСЂРІРѕР№ РёРЅС‚РµСЂРїРѕР»СЏС†РёРё РїРѕ СѓРіР»Сѓ
 		return Current;
 	}
-	//вторая интерполяция по углу
+	//РІС‚РѕСЂР°СЏ РёРЅС‚РµСЂРїРѕР»СЏС†РёСЏ РїРѕ СѓРіР»Сѓ
 	Current2 = I_PsiTheta[cntPsiPlus][cntThetaMinus] + (I_PsiTheta[cntPsiPlus][cntThetaPlus] - I_PsiTheta[cntPsiPlus][cntThetaMinus])*(Theta - (float)cntThetaMinus*p->motorInternals.ThetaStep)*p->motorInternals.ThetaStep_inv;
-	//интерполяция по потоку
+	//РёРЅС‚РµСЂРїРѕР»СЏС†РёСЏ РїРѕ РїРѕС‚РѕРєСѓ
 	Current = Current1 + (Current2 - Current1)*(PsiS - (float)cntPsiMinus*p->motorInternals.PsiStep)*p->motorInternals.PsiStep_inv;
 	return Current;
 }
 
-//двухмерная интерполяция по поверхности для поиска момента в модели SRD
+//РґРІСѓС…РјРµСЂРЅР°СЏ РёРЅС‚РµСЂРїРѕР»СЏС†РёСЏ РїРѕ РїРѕРІРµСЂС…РЅРѕСЃС‚Рё РґР»СЏ РїРѕРёСЃРєР° РјРѕРјРµРЅС‚Р° РІ РјРѕРґРµР»Рё SRD
 float MotorModel_PhaseTorqueInterpolation (TMotorModel *p, volatile float Theta, volatile float IPh)
 {
 
@@ -726,87 +726,87 @@ float MotorModel_PhaseTorqueInterpolation (TMotorModel *p, volatile float Theta,
 	volatile float Torque1, Torque2;
 	volatile int cntThetaMinus, cntThetaPlus, cntIMinus, cntIPlus;
 
-	//ограничиваем входные переменные
-	//по углу надо зациклить
+	//РѕРіСЂР°РЅРёС‡РёРІР°РµРј РІС…РѕРґРЅС‹Рµ РїРµСЂРµРјРµРЅРЅС‹Рµ
+	//РїРѕ СѓРіР»Сѓ РЅР°РґРѕ Р·Р°С†РёРєР»РёС‚СЊ
 	if (Theta < 0)
-		Theta += p->motorInternals.ThetaMax;	//прибавляем 2пи
+		Theta += p->motorInternals.ThetaMax;	//РїСЂРёР±Р°РІР»СЏРµРј 2РїРё
 	if (Theta > p->motorInternals.ThetaMax)
-		Theta -= p->motorInternals.ThetaMax;	//вычитаем 2пи
-	cntThetaMinus = Theta*p->motorInternals.ThetaStep_inv;	//индекс массива по углу (меньший из двух)
-	cntThetaPlus = cntThetaMinus + 1;			//больший из двух
-	if (cntThetaPlus > SRD_SURFACE_RESOLUTION)		//если вышел за границу массива, зацикливаем
+		Theta -= p->motorInternals.ThetaMax;	//РІС‹С‡РёС‚Р°РµРј 2РїРё
+	cntThetaMinus = Theta*p->motorInternals.ThetaStep_inv;	//РёРЅРґРµРєСЃ РјР°СЃСЃРёРІР° РїРѕ СѓРіР»Сѓ (РјРµРЅСЊС€РёР№ РёР· РґРІСѓС…)
+	cntThetaPlus = cntThetaMinus + 1;			//Р±РѕР»СЊС€РёР№ РёР· РґРІСѓС…
+	if (cntThetaPlus > SRD_SURFACE_RESOLUTION)		//РµСЃР»Рё РІС‹С€РµР» Р·Р° РіСЂР°РЅРёС†Сѓ РјР°СЃСЃРёРІР°, Р·Р°С†РёРєР»РёРІР°РµРј
 	{
 		cntThetaPlus -= (SRD_SURFACE_RESOLUTION+1);
 	}
-	//по току надо просто ограничить сверху и снизу
+	//РїРѕ С‚РѕРєСѓ РЅР°РґРѕ РїСЂРѕСЃС‚Рѕ РѕРіСЂР°РЅРёС‡РёС‚СЊ СЃРІРµСЂС…Сѓ Рё СЃРЅРёР·Сѓ
 	if (IPh < 0)
 		IPh = 0;
 	if (IPh > p->motorInternals.IMax)
 		IPh = p->motorInternals.IMax;
-	cntIMinus = IPh*p->motorInternals.IStep_inv;		//индекс массива по току (меньший из двух)
-	cntIPlus = cntIMinus + 1;				//больший из двух
+	cntIMinus = IPh*p->motorInternals.IStep_inv;		//РёРЅРґРµРєСЃ РјР°СЃСЃРёРІР° РїРѕ С‚РѕРєСѓ (РјРµРЅСЊС€РёР№ РёР· РґРІСѓС…)
+	cntIPlus = cntIMinus + 1;				//Р±РѕР»СЊС€РёР№ РёР· РґРІСѓС…
 
-	//первая интерполяция по углу
+	//РїРµСЂРІР°СЏ РёРЅС‚РµСЂРїРѕР»СЏС†РёСЏ РїРѕ СѓРіР»Сѓ
 	Torque1 = M_ITheta[cntIMinus][cntThetaMinus] + (M_ITheta[cntIMinus][cntThetaPlus] - M_ITheta[cntIMinus][cntThetaMinus])*(Theta - (float)cntThetaMinus*p->motorInternals.ThetaStep)*p->motorInternals.ThetaStep_inv;
-	//если попали на верхнюю границу по току, надо интерполировать по сокращенным формулам, чтобы не выпасть за границы массива
-	if (cntIMinus >= SRD_SURFACE_RESOLUTION)	//по току оказались на верхней границе
+	//РµСЃР»Рё РїРѕРїР°Р»Рё РЅР° РІРµСЂС…РЅСЋСЋ РіСЂР°РЅРёС†Сѓ РїРѕ С‚РѕРєСѓ, РЅР°РґРѕ РёРЅС‚РµСЂРїРѕР»РёСЂРѕРІР°С‚СЊ РїРѕ СЃРѕРєСЂР°С‰РµРЅРЅС‹Рј С„РѕСЂРјСѓР»Р°Рј, С‡С‚РѕР±С‹ РЅРµ РІС‹РїР°СЃС‚СЊ Р·Р° РіСЂР°РЅРёС†С‹ РјР°СЃСЃРёРІР°
+	if (cntIMinus >= SRD_SURFACE_RESOLUTION)	//РїРѕ С‚РѕРєСѓ РѕРєР°Р·Р°Р»РёСЃСЊ РЅР° РІРµСЂС…РЅРµР№ РіСЂР°РЅРёС†Рµ
 	{
-		//интерполяция по току
-		Torque = Torque1;	//интерполировать на границе по току не надо, момент будет равен моменту от первой интерполяции по углу
+		//РёРЅС‚РµСЂРїРѕР»СЏС†РёСЏ РїРѕ С‚РѕРєСѓ
+		Torque = Torque1;	//РёРЅС‚РµСЂРїРѕР»РёСЂРѕРІР°С‚СЊ РЅР° РіСЂР°РЅРёС†Рµ РїРѕ С‚РѕРєСѓ РЅРµ РЅР°РґРѕ, РјРѕРјРµРЅС‚ Р±СѓРґРµС‚ СЂР°РІРµРЅ РјРѕРјРµРЅС‚Сѓ РѕС‚ РїРµСЂРІРѕР№ РёРЅС‚РµСЂРїРѕР»СЏС†РёРё РїРѕ СѓРіР»Сѓ
 		return Torque;
 	}
-	//вторая интерполяция по углу
+	//РІС‚РѕСЂР°СЏ РёРЅС‚РµСЂРїРѕР»СЏС†РёСЏ РїРѕ СѓРіР»Сѓ
 	Torque2 = M_ITheta[cntIPlus][cntThetaMinus] + (M_ITheta[cntIPlus][cntThetaPlus] - M_ITheta[cntIPlus][cntThetaMinus])*(Theta - (float)cntThetaMinus*p->motorInternals.ThetaStep)*p->motorInternals.ThetaStep_inv;
-	//интерполяция по току
+	//РёРЅС‚РµСЂРїРѕР»СЏС†РёСЏ РїРѕ С‚РѕРєСѓ
 	Torque = Torque1 + (Torque2 - Torque1)*(IPh - (float)cntIMinus*p->motorInternals.IStep)*p->motorInternals.IStep_inv;
 	return Torque;
 }
 
 void Model_Execute_InductionMotor(TMotorModel *p) {
-	MotorModel_calcU43Phase(p);	//расчет напряжений
+	MotorModel_calcU43Phase(p);	//СЂР°СЃС‡РµС‚ РЅР°РїСЂСЏР¶РµРЅРёР№
 
-	// Расчет синуса и косинуса угла ротора
-	p->motorInternals.cosTetaR = _IQtoF(_IQcos(_IQ(p->motorInternals.tetaR)));//синус и косинус считаются с фиксированной точкой, т.к. флоатовские занимают тысячи тактов (видимо, какая-то медленная реализация, не использующая аппаратную поддержку).
-	p->motorInternals.sinTetaR = _IQtoF(_IQsin(_IQ(p->motorInternals.tetaR)));//если удастся найти быстрый плавающий синус и косинус, то их можно считать во флоате
+	// Р Р°СЃС‡РµС‚ СЃРёРЅСѓСЃР° Рё РєРѕСЃРёРЅСѓСЃР° СѓРіР»Р° СЂРѕС‚РѕСЂР°
+	p->motorInternals.cosTetaR = _IQtoF(_IQcos(_IQ(p->motorInternals.tetaR)));//СЃРёРЅСѓСЃ Рё РєРѕСЃРёРЅСѓСЃ СЃС‡РёС‚Р°СЋС‚СЃСЏ СЃ С„РёРєСЃРёСЂРѕРІР°РЅРЅРѕР№ С‚РѕС‡РєРѕР№, С‚.Рє. С„Р»РѕР°С‚РѕРІСЃРєРёРµ Р·Р°РЅРёРјР°СЋС‚ С‚С‹СЃСЏС‡Рё С‚Р°РєС‚РѕРІ (РІРёРґРёРјРѕ, РєР°РєР°СЏ-С‚Рѕ РјРµРґР»РµРЅРЅР°СЏ СЂРµР°Р»РёР·Р°С†РёСЏ, РЅРµ РёСЃРїРѕР»СЊР·СѓСЋС‰Р°СЏ Р°РїРїР°СЂР°С‚РЅСѓСЋ РїРѕРґРґРµСЂР¶РєСѓ).
+	p->motorInternals.sinTetaR = _IQtoF(_IQsin(_IQ(p->motorInternals.tetaR)));//РµСЃР»Рё СѓРґР°СЃС‚СЃСЏ РЅР°Р№С‚Рё Р±С‹СЃС‚СЂС‹Р№ РїР»Р°РІР°СЋС‰РёР№ СЃРёРЅСѓСЃ Рё РєРѕСЃРёРЅСѓСЃ, С‚Рѕ РёС… РјРѕР¶РЅРѕ СЃС‡РёС‚Р°С‚СЊ РІРѕ С„Р»РѕР°С‚Рµ
 
-	// Расчет изменений потокосцеплений (предикторы)
+	// Р Р°СЃС‡РµС‚ РёР·РјРµРЅРµРЅРёР№ РїРѕС‚РѕРєРѕСЃС†РµРїР»РµРЅРёР№ (РїСЂРµРґРёРєС‚РѕСЂС‹)
 	p->motorInternals.dpsa = (p->motorInternals.usa - p->motorInternals.isa * p->motorInternals.rs);
 	p->motorInternals.dpsb = (p->motorInternals.usb - p->motorInternals.isb * p->motorInternals.rs);
 	p->motorInternals.dprd = -(p->motorInternals.ird * p->motorInternals.rr);
 	p->motorInternals.dprq = -(p->motorInternals.irq * p->motorInternals.rr);
 
-	// Расчет предикторов потокосцеплений
+	// Р Р°СЃС‡РµС‚ РїСЂРµРґРёРєС‚РѕСЂРѕРІ РїРѕС‚РѕРєРѕСЃС†РµРїР»РµРЅРёР№
 	p->motorInternals.ppsa = p->motorInternals.psa + p->motorInternals.dpsa * p->motorInternals.t;
 	p->motorInternals.ppsb = p->motorInternals.psb + p->motorInternals.dpsb * p->motorInternals.t;
 	p->motorInternals.pprd = p->motorInternals.prd + p->motorInternals.dprd * p->motorInternals.t;
 	p->motorInternals.pprq = p->motorInternals.prq + p->motorInternals.dprq * p->motorInternals.t;
 
-	// Поворот потокосцеплений ротора в координаты alpha,beta
+	// РџРѕРІРѕСЂРѕС‚ РїРѕС‚РѕРєРѕСЃС†РµРїР»РµРЅРёР№ СЂРѕС‚РѕСЂР° РІ РєРѕРѕСЂРґРёРЅР°С‚С‹ alpha,beta
 	p->motorInternals.ppra = p->motorInternals.pprd * p->motorInternals.cosTetaR - p->motorInternals.pprq * p->motorInternals.sinTetaR;
 	p->motorInternals.pprb = +p->motorInternals.pprd * p->motorInternals.sinTetaR + p->motorInternals.pprq * p->motorInternals.cosTetaR;
 
-	// Расчет токов для предикторного уравнения
+	// Р Р°СЃС‡РµС‚ С‚РѕРєРѕРІ РґР»СЏ РїСЂРµРґРёРєС‚РѕСЂРЅРѕРіРѕ СѓСЂР°РІРЅРµРЅРёСЏ
 	p->motorInternals.isa = p->motorInternals.ks * p->motorInternals.ppsa + p->motorInternals.km * p->motorInternals.ppra;
 	p->motorInternals.isb = p->motorInternals.ks * p->motorInternals.ppsb + p->motorInternals.km * p->motorInternals.pprb;
 	p->motorInternals.ira = p->motorInternals.km * p->motorInternals.ppsa + p->motorInternals.kr * p->motorInternals.ppra;
 	p->motorInternals.irb = p->motorInternals.km * p->motorInternals.ppsb + p->motorInternals.kr * p->motorInternals.pprb;
 
-	// Поворот роторных токов в d,q координаты
+	// РџРѕРІРѕСЂРѕС‚ СЂРѕС‚РѕСЂРЅС‹С… С‚РѕРєРѕРІ РІ d,q РєРѕРѕСЂРґРёРЅР°С‚С‹
 	p->motorInternals.ird = p->motorInternals.ira * p->motorInternals.cosTetaR + p->motorInternals.irb * p->motorInternals.sinTetaR;
 	p->motorInternals.irq = -p->motorInternals.ira * p->motorInternals.sinTetaR + p->motorInternals.irb * p->motorInternals.cosTetaR;
 
-	// Расчет изменений потокосцеплений по Рунге-Кутта второго порядка
+	// Р Р°СЃС‡РµС‚ РёР·РјРµРЅРµРЅРёР№ РїРѕС‚РѕРєРѕСЃС†РµРїР»РµРЅРёР№ РїРѕ Р СѓРЅРіРµ-РљСѓС‚С‚Р° РІС‚РѕСЂРѕРіРѕ РїРѕСЂСЏРґРєР°
 	p->motorInternals.psa = p->motorInternals.psa + p->motorInternals.t2 * (p->motorInternals.dpsa + (p->motorInternals.usa - p->motorInternals.isa * p->motorInternals.rs));
 	p->motorInternals.psb = p->motorInternals.psb + p->motorInternals.t2 * (p->motorInternals.dpsb + (p->motorInternals.usb - p->motorInternals.isb * p->motorInternals.rs));
 	p->motorInternals.prd = p->motorInternals.prd + p->motorInternals.t2 * (p->motorInternals.dprd + (-p->motorInternals.ird * p->motorInternals.rr));
 	p->motorInternals.prq = p->motorInternals.prq + p->motorInternals.t2 * (p->motorInternals.dprq + (-p->motorInternals.irq * p->motorInternals.rr));
 
-	// Поворот потокосцеплений ротора в координаты alpha,beta
+	// РџРѕРІРѕСЂРѕС‚ РїРѕС‚РѕРєРѕСЃС†РµРїР»РµРЅРёР№ СЂРѕС‚РѕСЂР° РІ РєРѕРѕСЂРґРёРЅР°С‚С‹ alpha,beta
 	p->motorInternals.pra = p->motorInternals.prd * p->motorInternals.cosTetaR - p->motorInternals.prq * p->motorInternals.sinTetaR;
 	p->motorInternals.prb = p->motorInternals.prd * p->motorInternals.sinTetaR + p->motorInternals.prq * p->motorInternals.cosTetaR;
 
-	//если инвертор выключен и все токи пересекли ноль (колеблются около нуля, расфорсировка прошла)
-	//то обнуляем все потоки в двигателе (читерство, иначе сложный расчет будет)
+	//РµСЃР»Рё РёРЅРІРµСЂС‚РѕСЂ РІС‹РєР»СЋС‡РµРЅ Рё РІСЃРµ С‚РѕРєРё РїРµСЂРµСЃРµРєР»Рё РЅРѕР»СЊ (РєРѕР»РµР±Р»СЋС‚СЃСЏ РѕРєРѕР»Рѕ РЅСѓР»СЏ, СЂР°СЃС„РѕСЂСЃРёСЂРѕРІРєР° РїСЂРѕС€Р»Р°)
+	//С‚Рѕ РѕР±РЅСѓР»СЏРµРј РІСЃРµ РїРѕС‚РѕРєРё РІ РґРІРёРіР°С‚РµР»Рµ (С‡РёС‚РµСЂСЃС‚РІРѕ, РёРЅР°С‡Рµ СЃР»РѕР¶РЅС‹Р№ СЂР°СЃС‡РµС‚ Р±СѓРґРµС‚)
 	if ((p->InvertorEna == 0) && (p->motorInternals.CurrentInvertedFlag == 7)) {
 		p->motorInternals.psa = 0;
 		p->motorInternals.psb = 0;
@@ -816,33 +816,33 @@ void Model_Execute_InductionMotor(TMotorModel *p) {
 		p->motorInternals.prb = 0;
 	}
 
-	// Расчет токов после уточнения изменения потокосцеплений
+	// Р Р°СЃС‡РµС‚ С‚РѕРєРѕРІ РїРѕСЃР»Рµ СѓС‚РѕС‡РЅРµРЅРёСЏ РёР·РјРµРЅРµРЅРёСЏ РїРѕС‚РѕРєРѕСЃС†РµРїР»РµРЅРёР№
 	p->motorInternals.isa = p->motorInternals.ks * p->motorInternals.psa + p->motorInternals.km * p->motorInternals.pra;
 	p->motorInternals.isb = p->motorInternals.ks * p->motorInternals.psb + p->motorInternals.km * p->motorInternals.prb;
 	p->motorInternals.ira = p->motorInternals.km * p->motorInternals.psa + p->motorInternals.kr * p->motorInternals.pra;
 	p->motorInternals.irb = p->motorInternals.km * p->motorInternals.psb + p->motorInternals.kr * p->motorInternals.prb;
 
-	// Поворот роторных токов в d,q координаты
+	// РџРѕРІРѕСЂРѕС‚ СЂРѕС‚РѕСЂРЅС‹С… С‚РѕРєРѕРІ РІ d,q РєРѕРѕСЂРґРёРЅР°С‚С‹
 	p->motorInternals.ird = p->motorInternals.ira * p->motorInternals.cosTetaR + p->motorInternals.irb * p->motorInternals.sinTetaR;
 	p->motorInternals.irq = -p->motorInternals.ira * p->motorInternals.sinTetaR + p->motorInternals.irb * p->motorInternals.cosTetaR;
 
-	// Расчет момента
+	// Р Р°СЃС‡РµС‚ РјРѕРјРµРЅС‚Р°
 	p->motorInternals.torque = 3.0 / 2.0 * p->motorInternals.pp * (p->motorInternals.psa * p->motorInternals.isb - p->motorInternals.psb * p->motorInternals.isa);
 
-	// Расчет механики
+	// Р Р°СЃС‡РµС‚ РјРµС…Р°РЅРёРєРё
 	MotorModel_MechModelExecute(p);
 
-	//токи из двухфазной системы в трехфазную
+	//С‚РѕРєРё РёР· РґРІСѓС…С„Р°Р·РЅРѕР№ СЃРёСЃС‚РµРјС‹ РІ С‚СЂРµС…С„Р°Р·РЅСѓСЋ
 	p->motorInternals.isPhaseA = p->motorInternals.isa;
 	p->motorInternals.isPhaseB = -0.5 * p->motorInternals.isa + p->motorInternals.cos30 * p->motorInternals.isb;
 	p->motorInternals.isPhaseC = -p->motorInternals.isa - p->motorInternals.isPhaseB;
 
-	//расчет измеряемых величин
-	p->motorInternals.adcSpeedtemp = p->motorInternals.omega * p->motorInternals.speedK + ADC_HALF_VALUE;						//скорость (тахогенератор)
-	p->motorInternals.iAtemp = p->motorInternals.isa * p->motorInternals.iSenseK + ADC_HALF_VALUE;				//ток фазы A
-	p->motorInternals.iBtemp = p->motorInternals.isPhaseB * p->motorInternals.iSenseK + ADC_HALF_VALUE;			//ток фазы B
-	p->motorInternals.tetaRM = p->motorInternals.tetaRM + p->motorInternals.t * p->motorInternals.omega;	//механическое положение ротора
-	if (p->motorInternals.tetaRM > 2 * MOTOR_MODEL_PI)					//ограничиваем 0..2Пи
+	//СЂР°СЃС‡РµС‚ РёР·РјРµСЂСЏРµРјС‹С… РІРµР»РёС‡РёРЅ
+	p->motorInternals.adcSpeedtemp = p->motorInternals.omega * p->motorInternals.speedK + ADC_HALF_VALUE;						//СЃРєРѕСЂРѕСЃС‚СЊ (С‚Р°С…РѕРіРµРЅРµСЂР°С‚РѕСЂ)
+	p->motorInternals.iAtemp = p->motorInternals.isa * p->motorInternals.iSenseK + ADC_HALF_VALUE;				//С‚РѕРє С„Р°Р·С‹ A
+	p->motorInternals.iBtemp = p->motorInternals.isPhaseB * p->motorInternals.iSenseK + ADC_HALF_VALUE;			//С‚РѕРє С„Р°Р·С‹ B
+	p->motorInternals.tetaRM = p->motorInternals.tetaRM + p->motorInternals.t * p->motorInternals.omega;	//РјРµС…Р°РЅРёС‡РµСЃРєРѕРµ РїРѕР»РѕР¶РµРЅРёРµ СЂРѕС‚РѕСЂР°
+	if (p->motorInternals.tetaRM > 2 * MOTOR_MODEL_PI)					//РѕРіСЂР°РЅРёС‡РёРІР°РµРј 0..2РџРё
 		p->motorInternals.tetaRM -= 2 * MOTOR_MODEL_PI;
 	if (p->motorInternals.tetaRM < 0)
 		p->motorInternals.tetaRM += 2 * MOTOR_MODEL_PI;
@@ -850,79 +850,79 @@ void Model_Execute_InductionMotor(TMotorModel *p) {
 }
 
 void Model_Execute_SyncMotor(TMotorModel *p) {
-	MotorModel_calcU43Phase(p);	//расчет напряжений
+	MotorModel_calcU43Phase(p);	//СЂР°СЃС‡РµС‚ РЅР°РїСЂСЏР¶РµРЅРёР№
 
-	// Расчет потокосцепления ротора
-	if (p->motorInternals.syncm_pm == 0) // Если с независимой ОВ
+	// Р Р°СЃС‡РµС‚ РїРѕС‚РѕРєРѕСЃС†РµРїР»РµРЅРёСЏ СЂРѕС‚РѕСЂР°
+	if (p->motorInternals.syncm_pm == 0) // Р•СЃР»Рё СЃ РЅРµР·Р°РІРёСЃРёРјРѕР№ РћР’
 	{
-		MotorModel_calcU4SyncMFieldWinding(p);	//расчет напряжения ОВ
+		MotorModel_calcU4SyncMFieldWinding(p);	//СЂР°СЃС‡РµС‚ РЅР°РїСЂСЏР¶РµРЅРёСЏ РћР’
 		p->motorInternals.dif = (p->motorInternals.u_f - p->motorInternals.i_f * p->motorInternals.r_f)*p->motorInternals._1_l_f;
 		p->motorInternals.i_f = p->motorInternals.i_f + p->motorInternals.dif * p->motorInternals.t;
-		if (p->motorInternals.i_f <= p->motorInternals.RatedFluxCurrent)		// Учет насыщения
+		if (p->motorInternals.i_f <= p->motorInternals.RatedFluxCurrent)		// РЈС‡РµС‚ РЅР°СЃС‹С‰РµРЅРёСЏ
 			p->motorInternals.m = p->motorInternals.i_f * p->motorInternals.l_m;
 		else
-			p->motorInternals.m = p->motorInternals.RatedFluxCurrent * p->motorInternals.l_m; // тут можно чуть изменить, введя небольшую надбавку.
-	}	// Если с постоянными магнитами, то поток ротора присвоился еще в ините и не меняется
+			p->motorInternals.m = p->motorInternals.RatedFluxCurrent * p->motorInternals.l_m; // С‚СѓС‚ РјРѕР¶РЅРѕ С‡СѓС‚СЊ РёР·РјРµРЅРёС‚СЊ, РІРІРµРґСЏ РЅРµР±РѕР»СЊС€СѓСЋ РЅР°РґР±Р°РІРєСѓ.
+	}	// Р•СЃР»Рё СЃ РїРѕСЃС‚РѕСЏРЅРЅС‹РјРё РјР°РіРЅРёС‚Р°РјРё, С‚Рѕ РїРѕС‚РѕРє СЂРѕС‚РѕСЂР° РїСЂРёСЃРІРѕРёР»СЃСЏ РµС‰Рµ РІ РёРЅРёС‚Рµ Рё РЅРµ РјРµРЅСЏРµС‚СЃСЏ
 
-	// Расчет синуса и косинуса угла ротора
-	p->motorInternals.cosTetaR = _IQtoF(_IQcos(_IQ(p->motorInternals.tetaR)));//синус и косинус считаются с фиксированной точкой, т.к. флоатовские занимают тысячи тактов (видимо, какая-то медленная реализация, не использующая аппаратную поддержку).
-	p->motorInternals.sinTetaR = _IQtoF(_IQsin(_IQ(p->motorInternals.tetaR)));//если удастся найти быстрый плавающий синус и косинус, то их можно считать во флоате
+	// Р Р°СЃС‡РµС‚ СЃРёРЅСѓСЃР° Рё РєРѕСЃРёРЅСѓСЃР° СѓРіР»Р° СЂРѕС‚РѕСЂР°
+	p->motorInternals.cosTetaR = _IQtoF(_IQcos(_IQ(p->motorInternals.tetaR)));//СЃРёРЅСѓСЃ Рё РєРѕСЃРёРЅСѓСЃ СЃС‡РёС‚Р°СЋС‚СЃСЏ СЃ С„РёРєСЃРёСЂРѕРІР°РЅРЅРѕР№ С‚РѕС‡РєРѕР№, С‚.Рє. С„Р»РѕР°С‚РѕРІСЃРєРёРµ Р·Р°РЅРёРјР°СЋС‚ С‚С‹СЃСЏС‡Рё С‚Р°РєС‚РѕРІ (РІРёРґРёРјРѕ, РєР°РєР°СЏ-С‚Рѕ РјРµРґР»РµРЅРЅР°СЏ СЂРµР°Р»РёР·Р°С†РёСЏ, РЅРµ РёСЃРїРѕР»СЊР·СѓСЋС‰Р°СЏ Р°РїРїР°СЂР°С‚РЅСѓСЋ РїРѕРґРґРµСЂР¶РєСѓ).
+	p->motorInternals.sinTetaR = _IQtoF(_IQsin(_IQ(p->motorInternals.tetaR)));//РµСЃР»Рё СѓРґР°СЃС‚СЃСЏ РЅР°Р№С‚Рё Р±С‹СЃС‚СЂС‹Р№ РїР»Р°РІР°СЋС‰РёР№ СЃРёРЅСѓСЃ Рё РєРѕСЃРёРЅСѓСЃ, С‚Рѕ РёС… РјРѕР¶РЅРѕ СЃС‡РёС‚Р°С‚СЊ РІРѕ С„Р»РѕР°С‚Рµ
 
-	// Поворот напряжений из осей альфа.бета в оси d,q
+	// РџРѕРІРѕСЂРѕС‚ РЅР°РїСЂСЏР¶РµРЅРёР№ РёР· РѕСЃРµР№ Р°Р»СЊС„Р°.Р±РµС‚Р° РІ РѕСЃРё d,q
 	p->motorInternals.usd = p->motorInternals.usa * p->motorInternals.cosTetaR + p->motorInternals.usb * p->motorInternals.sinTetaR;
 	p->motorInternals.usq = -p->motorInternals.usa * p->motorInternals.sinTetaR + p->motorInternals.usb * p->motorInternals.cosTetaR;
 
-	// Расчет изменений потокосцеплений (предикторы)
+	// Р Р°СЃС‡РµС‚ РёР·РјРµРЅРµРЅРёР№ РїРѕС‚РѕРєРѕСЃС†РµРїР»РµРЅРёР№ (РїСЂРµРґРёРєС‚РѕСЂС‹)
 	p->motorInternals.dpsd = (p->motorInternals.usd - p->motorInternals.isd * p->motorInternals.rs + p->motorInternals.psq * p->motorInternals.omega);
 	p->motorInternals.dpsq = (p->motorInternals.usq - p->motorInternals.isq * p->motorInternals.rs - p->motorInternals.psd * p->motorInternals.omega);
 
-	// Расчет предикторов потокосцеплений
+	// Р Р°СЃС‡РµС‚ РїСЂРµРґРёРєС‚РѕСЂРѕРІ РїРѕС‚РѕРєРѕСЃС†РµРїР»РµРЅРёР№
 	p->motorInternals.ppsd = p->motorInternals.psd + p->motorInternals.dpsd * p->motorInternals.t;
 	p->motorInternals.ppsq = p->motorInternals.psq + p->motorInternals.dpsq * p->motorInternals.t;
 
-	// Расчет токов для предикторного уравнения
+	// Р Р°СЃС‡РµС‚ С‚РѕРєРѕРІ РґР»СЏ РїСЂРµРґРёРєС‚РѕСЂРЅРѕРіРѕ СѓСЂР°РІРЅРµРЅРёСЏ
 	p->motorInternals.isd = (p->motorInternals.ppsd - p->motorInternals.m) * p->motorInternals._1_lsd;
 	p->motorInternals.isq = p->motorInternals.ppsq * p->motorInternals._1_lsq;
 
-	// Расчет изменений потокосцеплений по Рунге-Кутта второго порядка
+	// Р Р°СЃС‡РµС‚ РёР·РјРµРЅРµРЅРёР№ РїРѕС‚РѕРєРѕСЃС†РµРїР»РµРЅРёР№ РїРѕ Р СѓРЅРіРµ-РљСѓС‚С‚Р° РІС‚РѕСЂРѕРіРѕ РїРѕСЂСЏРґРєР°
 	p->motorInternals.psd = p->motorInternals.psd + p->motorInternals.t2 * (p->motorInternals.dpsd + (p->motorInternals.usd - p->motorInternals.isd * p->motorInternals.rs + p->motorInternals.psq * p->motorInternals.omega));
 	p->motorInternals.psq = p->motorInternals.psq + p->motorInternals.t2 * (p->motorInternals.dpsq + (p->motorInternals.usq - p->motorInternals.isq * p->motorInternals.rs - p->motorInternals.psd * p->motorInternals.omega));
 
-	//если инвертор выключен и все токи пересекли ноль (колеблются около нуля, расфорсировка прошла)
-	//то выключаем расчет токов статора, чтобы не дергались (читерство, иначе сложный расчет будет)
+	//РµСЃР»Рё РёРЅРІРµСЂС‚РѕСЂ РІС‹РєР»СЋС‡РµРЅ Рё РІСЃРµ С‚РѕРєРё РїРµСЂРµСЃРµРєР»Рё РЅРѕР»СЊ (РєРѕР»РµР±Р»СЋС‚СЃСЏ РѕРєРѕР»Рѕ РЅСѓР»СЏ, СЂР°СЃС„РѕСЂСЃРёСЂРѕРІРєР° РїСЂРѕС€Р»Р°)
+	//С‚Рѕ РІС‹РєР»СЋС‡Р°РµРј СЂР°СЃС‡РµС‚ С‚РѕРєРѕРІ СЃС‚Р°С‚РѕСЂР°, С‡С‚РѕР±С‹ РЅРµ РґРµСЂРіР°Р»РёСЃСЊ (С‡РёС‚РµСЂСЃС‚РІРѕ, РёРЅР°С‡Рµ СЃР»РѕР¶РЅС‹Р№ СЂР°СЃС‡РµС‚ Р±СѓРґРµС‚)
 	if ((p->InvertorEna == 0) && (p->motorInternals.CurrentInvertedFlag == 7)) {
 		p->motorInternals.psd = p->motorInternals.m;
 		p->motorInternals.psq = 0;
 	}
 
-	// Расчет токов после уточнения изменения потокосцеплений
+	// Р Р°СЃС‡РµС‚ С‚РѕРєРѕРІ РїРѕСЃР»Рµ СѓС‚РѕС‡РЅРµРЅРёСЏ РёР·РјРµРЅРµРЅРёСЏ РїРѕС‚РѕРєРѕСЃС†РµРїР»РµРЅРёР№
 	p->motorInternals.isd = (p->motorInternals.psd - p->motorInternals.m) * p->motorInternals._1_lsd;
 	p->motorInternals.isq = p->motorInternals.psq * p->motorInternals._1_lsq;
 
-	//поворот токов в оси альфа,бета (для вывода на АЦП)
+	//РїРѕРІРѕСЂРѕС‚ С‚РѕРєРѕРІ РІ РѕСЃРё Р°Р»СЊС„Р°,Р±РµС‚Р° (РґР»СЏ РІС‹РІРѕРґР° РЅР° РђР¦Рџ)
 	p->motorInternals.isa = p->motorInternals.isd * p->motorInternals.cosTetaR - p->motorInternals.isq * p->motorInternals.sinTetaR;
 	p->motorInternals.isb = +p->motorInternals.isd * p->motorInternals.sinTetaR + p->motorInternals.isq * p->motorInternals.cosTetaR;
 
-	// Расчет момента
+	// Р Р°СЃС‡РµС‚ РјРѕРјРµРЅС‚Р°
 	p->motorInternals.torque = 3.0 / 2.0 * p->motorInternals.pp * (p->motorInternals.psd * p->motorInternals.isq - p->motorInternals.psq * p->motorInternals.isd);
 
-	// Расчет механики
+	// Р Р°СЃС‡РµС‚ РјРµС…Р°РЅРёРєРё
 	MotorModel_MechModelExecute(p);
 
-	//токи из двухфазной системы в трехфазную
+	//С‚РѕРєРё РёР· РґРІСѓС…С„Р°Р·РЅРѕР№ СЃРёСЃС‚РµРјС‹ РІ С‚СЂРµС…С„Р°Р·РЅСѓСЋ
 	p->motorInternals.isPhaseA = p->motorInternals.isa;
 	p->motorInternals.isPhaseB = -0.5 * p->motorInternals.isa + p->motorInternals.cos30 * p->motorInternals.isb;
 	p->motorInternals.isPhaseC = -p->motorInternals.isa - p->motorInternals.isPhaseB;
 
 	p->motorInternals.isPhaseD = p->motorInternals.i_f;
 
-	//расчет измеряемых величин
-	p->adc_code_Speed = p->motorInternals.omega * p->motorInternals.speedK + ADC_HALF_VALUE;						//скорость (тахогенератор)
-	p->motorInternals.iAtemp = p->motorInternals.isa * p->motorInternals.iSenseK + ADC_HALF_VALUE;				//ток фазы A
-	p->motorInternals.iBtemp = p->motorInternals.isPhaseB * p->motorInternals.iSenseK + ADC_HALF_VALUE;			//ток фазы B
-	p->motorInternals.iDtemp = p->motorInternals.i_f * p->motorInternals.ifSenseK + ADC_HALF_VALUE;					//ток ОВ
-	p->motorInternals.tetaRM = p->motorInternals.tetaRM + p->motorInternals.t * p->motorInternals.omega;	//механическое положение ротора
-	if (p->motorInternals.tetaRM > 2 * MOTOR_MODEL_PI)					//ограничиваем 0..2Пи
+	//СЂР°СЃС‡РµС‚ РёР·РјРµСЂСЏРµРјС‹С… РІРµР»РёС‡РёРЅ
+	p->adc_code_Speed = p->motorInternals.omega * p->motorInternals.speedK + ADC_HALF_VALUE;						//СЃРєРѕСЂРѕСЃС‚СЊ (С‚Р°С…РѕРіРµРЅРµСЂР°С‚РѕСЂ)
+	p->motorInternals.iAtemp = p->motorInternals.isa * p->motorInternals.iSenseK + ADC_HALF_VALUE;				//С‚РѕРє С„Р°Р·С‹ A
+	p->motorInternals.iBtemp = p->motorInternals.isPhaseB * p->motorInternals.iSenseK + ADC_HALF_VALUE;			//С‚РѕРє С„Р°Р·С‹ B
+	p->motorInternals.iDtemp = p->motorInternals.i_f * p->motorInternals.ifSenseK + ADC_HALF_VALUE;					//С‚РѕРє РћР’
+	p->motorInternals.tetaRM = p->motorInternals.tetaRM + p->motorInternals.t * p->motorInternals.omega;	//РјРµС…Р°РЅРёС‡РµСЃРєРѕРµ РїРѕР»РѕР¶РµРЅРёРµ СЂРѕС‚РѕСЂР°
+	if (p->motorInternals.tetaRM > 2 * MOTOR_MODEL_PI)					//РѕРіСЂР°РЅРёС‡РёРІР°РµРј 0..2РџРё
 		p->motorInternals.tetaRM -= 2 * MOTOR_MODEL_PI;
 	if (p->motorInternals.tetaRM < 0)
 		p->motorInternals.tetaRM += 2 * MOTOR_MODEL_PI;
@@ -931,43 +931,43 @@ void Model_Execute_SyncMotor(TMotorModel *p) {
 }
 
 void Model_Execute_DCMotor(TMotorModel *p) {
-	// Преобразование напряжений
+	// РџСЂРµРѕР±СЂР°Р·РѕРІР°РЅРёРµ РЅР°РїСЂСЏР¶РµРЅРёР№
 	MotorModel_calcU42Phase(p);
 
-	// !!! Внимание! При соотношении параметров ОВ с малой индуктивность и большим сопротивлением расчет ОВ может выполняться некорректно
-	// !!! Критическое соотношение параметров Lf=6.3 мГн и Rf=125 Ом
+	// !!! Р’РЅРёРјР°РЅРёРµ! РџСЂРё СЃРѕРѕС‚РЅРѕС€РµРЅРёРё РїР°СЂР°РјРµС‚СЂРѕРІ РћР’ СЃ РјР°Р»РѕР№ РёРЅРґСѓРєС‚РёРІРЅРѕСЃС‚СЊ Рё Р±РѕР»СЊС€РёРј СЃРѕРїСЂРѕС‚РёРІР»РµРЅРёРµРј СЂР°СЃС‡РµС‚ РћР’ РјРѕР¶РµС‚ РІС‹РїРѕР»РЅСЏС‚СЊСЃСЏ РЅРµРєРѕСЂСЂРµРєС‚РЅРѕ
+	// !!! РљСЂРёС‚РёС‡РµСЃРєРѕРµ СЃРѕРѕС‚РЅРѕС€РµРЅРёРµ РїР°СЂР°РјРµС‚СЂРѕРІ Lf=6.3 РјР“РЅ Рё Rf=125 РћРј
 
-	// предварительный расчет приращений по току
-	if (p->motorInternals.dcm_pm == 0) // Если с независимой ОВ
+	// РїСЂРµРґРІР°СЂРёС‚РµР»СЊРЅС‹Р№ СЂР°СЃС‡РµС‚ РїСЂРёСЂР°С‰РµРЅРёР№ РїРѕ С‚РѕРєСѓ
+	if (p->motorInternals.dcm_pm == 0) // Р•СЃР»Рё СЃ РЅРµР·Р°РІРёСЃРёРјРѕР№ РћР’
 	{
 		p->motorInternals.dif = (p->motorInternals.u_f - p->motorInternals.i_f * p->motorInternals.r_f)*p->motorInternals._1_l_f;
 		p->motorInternals.i_f = p->motorInternals.i_f + p->motorInternals.dif * p->motorInternals.t;
-		if (p->motorInternals.i_f <= p->motorInternals.RatedFluxCurrent)		// Учет насыщения
+		if (p->motorInternals.i_f <= p->motorInternals.RatedFluxCurrent)		// РЈС‡РµС‚ РЅР°СЃС‹С‰РµРЅРёСЏ
 			p->motorInternals.kf = p->motorInternals.i_f * p->motorInternals.l_m;
 		else
-			p->motorInternals.kf = p->motorInternals.RatedFluxCurrent * p->motorInternals.l_m; // тут можно чуть изменить, введя небольшую надбавку.
+			p->motorInternals.kf = p->motorInternals.RatedFluxCurrent * p->motorInternals.l_m; // С‚СѓС‚ РјРѕР¶РЅРѕ С‡СѓС‚СЊ РёР·РјРµРЅРёС‚СЊ, РІРІРµРґСЏ РЅРµР±РѕР»СЊС€СѓСЋ РЅР°РґР±Р°РІРєСѓ.
 	}
-	else // Если с постоянными магнитами
+	else // Р•СЃР»Рё СЃ РїРѕСЃС‚РѕСЏРЅРЅС‹РјРё РјР°РіРЅРёС‚Р°РјРё
 		p->motorInternals.kf = p->motorInternals.l_m * 1.0;
 
 	p->motorInternals.dia = (p->motorInternals.u_a - p->motorInternals.kf*p->motorInternals.omega - p->motorInternals.i_a*(p->motorInternals.r_a + p->motorInternals.r_ad))*p->motorInternals._1_l_a;
 	p->motorInternals.i_a = p->motorInternals.i_a + p->motorInternals.dia * p->motorInternals.t;
 
-	//если инвертор выключен и все токи пересекли ноль (колеблются около нуля, расфорсировка прошла)
-	//то выключаем расчет токов статора, чтобы не дергались (читерство, иначе сложный расчет будет)
+	//РµСЃР»Рё РёРЅРІРµСЂС‚РѕСЂ РІС‹РєР»СЋС‡РµРЅ Рё РІСЃРµ С‚РѕРєРё РїРµСЂРµСЃРµРєР»Рё РЅРѕР»СЊ (РєРѕР»РµР±Р»СЋС‚СЃСЏ РѕРєРѕР»Рѕ РЅСѓР»СЏ, СЂР°СЃС„РѕСЂСЃРёСЂРѕРІРєР° РїСЂРѕС€Р»Р°)
+	//С‚Рѕ РІС‹РєР»СЋС‡Р°РµРј СЂР°СЃС‡РµС‚ С‚РѕРєРѕРІ СЃС‚Р°С‚РѕСЂР°, С‡С‚РѕР±С‹ РЅРµ РґРµСЂРіР°Р»РёСЃСЊ (С‡РёС‚РµСЂСЃС‚РІРѕ, РёРЅР°С‡Рµ СЃР»РѕР¶РЅС‹Р№ СЂР°СЃС‡РµС‚ Р±СѓРґРµС‚)
 	if ((p->InvertorEna == 0) && (p->motorInternals.CurrentInvertedFlag == 7)) {
 		p->motorInternals.i_a=0;
 	}
 
-	// Момент
+	// РњРѕРјРµРЅС‚
 	p->motorInternals.torque = p->motorInternals.kf * p->motorInternals.i_a;
 
-	// вычисление механических величин
+	// РІС‹С‡РёСЃР»РµРЅРёРµ РјРµС…Р°РЅРёС‡РµСЃРєРёС… РІРµР»РёС‡РёРЅ
 	MotorModel_MechModelExecute(p);
 
 	//omega+=0.5;
-	p->motorInternals.tetaRM = p->motorInternals.tetaRM + p->motorInternals.t * p->motorInternals.omega;		//положение
-	if (p->motorInternals.tetaRM > 2 * MOTOR_MODEL_PI)						//ограничение 0..2Пи
+	p->motorInternals.tetaRM = p->motorInternals.tetaRM + p->motorInternals.t * p->motorInternals.omega;		//РїРѕР»РѕР¶РµРЅРёРµ
+	if (p->motorInternals.tetaRM > 2 * MOTOR_MODEL_PI)						//РѕРіСЂР°РЅРёС‡РµРЅРёРµ 0..2РџРё
 		p->motorInternals.tetaRM -= 2 * MOTOR_MODEL_PI;
 	if (p->motorInternals.tetaRM < 0)
 		p->motorInternals.tetaRM += 2 * MOTOR_MODEL_PI;
@@ -976,52 +976,52 @@ void Model_Execute_DCMotor(TMotorModel *p) {
 	p->motorInternals.isPhaseB = p->motorInternals.isPhaseA;
 	p->motorInternals.isPhaseC = p->motorInternals.i_f;
 
-	//расчет измеряемых величин
-	p->motorInternals.adcSpeedtemp = p->motorInternals.omega * p->motorInternals.speedK + ADC_HALF_VALUE;			//скорость (тахогенератор)
-	p->motorInternals.iAtemp = p->motorInternals.i_a * p->motorInternals.iSenseK + ADC_HALF_VALUE;					//ток якоря
-	p->motorInternals.iCtemp = p->motorInternals.i_f * p->motorInternals.ifSenseK + ADC_HALF_VALUE;					//ток ОВ
+	//СЂР°СЃС‡РµС‚ РёР·РјРµСЂСЏРµРјС‹С… РІРµР»РёС‡РёРЅ
+	p->motorInternals.adcSpeedtemp = p->motorInternals.omega * p->motorInternals.speedK + ADC_HALF_VALUE;			//СЃРєРѕСЂРѕСЃС‚СЊ (С‚Р°С…РѕРіРµРЅРµСЂР°С‚РѕСЂ)
+	p->motorInternals.iAtemp = p->motorInternals.i_a * p->motorInternals.iSenseK + ADC_HALF_VALUE;					//С‚РѕРє СЏРєРѕСЂСЏ
+	p->motorInternals.iCtemp = p->motorInternals.i_f * p->motorInternals.ifSenseK + ADC_HALF_VALUE;					//С‚РѕРє РћР’
 }
 
 
 void Model_Execute_SRDMotor(TMotorModel *p) {
-	p->motorInternals.ua=p->motorInternals.udc*(p->motorInternals.cmpr0*p->motorInternals.inv_tpr*2-1);	//фазное напряжение
-	p->motorInternals.psa+=(p->motorInternals.ua - p->motorInternals.isPhaseA*p->motorInternals.rs)*p->motorInternals.t;					//интегрируем потокосцепление
+	p->motorInternals.ua=p->motorInternals.udc*(p->motorInternals.cmpr0*p->motorInternals.inv_tpr*2-1);	//С„Р°Р·РЅРѕРµ РЅР°РїСЂСЏР¶РµРЅРёРµ
+	p->motorInternals.psa+=(p->motorInternals.ua - p->motorInternals.isPhaseA*p->motorInternals.rs)*p->motorInternals.t;					//РёРЅС‚РµРіСЂРёСЂСѓРµРј РїРѕС‚РѕРєРѕСЃС†РµРїР»РµРЅРёРµ
 	if (p->motorInternals.psa<0)
 		p->motorInternals.psa=0;
-	p->motorInternals.isPhaseA=MotorModel_PhaseCurrentInterpolation(p,p->motorInternals.tetaR, p->motorInternals.psa);			//ищем ток фазы
-	p->motorInternals.torque_a = MotorModel_PhaseTorqueInterpolation(p,p->motorInternals.tetaR, p->motorInternals.isPhaseA);		//ищем момент фазы
+	p->motorInternals.isPhaseA=MotorModel_PhaseCurrentInterpolation(p,p->motorInternals.tetaR, p->motorInternals.psa);			//РёС‰РµРј С‚РѕРє С„Р°Р·С‹
+	p->motorInternals.torque_a = MotorModel_PhaseTorqueInterpolation(p,p->motorInternals.tetaR, p->motorInternals.isPhaseA);		//РёС‰РµРј РјРѕРјРµРЅС‚ С„Р°Р·С‹
 	//DebugW2 = _IQ(p->motorInternals.torque_a);
 
-	p->motorInternals.ub=p->motorInternals.udc*(p->motorInternals.cmpr1*p->motorInternals.inv_tpr*2-1);	//фазное напряжение
-	p->motorInternals.psb+=(p->motorInternals.ub - p->motorInternals.isPhaseB*p->motorInternals.rs)*p->motorInternals.t;					//интегрируем потокосцепление
+	p->motorInternals.ub=p->motorInternals.udc*(p->motorInternals.cmpr1*p->motorInternals.inv_tpr*2-1);	//С„Р°Р·РЅРѕРµ РЅР°РїСЂСЏР¶РµРЅРёРµ
+	p->motorInternals.psb+=(p->motorInternals.ub - p->motorInternals.isPhaseB*p->motorInternals.rs)*p->motorInternals.t;					//РёРЅС‚РµРіСЂРёСЂСѓРµРј РїРѕС‚РѕРєРѕСЃС†РµРїР»РµРЅРёРµ
 	if (p->motorInternals.psb<0)
 		p->motorInternals.psb=0;
-	float TetaB = p->motorInternals.tetaR+MOTOR_MODEL_PI*1.33333;				//фазовый сдвиг
+	float TetaB = p->motorInternals.tetaR+MOTOR_MODEL_PI*1.33333;				//С„Р°Р·РѕРІС‹Р№ СЃРґРІРёРі
 	if (TetaB > 2*MOTOR_MODEL_PI)
 		TetaB -= 2*MOTOR_MODEL_PI;
-	p->motorInternals.isPhaseB=MotorModel_PhaseCurrentInterpolation(p,TetaB, p->motorInternals.psb);					//ищем ток фазы
-	p->motorInternals.torque_b = MotorModel_PhaseTorqueInterpolation(p,TetaB, p->motorInternals.isPhaseB);			//ищем момент фазы
+	p->motorInternals.isPhaseB=MotorModel_PhaseCurrentInterpolation(p,TetaB, p->motorInternals.psb);					//РёС‰РµРј С‚РѕРє С„Р°Р·С‹
+	p->motorInternals.torque_b = MotorModel_PhaseTorqueInterpolation(p,TetaB, p->motorInternals.isPhaseB);			//РёС‰РµРј РјРѕРјРµРЅС‚ С„Р°Р·С‹
 	//DebugW3 = _IQ(p->motorInternals.torque_b);
 
-	p->motorInternals.uc=p->motorInternals.udc*(p->motorInternals.cmpr2*p->motorInternals.inv_tpr*2-1);	//фазное напряжение
-	p->motorInternals.psc+=(p->motorInternals.uc - p->motorInternals.isPhaseC*p->motorInternals.rs)*p->motorInternals.t;					//интегрируем потокосцепление
+	p->motorInternals.uc=p->motorInternals.udc*(p->motorInternals.cmpr2*p->motorInternals.inv_tpr*2-1);	//С„Р°Р·РЅРѕРµ РЅР°РїСЂСЏР¶РµРЅРёРµ
+	p->motorInternals.psc+=(p->motorInternals.uc - p->motorInternals.isPhaseC*p->motorInternals.rs)*p->motorInternals.t;					//РёРЅС‚РµРіСЂРёСЂСѓРµРј РїРѕС‚РѕРєРѕСЃС†РµРїР»РµРЅРёРµ
 	if (p->motorInternals.psc<0)
 		p->motorInternals.psc=0;
-	float TetaC = p->motorInternals.tetaR+MOTOR_MODEL_PI*0.66667;				//фазовый сдвиг
+	float TetaC = p->motorInternals.tetaR+MOTOR_MODEL_PI*0.66667;				//С„Р°Р·РѕРІС‹Р№ СЃРґРІРёРі
 	if (TetaC > 2*MOTOR_MODEL_PI)
 		TetaC -= 2*MOTOR_MODEL_PI;
-	p->motorInternals.isPhaseC=MotorModel_PhaseCurrentInterpolation(p,TetaC, p->motorInternals.psc);					//ищем ток фазы
-	p->motorInternals.torque_c = MotorModel_PhaseTorqueInterpolation(p,TetaC, p->motorInternals.isPhaseC);			//ищем момент фазы
+	p->motorInternals.isPhaseC=MotorModel_PhaseCurrentInterpolation(p,TetaC, p->motorInternals.psc);					//РёС‰РµРј С‚РѕРє С„Р°Р·С‹
+	p->motorInternals.torque_c = MotorModel_PhaseTorqueInterpolation(p,TetaC, p->motorInternals.isPhaseC);			//РёС‰РµРј РјРѕРјРµРЅС‚ С„Р°Р·С‹
 	//DebugW4 = _IQ(p->motorInternals.torque_c);
 
-	//Суммарный момент всех фаз (фазы - независимые)
+	//РЎСѓРјРјР°СЂРЅС‹Р№ РјРѕРјРµРЅС‚ РІСЃРµС… С„Р°Р· (С„Р°Р·С‹ - РЅРµР·Р°РІРёСЃРёРјС‹Рµ)
 	p->motorInternals.torque = p->motorInternals.torque_a + p->motorInternals.torque_b + p->motorInternals.torque_c;
 
-	// Расчет механики
+	// Р Р°СЃС‡РµС‚ РјРµС…Р°РЅРёРєРё
 	MotorModel_MechModelExecute(p);
 
 	p->motorInternals.tetaRM+=p->motorInternals.t*p->motorInternals.omega;
-	//p->motorInternals.tetaRM = 0.393;	//угол с максимальным моментом для фазы A, для теста
+	//p->motorInternals.tetaRM = 0.393;	//СѓРіРѕР» СЃ РјР°РєСЃРёРјР°Р»СЊРЅС‹Рј РјРѕРјРµРЅС‚РѕРј РґР»СЏ С„Р°Р·С‹ A, РґР»СЏ С‚РµСЃС‚Р°
 	if (p->motorInternals.tetaRM>2*MOTOR_MODEL_PI)
 		p->motorInternals.tetaRM-=2*MOTOR_MODEL_PI;
 	if (p->motorInternals.tetaRM<0)
@@ -1039,15 +1039,15 @@ void Model_Execute_SRDMotor(TMotorModel *p) {
 
 }
 
-//основная функция расчета модели, вызывается в рперывании 10 кГц
+//РѕСЃРЅРѕРІРЅР°СЏ С„СѓРЅРєС†РёСЏ СЂР°СЃС‡РµС‚Р° РјРѕРґРµР»Рё, РІС‹Р·С‹РІР°РµС‚СЃСЏ РІ СЂРїРµСЂС‹РІР°РЅРёРё 10 РєР“С†
 void MotorModel_Execute(TMotorModel *p) {
 
-	p->motorInternals.cmpr0 = p->motorInternals.tpr-p->cmpr0;	//уставки сравнения ШИМ. С инверсией, потому что так настроен модуль ШИМ
+	p->motorInternals.cmpr0 = p->motorInternals.tpr-p->cmpr0;	//СѓСЃС‚Р°РІРєРё СЃСЂР°РІРЅРµРЅРёСЏ РЁРРњ. РЎ РёРЅРІРµСЂСЃРёРµР№, РїРѕС‚РѕРјСѓ С‡С‚Рѕ С‚Р°Рє РЅР°СЃС‚СЂРѕРµРЅ РјРѕРґСѓР»СЊ РЁРРњ
 	p->motorInternals.cmpr1 = p->motorInternals.tpr-p->cmpr1;
 	p->motorInternals.cmpr2 = p->motorInternals.tpr-p->cmpr2;
 	p->motorInternals.cmpr3 = p->motorInternals.tpr-p->cmpr3;
 
-	if (p->fault == 0)		//если нет ошибки модели, считаем
+	if (p->fault == 0)		//РµСЃР»Рё РЅРµС‚ РѕС€РёР±РєРё РјРѕРґРµР»Рё, СЃС‡РёС‚Р°РµРј
 	{
 		if (p->motorInternals.type == MODEL_INDUCTION_MOTOR) {
 			Model_Execute_InductionMotor(p);
@@ -1062,7 +1062,7 @@ void MotorModel_Execute(TMotorModel *p) {
 		else if (p->motorInternals.type==MODEL_SRD_MOTOR){
 			Model_Execute_SRDMotor(p);
 		}
-	} else {//модель в аварии
+	} else {//РјРѕРґРµР»СЊ РІ Р°РІР°СЂРёРё
 		p->motorInternals.iAtemp=ADC_HALF_VALUE;
 		p->motorInternals.iBtemp=ADC_HALF_VALUE;
 		p->motorInternals.iCtemp=ADC_HALF_VALUE;
@@ -1070,12 +1070,12 @@ void MotorModel_Execute(TMotorModel *p) {
 
 	}
 
-	//Имитация сигнала с датчика Холла (3 элемента) в зависимости от текущего электрического положения
-	//рассчитываем номер электрического сектора, где сейчас ротор из электрического угла
+	//РРјРёС‚Р°С†РёСЏ СЃРёРіРЅР°Р»Р° СЃ РґР°С‚С‡РёРєР° РҐРѕР»Р»Р° (3 СЌР»РµРјРµРЅС‚Р°) РІ Р·Р°РІРёСЃРёРјРѕСЃС‚Рё РѕС‚ С‚РµРєСѓС‰РµРіРѕ СЌР»РµРєС‚СЂРёС‡РµСЃРєРѕРіРѕ РїРѕР»РѕР¶РµРЅРёСЏ
+	//СЂР°СЃСЃС‡РёС‚С‹РІР°РµРј РЅРѕРјРµСЂ СЌР»РµРєС‚СЂРёС‡РµСЃРєРѕРіРѕ СЃРµРєС‚РѕСЂР°, РіРґРµ СЃРµР№С‡Р°СЃ СЂРѕС‚РѕСЂ РёР· СЌР»РµРєС‚СЂРёС‡РµСЃРєРѕРіРѕ СѓРіР»Р°
 	Uint16 TempSector=p->motorInternals.tetaR * (1/(2 * MOTOR_MODEL_PI)*6);
-	TempSector=TempSector%6;//угол не ограничен, поэтому используем остаток от делеления на кол-во секторов
+	TempSector=TempSector%6;//СѓРіРѕР» РЅРµ РѕРіСЂР°РЅРёС‡РµРЅ, РїРѕСЌС‚РѕРјСѓ РёСЃРїРѕР»СЊР·СѓРµРј РѕСЃС‚Р°С‚РѕРє РѕС‚ РґРµР»РµР»РµРЅРёСЏ РЅР° РєРѕР»-РІРѕ СЃРµРєС‚РѕСЂРѕРІ
 
-	switch (TempSector){//в зависимости от номера сектора формируем побитовый код на элементах Холла
+	switch (TempSector){//РІ Р·Р°РІРёСЃРёРјРѕСЃС‚Рё РѕС‚ РЅРѕРјРµСЂР° СЃРµРєС‚РѕСЂР° С„РѕСЂРјРёСЂСѓРµРј РїРѕР±РёС‚РѕРІС‹Р№ РєРѕРґ РЅР° СЌР»РµРјРµРЅС‚Р°С… РҐРѕР»Р»Р°
 		case 0:{
 			p->motorInternals.hallSensor=5;//101
 			break;
@@ -1103,29 +1103,29 @@ void MotorModel_Execute(TMotorModel *p) {
 
 	}
 
-	if (p->motorInternals.hallSensor!=p->motorInternals.hallSensorPrev){//Пришла новая метка ДПР Холла
-		p->hallSensorOmega=p->motorInternals.hallSensorOmegaPrev;//На выход модели - скорость, которая была между предыдущими метками ДПР Холла
-		p->motorInternals.hallSensorOmegaPrev=p->motorInternals.omega;//Запоминаем текущую скорость, чтобы отдать её потом
+	if (p->motorInternals.hallSensor!=p->motorInternals.hallSensorPrev){//РџСЂРёС€Р»Р° РЅРѕРІР°СЏ РјРµС‚РєР° Р”РџР  РҐРѕР»Р»Р°
+		p->hallSensorOmega=p->motorInternals.hallSensorOmegaPrev;//РќР° РІС‹С…РѕРґ РјРѕРґРµР»Рё - СЃРєРѕСЂРѕСЃС‚СЊ, РєРѕС‚РѕСЂР°СЏ Р±С‹Р»Р° РјРµР¶РґСѓ РїСЂРµРґС‹РґСѓС‰РёРјРё РјРµС‚РєР°РјРё Р”РџР  РҐРѕР»Р»Р°
+		p->motorInternals.hallSensorOmegaPrev=p->motorInternals.omega;//Р—Р°РїРѕРјРёРЅР°РµРј С‚РµРєСѓС‰СѓСЋ СЃРєРѕСЂРѕСЃС‚СЊ, С‡С‚РѕР±С‹ РѕС‚РґР°С‚СЊ РµС‘ РїРѕС‚РѕРј
 		p->hallSensorInterpAdd=0;
 		p->motorInternals.hallSensorPrev=p->motorInternals.hallSensor;
 		p->hallSensor=p->motorInternals.hallSensor;
 	}
 
-	if (fabs(p->motorInternals.omega)<1){//если двигатель почти стоит
+	if (fabs(p->motorInternals.omega)<1){//РµСЃР»Рё РґРІРёРіР°С‚РµР»СЊ РїРѕС‡С‚Рё СЃС‚РѕРёС‚
 		p->hallSensorOmega=0;
 		p->motorInternals.hallSensorOmegaPrev=0;
 		p->hallSensorInterpAdd=0;
 	}
-	if (p->hallSensorInterpAdd < (MOTOR_MODEL_PI/3))	//ограничиваем шестой частью угла
-	p->hallSensorInterpAdd = p->hallSensorInterpAdd + p->motorInternals.t * p->hallSensorOmega *p->motorInternals.pp;	//механическое положение ротора
+	if (p->hallSensorInterpAdd < (MOTOR_MODEL_PI/3))	//РѕРіСЂР°РЅРёС‡РёРІР°РµРј С€РµСЃС‚РѕР№ С‡Р°СЃС‚СЊСЋ СѓРіР»Р°
+	p->hallSensorInterpAdd = p->hallSensorInterpAdd + p->motorInternals.t * p->hallSensorOmega *p->motorInternals.pp;	//РјРµС…Р°РЅРёС‡РµСЃРєРѕРµ РїРѕР»РѕР¶РµРЅРёРµ СЂРѕС‚РѕСЂР°
 
-	p->motorInternals.power=p->motorInternals.omega*p->motorInternals.torque*0.001;//Мощность на валу в кВт
-	p->qepCounter=p->motorInternals.tetaRM*MODEL_INV_2PI*p->motorInternals.QEPResolution*4;//Имитация счетчика инкрементального энкодера из текущего угла двигателя
-	p->motorInternals.omega_rpm = p->motorInternals.omega*MODEL_INV_2PI*60;//Частота вращения вала из рад/с в об/мин
-	p->motorInternals.Udc_temp=p->motorInternals.udc*p->motorInternals.udSenseK;//Имитация измерения напряжения ЗПТ
+	p->motorInternals.power=p->motorInternals.omega*p->motorInternals.torque*0.001;//РњРѕС‰РЅРѕСЃС‚СЊ РЅР° РІР°Р»Сѓ РІ РєР’С‚
+	p->qepCounter=p->motorInternals.tetaRM*MODEL_INV_2PI*p->motorInternals.QEPResolution*4;//РРјРёС‚Р°С†РёСЏ СЃС‡РµС‚С‡РёРєР° РёРЅРєСЂРµРјРµРЅС‚Р°Р»СЊРЅРѕРіРѕ СЌРЅРєРѕРґРµСЂР° РёР· С‚РµРєСѓС‰РµРіРѕ СѓРіР»Р° РґРІРёРіР°С‚РµР»СЏ
+	p->motorInternals.omega_rpm = p->motorInternals.omega*MODEL_INV_2PI*60;//Р§Р°СЃС‚РѕС‚Р° РІСЂР°С‰РµРЅРёСЏ РІР°Р»Р° РёР· СЂР°Рґ/СЃ РІ РѕР±/РјРёРЅ
+	p->motorInternals.Udc_temp=p->motorInternals.udc*p->motorInternals.udSenseK;//РРјРёС‚Р°С†РёСЏ РёР·РјРµСЂРµРЅРёСЏ РЅР°РїСЂСЏР¶РµРЅРёСЏ Р—РџРў
 
 
-	//наложение шума АЦП
+	//РЅР°Р»РѕР¶РµРЅРёРµ С€СѓРјР° РђР¦Рџ
 	p->motorInternals.iAtemp += MotorModel_fastrand();
 	p->motorInternals.iBtemp += MotorModel_fastrand();
 	p->motorInternals.iCtemp += MotorModel_fastrand();
@@ -1133,7 +1133,7 @@ void MotorModel_Execute(TMotorModel *p) {
 	p->motorInternals.adcSpeedtemp += MotorModel_fastrand();
 	p->motorInternals.Udc_temp += MotorModel_fastrand();
 
-	//насыщение каналов АЦП
+	//РЅР°СЃС‹С‰РµРЅРёРµ РєР°РЅР°Р»РѕРІ РђР¦Рџ
 	if (p->motorInternals.iAtemp > ADC_MAX_VALUE)
 		p->motorInternals.iAtemp = ADC_MAX_VALUE;
 	if (p->motorInternals.iAtemp < 0)

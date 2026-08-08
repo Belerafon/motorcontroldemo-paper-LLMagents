@@ -1,5 +1,5 @@
 /*!
-    Copyright 2017 	АО "НИИЭТ" и ООО "НПФ ВЕКТОР"
+    Copyright 2017 	РђРћ "РќРРР­Рў" Рё РћРћРћ "РќРџР¤ Р’Р•РљРўРћР "
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -14,12 +14,12 @@
    limitations under the License.
 
  \file      V_usblib.c
- \brief     Набор функций для инициализации драйвера USB. Основан на примере
- 			USB VCP" от НИИЭТ:
+ \brief     РќР°Р±РѕСЂ С„СѓРЅРєС†РёР№ РґР»СЏ РёРЅРёС†РёР°Р»РёР·Р°С†РёРё РґСЂР°Р№РІРµСЂР° USB. РћСЃРЅРѕРІР°РЅ РЅР° РїСЂРёРјРµСЂРµ
+ 			USB VCP" РѕС‚ РќРРР­Рў:
  			https://bitbucket.org/niietcm4/
  			---> / chip / K1921VK01T / GCC / USB / CDC_VCP /
 
- \author    ООО "НПФ Вектор". http://motorcontrol.ru, НИИЭТ http://niiet.ru
+ \author    РћРћРћ "РќРџР¤ Р’РµРєС‚РѕСЂ". http://motorcontrol.ru, РќРРР­Рў http://niiet.ru
  \version   v 1.0 08/08/2017
 
 */

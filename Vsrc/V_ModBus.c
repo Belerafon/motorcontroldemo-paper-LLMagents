@@ -1,5 +1,5 @@
 /*!
-    Copyright 2017 	АО "НИИЭТ" и ООО "НПФ ВЕКТОР"
+    Copyright 2017 	РђРћ "РќРРР­Рў" Рё РћРћРћ "РќРџР¤ Р’Р•РљРўРћР "
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -14,38 +14,38 @@
    limitations under the License.
 
  \file      V_ModBus.c
- \brief     Драйвер ModBus (см. TModBus)
- 24-03-2017		Перенос драйвера на К1921ВК01Т НИИЭТ. Сильный рефакторинг.
+ \brief     Р”СЂР°Р№РІРµСЂ ModBus (СЃРј. TModBus)
+ 24-03-2017		РџРµСЂРµРЅРѕСЃ РґСЂР°Р№РІРµСЂР° РЅР° Рљ1921Р’Рљ01Рў РќРРР­Рў. РЎРёР»СЊРЅС‹Р№ СЂРµС„Р°РєС‚РѕСЂРёРЅРі.
 
- 13-08-2012		Теперь поле type структуры MB_Record используется как признак записи/чтения
-				для не битовых HR/IR-переменных (раньше там был только признак записи).
+ 13-08-2012		РўРµРїРµСЂСЊ РїРѕР»Рµ type СЃС‚СЂСѓРєС‚СѓСЂС‹ MB_Record РёСЃРїРѕР»СЊР·СѓРµС‚СЃСЏ РєР°Рє РїСЂРёР·РЅР°Рє Р·Р°РїРёСЃРё/С‡С‚РµРЅРёСЏ
+				РґР»СЏ РЅРµ Р±РёС‚РѕРІС‹С… HR/IR-РїРµСЂРµРјРµРЅРЅС‹С… (СЂР°РЅСЊС€Рµ С‚Р°Рј Р±С‹Р» С‚РѕР»СЊРєРѕ РїСЂРёР·РЅР°Рє Р·Р°РїРёСЃРё).
 
- 24-01-2012     Теперь проще выбирать между SciaRegs, ScibRegs и ScicRegs. Это сделано
-				дефайном. Переименована структура RS в MODBUS_RS
-
-
- 26-02-2011     Исправлены какие-то баги, добавлена возможность отслеживать запись в объекты
-				типа "регистр" за счет изменения номера бита в словаре, поддержка большего
-				кол-ва процессоров.
+ 24-01-2012     РўРµРїРµСЂСЊ РїСЂРѕС‰Рµ РІС‹Р±РёСЂР°С‚СЊ РјРµР¶РґСѓ SciaRegs, ScibRegs Рё ScicRegs. Р­С‚Рѕ СЃРґРµР»Р°РЅРѕ
+				РґРµС„Р°Р№РЅРѕРј. РџРµСЂРµРёРјРµРЅРѕРІР°РЅР° СЃС‚СЂСѓРєС‚СѓСЂР° RS РІ MODBUS_RS
 
 
-  27-11-2009    Сделана доработка драйвера для поддержки broadcast (широковещательных) сообщений. Естесственно,
-                что поддерживаются только команды записи (0x5 - write coils и 0x6 - write single register), т.к.
-                broadcast сообщения являются неподтверждаемыми сообщениями. Иными словами читать бесполезно, т.к.
-                ответа не придет... (Алямкин)
+ 26-02-2011     РСЃРїСЂР°РІР»РµРЅС‹ РєР°РєРёРµ-С‚Рѕ Р±Р°РіРё, РґРѕР±Р°РІР»РµРЅР° РІРѕР·РјРѕР¶РЅРѕСЃС‚СЊ РѕС‚СЃР»РµР¶РёРІР°С‚СЊ Р·Р°РїРёСЃСЊ РІ РѕР±СЉРµРєС‚С‹
+				С‚РёРїР° "СЂРµРіРёСЃС‚СЂ" Р·Р° СЃС‡РµС‚ РёР·РјРµРЅРµРЅРёСЏ РЅРѕРјРµСЂР° Р±РёС‚Р° РІ СЃР»РѕРІР°СЂРµ, РїРѕРґРґРµСЂР¶РєР° Р±РѕР»СЊС€РµРіРѕ
+				РєРѕР»-РІР° РїСЂРѕС†РµСЃСЃРѕСЂРѕРІ.
 
-  21-10-2008    Исправлена ошибка переполнения входного регистра - при переполнении выставлялась frame error (из драйвера SYS_VID800)
-  29-01-2008    Иправлена ошибка расчета таймаутов
-  28-01-2008    Иправлена ошибка в функции пойска нужного элемента словаря
 
-  29-11-2007    Драйвер переделан для работы с МК17.1
-                                1.Исправлена ошибка при обнулении битовых регистров
-                                2.Исправлен неправильный перебор элементов в словаре
-                                3.Добавлена возможность автоматического перезапуска драйвера при большом количестве ошибок на линии
+  27-11-2009    РЎРґРµР»Р°РЅР° РґРѕСЂР°Р±РѕС‚РєР° РґСЂР°Р№РІРµСЂР° РґР»СЏ РїРѕРґРґРµСЂР¶РєРё broadcast (С€РёСЂРѕРєРѕРІРµС‰Р°С‚РµР»СЊРЅС‹С…) СЃРѕРѕР±С‰РµРЅРёР№. Р•СЃС‚РµСЃСЃС‚РІРµРЅРЅРѕ,
+                С‡С‚Рѕ РїРѕРґРґРµСЂР¶РёРІР°СЋС‚СЃСЏ С‚РѕР»СЊРєРѕ РєРѕРјР°РЅРґС‹ Р·Р°РїРёСЃРё (0x5 - write coils Рё 0x6 - write single register), С‚.Рє.
+                broadcast СЃРѕРѕР±С‰РµРЅРёСЏ СЏРІР»СЏСЋС‚СЃСЏ РЅРµРїРѕРґС‚РІРµСЂР¶РґР°РµРјС‹РјРё СЃРѕРѕР±С‰РµРЅРёСЏРјРё. РРЅС‹РјРё СЃР»РѕРІР°РјРё С‡РёС‚Р°С‚СЊ Р±РµСЃРїРѕР»РµР·РЅРѕ, С‚.Рє.
+                РѕС‚РІРµС‚Р° РЅРµ РїСЂРёРґРµС‚... (РђР»СЏРјРєРёРЅ)
 
-                                Замечание. Особенность реализации драйвера не предполагает наличия регистра № 0х0000 в словаре
-                                Для устранения недостатка необходимо в инициализации переделать пойск последних элементов
-                                массивов с поля номера регистра на поле адреса переменной регистра.
+  21-10-2008    РСЃРїСЂР°РІР»РµРЅР° РѕС€РёР±РєР° РїРµСЂРµРїРѕР»РЅРµРЅРёСЏ РІС…РѕРґРЅРѕРіРѕ СЂРµРіРёСЃС‚СЂР° - РїСЂРё РїРµСЂРµРїРѕР»РЅРµРЅРёРё РІС‹СЃС‚Р°РІР»СЏР»Р°СЃСЊ frame error (РёР· РґСЂР°Р№РІРµСЂР° SYS_VID800)
+  29-01-2008    РРїСЂР°РІР»РµРЅР° РѕС€РёР±РєР° СЂР°СЃС‡РµС‚Р° С‚Р°Р№РјР°СѓС‚РѕРІ
+  28-01-2008    РРїСЂР°РІР»РµРЅР° РѕС€РёР±РєР° РІ С„СѓРЅРєС†РёРё РїРѕР№СЃРєР° РЅСѓР¶РЅРѕРіРѕ СЌР»РµРјРµРЅС‚Р° СЃР»РѕРІР°СЂСЏ
+
+  29-11-2007    Р”СЂР°Р№РІРµСЂ РїРµСЂРµРґРµР»Р°РЅ РґР»СЏ СЂР°Р±РѕС‚С‹ СЃ РњРљ17.1
+                                1.РСЃРїСЂР°РІР»РµРЅР° РѕС€РёР±РєР° РїСЂРё РѕР±РЅСѓР»РµРЅРёРё Р±РёС‚РѕРІС‹С… СЂРµРіРёСЃС‚СЂРѕРІ
+                                2.РСЃРїСЂР°РІР»РµРЅ РЅРµРїСЂР°РІРёР»СЊРЅС‹Р№ РїРµСЂРµР±РѕСЂ СЌР»РµРјРµРЅС‚РѕРІ РІ СЃР»РѕРІР°СЂРµ
+                                3.Р”РѕР±Р°РІР»РµРЅР° РІРѕР·РјРѕР¶РЅРѕСЃС‚СЊ Р°РІС‚РѕРјР°С‚РёС‡РµСЃРєРѕРіРѕ РїРµСЂРµР·Р°РїСѓСЃРєР° РґСЂР°Р№РІРµСЂР° РїСЂРё Р±РѕР»СЊС€РѕРј РєРѕР»РёС‡РµСЃС‚РІРµ РѕС€РёР±РѕРє РЅР° Р»РёРЅРёРё
+
+                                Р—Р°РјРµС‡Р°РЅРёРµ. РћСЃРѕР±РµРЅРЅРѕСЃС‚СЊ СЂРµР°Р»РёР·Р°С†РёРё РґСЂР°Р№РІРµСЂР° РЅРµ РїСЂРµРґРїРѕР»Р°РіР°РµС‚ РЅР°Р»РёС‡РёСЏ СЂРµРіРёСЃС‚СЂР° в„– 0С…0000 РІ СЃР»РѕРІР°СЂРµ
+                                Р”Р»СЏ СѓСЃС‚СЂР°РЅРµРЅРёСЏ РЅРµРґРѕСЃС‚Р°С‚РєР° РЅРµРѕР±С…РѕРґРёРјРѕ РІ РёРЅРёС†РёР°Р»РёР·Р°С†РёРё РїРµСЂРµРґРµР»Р°С‚СЊ РїРѕР№СЃРє РїРѕСЃР»РµРґРЅРёС… СЌР»РµРјРµРЅС‚РѕРІ
+                                РјР°СЃСЃРёРІРѕРІ СЃ РїРѕР»СЏ РЅРѕРјРµСЂР° СЂРµРіРёСЃС‚СЂР° РЅР° РїРѕР»Рµ Р°РґСЂРµСЃР° РїРµСЂРµРјРµРЅРЅРѕР№ СЂРµРіРёСЃС‚СЂР°.
   16-11-2006    Release Rev 1.0
 
  \author        Alecksey Anuchin
@@ -59,16 +59,16 @@
 #include "main.h"
 
 #if defined (HW_MOTORCONTROLBOARD) || defined (HW_MOTORCONTROLBOARD_SIMULATOR)
-//Макросы для переключения RS485 между приемом и передачей
+//РњР°РєСЂРѕСЃС‹ РґР»СЏ РїРµСЂРµРєР»СЋС‡РµРЅРёСЏ RS485 РјРµР¶РґСѓ РїСЂРёРµРјРѕРј Рё РїРµСЂРµРґР°С‡РµР№
 #define MODBUS_RX_RS485 NT_GPIOG->MASKHIGHBYTE_bit[1].MASKHB = 0	//G8
 #define MODBUS_TX_RS485 NT_GPIOG->MASKHIGHBYTE_bit[1].MASKHB = 1	//G8
 #else
 #define MODBUS_RX_RS485 //NT_GPIOC->MASKHIGHBYTE_bit[4].MASKHB = 4
 #define MODBUS_TX_RS485 //NT_GPIOC->MASKHIGHBYTE_bit[4].MASKHB = 0
 #endif
-//Макрос для осциллографирования ножек UART (удобно для отладки, когда вообще ничего не работает)
+//РњР°РєСЂРѕСЃ РґР»СЏ РѕСЃС†РёР»Р»РѕРіСЂР°С„РёСЂРѕРІР°РЅРёСЏ РЅРѕР¶РµРє UART (СѓРґРѕР±РЅРѕ РґР»СЏ РѕС‚Р»Р°РґРєРё, РєРѕРіРґР° РІРѕРѕР±С‰Рµ РЅРёС‡РµРіРѕ РЅРµ СЂР°Р±РѕС‚Р°РµС‚)
 #define MODBUS_GPIO_VALUE  (NT_GPIOD->DATA>>1) & 3
-//Частота тактирования блока UART (настраивается в инициализации микроконтроллера)
+//Р§Р°СЃС‚РѕС‚Р° С‚Р°РєС‚РёСЂРѕРІР°РЅРёСЏ Р±Р»РѕРєР° UART (РЅР°СЃС‚СЂР°РёРІР°РµС‚СЃСЏ РІ РёРЅРёС†РёР°Р»РёР·Р°С†РёРё РјРёРєСЂРѕРєРѕРЅС‚СЂРѕР»Р»РµСЂР°)
 #define UART_CLOCK_FREQ 25000000
 
 
@@ -76,48 +76,48 @@ void  ModBus_RS_Init(TModBus *p){
 
 #if defined (HW_MOTORCONTROLBOARD) ||  defined (HW_MOTORCONTROLBOARD_SIMULATOR)
 
-	//Разрешить ножке G8 работать на выход
+	//Р Р°Р·СЂРµС€РёС‚СЊ РЅРѕР¶РєРµ G8 СЂР°Р±РѕС‚Р°С‚СЊ РЅР° РІС‹С…РѕРґ
 	NT_GPIOG->OUTENSET = (1 << 8);
 
 
-    // Выбрать и разрешить периферийную функцию
+    // Р’С‹Р±СЂР°С‚СЊ Рё СЂР°Р·СЂРµС€РёС‚СЊ РїРµСЂРёС„РµСЂРёР№РЅСѓСЋ С„СѓРЅРєС†РёСЋ
     NT_COMMON_REG->GPIOPCTLF_bit.PIN10 = 0;   //UART_TxD[2]
     NT_COMMON_REG->GPIOPCTLF_bit.PIN11 = 0;  //UART_RxD[2]
     NT_GPIOF->ALTFUNCSET = (1 << 10) + (1 << 11);
 
-    // Изменить периферийную функцию F4, чтобы она не заблокировала UART2
+    // РР·РјРµРЅРёС‚СЊ РїРµСЂРёС„РµСЂРёР№РЅСѓСЋ С„СѓРЅРєС†РёСЋ F4, С‡С‚РѕР±С‹ РѕРЅР° РЅРµ Р·Р°Р±Р»РѕРєРёСЂРѕРІР°Р»Р° UART2
     NT_COMMON_REG->GPIOPCTLF_bit.PIN4 = 1;
 
-    p->MBInternals.NT_UART=NT_UART2;//Используемый в драйвере номер UART (1,2,3)
+    p->MBInternals.NT_UART=NT_UART2;//РСЃРїРѕР»СЊР·СѓРµРјС‹Р№ РІ РґСЂР°Р№РІРµСЂРµ РЅРѕРјРµСЂ UART (1,2,3)
 
-	p->MBInternals.NT_UART->CR_bit.UARTEN = 1; 		// Разрешить работу UART
+	p->MBInternals.NT_UART->CR_bit.UARTEN = 1; 		// Р Р°Р·СЂРµС€РёС‚СЊ СЂР°Р±РѕС‚Сѓ UART
 #else
-	// Выбрать и разрешить периферийную функцию
+	// Р’С‹Р±СЂР°С‚СЊ Рё СЂР°Р·СЂРµС€РёС‚СЊ РїРµСЂРёС„РµСЂРёР№РЅСѓСЋ С„СѓРЅРєС†РёСЋ
 	NT_COMMON_REG->GPIOPCTLD_bit.PIN1 = 1;	 //UART_TxD[3]
 	NT_COMMON_REG->GPIOPCTLD_bit.PIN2 = 1;	//UART_RxD[3]
 	NT_GPIOD->ALTFUNCSET = (1 << 1) + (1 << 2);
 
-	// Изменить периферийную функцию F12 и F13, чтобы они не заблокировали UART3
+	// РР·РјРµРЅРёС‚СЊ РїРµСЂРёС„РµСЂРёР№РЅСѓСЋ С„СѓРЅРєС†РёСЋ F12 Рё F13, С‡С‚РѕР±С‹ РѕРЅРё РЅРµ Р·Р°Р±Р»РѕРєРёСЂРѕРІР°Р»Рё UART3
 	NT_COMMON_REG->GPIOPCTLF_bit.PIN12 = 1;
 	NT_COMMON_REG->GPIOPCTLF_bit.PIN13 = 1;
-	p->MBInternals.NT_UART=NT_UART3;//Используемый в драйвере номер UART (1,2,3)
+	p->MBInternals.NT_UART=NT_UART3;//РСЃРїРѕР»СЊР·СѓРµРјС‹Р№ РІ РґСЂР°Р№РІРµСЂРµ РЅРѕРјРµСЂ UART (1,2,3)
 
-	p->MBInternals.NT_UART->CR_bit.UARTEN = 1; 		// Разрешить работу UART
+	p->MBInternals.NT_UART->CR_bit.UARTEN = 1; 		// Р Р°Р·СЂРµС€РёС‚СЊ СЂР°Р±РѕС‚Сѓ UART
 #endif
 
-	//Текущая реализация драйвера не использует FIFO, обрабатывает данные по одному байту
-	//и вызывается в прерывании 10кГц. Поэтому частоты обмена больше 57600 не поддерживаются (будет терять байты)
+	//РўРµРєСѓС‰Р°СЏ СЂРµР°Р»РёР·Р°С†РёСЏ РґСЂР°Р№РІРµСЂР° РЅРµ РёСЃРїРѕР»СЊР·СѓРµС‚ FIFO, РѕР±СЂР°Р±Р°С‚С‹РІР°РµС‚ РґР°РЅРЅС‹Рµ РїРѕ РѕРґРЅРѕРјСѓ Р±Р°Р№С‚Сѓ
+	//Рё РІС‹Р·С‹РІР°РµС‚СЃСЏ РІ РїСЂРµСЂС‹РІР°РЅРёРё 10РєР“С†. РџРѕСЌС‚РѕРјСѓ С‡Р°СЃС‚РѕС‚С‹ РѕР±РјРµРЅР° Р±РѕР»СЊС€Рµ 57600 РЅРµ РїРѕРґРґРµСЂР¶РёРІР°СЋС‚СЃСЏ (Р±СѓРґРµС‚ С‚РµСЂСЏС‚СЊ Р±Р°Р№С‚С‹)
 	if (p->BaudRate>57600)
 		p->BaudRate=57600;
 
-	// Настройка частоты в двух регистрах:
-	// задание делителя частоты для получения BaudRate
-	// Т.к. блок UART тактируется с частотой 25 МГц (так настроено в ините микроконтроллера),
-	// то для получения частоты, например, 57600 бит/с необходим
-	// делитель 25000000 / (16 * 57600) = 27,126736111111111111111111111111
-	// Целая часть I = 27
-	// Дробная часть F = (int)( 0.126736111*64 + 0.5 ) = 8
-	// Формулы см. в документации
+	// РќР°СЃС‚СЂРѕР№РєР° С‡Р°СЃС‚РѕС‚С‹ РІ РґРІСѓС… СЂРµРіРёСЃС‚СЂР°С…:
+	// Р·Р°РґР°РЅРёРµ РґРµР»РёС‚РµР»СЏ С‡Р°СЃС‚РѕС‚С‹ РґР»СЏ РїРѕР»СѓС‡РµРЅРёСЏ BaudRate
+	// Рў.Рє. Р±Р»РѕРє UART С‚Р°РєС‚РёСЂСѓРµС‚СЃСЏ СЃ С‡Р°СЃС‚РѕС‚РѕР№ 25 РњР“С† (С‚Р°Рє РЅР°СЃС‚СЂРѕРµРЅРѕ РІ РёРЅРёС‚Рµ РјРёРєСЂРѕРєРѕРЅС‚СЂРѕР»Р»РµСЂР°),
+	// С‚Рѕ РґР»СЏ РїРѕР»СѓС‡РµРЅРёСЏ С‡Р°СЃС‚РѕС‚С‹, РЅР°РїСЂРёРјРµСЂ, 57600 Р±РёС‚/СЃ РЅРµРѕР±С…РѕРґРёРј
+	// РґРµР»РёС‚РµР»СЊ 25000000 / (16 * 57600) = 27,126736111111111111111111111111
+	// Р¦РµР»Р°СЏ С‡Р°СЃС‚СЊ I = 27
+	// Р”СЂРѕР±РЅР°СЏ С‡Р°СЃС‚СЊ F = (int)( 0.126736111*64 + 0.5 ) = 8
+	// Р¤РѕСЂРјСѓР»С‹ СЃРј. РІ РґРѕРєСѓРјРµРЅС‚Р°С†РёРё
 	float DivResFloat=(float)UART_CLOCK_FREQ / (16 * p->BaudRate);
 	long DivResInt=(long)DivResFloat;
 	long DivResFrac=(int)((DivResFloat-DivResInt)*64 + 0.5);
@@ -125,13 +125,13 @@ void  ModBus_RS_Init(TModBus *p){
 	p->MBInternals.NT_UART->IBRD_bit.BAUD_DIVINT= DivResInt;
 	p->MBInternals.NT_UART->FBRD_bit.BAUD_DIVFRAC = DivResFrac;
 
-	// 8 бит данных, 1 стоп бит, без контроля четности
-	p->MBInternals.NT_UART->LCR_H_bit.SPS = 0;		// Нет проверки четности
-	p->MBInternals.NT_UART->LCR_H_bit.WLEN = 3;		// Длина посылки 8 бит
-	p->MBInternals.NT_UART->LCR_H_bit.FEN = 0;		// Не использовать FIFO
-	p->MBInternals.NT_UART->CR_bit.TXE = 1;			// Разрешить приём
-	p->MBInternals.NT_UART->CR_bit.RXE = 1;			// Разрешить передачу
-	p->MBInternals.NT_UART->LCR_H_bit.STP2 = 0;		// 1 стоп-бит
+	// 8 Р±РёС‚ РґР°РЅРЅС‹С…, 1 СЃС‚РѕРї Р±РёС‚, Р±РµР· РєРѕРЅС‚СЂРѕР»СЏ С‡РµС‚РЅРѕСЃС‚Рё
+	p->MBInternals.NT_UART->LCR_H_bit.SPS = 0;		// РќРµС‚ РїСЂРѕРІРµСЂРєРё С‡РµС‚РЅРѕСЃС‚Рё
+	p->MBInternals.NT_UART->LCR_H_bit.WLEN = 3;		// Р”Р»РёРЅР° РїРѕСЃС‹Р»РєРё 8 Р±РёС‚
+	p->MBInternals.NT_UART->LCR_H_bit.FEN = 0;		// РќРµ РёСЃРїРѕР»СЊР·РѕРІР°С‚СЊ FIFO
+	p->MBInternals.NT_UART->CR_bit.TXE = 1;			// Р Р°Р·СЂРµС€РёС‚СЊ РїСЂРёС‘Рј
+	p->MBInternals.NT_UART->CR_bit.RXE = 1;			// Р Р°Р·СЂРµС€РёС‚СЊ РїРµСЂРµРґР°С‡Сѓ
+	p->MBInternals.NT_UART->LCR_H_bit.STP2 = 0;		// 1 СЃС‚РѕРї-Р±РёС‚
 
 }
 
@@ -139,37 +139,37 @@ void  ModBus_RS_Init(TModBus *p){
 
 void  ModBus_ResetError(TModBus *p)
 {
-	// Биты 0-3 - биты ошибок, сбрасываются записью в них "1"
+	// Р‘РёС‚С‹ 0-3 - Р±РёС‚С‹ РѕС€РёР±РѕРє, СЃР±СЂР°СЃС‹РІР°СЋС‚СЃСЏ Р·Р°РїРёСЃСЊСЋ РІ РЅРёС… "1"
 	p->MBInternals.NT_UART->RSR_ECR |= 0x000F;
 }
 
 int16 ModBus_CheckDataReady(TModBus *p)
 {
-	// return 1 - если буфер приёмника не пуст
+	// return 1 - РµСЃР»Рё Р±СѓС„РµСЂ РїСЂРёС‘РјРЅРёРєР° РЅРµ РїСѓСЃС‚
 	return (!p->MBInternals.NT_UART->FR_bit.RXFE);
 }
 
-int16  ModBus_CheckTxEmpty(TModBus *p) //Если все отправлено (пуст и основной и теневой регистры)
+int16  ModBus_CheckTxEmpty(TModBus *p) //Р•СЃР»Рё РІСЃРµ РѕС‚РїСЂР°РІР»РµРЅРѕ (РїСѓСЃС‚ Рё РѕСЃРЅРѕРІРЅРѕР№ Рё С‚РµРЅРµРІРѕР№ СЂРµРіРёСЃС‚СЂС‹)
 {
-	// return 1 - если буфер передатчика пуст
+	// return 1 - РµСЃР»Рё Р±СѓС„РµСЂ РїРµСЂРµРґР°С‚С‡РёРєР° РїСѓСЃС‚
 	return (p->MBInternals.NT_UART->FR_bit.TXFE);
 }
 
-int16  ModBus_CheckTxReady(TModBus *p) //В передатчик можно положить следующий символ (буфер свободен)
+int16  ModBus_CheckTxReady(TModBus *p) //Р’ РїРµСЂРµРґР°С‚С‡РёРє РјРѕР¶РЅРѕ РїРѕР»РѕР¶РёС‚СЊ СЃР»РµРґСѓСЋС‰РёР№ СЃРёРјРІРѕР» (Р±СѓС„РµСЂ СЃРІРѕР±РѕРґРµРЅ)
 {
-	// "1" - если буфер передатчика пуст
+	// "1" - РµСЃР»Рё Р±СѓС„РµСЂ РїРµСЂРµРґР°С‚С‡РёРєР° РїСѓСЃС‚
 	return (p->MBInternals.NT_UART->FR_bit.TXFE);
 }
 
-void  ModBus_Tx(TModBus *p, int16 data)  // Передача данных
+void  ModBus_Tx(TModBus *p, int16 data)  // РџРµСЂРµРґР°С‡Р° РґР°РЅРЅС‹С…
 {
 	Uint8 tmp_data = data;
 	p->MBInternals.NT_UART->DR_bit.DATA = tmp_data;
 }
 
-//!Инициализация.
-//!настройка таймаутов,
-//!обработка словаря объектов для последующего быстрого поиска
+//!РРЅРёС†РёР°Р»РёР·Р°С†РёСЏ.
+//!РЅР°СЃС‚СЂРѕР№РєР° С‚Р°Р№РјР°СѓС‚РѕРІ,
+//!РѕР±СЂР°Р±РѕС‚РєР° СЃР»РѕРІР°СЂСЏ РѕР±СЉРµРєС‚РѕРІ РґР»СЏ РїРѕСЃР»РµРґСѓСЋС‰РµРіРѕ Р±С‹СЃС‚СЂРѕРіРѕ РїРѕРёСЃРєР°
 
 //! \memberof TModBus
 void ModBus_Init(TModBus *p)
@@ -185,13 +185,13 @@ void ModBus_Init(TModBus *p)
 
 
 ////// HR
-  // поиск размера массива HR
+  // РїРѕРёСЃРє СЂР°Р·РјРµСЂР° РјР°СЃСЃРёРІР° HR
   x=0;
   while (mbodHR[x].index!=0)
     x++;
   p->MBInternals.NumOfHRs=x;
 
-  // поиск среднего элемента массива HR
+  // РїРѕРёСЃРє СЃСЂРµРґРЅРµРіРѕ СЌР»РµРјРµРЅС‚Р° РјР°СЃСЃРёРІР° HR
   p->MBInternals.MiddleOfHRs=x;
   x=0;
   while ((p->MBInternals.MiddleOfHRs>>1)!=0)
@@ -201,8 +201,8 @@ void ModBus_Init(TModBus *p)
   }
   p->MBInternals.MiddleOfHRs=x;
 
-  // поиск начального инкремента для метода последовательного
-  // приближения
+  // РїРѕРёСЃРє РЅР°С‡Р°Р»СЊРЅРѕРіРѕ РёРЅРєСЂРµРјРµРЅС‚Р° РґР»СЏ РјРµС‚РѕРґР° РїРѕСЃР»РµРґРѕРІР°С‚РµР»СЊРЅРѕРіРѕ
+  // РїСЂРёР±Р»РёР¶РµРЅРёСЏ
   p->MBInternals.InitialStepOfHRs=1;
   while (x!=0)
   {
@@ -212,13 +212,13 @@ void ModBus_Init(TModBus *p)
   p->MBInternals.InitialStepOfHRs>>=1;
 
 ////// Coils
-  // поиск размера массива C
+  // РїРѕРёСЃРє СЂР°Р·РјРµСЂР° РјР°СЃСЃРёРІР° C
   x=0;
   while (mbodC[x].index!=0)
     x++;
   p->MBInternals.NumOfCs=x;
 
-  // поиск среднего элемента массива C
+  // РїРѕРёСЃРє СЃСЂРµРґРЅРµРіРѕ СЌР»РµРјРµРЅС‚Р° РјР°СЃСЃРёРІР° C
   p->MBInternals.MiddleOfCs=x;
   x=0;
   while ((p->MBInternals.MiddleOfCs>>1)!=0)
@@ -228,8 +228,8 @@ void ModBus_Init(TModBus *p)
   }
   p->MBInternals.MiddleOfCs=x;
 
-  // поиск начального инкремента для метода последовательного
-  // приближения
+  // РїРѕРёСЃРє РЅР°С‡Р°Р»СЊРЅРѕРіРѕ РёРЅРєСЂРµРјРµРЅС‚Р° РґР»СЏ РјРµС‚РѕРґР° РїРѕСЃР»РµРґРѕРІР°С‚РµР»СЊРЅРѕРіРѕ
+  // РїСЂРёР±Р»РёР¶РµРЅРёСЏ
   p->MBInternals.InitialStepOfCs=1;
   while (x!=0)
   {
@@ -239,13 +239,13 @@ void ModBus_Init(TModBus *p)
   p->MBInternals.InitialStepOfCs>>=1;
 
 // Discrete Inputs
-  // поиск размера массива DI
+  // РїРѕРёСЃРє СЂР°Р·РјРµСЂР° РјР°СЃСЃРёРІР° DI
   x=0;
   while (mbodDI[x].index!=0)
     x++;
   p->MBInternals.NumOfDIs=x;
 
-  // поиск среднего элемента массива DI
+  // РїРѕРёСЃРє СЃСЂРµРґРЅРµРіРѕ СЌР»РµРјРµРЅС‚Р° РјР°СЃСЃРёРІР° DI
   p->MBInternals.MiddleOfDIs=x;
   x=0;
   while ((p->MBInternals.MiddleOfDIs>>1)!=0)
@@ -255,8 +255,8 @@ void ModBus_Init(TModBus *p)
   }
   p->MBInternals.MiddleOfDIs=x;
 
-  // поиск начального инкремента для метода последовательного
-  // приближения
+  // РїРѕРёСЃРє РЅР°С‡Р°Р»СЊРЅРѕРіРѕ РёРЅРєСЂРµРјРµРЅС‚Р° РґР»СЏ РјРµС‚РѕРґР° РїРѕСЃР»РµРґРѕРІР°С‚РµР»СЊРЅРѕРіРѕ
+  // РїСЂРёР±Р»РёР¶РµРЅРёСЏ
   p->MBInternals.InitialStepOfDIs=1;
   while (x!=0)
   {
@@ -266,13 +266,13 @@ void ModBus_Init(TModBus *p)
   p->MBInternals.InitialStepOfDIs>>=1;
 
 ////// IR
-  // поиск размера массива HR
+  // РїРѕРёСЃРє СЂР°Р·РјРµСЂР° РјР°СЃСЃРёРІР° HR
   x=0;
   while (mbodIR[x].index!=0)
     x++;
   p->MBInternals.NumOfIRs=x;
 
-  // поиск среднего элемента массива HR
+  // РїРѕРёСЃРє СЃСЂРµРґРЅРµРіРѕ СЌР»РµРјРµРЅС‚Р° РјР°СЃСЃРёРІР° HR
   p->MBInternals.MiddleOfIRs=x;
   x=0;
   while ((p->MBInternals.MiddleOfIRs>>1)!=0)
@@ -282,8 +282,8 @@ void ModBus_Init(TModBus *p)
   }
   p->MBInternals.MiddleOfIRs=x;
 
-  // поиск начального инкремента для метода последовательного
-  // приближения
+  // РїРѕРёСЃРє РЅР°С‡Р°Р»СЊРЅРѕРіРѕ РёРЅРєСЂРµРјРµРЅС‚Р° РґР»СЏ РјРµС‚РѕРґР° РїРѕСЃР»РµРґРѕРІР°С‚РµР»СЊРЅРѕРіРѕ
+  // РїСЂРёР±Р»РёР¶РµРЅРёСЏ
   p->MBInternals.InitialStepOfIRs=1;
   while (x!=0)
   {
@@ -299,58 +299,58 @@ void ModBus_Init(TModBus *p)
 
 
 
-//!Расчет
+//!Р Р°СЃС‡РµС‚
 
-//!Фунция обработки посылок ModBus
+//!Р¤СѓРЅС†РёСЏ РѕР±СЂР°Р±РѕС‚РєРё РїРѕСЃС‹Р»РѕРє ModBus
 
 //! \memberof TModBus
 void ModBus_Execute(TModBus *p)
 {
   Uint16 x;
   volatile Uint16 RxReg;
-  if (ModBus.Enabled == 1){ // Если включен MODBUS
+  if (ModBus.Enabled == 1){ // Р•СЃР»Рё РІРєР»СЋС‡РµРЅ MODBUS
 	  p->OfflineCounter+=1;
 
-	  //долго нет собщений по сети?
+	  //РґРѕР»РіРѕ РЅРµС‚ СЃРѕР±С‰РµРЅРёР№ РїРѕ СЃРµС‚Рё?
 	  if (p->OfflineCounter>p->OfflineCounterMax)
 	  {
-		p->isOnline=0;//Мы не в сети
-		p->OfflineCounter=p->OfflineCounterMax+1;//чтоб не убежал
+		p->isOnline=0;//РњС‹ РЅРµ РІ СЃРµС‚Рё
+		p->OfflineCounter=p->OfflineCounterMax+1;//С‡С‚РѕР± РЅРµ СѓР±РµР¶Р°Р»
 	  }
 	  else
-		p->isOnline=1;//в сети
+		p->isOnline=1;//РІ СЃРµС‚Рё
 
-	  //Контроль ошибок
+	  //РљРѕРЅС‚СЂРѕР»СЊ РѕС€РёР±РѕРє
 	  if (p->errorCode)
-	  {//Если висит ошибка
+	  {//Р•СЃР»Рё РІРёСЃРёС‚ РѕС€РёР±РєР°
 		p->error += 1;
-		if (p->AutoRestart == 1)//Если разрешен авто сброс ошибок
+		if (p->AutoRestart == 1)//Р•СЃР»Рё СЂР°Р·СЂРµС€РµРЅ Р°РІС‚Рѕ СЃР±СЂРѕСЃ РѕС€РёР±РѕРє
 			ModBus_ResetError(p);
 	  }
-	  if (p->clear_error == 1)//Если выставлен флаг однократного ручного сброса ошибки
+	  if (p->clear_error == 1)//Р•СЃР»Рё РІС‹СЃС‚Р°РІР»РµРЅ С„Р»Р°Рі РѕРґРЅРѕРєСЂР°С‚РЅРѕРіРѕ СЂСѓС‡РЅРѕРіРѕ СЃР±СЂРѕСЃР° РѕС€РёР±РєРё
 	  {
 		ModBus_ResetError(p);
 		p->clear_error = 0;
 		p->error = 0;
 	  }
-	  //Текущее значение GPIO для отладки
+	  //РўРµРєСѓС‰РµРµ Р·РЅР°С‡РµРЅРёРµ GPIO РґР»СЏ РѕС‚Р»Р°РґРєРё
 	  p->GPIOsValue=MODBUS_GPIO_VALUE;
 
 
-	  if (p->MBInternals.TxState<1)//TxState==0 - передача не идет
-		if (ModBus_CheckDataReady(p))//Если есть готовые принятные данные (байт)
+	  if (p->MBInternals.TxState<1)//TxState==0 - РїРµСЂРµРґР°С‡Р° РЅРµ РёРґРµС‚
+		if (ModBus_CheckDataReady(p))//Р•СЃР»Рё РµСЃС‚СЊ РіРѕС‚РѕРІС‹Рµ РїСЂРёРЅСЏС‚РЅС‹Рµ РґР°РЅРЅС‹Рµ (Р±Р°Р№С‚)
 		{
-		  p->MBInternals.TimeOut=p->MBInternals.TimeOut1_5;//Таймаут равный полтора символа
-		  RxReg = p->MBInternals.NT_UART->DR;//Прием очередного символа
+		  p->MBInternals.TimeOut=p->MBInternals.TimeOut1_5;//РўР°Р№РјР°СѓС‚ СЂР°РІРЅС‹Р№ РїРѕР»С‚РѕСЂР° СЃРёРјРІРѕР»Р°
+		  RxReg = p->MBInternals.NT_UART->DR;//РџСЂРёРµРј РѕС‡РµСЂРµРґРЅРѕРіРѕ СЃРёРјРІРѕР»Р°
 		  p->errorCode=(RxReg & 0x0F00)>>8;
 		  RxReg = RxReg & 0xFF;
-		  p->received_data = RxReg;//Перекладывание принятых данных для отладки
+		  p->received_data = RxReg;//РџРµСЂРµРєР»Р°РґС‹РІР°РЅРёРµ РїСЂРёРЅСЏС‚С‹С… РґР°РЅРЅС‹С… РґР»СЏ РѕС‚Р»Р°РґРєРё
 		  p->ReceiveByteCounter++;
-		  if (p->MBInternals.InCount==MODBUS_MAX_RX_COUNT)//Принятно слишком много байт
+		  if (p->MBInternals.InCount==MODBUS_MAX_RX_COUNT)//РџСЂРёРЅСЏС‚РЅРѕ СЃР»РёС€РєРѕРј РјРЅРѕРіРѕ Р±Р°Р№С‚
 			return;
-		  p->MBInternals.In[p->MBInternals.InCount++]=RxReg;//Принятые данные в массив
-		  p->MBInternals.RxCRC^=RxReg;//Сразу же расчет контрольной суммы
-		  for (RxReg=0; RxReg<8; RxReg++)//Это тоже продолжение расчета контрольной суммы
+		  p->MBInternals.In[p->MBInternals.InCount++]=RxReg;//РџСЂРёРЅСЏС‚С‹Рµ РґР°РЅРЅС‹Рµ РІ РјР°СЃСЃРёРІ
+		  p->MBInternals.RxCRC^=RxReg;//РЎСЂР°Р·Сѓ Р¶Рµ СЂР°СЃС‡РµС‚ РєРѕРЅС‚СЂРѕР»СЊРЅРѕР№ СЃСѓРјРјС‹
+		  for (RxReg=0; RxReg<8; RxReg++)//Р­С‚Рѕ С‚РѕР¶Рµ РїСЂРѕРґРѕР»Р¶РµРЅРёРµ СЂР°СЃС‡РµС‚Р° РєРѕРЅС‚СЂРѕР»СЊРЅРѕР№ СЃСѓРјРјС‹
 			if (p->MBInternals.RxCRC&0x01)
 			{
 			  p->MBInternals.RxCRC>>=1;
@@ -358,42 +358,42 @@ void ModBus_Execute(TModBus *p)
 			}
 			else
 			  p->MBInternals.RxCRC>>=1;
-		  //больше ничего, если есть принятые данные, не делается
+		  //Р±РѕР»СЊС€Рµ РЅРёС‡РµРіРѕ, РµСЃР»Рё РµСЃС‚СЊ РїСЂРёРЅСЏС‚С‹Рµ РґР°РЅРЅС‹Рµ, РЅРµ РґРµР»Р°РµС‚СЃСЏ
 		  return;
 		}
-	  if (p->MBInternals.TimeOut==0)//Когда таймаут вышел, его обрабатывает условие p->MBInternals.TimeOut==1, а равен нулю он становится после приема
+	  if (p->MBInternals.TimeOut==0)//РљРѕРіРґР° С‚Р°Р№РјР°СѓС‚ РІС‹С€РµР», РµРіРѕ РѕР±СЂР°Р±Р°С‚С‹РІР°РµС‚ СѓСЃР»РѕРІРёРµ p->MBInternals.TimeOut==1, Р° СЂР°РІРµРЅ РЅСѓР»СЋ РѕРЅ СЃС‚Р°РЅРѕРІРёС‚СЃСЏ РїРѕСЃР»Рµ РїСЂРёРµРјР°
 	  {
-		p->MBInternals.InCount=0;//Обнуление счетчика массива
-		p->MBInternals.RxCRC=0xFFFF;//Инициализация контрольной суммы на прием
-		if (ModBus_CheckTxEmpty(p))//Если буфер на отправку пуст
+		p->MBInternals.InCount=0;//РћР±РЅСѓР»РµРЅРёРµ СЃС‡РµС‚С‡РёРєР° РјР°СЃСЃРёРІР°
+		p->MBInternals.RxCRC=0xFFFF;//РРЅРёС†РёР°Р»РёР·Р°С†РёСЏ РєРѕРЅС‚СЂРѕР»СЊРЅРѕР№ СЃСѓРјРјС‹ РЅР° РїСЂРёРµРј
+		if (ModBus_CheckTxEmpty(p))//Р•СЃР»Рё Р±СѓС„РµСЂ РЅР° РѕС‚РїСЂР°РІРєСѓ РїСѓСЃС‚
 		{
-		  MODBUS_RX_RS485;//Переключение RS485 на прием
-		  p->MBInternals.TxState=0;//TxState==0 - передача не идет
-		  p->MBInternals.TxCRC=0xFFFF;//Инициализация контрольной суммы на передачу
+		  MODBUS_RX_RS485;//РџРµСЂРµРєР»СЋС‡РµРЅРёРµ RS485 РЅР° РїСЂРёРµРј
+		  p->MBInternals.TxState=0;//TxState==0 - РїРµСЂРµРґР°С‡Р° РЅРµ РёРґРµС‚
+		  p->MBInternals.TxCRC=0xFFFF;//РРЅРёС†РёР°Р»РёР·Р°С†РёСЏ РєРѕРЅС‚СЂРѕР»СЊРЅРѕР№ СЃСѓРјРјС‹ РЅР° РїРµСЂРµРґР°С‡Сѓ
 		}
 		return;
 	  }
-	  if (p->MBInternals.TimeOut==1) //; Сюда попадаем, когда межу символами появляется пауза в 1,5 символа
-		if (p->MBInternals.InCount!=0) //; Если количество входных данных не равно нулю, то рассматривем, что пришло
+	  if (p->MBInternals.TimeOut==1) //; РЎСЋРґР° РїРѕРїР°РґР°РµРј, РєРѕРіРґР° РјРµР¶Сѓ СЃРёРјРІРѕР»Р°РјРё РїРѕСЏРІР»СЏРµС‚СЃСЏ РїР°СѓР·Р° РІ 1,5 СЃРёРјРІРѕР»Р°
+		if (p->MBInternals.InCount!=0) //; Р•СЃР»Рё РєРѕР»РёС‡РµСЃС‚РІРѕ РІС…РѕРґРЅС‹С… РґР°РЅРЅС‹С… РЅРµ СЂР°РІРЅРѕ РЅСѓР»СЋ, С‚Рѕ СЂР°СЃСЃРјР°С‚СЂРёРІРµРј, С‡С‚Рѕ РїСЂРёС€Р»Рѕ
 		{
-		  //поддержка broadcast осуществляется тут (по другому я незнаю как еще  - Алямкин)
-		  //далее переход в передачу - нам туда не нужно, потому обрабатываем здесь
-		  //обрабатывать имеет смысл только команды на запись (0x5 - write coils и 0x6 - write single register).
-		  if (p->MBInternals.In[0] == 0)//Входной массив, байт адреса равен 0 - широковещательный
+		  //РїРѕРґРґРµСЂР¶РєР° broadcast РѕСЃСѓС‰РµСЃС‚РІР»СЏРµС‚СЃСЏ С‚СѓС‚ (РїРѕ РґСЂСѓРіРѕРјСѓ СЏ РЅРµР·РЅР°СЋ РєР°Рє РµС‰Рµ  - РђР»СЏРјРєРёРЅ)
+		  //РґР°Р»РµРµ РїРµСЂРµС…РѕРґ РІ РїРµСЂРµРґР°С‡Сѓ - РЅР°Рј С‚СѓРґР° РЅРµ РЅСѓР¶РЅРѕ, РїРѕС‚РѕРјСѓ РѕР±СЂР°Р±Р°С‚С‹РІР°РµРј Р·РґРµСЃСЊ
+		  //РѕР±СЂР°Р±Р°С‚С‹РІР°С‚СЊ РёРјРµРµС‚ СЃРјС‹СЃР» С‚РѕР»СЊРєРѕ РєРѕРјР°РЅРґС‹ РЅР° Р·Р°РїРёСЃСЊ (0x5 - write coils Рё 0x6 - write single register).
+		  if (p->MBInternals.In[0] == 0)//Р’С…РѕРґРЅРѕР№ РјР°СЃСЃРёРІ, Р±Р°Р№С‚ Р°РґСЂРµСЃР° СЂР°РІРµРЅ 0 - С€РёСЂРѕРєРѕРІРµС‰Р°С‚РµР»СЊРЅС‹Р№
 		  {
 			//0x5 - write coils
 			if (p->MBInternals.In[1] == 5)
 			{
-			  x=(p->MBInternals.In[4]<<8)+p->MBInternals.In[5];//Данные
-			  //0 - если нашла, 3 - если запрос некорректен,  2 - ошибка в поиске
+			  x=(p->MBInternals.In[4]<<8)+p->MBInternals.In[5];//Р”Р°РЅРЅС‹Рµ
+			  //0 - РµСЃР»Рё РЅР°С€Р»Р°, 3 - РµСЃР»Рё Р·Р°РїСЂРѕСЃ РЅРµРєРѕСЂСЂРµРєС‚РµРЅ,  2 - РѕС€РёР±РєР° РІ РїРѕРёСЃРєРµ
 			  p->MBInternals.temp=ModBus_FindVocAddr(p, mbodC,\
 										   p->MBInternals.NumOfCs, 1,\
 										   (p->MBInternals.In[2]<<8)+p->MBInternals.In[3],\
 										   1,\
 										   p->MBInternals.MiddleOfCs, p->MBInternals.InitialStepOfCs);
-			  if ((x!=0xFF00)&&(x!=0x0000))//Данные не валидны, для битовой переменной должны быть FF00 или 0000
-				p->MBInternals.temp=3;//делается как будто ModBus_FindVocAddr вернула некорректный запрос
-			  if (p->MBInternals.temp==0)//если ModBus_FindVocAddr нашла адрес
+			  if ((x!=0xFF00)&&(x!=0x0000))//Р”Р°РЅРЅС‹Рµ РЅРµ РІР°Р»РёРґРЅС‹, РґР»СЏ Р±РёС‚РѕРІРѕР№ РїРµСЂРµРјРµРЅРЅРѕР№ РґРѕР»Р¶РЅС‹ Р±С‹С‚СЊ FF00 РёР»Рё 0000
+				p->MBInternals.temp=3;//РґРµР»Р°РµС‚СЃСЏ РєР°Рє Р±СѓРґС‚Рѕ ModBus_FindVocAddr РІРµСЂРЅСѓР»Р° РЅРµРєРѕСЂСЂРµРєС‚РЅС‹Р№ Р·Р°РїСЂРѕСЃ
+			  if (p->MBInternals.temp==0)//РµСЃР»Рё ModBus_FindVocAddr РЅР°С€Р»Р° Р°РґСЂРµСЃ
 			  {
 				if (p->MBInternals.In[4]==0)   // reset bit
 				  *(Uint16 *)(p->MBInternals.Addr->addr)&=(0xFFFF-(1<<p->MBInternals.Addr->type_or_acc));
@@ -408,55 +408,55 @@ void ModBus_Execute(TModBus *p)
 										   (p->MBInternals.In[2]<<8)+p->MBInternals.In[3],\
 										   1,\
 										   p->MBInternals.MiddleOfHRs, p->MBInternals.InitialStepOfHRs);
-			  if (p->MBInternals.temp==0)//если ModBus_FindVocAddr нашла адрес
+			  if (p->MBInternals.temp==0)//РµСЃР»Рё ModBus_FindVocAddr РЅР°С€Р»Р° Р°РґСЂРµСЃ
 			  {
 				*(Uint16 *)(p->MBInternals.Addr->addr)=(p->MBInternals.In[4]<<8)+p->MBInternals.In[5];
 			  }
 			}
 
-			//делаем то же самое, что и ниже для правильной отбраковки сообщения и выходим
-			p->MBInternals.InCount=0;//обнуление массива принятых байт
-			p->MBInternals.TimeOut=0;//обнуление таймаута
-			p->MBInternals.RxCRC=0xFFFF;//инициализация контрольной суммы
+			//РґРµР»Р°РµРј С‚Рѕ Р¶Рµ СЃР°РјРѕРµ, С‡С‚Рѕ Рё РЅРёР¶Рµ РґР»СЏ РїСЂР°РІРёР»СЊРЅРѕР№ РѕС‚Р±СЂР°РєРѕРІРєРё СЃРѕРѕР±С‰РµРЅРёСЏ Рё РІС‹С…РѕРґРёРј
+			p->MBInternals.InCount=0;//РѕР±РЅСѓР»РµРЅРёРµ РјР°СЃСЃРёРІР° РїСЂРёРЅСЏС‚С‹С… Р±Р°Р№С‚
+			p->MBInternals.TimeOut=0;//РѕР±РЅСѓР»РµРЅРёРµ С‚Р°Р№РјР°СѓС‚Р°
+			p->MBInternals.RxCRC=0xFFFF;//РёРЅРёС†РёР°Р»РёР·Р°С†РёСЏ РєРѕРЅС‚СЂРѕР»СЊРЅРѕР№ СЃСѓРјРјС‹
 			return;
 		  }
 
-		  if (p->MBInternals.In[0]!=p->RSNodeID) //; Если номер узла не совпал с нашим, то выкидываем посылку.
+		  if (p->MBInternals.In[0]!=p->RSNodeID) //; Р•СЃР»Рё РЅРѕРјРµСЂ СѓР·Р»Р° РЅРµ СЃРѕРІРїР°Р» СЃ РЅР°С€РёРј, С‚Рѕ РІС‹РєРёРґС‹РІР°РµРј РїРѕСЃС‹Р»РєСѓ.
 		  {
 			p->MBInternals.InCount=0;
 			p->MBInternals.TimeOut=0;
 			p->MBInternals.RxCRC=0xFFFF;
 			return;
 		  }
-		  if (p->MBInternals.RxCRC!=0)    //; Если не сошлась контрольная сумма, то выкидываем посылку.
+		  if (p->MBInternals.RxCRC!=0)    //; Р•СЃР»Рё РЅРµ СЃРѕС€Р»Р°СЃСЊ РєРѕРЅС‚СЂРѕР»СЊРЅР°СЏ СЃСѓРјРјР°, С‚Рѕ РІС‹РєРёРґС‹РІР°РµРј РїРѕСЃС‹Р»РєСѓ.
 		  {
 			p->MBInternals.InCount=0;
 			p->MBInternals.TimeOut=0;
 			p->MBInternals.RxCRC=0xFFFF;
 			return;
 		  }
-		  if (p->MBInternals.RecievedCounter<0)//!!!                                                             //; Если еще не проинициализирован счетчик между фреймов (-1), то
+		  if (p->MBInternals.RecievedCounter<0)//!!!                                                             //; Р•СЃР»Рё РµС‰Рµ РЅРµ РїСЂРѕРёРЅРёС†РёР°Р»РёР·РёСЂРѕРІР°РЅ СЃС‡РµС‚С‡РёРє РјРµР¶РґСѓ С„СЂРµР№РјРѕРІ (-1), С‚Рѕ
 		  {
-			//; инициализируем счетчик и выходим.
+			//; РёРЅРёС†РёР°Р»РёР·РёСЂСѓРµРј СЃС‡РµС‚С‡РёРє Рё РІС‹С…РѕРґРёРј.
 			p->MBInternals.RecievedCounter=p->MBInternals.TimeOut2_5;
 			return;
 		  }
-		  if (p->MBInternals.RecievedCounter>0)//!!!                                                                        //; Если счетчик паузы между фреймов еще положительный, то уменьшаем его
+		  if (p->MBInternals.RecievedCounter>0)//!!!                                                                        //; Р•СЃР»Рё СЃС‡РµС‚С‡РёРє РїР°СѓР·С‹ РјРµР¶РґСѓ С„СЂРµР№РјРѕРІ РµС‰Рµ РїРѕР»РѕР¶РёС‚РµР»СЊРЅС‹Р№, С‚Рѕ СѓРјРµРЅСЊС€Р°РµРј РµРіРѕ
 		  {
-			//; и выходим
+			//; Рё РІС‹С…РѕРґРёРј
 			p->MBInternals.RecievedCounter--;
 			return;
 		  }
-		  //; Если счетчик RecievedCounter досчитал до нуля, то можно переключаться на передачу.
+		  //; Р•СЃР»Рё СЃС‡РµС‚С‡РёРє RecievedCounter РґРѕСЃС‡РёС‚Р°Р» РґРѕ РЅСѓР»СЏ, С‚Рѕ РјРѕР¶РЅРѕ РїРµСЂРµРєР»СЋС‡Р°С‚СЊСЃСЏ РЅР° РїРµСЂРµРґР°С‡Сѓ.
 		  p->MBInternals.RecievedCounter=-1;
 		  p->ReceivePacketCounter++;
-		  MODBUS_TX_RS485;//RS485 на передачу
-		  p->MBInternals.TxState=1;//Передача
+		  MODBUS_TX_RS485;//RS485 РЅР° РїРµСЂРµРґР°С‡Сѓ
+		  p->MBInternals.TxState=1;//РџРµСЂРµРґР°С‡Р°
 		  p->MBInternals.RxCRC=0xFFFF;
 		  p->MBInternals.TimeOut=p->MBInternals.TimeOut2_5;
-		  ModBus_Tx(p,p->MBInternals.In[0]);//Передается первый байт - адрес устройства, почему-то взят из приема...
-		  p->MBInternals.TxCRC^=p->MBInternals.In[0];//сразу расчет контрольноу суммы на передачу
-		  //и это тоже расчет контрольной суммы
+		  ModBus_Tx(p,p->MBInternals.In[0]);//РџРµСЂРµРґР°РµС‚СЃСЏ РїРµСЂРІС‹Р№ Р±Р°Р№С‚ - Р°РґСЂРµСЃ СѓСЃС‚СЂРѕР№СЃС‚РІР°, РїРѕС‡РµРјСѓ-С‚Рѕ РІР·СЏС‚ РёР· РїСЂРёРµРјР°...
+		  p->MBInternals.TxCRC^=p->MBInternals.In[0];//СЃСЂР°Р·Сѓ СЂР°СЃС‡РµС‚ РєРѕРЅС‚СЂРѕР»СЊРЅРѕСѓ СЃСѓРјРјС‹ РЅР° РїРµСЂРµРґР°С‡Сѓ
+		  //Рё СЌС‚Рѕ С‚РѕР¶Рµ СЂР°СЃС‡РµС‚ РєРѕРЅС‚СЂРѕР»СЊРЅРѕР№ СЃСѓРјРјС‹
 		  for (RxReg=0; RxReg<8; RxReg++)
 			if (p->MBInternals.TxCRC&0x01)
 			{
@@ -467,66 +467,66 @@ void ModBus_Execute(TModBus *p)
 			  p->MBInternals.TxCRC>>=1;
 		  return;
 		}
-		else//количество принятых данных равно нулю.. почему-то
+		else//РєРѕР»РёС‡РµСЃС‚РІРѕ РїСЂРёРЅСЏС‚С‹С… РґР°РЅРЅС‹С… СЂР°РІРЅРѕ РЅСѓР»СЋ.. РїРѕС‡РµРјСѓ-С‚Рѕ
 		{
 		  p->MBInternals.TimeOut=0;
 		  return;
 		}
-	  p->MBInternals.TimeOut--;//отсчитывается таймаут
-	  if (p->MBInternals.TxState<1)//если TxState==0 - нет передачи, т выход, т.к. ниже - передача.
+	  p->MBInternals.TimeOut--;//РѕС‚СЃС‡РёС‚С‹РІР°РµС‚СЃСЏ С‚Р°Р№РјР°СѓС‚
+	  if (p->MBInternals.TxState<1)//РµСЃР»Рё TxState==0 - РЅРµС‚ РїРµСЂРµРґР°С‡Рё, С‚ РІС‹С…РѕРґ, С‚.Рє. РЅРёР¶Рµ - РїРµСЂРµРґР°С‡Р°.
 		return;
 
-	  if (ModBus_CheckTxReady(p)==0)//если передатчик занят
+	  if (ModBus_CheckTxReady(p)==0)//РµСЃР»Рё РїРµСЂРµРґР°С‚С‡РёРє Р·Р°РЅСЏС‚
 		return;
 
-	  //Инициализация таймаута
+	  //РРЅРёС†РёР°Р»РёР·Р°С†РёСЏ С‚Р°Р№РјР°СѓС‚Р°
 	  p->MBInternals.TimeOut=p->MBInternals.TimeOut2_5;
 
-	  // с этого момента включается дискретный автомат
-	  // протокола
+	  // СЃ СЌС‚РѕРіРѕ РјРѕРјРµРЅС‚Р° РІРєР»СЋС‡Р°РµС‚СЃСЏ РґРёСЃРєСЂРµС‚РЅС‹Р№ Р°РІС‚РѕРјР°С‚
+	  // РїСЂРѕС‚РѕРєРѕР»Р°
 	  //p->TxState=0;
 
-	  if (p->MBInternals.TxState==1)   //Состояние передачи 1
+	  if (p->MBInternals.TxState==1)   //РЎРѕСЃС‚РѕСЏРЅРёРµ РїРµСЂРµРґР°С‡Рё 1
 	  {
-		p->OfflineCounter=0;//Счетчик для контроля пересылаемых пакетов ModBus
-		p->MBInternals.temp=p->MBInternals.In[1];//Принятый массив, тут номер функции
-		if (p->MBInternals.temp==1)    // Функция read Coils
+		p->OfflineCounter=0;//РЎС‡РµС‚С‡РёРє РґР»СЏ РєРѕРЅС‚СЂРѕР»СЏ РїРµСЂРµСЃС‹Р»Р°РµРјС‹С… РїР°РєРµС‚РѕРІ ModBus
+		p->MBInternals.temp=p->MBInternals.In[1];//РџСЂРёРЅСЏС‚С‹Р№ РјР°СЃСЃРёРІ, С‚СѓС‚ РЅРѕРјРµСЂ С„СѓРЅРєС†РёРё
+		if (p->MBInternals.temp==1)    // Р¤СѓРЅРєС†РёСЏ read Coils
 		{
-		  p->MBInternals.ToSend=p->MBInternals.temp;//для отправки - номер функции
+		  p->MBInternals.ToSend=p->MBInternals.temp;//РґР»СЏ РѕС‚РїСЂР°РІРєРё - РЅРѕРјРµСЂ С„СѓРЅРєС†РёРё
 		  p->MBInternals.temp=ModBus_FindVocAddr(p,mbodC,\
 									   p->MBInternals.NumOfCs, 1,\
 									   (p->MBInternals.In[2]<<8)+p->MBInternals.In[3],\
 									   (p->MBInternals.In[4]<<8)+p->MBInternals.In[5],\
 									   p->MBInternals.MiddleOfCs, p->MBInternals.InitialStepOfCs);
-		  if (p->MBInternals.temp==0)//в словаре найден элемент
+		  if (p->MBInternals.temp==0)//РІ СЃР»РѕРІР°СЂРµ РЅР°Р№РґРµРЅ СЌР»РµРјРµРЅС‚
 		  {
 			p->MBInternals.TxState=10;
 		  }
-		  else//ошибка, в словаре элемент не найден
+		  else//РѕС€РёР±РєР°, РІ СЃР»РѕРІР°СЂРµ СЌР»РµРјРµРЅС‚ РЅРµ РЅР°Р№РґРµРЅ
 		  {
-			p->MBInternals.ToSend|=0x80;//добавляется маска ошибки
+			p->MBInternals.ToSend|=0x80;//РґРѕР±Р°РІР»СЏРµС‚СЃСЏ РјР°СЃРєР° РѕС€РёР±РєРё
 			p->MBInternals.TxState=p->MBInternals.temp+3;
 		  }
 		}
-		else if (p->MBInternals.temp==2)       // Код функции read DI
+		else if (p->MBInternals.temp==2)       // РљРѕРґ С„СѓРЅРєС†РёРё read DI
 		{
-		  p->MBInternals.ToSend=p->MBInternals.temp;//для отправки - номер функции
+		  p->MBInternals.ToSend=p->MBInternals.temp;//РґР»СЏ РѕС‚РїСЂР°РІРєРё - РЅРѕРјРµСЂ С„СѓРЅРєС†РёРё
 		  p->MBInternals.temp=ModBus_FindVocAddr(p,mbodDI,\
 									   p->MBInternals.NumOfDIs, 1,\
 									   (p->MBInternals.In[2]<<8)+p->MBInternals.In[3],\
 									   (p->MBInternals.In[4]<<8)+p->MBInternals.In[5],\
 									   p->MBInternals.MiddleOfDIs, p->MBInternals.InitialStepOfDIs);
-		  if (p->MBInternals.temp==0)//в словаре найден элемент
+		  if (p->MBInternals.temp==0)//РІ СЃР»РѕРІР°СЂРµ РЅР°Р№РґРµРЅ СЌР»РµРјРµРЅС‚
 		  {
 			p->MBInternals.TxState=10;
 		  }
-		  else//ошибка, в словаре элемент не найден
+		  else//РѕС€РёР±РєР°, РІ СЃР»РѕРІР°СЂРµ СЌР»РµРјРµРЅС‚ РЅРµ РЅР°Р№РґРµРЅ
 		  {
-			p->MBInternals.ToSend|=0x80;//добавляется маска ошибки
+			p->MBInternals.ToSend|=0x80;//РґРѕР±Р°РІР»СЏРµС‚СЃСЏ РјР°СЃРєР° РѕС€РёР±РєРё
 			p->MBInternals.TxState=p->MBInternals.temp+3;
 		  }
 		}
-		else if (p->MBInternals.temp==3)       // Функция read HR
+		else if (p->MBInternals.temp==3)       // Р¤СѓРЅРєС†РёСЏ read HR
 		{
 		  p->MBInternals.ToSend=p->MBInternals.temp;
 		  p->MBInternals.temp=ModBus_FindVocAddr(p,mbodHR,\
@@ -534,17 +534,17 @@ void ModBus_Execute(TModBus *p)
 									   (p->MBInternals.In[2]<<8)+p->MBInternals.In[3],\
 									   (p->MBInternals.In[4]<<8)+p->MBInternals.In[5],\
 									   p->MBInternals.MiddleOfHRs, p->MBInternals.InitialStepOfHRs);
-		  if (p->MBInternals.temp==0)//в словаре найден элемент
+		  if (p->MBInternals.temp==0)//РІ СЃР»РѕРІР°СЂРµ РЅР°Р№РґРµРЅ СЌР»РµРјРµРЅС‚
 		  {
 			p->MBInternals.TxState=7;
 		  }
-		  else//ошибка, в словаре элемент не найден
+		  else//РѕС€РёР±РєР°, РІ СЃР»РѕРІР°СЂРµ СЌР»РµРјРµРЅС‚ РЅРµ РЅР°Р№РґРµРЅ
 		  {
-			p->MBInternals.ToSend|=0x80;//добавляется маска ошибки
+			p->MBInternals.ToSend|=0x80;//РґРѕР±Р°РІР»СЏРµС‚СЃСЏ РјР°СЃРєР° РѕС€РёР±РєРё
 			p->MBInternals.TxState=p->MBInternals.temp+3;
 		  }
 		}
-		else if (p->MBInternals.temp==4)       // Функция read IR
+		else if (p->MBInternals.temp==4)       // Р¤СѓРЅРєС†РёСЏ read IR
 		{
 		  p->MBInternals.ToSend=p->MBInternals.temp;
 		  p->MBInternals.temp=ModBus_FindVocAddr(p,mbodIR,\
@@ -552,43 +552,43 @@ void ModBus_Execute(TModBus *p)
 									   (p->MBInternals.In[2]<<8)+p->MBInternals.In[3],\
 									   (p->MBInternals.In[4]<<8)+p->MBInternals.In[5],\
 									   p->MBInternals.MiddleOfIRs, p->MBInternals.InitialStepOfIRs);
-		  if (p->MBInternals.temp==0)//в словаре найден элемент
+		  if (p->MBInternals.temp==0)//РІ СЃР»РѕРІР°СЂРµ РЅР°Р№РґРµРЅ СЌР»РµРјРµРЅС‚
 		  {
 			p->MBInternals.TxState=7;
 		  }
-		  else//ошибка, в словаре элемент не найден
+		  else//РѕС€РёР±РєР°, РІ СЃР»РѕРІР°СЂРµ СЌР»РµРјРµРЅС‚ РЅРµ РЅР°Р№РґРµРЅ
 		  {
-			p->MBInternals.ToSend|=0x80;//добавляется маска ошибки
+			p->MBInternals.ToSend|=0x80;//РґРѕР±Р°РІР»СЏРµС‚СЃСЏ РјР°СЃРєР° РѕС€РёР±РєРё
 			p->MBInternals.TxState=p->MBInternals.temp+3;
 		  }
 		}
-		else if (p->MBInternals.temp==5)       // Функция write Coil
+		else if (p->MBInternals.temp==5)       // Р¤СѓРЅРєС†РёСЏ write Coil
 		{
 		  p->MBInternals.ToSend=p->MBInternals.temp;
-		  x=(p->MBInternals.In[4]<<8)+p->MBInternals.In[5];//Данные
+		  x=(p->MBInternals.In[4]<<8)+p->MBInternals.In[5];//Р”Р°РЅРЅС‹Рµ
 		  p->MBInternals.temp=ModBus_FindVocAddr(p,mbodC,\
 									   p->MBInternals.NumOfCs, 1,\
 									   (p->MBInternals.In[2]<<8)+p->MBInternals.In[3],\
 									   1,\
 									   p->MBInternals.MiddleOfCs, p->MBInternals.InitialStepOfCs);
-		  if ((x!=0xFF00)&&(x!=0x0000))//Данные не валидны - можно только 0xFF00 и 0x0000
-			p->MBInternals.temp=3;//Как будто бы ModBus_FindVocAddr вернула ошибку
-		  if (p->MBInternals.temp==0)//в словаре найден элемент
+		  if ((x!=0xFF00)&&(x!=0x0000))//Р”Р°РЅРЅС‹Рµ РЅРµ РІР°Р»РёРґРЅС‹ - РјРѕР¶РЅРѕ С‚РѕР»СЊРєРѕ 0xFF00 Рё 0x0000
+			p->MBInternals.temp=3;//РљР°Рє Р±СѓРґС‚Рѕ Р±С‹ ModBus_FindVocAddr РІРµСЂРЅСѓР»Р° РѕС€РёР±РєСѓ
+		  if (p->MBInternals.temp==0)//РІ СЃР»РѕРІР°СЂРµ РЅР°Р№РґРµРЅ СЌР»РµРјРµРЅС‚
 		  {
 			p->MBInternals.TxState=12;
-			if (p->MBInternals.In[4]==0) // Операция над словарем - reset bit
+			if (p->MBInternals.In[4]==0) // РћРїРµСЂР°С†РёСЏ РЅР°Рґ СЃР»РѕРІР°СЂРµРј - reset bit
 			  *(Uint16 *)(p->MBInternals.Addr->addr)&=(0xFFFF-(1<<p->MBInternals.Addr->type_or_acc));
 			else                                            // set bit
 			  *(Uint16 *)(p->MBInternals.Addr->addr)|=(1<<p->MBInternals.Addr->type_or_acc);
 			p->Refresh=1;
 		  }
-		  else//ошибка, в словаре элемент не найден
+		  else//РѕС€РёР±РєР°, РІ СЃР»РѕРІР°СЂРµ СЌР»РµРјРµРЅС‚ РЅРµ РЅР°Р№РґРµРЅ
 		  {
-			p->MBInternals.ToSend|=0x80;//добавляется маска ошибки
+			p->MBInternals.ToSend|=0x80;//РґРѕР±Р°РІР»СЏРµС‚СЃСЏ РјР°СЃРєР° РѕС€РёР±РєРё
 			p->MBInternals.TxState=p->MBInternals.temp+3;
 		  }
 		}
-		else if (p->MBInternals.temp==6)  // Функция write HR
+		else if (p->MBInternals.temp==6)  // Р¤СѓРЅРєС†РёСЏ write HR
 		{
 		  p->MBInternals.ToSend=p->MBInternals.temp;
 		  p->MBInternals.temp=ModBus_FindVocAddr(p,mbodHR,\
@@ -596,22 +596,22 @@ void ModBus_Execute(TModBus *p)
 									   (p->MBInternals.In[2]<<8)+p->MBInternals.In[3],\
 									   1,\
 									   p->MBInternals.MiddleOfHRs, p->MBInternals.InitialStepOfHRs);
-		  if (p->MBInternals.temp==0)//в словаре найден элемент
+		  if (p->MBInternals.temp==0)//РІ СЃР»РѕРІР°СЂРµ РЅР°Р№РґРµРЅ СЌР»РµРјРµРЅС‚
 		  {
 			p->MBInternals.TxState=12;
-			//Операция над словарем - запись регистра
+			//РћРїРµСЂР°С†РёСЏ РЅР°Рґ СЃР»РѕРІР°СЂРµРј - Р·Р°РїРёСЃСЊ СЂРµРіРёСЃС‚СЂР°
 			*(Uint16 *)(p->MBInternals.Addr->addr)=(p->MBInternals.In[4]<<8)+p->MBInternals.In[5];
 			p->MBInternals.Addr->type_or_acc = MB_VAR_WRITE;
 		  }
-		  else//ошибка, в словаре элемент не найден
+		  else//РѕС€РёР±РєР°, РІ СЃР»РѕРІР°СЂРµ СЌР»РµРјРµРЅС‚ РЅРµ РЅР°Р№РґРµРЅ
 		  {
-			p->MBInternals.ToSend|=0x80;//добавляется маска ошибки
+			p->MBInternals.ToSend|=0x80;//РґРѕР±Р°РІР»СЏРµС‚СЃСЏ РјР°СЃРєР° РѕС€РёР±РєРё
 			p->MBInternals.TxState=p->MBInternals.temp+3;
 		  }
 		}
-		else//никакая из поддерживаемых функций
+		else//РЅРёРєР°РєР°СЏ РёР· РїРѕРґРґРµСЂР¶РёРІР°РµРјС‹С… С„СѓРЅРєС†РёР№
 		{
-		  p->MBInternals.ToSend=p->MBInternals.temp|0x80;//добавляется маска ошибки
+		  p->MBInternals.ToSend=p->MBInternals.temp|0x80;//РґРѕР±Р°РІР»СЏРµС‚СЃСЏ РјР°СЃРєР° РѕС€РёР±РєРё
 		  p->MBInternals.TxState=2;
 		}
 	  }
@@ -644,16 +644,16 @@ void ModBus_Execute(TModBus *p)
 	  else if (p->MBInternals.TxState==11)  // send data read Coils
 	  {
 		p->MBInternals.ToSend=0;
-		for (x=0; x<8; x++)//Можно упаковать 8 битовых переменных за раз
+		for (x=0; x<8; x++)//РњРѕР¶РЅРѕ СѓРїР°РєРѕРІР°С‚СЊ 8 Р±РёС‚РѕРІС‹С… РїРµСЂРµРјРµРЅРЅС‹С… Р·Р° СЂР°Р·
 		{
-		  if (p->MBInternals.In[5]!=0)//количество запрашиваемых элементов словаря
+		  if (p->MBInternals.In[5]!=0)//РєРѕР»РёС‡РµСЃС‚РІРѕ Р·Р°РїСЂР°С€РёРІР°РµРјС‹С… СЌР»РµРјРµРЅС‚РѕРІ СЃР»РѕРІР°СЂСЏ
 		  {
-			//Отправка элемента словаря
+			//РћС‚РїСЂР°РІРєР° СЌР»РµРјРµРЅС‚Р° СЃР»РѕРІР°СЂСЏ
 			p->MBInternals.ToSend|=(((*(Uint16 *)(p->MBInternals.Addr->addr))>>(p->MBInternals.Addr->type_or_acc))&0x01)<<x;
 			p->MBInternals.Addr++;
 			p->MBInternals.In[5]--;
 		  }
-		  if (p->MBInternals.In[5]==0)//Если все отправили
+		  if (p->MBInternals.In[5]==0)//Р•СЃР»Рё РІСЃРµ РѕС‚РїСЂР°РІРёР»Рё
 			p->MBInternals.TxState=3;
 		}
 	  }
@@ -675,8 +675,8 @@ void ModBus_Execute(TModBus *p)
 		p->MBInternals.ToSend=p->MBInternals.temp&0xFF;
 		p->MBInternals.Addr->type_or_acc = MB_VAR_READ;
 		p->MBInternals.Addr+=1;
-		p->MBInternals.In[5]--;//уменьшение кол-ва запрошенных переменных во входном массиве
-		if (p->MBInternals.In[5]==0)//Если это количество равно нулю (все переменные отправили)
+		p->MBInternals.In[5]--;//СѓРјРµРЅСЊС€РµРЅРёРµ РєРѕР»-РІР° Р·Р°РїСЂРѕС€РµРЅРЅС‹С… РїРµСЂРµРјРµРЅРЅС‹С… РІРѕ РІС…РѕРґРЅРѕРј РјР°СЃСЃРёРІРµ
+		if (p->MBInternals.In[5]==0)//Р•СЃР»Рё СЌС‚Рѕ РєРѕР»РёС‡РµСЃС‚РІРѕ СЂР°РІРЅРѕ РЅСѓР»СЋ (РІСЃРµ РїРµСЂРµРјРµРЅРЅС‹Рµ РѕС‚РїСЂР°РІРёР»Рё)
 		  p->MBInternals.TxState=3;
 		else
 		  p->MBInternals.TxState=8;
@@ -727,14 +727,14 @@ void ModBus_Execute(TModBus *p)
   }
 }
 
-//!Вспомогательная функция поиска
+//!Р’СЃРїРѕРјРѕРіР°С‚РµР»СЊРЅР°СЏ С„СѓРЅРєС†РёСЏ РїРѕРёСЃРєР°
 
 
-//!функция ищет элемент в таблице и возвращает ссылку на него в p->MBInternals.Addr
-//!возвращает:
-//!       0 - если нашла
-//!       3 - если запрос некорректен
-//!       2 - ошибка в пойске
+//!С„СѓРЅРєС†РёСЏ РёС‰РµС‚ СЌР»РµРјРµРЅС‚ РІ С‚Р°Р±Р»РёС†Рµ Рё РІРѕР·РІСЂР°С‰Р°РµС‚ СЃСЃС‹Р»РєСѓ РЅР° РЅРµРіРѕ РІ p->MBInternals.Addr
+//!РІРѕР·РІСЂР°С‰Р°РµС‚:
+//!       0 - РµСЃР»Рё РЅР°С€Р»Р°
+//!       3 - РµСЃР»Рё Р·Р°РїСЂРѕСЃ РЅРµРєРѕСЂСЂРµРєС‚РµРЅ
+//!       2 - РѕС€РёР±РєР° РІ РїРѕР№СЃРєРµ
 
 //! \memberof TModBus
 int16 ModBus_FindVocAddr(TModBus *p,volatile MB_Record /*const*/ Table[], Uint16 TableSize, int16 Type, Uint16 Index, int16 NumOfIndexs, int16 Mid, int16 Step)
