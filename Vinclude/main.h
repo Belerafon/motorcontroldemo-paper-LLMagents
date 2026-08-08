@@ -152,6 +152,7 @@ volatile extern float DebugF1;
 volatile extern float DebugF2;
 volatile extern float DebugF3;
 volatile extern float DebugF4;
+volatile extern int DecoupleEna;
 
 //Счетчики прерываний модуля захвата
 extern Uint16 CounterCAP_isr;

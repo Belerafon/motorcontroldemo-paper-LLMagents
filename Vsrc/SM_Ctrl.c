@@ -446,6 +446,29 @@ void SM_Ctrl_Fast_Calc(TSM_Ctrl *p) {
 			//выходов регуляторов тока (напряжений по осям d и q)
 			ipark.de = pid_id.pid_out_reg3;
 			ipark.qe = pid_iq.pid_out_reg3;
+
+			//Компенсация перекрестных связей (декаплинг) регуляторов тока в осях d,q.
+			//На высокой частоте вращения перекрестные связи и ЭДС вращения ухудшают
+			//реакцию регуляторов на изменение задания, поэтому к выходам регуляторов
+			//добавляется компенсирующее напряжение прямого канала.
+			//DecoupleEna: 0 - декаплинг выключен (старое поведение, безопасный дефолт),
+			//              !=0 - включен. Включается по JTAG в испытаниях.
+			//DebugW2: Kdq - коэффициент перекрестной связи оси q->d (о.е. напряжения
+			//         на о.е. тока на о.е. скорости).
+			//DebugW3: Kqd - коэффициент перекрестной связи оси d->q.
+			//DebugW4: Kflx - коэффициент ЭДС вращения постоянных магнитов (о.е.
+			//         напряжения на о.е. скорости).
+			if (DecoupleEna != 0) {
+				//уд = uq_pid + Kdq*isq*we  (компенсация -we*Lq*isq в оси d)
+				//уq = uq_pid - (Kqd*isd + Kflx)*we (компенсация +we*(Ld*isd+psi_pm) в оси q)
+				long udff = _IQmpy(_IQmpy(DebugW2, park.qe), cur_par.speed);
+				long uqff = _IQmpy(_IQmpy(DebugW3, park.de) + DebugW4, cur_par.speed);
+				ipark.de += udff;
+				ipark.qe -= uqff;
+				DebugF1 = _IQtoF(udff);
+				DebugF2 = _IQtoF(uqff);
+			}
+
 			ipark.ang = refs.theta_elec;
 			ipark.calc(&ipark);            //расчет преобразования координат
 

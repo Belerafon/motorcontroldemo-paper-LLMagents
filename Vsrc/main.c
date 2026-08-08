@@ -93,6 +93,12 @@ volatile long DebugW1 = 0;
 volatile long DebugW2 = 0;
 volatile long DebugW3 = 0;
 volatile long DebugW4 = 0;
+
+//! Включение компенсации перекрестных связей (декаплинга) регуляторов тока.
+//! Специальный флаг прошивки (не параметр словаря CANopen), поэтому на каждом
+//! сбросе он гарантированно равен 0 - декаплинг выключен по умолчанию.
+//! Включается по JTAG в автоматизированных испытаниях.
+volatile int DecoupleEna = 0;
 volatile float DebugF1 = 0;
 volatile float DebugF2 = 0;
 volatile float DebugF3 = 0;

@@ -4,7 +4,12 @@ import math
 import unittest
 from dataclasses import dataclass
 
-from tests.e2e.metrics import analyze_current_mode4, analyze_vector_500
+from tests.e2e.metrics import (
+    analyze_current_mode4,
+    analyze_decoupling,
+    analyze_decoupling_feedforward,
+    analyze_vector_500,
+)
 
 
 @dataclass(frozen=True)
@@ -98,6 +103,121 @@ class Vector500MetricsTests(unittest.TestCase):
 
         self.assertFalse(metrics["passed"])
         self.assertFalse(metrics["criteria"]["overshoot"])
+
+
+class DecouplingMetricsTests(unittest.TestCase):
+    @staticmethod
+    def run_samples(*, decoupled: bool) -> list[SyntheticSample]:
+        result = []
+        for number in range(401):
+            time_s = number * 0.005
+            speed = 200.0 * (1.0 - math.exp(-time_s / 0.30))
+            iq_ref = 0.8 if time_s < 1.0 else 0.2
+            tau = 0.01 if decoupled else 0.05
+            iq = 0.2 + (0.8 - 0.2) * math.exp(-(time_s - 1.0) / tau) if time_s >= 1.0 else 0.8
+            peak_id = 0.02 if decoupled else 0.25
+            id_disturbance = peak_id * math.exp(
+                -((time_s - 1.0) / 0.05) ** 2
+            )
+            result.append(
+                SyntheticSample(
+                    number,
+                    time_s,
+                    {
+                        "speed_rpm": speed,
+                        "iq_ref_a": iq_ref,
+                        "iq_a": iq,
+                        "id_a": id_disturbance,
+                    },
+                )
+            )
+        return result
+
+    def test_decoupling_reduces_dq_errors(self) -> None:
+        metrics = analyze_decoupling(
+            self.run_samples(decoupled=False),
+            self.run_samples(decoupled=True),
+            target_speed_rpm=200.0,
+            current_limit_a=1.0,
+        )
+
+        self.assertTrue(metrics["passed"])
+        self.assertGreater(metrics["id_disturbance_reduction_percent"], 10.0)
+        self.assertGreater(metrics["iq_tracking_improvement_percent"], 10.0)
+        self.assertTrue(metrics["observations"]["d_axis_disturbance_reduced"])
+        self.assertTrue(
+            metrics["criteria"]["decoupling_active_improves_q_axis_tracking"]
+        )
+
+    def test_decoupling_without_benefit_fails(self) -> None:
+        metrics = analyze_decoupling(
+            self.run_samples(decoupled=False),
+            self.run_samples(decoupled=False),
+            target_speed_rpm=200.0,
+            current_limit_a=1.0,
+        )
+
+        self.assertFalse(metrics["passed"])
+        self.assertFalse(
+            metrics["criteria"]["decoupling_active_improves_q_axis_tracking"]
+        )
+
+
+class DecouplingFeedforwardMetricsTests(unittest.TestCase):
+    @staticmethod
+    def samples(*, correct: bool = True) -> list[SyntheticSample]:
+        k_dq, k_flx = 0.26, 1.70
+        speed, iq = 200.0, 3.0
+        we_pu, iq_pu = 200.0 / 500.0, 3.0 / 5.0
+        expected_udff = k_dq * iq_pu * we_pu
+        expected_uqff = k_flx * we_pu
+        if not correct:
+            expected_udff *= 0.4
+            expected_uqff *= 0.4
+        result = []
+        for number in range(201):
+            time_s = number * 0.01
+            result.append(
+                SyntheticSample(
+                    number,
+                    time_s,
+                    {
+                        "ud_ff": expected_udff,
+                        "uq_ff": expected_uqff,
+                        "speed_rpm": speed,
+                        "iq_a": iq,
+                    },
+                )
+            )
+        return result
+
+    def test_correct_feedforward_passes(self) -> None:
+        metrics = analyze_decoupling_feedforward(
+            self.samples(correct=True),
+            i_nom_a=5.0,
+            speed_nom_rpm=500.0,
+            k_dq=0.26,
+            k_flx=1.70,
+        )
+
+        self.assertTrue(metrics["passed"])
+        self.assertTrue(metrics["criteria"]["feedforward_active"])
+        self.assertTrue(metrics["d_axis_feedforward_matches"])
+        self.assertLess(metrics["d_axis_feedforward_max_error_percent"], 1.0)
+        self.assertLess(metrics["q_axis_feedforward_max_error_percent"], 1.0)
+
+    def test_wrong_feedforward_fails(self) -> None:
+        metrics = analyze_decoupling_feedforward(
+            self.samples(correct=False),
+            i_nom_a=5.0,
+            speed_nom_rpm=500.0,
+            k_dq=0.26,
+            k_flx=1.70,
+        )
+
+        self.assertFalse(metrics["passed"])
+        self.assertFalse(metrics["d_axis_feedforward_matches"])
+        self.assertFalse(metrics["criteria"]["q_axis_feedforward_matches"])
 
 
 if __name__ == "__main__":

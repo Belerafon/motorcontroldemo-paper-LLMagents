@@ -343,3 +343,206 @@ def analyze_vector_500(
     metrics["criteria"] = criteria
     metrics["passed"] = all(criteria.values())
     return metrics
+
+
+def analyze_decoupling_run(
+    samples: Sequence[Any],
+    *,
+    target_speed_rpm: float,
+    current_limit_a: float,
+) -> dict[str, Any]:
+    """Metrics of a single vector-mode run used for the A/B decoupling test.
+
+    Expects channels ``speed_rpm``, ``iq_ref_a``, ``iq_a`` and ``id_a``.
+    """
+    time_s = _times(samples)
+    speed = _series(samples, "speed_rpm")
+    iq_ref = _series(samples, "iq_ref_a")
+    iq = _series(samples, "iq_a")
+    id_actual = _series(samples, "id_a")
+    period = _sample_period(time_s)
+    start = _event_start(speed, target_speed_rpm)
+    # d-axis is regulated to zero in vector mode: the disturbance is |id|.
+    zero = [0.0] * len(id_actual)
+    id_iae = _trapz_abs_error(time_s, id_actual, zero, start)
+    iq_track_iae = _trapz_abs_error(time_s, iq, iq_ref, start)
+    tail_start = _tail_start(len(samples))
+    peak_speed = max(abs(value) for value in speed)
+    reached_speed = peak_speed >= abs(target_speed_rpm) * 0.95
+    return {
+        "samples": len(samples),
+        "sample_period_s": period,
+        "window_s": float(time_s[-1] - time_s[0]),
+        "event_start_s": float(time_s[start] - time_s[0]),
+        "reached_speed": reached_speed,
+        "peak_abs_speed_rpm": peak_speed,
+        "final_speed_rpm": _mean(speed[tail_start:]),
+        "id_disturbance_iae_a_s": id_iae,
+        "id_steady_rms_a": _rms(id_actual[tail_start:]),
+        "id_peak_abs_a": max(abs(value) for value in id_actual),
+        "iq_tracking_iae_a_s": iq_track_iae,
+        "iq_peak_abs_a": max(abs(value) for value in iq),
+        "iq_steady_rms_a": _rms(iq[tail_start:]),
+        "current_limit_a": current_limit_a,
+    }
+
+
+def analyze_decoupling(
+    samples_off: Sequence[Any],
+    samples_on: Sequence[Any],
+    *,
+    target_speed_rpm: float,
+    current_limit_a: float,
+    max_improvement_ratio: float = 0.90,
+    max_id_steady_rms_a: float = 0.10,
+) -> dict[str, Any]:
+    """Compare the d/q current regulators with decoupling off and on.
+
+    At high speed the dominant cross-coupling in a PMSM is the q-axis
+    back-electromotive force term, so decoupling primarily improves the q-axis
+    setpoint tracking; the d-axis disturbance reduction is reported as an
+    informational metric (it depends on the drive's configured current limit).
+    """
+    off = analyze_decoupling_run(
+        samples_off,
+        target_speed_rpm=target_speed_rpm,
+        current_limit_a=current_limit_a,
+    )
+    on = analyze_decoupling_run(
+        samples_on,
+        target_speed_rpm=target_speed_rpm,
+        current_limit_a=current_limit_a,
+    )
+    id_improved = on["id_disturbance_iae_a_s"] < (
+        off["id_disturbance_iae_a_s"] * max_improvement_ratio
+    )
+    iq_improved = on["iq_tracking_iae_a_s"] < (
+        off["iq_tracking_iae_a_s"] * max_improvement_ratio
+    )
+    metrics: dict[str, Any] = {
+        "target_speed_rpm": target_speed_rpm,
+        "off": off,
+        "on": on,
+        "id_disturbance_reduction_percent": (
+            (1.0 - on["id_disturbance_iae_a_s"] / off["id_disturbance_iae_a_s"])
+            * 100.0
+            if off["id_disturbance_iae_a_s"] > 0
+            else math.inf
+        ),
+        "iq_tracking_improvement_percent": (
+            (1.0 - on["iq_tracking_iae_a_s"] / off["iq_tracking_iae_a_s"])
+            * 100.0
+            if off["iq_tracking_iae_a_s"] > 0
+            else math.inf
+        ),
+    }
+    criteria = {
+        "enough_samples": (off["samples"] >= 64 and on["samples"] >= 64),
+        "off_reached_speed": off["reached_speed"],
+        "on_reached_speed": on["reached_speed"],
+        "decoupling_active_improves_q_axis_tracking": iq_improved,
+        "id_steady_regulated_when_on": on["id_steady_rms_a"] <= max_id_steady_rms_a,
+    }
+    metrics["observations"] = {
+        "d_axis_disturbance_reduced": id_improved,
+        "d_axis_disturbance_off_iae_a_s": off["id_disturbance_iae_a_s"],
+        "d_axis_disturbance_on_iae_a_s": on["id_disturbance_iae_a_s"],
+    }
+    metrics["limits"] = {
+        "max_improvement_ratio": max_improvement_ratio,
+        "max_id_steady_rms_a": max_id_steady_rms_a,
+    }
+    metrics["criteria"] = criteria
+    metrics["passed"] = all(criteria.values())
+    return metrics
+
+
+def analyze_decoupling_feedforward(
+    samples: Sequence[Any],
+    *,
+    i_nom_a: float,
+    speed_nom_rpm: float,
+    k_dq: float,
+    k_flx: float,
+    tolerance_percent: float = 10.0,
+    min_active_margin_percent: float = 5.0,
+) -> dict[str, Any]:
+    """Verify the firmware feedforward against the analytical coupling terms.
+
+    Expects channels ``ud_ff`` (DebugF1), ``uq_ff`` (DebugF2), ``speed_rpm``
+    and ``iq_a``. At steady state ``id`` is regulated to zero, so the q-axis
+    feedforward reduces to ``Kflx * we``. Relative errors are evaluated in the
+    high-speed tail of the window.
+    """
+    time_s = _times(samples)
+    speed = _series(samples, "speed_rpm")
+    iq = _series(samples, "iq_a")
+    udff = _series(samples, "ud_ff")
+    uqff = _series(samples, "uq_ff")
+    tail_start = _tail_start(len(samples))
+    we_pu = [abs(speed_value) / speed_nom_rpm for speed_value in speed]
+    iq_pu = [current / i_nom_a for current in iq]
+    expected_udff = [
+        k_dq * iq_pu_value * we_pu_value
+        for iq_pu_value, we_pu_value in zip(iq_pu, we_pu)
+    ]
+    expected_uqff = [k_flx * we_pu_value for we_pu_value in we_pu]
+
+    def relative_error(measured: float, expected: float) -> float:
+        if abs(expected) < 1e-9:
+            return 0.0 if abs(measured) < 1e-9 else math.inf
+        return abs(measured - expected) / abs(expected) * 100.0
+
+    max_error_udff = max(
+        relative_error(m, e)
+        for m, e in zip(udff[tail_start:], expected_udff[tail_start:])
+    )
+    max_error_uqff = max(
+        relative_error(m, e)
+        for m, e in zip(uqff[tail_start:], expected_uqff[tail_start:])
+    )
+    peak_feedforward = max(
+        max(abs(value) for value in udff[tail_start:]),
+        max(abs(value) for value in uqff[tail_start:]),
+    )
+    active_threshold = max(
+        (expected_uqff[tail_start:] if tail_start < len(expected_uqff) else [0.0])
+    ) * (min_active_margin_percent / 100.0)
+    # The q-axis term (back-electromotive force) is the dominant cross-coupling
+    # at speed and is reliably measured. The d-axis term is negligible at the
+    # small steady-state q-current of a bench drive, so its match is reported
+    # as an observation only.
+    criteria = {
+        "feedforward_active": peak_feedforward >= active_threshold,
+        "q_axis_feedforward_matches": max_error_uqff <= tolerance_percent,
+    }
+    metrics: dict[str, Any] = {
+        "samples": len(samples),
+        "window_s": float(time_s[-1] - time_s[0]),
+        "i_nom_a": i_nom_a,
+        "speed_nom_rpm": speed_nom_rpm,
+        "k_dq": k_dq,
+        "k_flx": k_flx,
+        "steady_feedforward_d_axis_peak": max(
+            abs(value) for value in udff[tail_start:]
+        ),
+        "steady_feedforward_q_axis_peak": max(
+            abs(value) for value in uqff[tail_start:]
+        ),
+        "d_axis_feedforward_max_error_percent": max_error_udff,
+        "q_axis_feedforward_max_error_percent": max_error_uqff,
+        "d_axis_feedforward_matches": max_error_udff <= tolerance_percent,
+        "expected_d_axis_feedforward_peak": max(
+            abs(value) for value in expected_udff[tail_start:]
+        ),
+        "expected_q_axis_feedforward_peak": max(
+            abs(value) for value in expected_uqff[tail_start:]
+        ),
+    }
+    metrics["limits"] = {
+        "tolerance_percent": tolerance_percent,
+        "min_active_margin_percent": min_active_margin_percent,
+    }
+    metrics["criteria"] = criteria
+    metrics["passed"] = all(criteria.values())
+    return metrics

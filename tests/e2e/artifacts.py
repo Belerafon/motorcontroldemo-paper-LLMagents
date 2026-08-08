@@ -128,3 +128,79 @@ def plot_vector_500(path: Path, samples: list[Sample]) -> None:
     current_axis.legend()
     figure.savefig(path, dpi=170)
     plt.close(figure)
+
+
+def plot_decoupling_comparison(
+    path: Path,
+    samples_off: list[Sample],
+    samples_on: list[Sample],
+    target_speed_rpm: float,
+) -> None:
+    import matplotlib.pyplot as plt
+
+    time_off = [sample.time_s for sample in samples_off]
+    time_on = [sample.time_s for sample in samples_on]
+    plt.style.use("seaborn-v0_8-whitegrid")
+    figure, axes = plt.subplots(
+        3, 1, figsize=(11, 10), sharex=True, constrained_layout=True
+    )
+    speed_axis = axes[0]
+    speed_axis.plot(time_off, [s.values["speed_rpm"] for s in samples_off],
+                    label="Speed (decoupling off)")
+    speed_axis.plot(time_on, [s.values["speed_rpm"] for s in samples_on],
+                    label="Speed (decoupling on)")
+    speed_axis.axhline(target_speed_rpm, color="gray", linestyle=":",
+                       label=f"Target {target_speed_rpm:g} rpm")
+    speed_axis.set_ylabel("Speed, rpm")
+    speed_axis.legend()
+    speed_axis.set_title("Decoupling A/B: current-regulator response at speed")
+
+    iq_axis = axes[1]
+    iq_axis.plot(time_off, [s.values["iq_ref_a"] for s in samples_off],
+                 "--", color="tab:gray", label="Iq ref (off)")
+    iq_axis.plot(time_off, [s.values["iq_a"] for s in samples_off],
+                 color="tab:blue", label="Iq (off)")
+    iq_axis.plot(time_on, [s.values["iq_a"] for s in samples_on],
+                 color="tab:orange", label="Iq (on)")
+    iq_axis.set_ylabel("q-axis current, A")
+    iq_axis.legend()
+
+    id_axis = axes[2]
+    id_axis.plot(time_off, [s.values["id_a"] for s in samples_off],
+                 color="tab:blue", label="Id (off)")
+    id_axis.plot(time_on, [s.values["id_a"] for s in samples_on],
+                 color="tab:orange", label="Id (on)")
+    id_axis.axhline(0.0, color="gray", linestyle=":")
+    id_axis.set_xlabel("Time, s")
+    id_axis.set_ylabel("d-axis current, A")
+    id_axis.legend()
+    figure.savefig(path, dpi=170)
+    plt.close(figure)
+
+
+def plot_decoupling_feedforward(
+    path: Path,
+    samples: list[Sample],
+    target_speed_rpm: float,
+) -> None:
+    import matplotlib.pyplot as plt
+
+    time_s = [sample.time_s for sample in samples]
+    plt.style.use("seaborn-v0_8-whitegrid")
+    figure, (feed_axis, speed_axis) = plt.subplots(
+        2, 1, figsize=(11, 6.4), sharex=True, constrained_layout=True
+    )
+    feed_axis.plot(time_s, [s.values["ud_ff"] for s in samples],
+                   label="d-axis feedforward (DebugF1)")
+    feed_axis.plot(time_s, [s.values["uq_ff"] for s in samples],
+                   label="q-axis feedforward (DebugF2)")
+    feed_axis.set_ylabel("Feedforward voltage, p.u.")
+    feed_axis.legend()
+    feed_axis.set_title("Decoupling feedforward at speed")
+    speed_axis.plot(time_s, [s.values["speed_rpm"] for s in samples],
+                    color="tab:red")
+    speed_axis.axhline(target_speed_rpm, color="gray", linestyle=":")
+    speed_axis.set_xlabel("Time, s")
+    speed_axis.set_ylabel("Speed, rpm", color="tab:red")
+    figure.savefig(path, dpi=170)
+    plt.close(figure)
