@@ -185,6 +185,7 @@ void SM_Net_Slow_Calc(TSM_Net *p) {
 	drv_params.U_nom = 0.5759 * drv_params.Udc_nom;//номинальное фазное напряжение
 	drv_params.power = ((long) 300) << 6; //приведем к формату 10.6
 	drv_params.freq_nom = ((float) drv_params.speed_nom * drv_params.p) / 60 + 0.5; //номин частота
+	dec.set_params(&dec); //пересчет параметров декаплинга регуляторов тока в о.е.
 	drv_interface.calc(&drv_interface);
 	FaultLog.background_calc(&FaultLog);
 

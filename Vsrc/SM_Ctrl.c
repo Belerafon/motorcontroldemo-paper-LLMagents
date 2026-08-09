@@ -442,10 +442,17 @@ void SM_Ctrl_Fast_Calc(TSM_Ctrl *p) {
 			pid_id.pid_fdb_reg3 = park.de; //обратная связь рег. тока оси d - вычисленный ток по фазе d
 			pid_id.calc(&pid_id); //расчет регулятора тока оси d
 
+			//Компенсация перекрёстных связей регуляторов тока (декаплинг),
+			//чтобы на высокой частоте вращения регуляторы лучше реагировали на изменение задания
+			dec.speed_elec = cur_par.speed; //электрическая частота в о.е. базовой частоты
+			dec.id = park.de; //ток по оси d
+			dec.iq = park.qe; //ток по оси q
+			dec.calc(&dec); //расчет компенсации
+
 			//Обратный поворот на угол refs.theta_elec для 
 			//выходов регуляторов тока (напряжений по осям d и q)
-			ipark.de = pid_id.pid_out_reg3;
-			ipark.qe = pid_iq.pid_out_reg3;
+			ipark.de = pid_id.pid_out_reg3 + dec.ud_ff;
+			ipark.qe = pid_iq.pid_out_reg3 + dec.uq_ff;
 			ipark.ang = refs.theta_elec;
 			ipark.calc(&ipark);            //расчет преобразования координат
 
@@ -582,10 +589,17 @@ void SM_Ctrl_Fast_Calc(TSM_Ctrl *p) {
 			pid_id.pid_fdb_reg3 = park.de; //обратная связь рег. тока оси d - вычисленный ток по фазе d
 			pid_id.calc(&pid_id); //расчет регулятора тока оси d
 
+			//Компенсация перекрёстных связей регуляторов тока (декаплинг),
+			//чтобы на высокой частоте вращения регуляторы лучше реагировали на изменение задания
+			dec.speed_elec = cur_par.speed; //электрическая частота в о.е. базовой частоты
+			dec.id = park.de; //ток по оси d
+			dec.iq = park.qe; //ток по оси q
+			dec.calc(&dec); //расчет компенсации
+
 			//Обратный поворот на угол refs.theta_elec для
 			//выходов регуляторов тока (напряжений по осям d и q)
-			ipark.de = pid_id.pid_out_reg3;
-			ipark.qe = pid_iq.pid_out_reg3;
+			ipark.de = pid_id.pid_out_reg3 + dec.ud_ff;
+			ipark.qe = pid_iq.pid_out_reg3 + dec.uq_ff;
 			ipark.ang = posspeedEqep.theta_elec;
 			ipark.calc(&ipark);            //расчет преобразования координат
 

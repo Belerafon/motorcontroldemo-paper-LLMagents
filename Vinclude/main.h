@@ -84,6 +84,7 @@ extern "C" {
 #include "V_fifo.h"
 #include "V_usblib.h"
 #include "V_Fan.h"
+#include "V_Decoupling.h"
 
 extern TClarke 		clarke;
 extern TPark 		park;
@@ -131,6 +132,7 @@ extern TLogger		FaultLog;
 extern TGlobalTime global_time;
 extern TUdControl udControl;
 extern TFanControl FanControl;
+extern TDecoupling dec;
 
 extern Uint16 msCounter;
 extern Uint16 FastCounter;

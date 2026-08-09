@@ -72,6 +72,7 @@ TLogger FaultLog = LOGGER_DEFAULTS;			//!<Протоколирование ав�
 TGlobalTime global_time = GLOBAL_TIME_DEFAULTS; //!<Работа с часами
 TUdControl udControl = UD_CONTROL_DEFAULTS; //!<Плавная зарядка ЗПТ через термисторы
 TFanControl FanControl = FAN_CONTROL_DEFAULTS; //!<Вентилятор
+TDecoupling dec = DECOUPLING_DEFAULTS; //!<Компенсация перекрёстных связей (декаплинг) регуляторов тока
 
 TRefs refs; //!< Структура с заданиями (токи, скорости)
 TCmd cmd = { 0 }; //!< Структура с командами управления
