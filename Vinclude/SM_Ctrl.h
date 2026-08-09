@@ -54,10 +54,12 @@ extern "C"
     int E;//!<Флаг первого вхождения.
     long AnglePrev;//!< Предыдущее значение угла для режима автонастройки ДПР
     long AngleDemo;//!< Угол для демо-режима контура положения
+    long fw_ui;//!< Интегратор ослабления поля (задание тока по оси d, <=0)
     void (*init)(struct SSM_Ctrl*);     //!< Pointer to the init funcion
     void (*slow_calc)(struct SSM_Ctrl*);//!< Pointer to the calc funtion
     void (*fast_calc)(struct SSM_Ctrl*); //!< Pointer to the calc funtion
     void (*ms_calc)(struct SSM_Ctrl*);  //!< Pointer to the calc funtion
+    void (*field_weaken)(struct SSM_Ctrl*);//!< Pointer to the field weakening calc funtion
   } ;
 
   typedef struct SSM_Ctrl TSM_Ctrl;
@@ -66,7 +68,8 @@ extern "C"
 #define SM_CTRL_DEFAULTS { .init = SM_Ctrl_Init,\
     .slow_calc = SM_Ctrl_Slow_Calc,\
     .fast_calc = SM_Ctrl_Fast_Calc,\
-    .ms_calc = SM_Ctrl_ms_Calc \
+    .ms_calc = SM_Ctrl_ms_Calc,\
+    .field_weaken = SM_Ctrl_FieldWeaken \
     }
 
   //! \memberof TSM_Ctrl
@@ -77,6 +80,8 @@ extern "C"
   void SM_Ctrl_Fast_Calc(TSM_Ctrl*);
   //! \memberof TSM_Ctrl
   void SM_Ctrl_ms_Calc(TSM_Ctrl*);
+  //! \memberof TSM_Ctrl
+  void SM_Ctrl_FieldWeaken(TSM_Ctrl*);
 
 #ifdef __cplusplus
 }
