@@ -97,6 +97,8 @@ struct SPWM_Module {
 	int32 k_pwm; //!< Период таймера ШИМ, для чтения.
 	int32 U_mag; //!< Текущая амплитуда напряжения, для чтения.
 	int32 U_lim; //!< Ограничение вектора напряжения, задается
+	int32 U_max; //!< Максимально достижимая амплитуда вектора напряжения (о.е. от номинального напряжения ЗПТ). Вычисляется автоматически из U_lim, текущего напряжения ЗПТ и мёртвого времени. Для чтения.
+	int32 U_dead_coef; //!< Коэффициент снижения максимального напряжения из-за мёртвого времени (0..1). Вычисляется в медленном расчете. Для чтения.
 
 	int32 GammaA; //!< Скважность фазы А в размерности таймера ШИМ, для чтения.
 	int32 GammaB; //!< Скважность фазы B в размерности таймера ШИМ, для чтения.
@@ -130,6 +132,7 @@ typedef volatile struct SPWM_Module TPWM_Module;
 //! Инициализатор по-умолчанию.
 #define PWM_Module_DEFAULTS  { \
     .U_lim = _IQ(0.866), \
+    .U_dead_coef = _IQ(1.0), \
     .Frequency = 0x1400, \
     .init = PWM_Module_Init, \
     .update = PWM_Module_Update, \
@@ -144,6 +147,8 @@ void PWM_Module_Init(TPWM_Module *);
 void PWM_Module_Update(TPWM_Module *);
 //! \memberof TPWM_Module
 void PWM_Module_SlowCalc(TPWM_Module *);
+//! \memberof TPWM_Module
+void PWM_Module_MaxVoltageCalc(TPWM_Module *);
 //! \memberof TPWM_Module
 void PWM_Module_On(TPWM_Module *);
 //! \memberof TPWM_Module

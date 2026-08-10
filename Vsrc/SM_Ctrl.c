@@ -78,6 +78,17 @@ void SM_Ctrl_Fast_Calc(TSM_Ctrl *p) {
 	if (sm_prot.state == PROT_FAIL)
 		p->state = CTRL_STOP;
 
+	//Динамическое ограничение выхода регуляторов тока (напряжений по осям d и q)
+	//по максимально достижимой амплитуде вектора напряжения. Она зависит от текущего
+	//напряжения ЗПТ (adc.Udc_meas) и возможностей модуля ШИМ (U_lim, мёртвое время).
+	//Благодаря этому при просадке ЗПТ регуляторы не запрашивают больше, чем способен
+	//отдать инвертор, и не накапливают интегральную составляющую сверх достижимого напряжения.
+	PWM_Module_MaxVoltageCalc(&pwm);
+	pid_id.pid_out_max = pwm.U_max;
+	pid_id.pid_out_min = -pwm.U_max;
+	pid_iq.pid_out_max = pwm.U_max;
+	pid_iq.pid_out_min = -pwm.U_max;
+
 //считаем дискретный автомат
 	if (p->state_prev != p->state)
 		p->E = 1;
