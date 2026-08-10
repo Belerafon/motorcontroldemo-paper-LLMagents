@@ -71,6 +71,9 @@ extern "C"
 
   //! \memberof TSM_Ctrl
   void SM_Ctrl_Init(TSM_Ctrl*);
+  //!Расчет ограничения тока оси q по заданной мощности (постоянство мощности)
+  //! \memberof TSM_Ctrl
+  long SM_Ctrl_PowerCurrentLimit(TSM_Ctrl*);
   //! \memberof TSM_Ctrl
   void SM_Ctrl_Slow_Calc(TSM_Ctrl*);
   //! \memberof TSM_Ctrl
