@@ -114,6 +114,8 @@ void SM_Ctrl_Fast_Calc(TSM_Ctrl *p) {
 		pwm.update(&pwm);
 		pid_id.reset(&pid_id);
 		pid_iq.reset(&pid_iq);
+		field_weak.Id_ref = 0; //сброс ослабления поля
+		field_weak.ui = 0;
 		pid_ia.reset(&pid_ia);
 		pid_spd.reset(&pid_spd);
 		pid_pos.reset(&pid_pos);
@@ -438,7 +440,14 @@ void SM_Ctrl_Fast_Calc(TSM_Ctrl *p) {
 			pid_iq.pid_fdb_reg3 = park.qe; //обратная связь рег. тока оси q - вычисленный ток по фазе q
 			pid_iq.calc(&pid_iq); //расчет регулятора тока оси q
 
-			pid_id.pid_ref_reg3 = 0; //задание тока по оси d - оси возбудения
+			//ослабление поля: при превышении напряжения задается отрицательный
+			//ток по оси d, что позволяет поднять скорость выше базовой
+			field_weak.U_meas = pwm.U_mag; //текущая амплитуда вектора напряжения
+			field_weak.U_lim = pwm.U_lim; //допустимая амплитуда
+			field_weak.Id_min = -refs.Iq_ref; //ограничение размагничивающего тока
+			field_weak.calc(&field_weak); //расчет ослабления поля
+
+			pid_id.pid_ref_reg3 = field_weak.Id_ref; //задание тока по оси d - оси возбудения
 			pid_id.pid_fdb_reg3 = park.de; //обратная связь рег. тока оси d - вычисленный ток по фазе d
 			pid_id.calc(&pid_id); //расчет регулятора тока оси d
 
@@ -578,7 +587,14 @@ void SM_Ctrl_Fast_Calc(TSM_Ctrl *p) {
 			pid_iq.pid_fdb_reg3 = park.qe; //обратная связь рег. тока оси q - вычисленный ток по фазе q
 			pid_iq.calc(&pid_iq); //расчет регулятора тока оси q
 
-			pid_id.pid_ref_reg3 = 0; //задание тока по оси d - оси возбудения
+			//ослабление поля: при превышении напряжения задается отрицательный
+			//ток по оси d, что позволяет поднять скорость выше базовой
+			field_weak.U_meas = pwm.U_mag; //текущая амплитуда вектора напряжения
+			field_weak.U_lim = pwm.U_lim; //допустимая амплитуда
+			field_weak.Id_min = -refs.Iq_ref; //ограничение размагничивающего тока
+			field_weak.calc(&field_weak); //расчет ослабления поля
+
+			pid_id.pid_ref_reg3 = field_weak.Id_ref; //задание тока по оси d - оси возбудения
 			pid_id.pid_fdb_reg3 = park.de; //обратная связь рег. тока оси d - вычисленный ток по фазе d
 			pid_id.calc(&pid_id); //расчет регулятора тока оси d
 
