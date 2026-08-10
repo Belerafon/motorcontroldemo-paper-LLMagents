@@ -544,6 +544,100 @@ void PWM_Module_No_SV_Update(TPWM_Module *p) {
     EINT;
 }
 
+//! Функция центрированной векторной ШИМ без привязки к шинам
+
+//! В отличие от 6-ти секторной ШИМ (PWM_Module_No_SV_Update) ни одна фаза
+//! в рабочем диапазоне не прижимается к верхней или нижней шине звена
+//! постоянного тока: все три фазы коммутируются симметрично. Улучшение
+//! использования напряжения ЗПТ относительно синусоидальной ШИМ достигается
+//! инжекцией нулевой последовательности, центрирующей фазные потенциалы
+//! относительно середины звена постоянного тока (аналог классической SVPWM с
+//! симметричным распределением нулевых векторов). Прижатие к шине возникает
+//! только на границе линейной зоны, когда упираемся в ограничение напряжения.
+//! \memberof TPWM_Module
+void PWM_Module_SV_Centered_Update(TPWM_Module *p) {
+	_iq Va;
+	_iq Vb;
+	_iq Vc;
+	_iq Vmax;
+	_iq Vmin;
+	_iq cm;
+	_iq PhasePtsA;
+	_iq PhasePtsB;
+	_iq PhasePtsC;
+
+	//Присвоение трех уставок сравнения только если счетчик таймера далек от нуля, чтобы
+	//предотвратить частичное применение скважностей, что в векторной ШИМ может быть критично и испортить период ШИМ.
+	DINT;
+	if (NT_PWM0->TBCTR > 30) {
+		NT_PWM0->CMPA_bit.CMPA = (Uint16)p->GammaA;
+		NT_PWM1->CMPA_bit.CMPA = (Uint16)p->GammaB;
+		NT_PWM2->CMPA_bit.CMPA = (Uint16)p->GammaC;
+	}
+	EINT;
+
+	//Нормирование входного задания (компенсация пульсаций Ud, ограничение U_lim).
+	//Заполняет UalphaNorm, UbetaNorm в базисе базового вектора.
+	PWM_Module_NormInput(p);
+
+	//Переход от осей альфа/бетта к фазным потенциалам (сумма равна нулю) и
+	//нормировка к половинному диапазону ШИМ (2/sqrt3 от базового вектора).
+	//Задание UalphaNorm, UbetaNorm нормировано относительно базового вектора
+	//(длина вектора = Vdc), а фазное напряжение (фаза-нейтраль) при этом
+	//меньше в sqrt3 раз, поэтому множитель 2/sqrt3 = _2_SQRT3.
+	Va = _IQmpy(p->UalphaNorm, _2_SQRT3);
+	Vb = _IQmpy(p->UalphaNorm, _IQ(-0.5773503)) + _IQmpy(p->UbetaNorm, _IQ(1.0));
+	Vc = _IQmpy(p->UalphaNorm, _IQ(-0.5773503)) - _IQmpy(p->UbetaNorm, _IQ(1.0));
+
+	//Находим экстремумы фазных потенциалов.
+	if (Va >= Vb) {
+		Vmax = (Va >= Vc) ? Va : Vc;
+		Vmin = (Vb <= Vc) ? Vb : Vc;
+	} else {
+		Vmax = (Vb >= Vc) ? Vb : Vc;
+		Vmin = (Va <= Vc) ? Va : Vc;
+	}
+
+	//Инжекция нулевой последовательности, центрирующая фазные потенциалы
+	//относительно середины звена постоянного тока (без привязки к шинам).
+	//Фазные потенциалы уже нормированы к половинному диапазону ШИМ.
+	cm = _IQmpy(_IQmpy(Vmax + Vmin, _IQ(-1.0)), _IQ(0.5)); // -(Vmax+Vmin)/2
+
+	PhasePtsA = _IQmpy(_IQ(1.0) - (Va + cm), _IQ(0.5));
+	PhasePtsB = _IQmpy(_IQ(1.0) - (Vb + cm), _IQ(0.5));
+	PhasePtsC = _IQmpy(_IQ(1.0) - (Vc + cm), _IQ(0.5));
+
+	p->GammaA = _IQmpy(p->k_pwm, PhasePtsA);
+	p->GammaB = _IQmpy(p->k_pwm, PhasePtsB);
+	p->GammaC = _IQmpy(p->k_pwm, PhasePtsC);
+
+	/*насыщения */
+
+	if (p->GammaA < 0)
+		p->GammaA = 0;
+	if (p->GammaB < 0)
+		p->GammaB = 0;
+	if (p->GammaC < 0)
+		p->GammaC = 0;
+
+	if (p->GammaA > p->k_pwm)
+		p->GammaA = p->k_pwm + 1;
+	if (p->GammaB > p->k_pwm)
+		p->GammaB = p->k_pwm + 1;
+	if (p->GammaC > p->k_pwm)
+		p->GammaC = p->k_pwm + 1;
+
+	//Присвоение трех уставок сравнения. Второй раз - чтобы предотвратить ситуацию
+	//с постоянной "незагрузкой" при равенстве частот расчета и ШИМ.
+	DINT;
+	if (NT_PWM0->TBCTR > 30) {
+		NT_PWM0->CMPA_bit.CMPA = (Uint16)p->GammaA;
+		NT_PWM1->CMPA_bit.CMPA = (Uint16)p->GammaB;
+		NT_PWM2->CMPA_bit.CMPA = (Uint16)p->GammaC;
+	}
+	EINT;
+}
+
 //! Функция синусоидальной ШИМ
 
 //! \memberof TPWM_Module
@@ -728,6 +822,10 @@ void PWM_Module_Update(TPWM_Module *p) {
 		}
 		case PWM_TYPE_SIN_PWM: {
 			PWM_Module_Sin_Update(p);
+			break;
+		}
+		case PWM_TYPE_SV_CENTERED: {
+			PWM_Module_SV_Centered_Update(p);
 			break;
 		}
 		case PWM_TYPE_DC_DRIVE: {
