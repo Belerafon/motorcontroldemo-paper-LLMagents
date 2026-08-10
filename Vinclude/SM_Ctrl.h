@@ -54,6 +54,12 @@ extern "C"
     int E;//!<Флаг первого вхождения.
     long AnglePrev;//!< Предыдущее значение угла для режима автонастройки ДПР
     long AngleDemo;//!< Угол для демо-режима контура положения
+    Uint16 fw_ena;//!< Разрешение ослабления поля (1 - включено)
+    long fw_ui;//!< Интегральная составляющая регулятора ослабления поля
+    long fw_Kp;//!< Пропорциональный коэффициент ослабления поля
+    long fw_Ki;//!< Интегральный коэффициент ослабления поля
+    long fw_Imax;//!< Максимальный (по модулю) ток ослабления поля, о.е.
+    long fw_Vmax;//!< Доля от ограничения напряжения ШИМ, при которой начинается ослабление поля
     void (*init)(struct SSM_Ctrl*);     //!< Pointer to the init funcion
     void (*slow_calc)(struct SSM_Ctrl*);//!< Pointer to the calc funtion
     void (*fast_calc)(struct SSM_Ctrl*); //!< Pointer to the calc funtion
@@ -66,7 +72,10 @@ extern "C"
 #define SM_CTRL_DEFAULTS { .init = SM_Ctrl_Init,\
     .slow_calc = SM_Ctrl_Slow_Calc,\
     .fast_calc = SM_Ctrl_Fast_Calc,\
-    .ms_calc = SM_Ctrl_ms_Calc \
+    .ms_calc = SM_Ctrl_ms_Calc,\
+    .fw_ena = 1, .fw_ui = 0,\
+    .fw_Kp = _IQ(1.0), .fw_Ki = _IQ(0.1),\
+    .fw_Imax = _IQ(0.8), .fw_Vmax = _IQ(0.9) \
     }
 
   //! \memberof TSM_Ctrl
