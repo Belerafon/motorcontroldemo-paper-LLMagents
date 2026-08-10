@@ -215,11 +215,15 @@ void SM_Ctrl_Fast_Calc(TSM_Ctrl *p) {
 		//регулятор тока "как бы" оси d (на самом деле эта ось к двигателю к оси d не привязана, это свободная ось)
 		pid_id.pid_ref_reg3 = refs.i_flux_ref; //задание на ток намагничивания
 		pid_id.pid_fdb_reg3 = park.de;//обратная связь - то что пришло с фазных преобразований
+		pid_id.pid_out_max = pwm.I_lim_dynamic;
+		pid_id.pid_out_min = -pwm.I_lim_dynamic;
 		pid_id.calc(&pid_id);
 
 		//регулятор тока "как бы" оси q (на самом деле эта ось к двигателю к оси q не привязана, это свободная ось)
 		pid_iq.pid_ref_reg3 = 0;//задание - ноль
 		pid_iq.pid_fdb_reg3 = park.qe;park.de;//обратная связь - то что пришло с фазных преобразований
+		pid_iq.pid_out_max = pwm.I_lim_dynamic;
+		pid_iq.pid_out_min = -pwm.I_lim_dynamic;
 		pid_iq.calc(&pid_iq);
 
 		//обратные фазные преобразования.
@@ -335,22 +339,26 @@ void SM_Ctrl_Fast_Calc(TSM_Ctrl *p) {
 			park.ang = refs.theta_elec;
 			park.calc(&park);
 
-			//регулятор тока "как бы" оси d (на самом деле эта ось к двигателю к оси d не привязана, это свободная ось)
-			pid_id.pid_ref_reg3 = refs.i_flux_ref;
-			pid_id.pid_fdb_reg3 = park.de;
-			pid_id.calc(&pid_id);
+		//регулятор тока "как бы" оси d (на самом деле эта ось к двигателю к оси d не привязана, это свободная ось)
+		pid_id.pid_ref_reg3 = refs.i_flux_ref;
+		pid_id.pid_fdb_reg3 = park.de;
+		pid_id.pid_out_max = pwm.I_lim_dynamic;
+		pid_id.pid_out_min = -pwm.I_lim_dynamic;
+		pid_id.calc(&pid_id);
 
-			//регулятор тока "как бы" оси q (на самом деле эта ось к двигателю к оси q не привязана, это свободная ось)
-			pid_iq.pid_ref_reg3 = 0;
-			pid_iq.pid_fdb_reg3 = park.qe;
-			pid_iq.calc(&pid_iq);
+		//регулятор тока "как бы" оси q (на самом деле эта ось к двигателю к оси q не привязана, это свободная ось)
+		pid_iq.pid_ref_reg3 = 0;
+		pid_iq.pid_fdb_reg3 = park.qe;
+		pid_iq.pid_out_max = pwm.I_lim_dynamic;
+		pid_iq.pid_out_min = -pwm.I_lim_dynamic;
+		pid_iq.calc(&pid_iq);
 
-			//обратные фазные преобразования.
-			//Крутим вектор напряжения, который выдают регуляторы токов обратно на угол refs.theta_elec
-			ipark.de = pid_id.pid_out_reg3;
-			ipark.qe = pid_iq.pid_out_reg3;
-			ipark.ang = refs.theta_elec;
-			ipark.calc(&ipark);
+		//обратные фазные преобразования.
+		//Крутим вектор напряжения, который выдают регуляторы токов обратно на угол refs.theta_elec
+		ipark.de = pid_id.pid_out_reg3;
+		ipark.qe = pid_iq.pid_out_reg3;
+		ipark.ang = refs.theta_elec;
+		ipark.calc(&ipark);
 
 			//получившиеся задания напряжения по осям альфа и бета отправляем на модуль ШИМ
 			pwm.UalphaRef = ipark.ds;
@@ -414,33 +422,37 @@ void SM_Ctrl_Fast_Calc(TSM_Ctrl *p) {
 			pid_spd.pid_fdb_reg3 = cur_par.speed; //обратная связь регулятора скорости - скорость ДПР
 
 
-			pid_spd.pid_out_max = refs.Iq_ref; //Максимум выхода регулятора скорости - заданный ток
+		pid_spd.pid_out_max = pwm.I_lim_dynamic; //Максимум выхода регулятора скорости - динамический лимит тока
+		pid_iq.pid_out_max = pwm.I_lim_dynamic;
+		pid_iq.pid_out_min = -pwm.I_lim_dynamic;
 
-			if (sw.recuperation_ena & 1)            //если разрешена рекуперация
-				pid_spd.pid_out_min = -refs.Iq_ref; //минимум рег. скор. - отрицательный ток
-			else
-				//иначе
-				pid_spd.pid_out_min = 0; //нулевой ток не даст рекупераци при вращении в положительную сторону
-			pid_spd.calc(&pid_spd); //расчет регулятора скорости
+		if (sw.recuperation_ena & 1)            //если разрешена рекуперация
+			pid_spd.pid_out_min = -pwm.I_lim_dynamic; //минимум рег. скор. - отрицательный ток
+		else
+			//иначе
+			pid_spd.pid_out_min = 0; //нулевой ток не даст рекупераци при вращении в положительную сторону
+		pid_spd.calc(&pid_spd); //расчет регулятора скорости
 
 
-			cur_par.ThetaRefCurr = refs.theta_elec;
-			refs.theta_elec &= 0x00FFFFFF; //Ограничение угла на 1.0 в формате 8.24
+		cur_par.ThetaRefCurr = refs.theta_elec;
+		refs.theta_elec &= 0x00FFFFFF; //Ограничение угла на 1.0 в формате 8.24
 
-			//Поворот токов фаз на угол refs.theta_elec
-			park.ds = clarke.ds;
-			park.qs = clarke.qs;
-			park.ang = refs.theta_elec;
-			park.calc(&park); //расчет преобразования координат
+		//Поворот токов фаз на угол refs.theta_elec
+		park.ds = clarke.ds;
+		park.qs = clarke.qs;
+		park.ang = refs.theta_elec;
+		park.calc(&park); //расчет преобразования координат
 
-			//задание рег. тока по оси q (оси момента) - выход регулятора скорости
-			pid_iq.pid_ref_reg3 = pid_spd.pid_out_reg3;
-			pid_iq.pid_fdb_reg3 = park.qe; //обратная связь рег. тока оси q - вычисленный ток по фазе q
-			pid_iq.calc(&pid_iq); //расчет регулятора тока оси q
+		//задание рег. тока по оси q (оси момента) - выход регулятора скорости
+		pid_iq.pid_ref_reg3 = pid_spd.pid_out_reg3;
+		pid_iq.pid_fdb_reg3 = park.qe; //обратная связь рег. тока оси q - вычисленный ток по фазе q
+		pid_iq.calc(&pid_iq); //расчет регулятора тока оси q
 
-			pid_id.pid_ref_reg3 = 0; //задание тока по оси d - оси возбудения
-			pid_id.pid_fdb_reg3 = park.de; //обратная связь рег. тока оси d - вычисленный ток по фазе d
-			pid_id.calc(&pid_id); //расчет регулятора тока оси d
+		pid_id.pid_ref_reg3 = 0; //задание тока по оси d - оси возбудения
+		pid_id.pid_fdb_reg3 = park.de; //обратная связь рег. тока оси d - вычисленный ток по фазе d
+		pid_id.pid_out_max = pwm.I_lim_dynamic;
+		pid_id.pid_out_min = -pwm.I_lim_dynamic;
+		pid_id.calc(&pid_id); //расчет регулятора тока оси d
 
 			//Обратный поворот на угол refs.theta_elec для 
 			//выходов регуляторов тока (напряжений по осям d и q)
@@ -562,25 +574,29 @@ void SM_Ctrl_Fast_Calc(TSM_Ctrl *p) {
 //			pid_spd.pid_fdb_reg3 = posspeedEqep.speed_filter.output; //обратная связь регулятора скорости - скорость ДПР
 			pid_spd.pid_fdb_reg3 = cur_par.speed;
 
-			pid_spd.pid_out_max = refs.Iq_ref; //Максимум выхода регулятора скорости - заданный ток
-			pid_spd.pid_out_min = -refs.Iq_ref; //минимум рег. скор. - отрицательный ток
-			pid_spd.calc(&pid_spd); //расчет регулятора скорости
+		pid_spd.pid_out_max = pwm.I_lim_dynamic; //Максимум выхода регулятора скорости - динамический лимит тока
+		pid_iq.pid_out_max = pwm.I_lim_dynamic;
+		pid_iq.pid_out_min = -pwm.I_lim_dynamic;
+		pid_spd.pid_out_min = -pwm.I_lim_dynamic; //минимум рег. скор. - отрицательный ток
+		pid_spd.calc(&pid_spd); //расчет регулятора скорости
 
 
-			//Поворот токов фаз на угол refs.theta_elec
-			park.ds = clarke.ds;
-			park.qs = clarke.qs;
-			park.ang = posspeedEqep.theta_elec;
-			park.calc(&park); //расчет преобразования координат
+		//Поворот токов фаз на угол refs.theta_elec
+		park.ds = clarke.ds;
+		park.qs = clarke.qs;
+		park.ang = refs.theta_elec;
+		park.calc(&park); //расчет преобразования координат
 
-			//задание рег. тока по оси q (оси момента) - выход регулятора скорости
-			pid_iq.pid_ref_reg3 = pid_spd.pid_out_reg3;
-			pid_iq.pid_fdb_reg3 = park.qe; //обратная связь рег. тока оси q - вычисленный ток по фазе q
-			pid_iq.calc(&pid_iq); //расчет регулятора тока оси q
+		//задание рег. тока по оси q (оси момента) - выход регулятора скорости
+		pid_iq.pid_ref_reg3 = pid_spd.pid_out_reg3;
+		pid_iq.pid_fdb_reg3 = park.qe; //обратная связь рег. тока оси q - вычисленный ток по фазе q
+		pid_iq.calc(&pid_iq); //расчет регулятора тока оси q
 
-			pid_id.pid_ref_reg3 = 0; //задание тока по оси d - оси возбудения
-			pid_id.pid_fdb_reg3 = park.de; //обратная связь рег. тока оси d - вычисленный ток по фазе d
-			pid_id.calc(&pid_id); //расчет регулятора тока оси d
+		pid_id.pid_ref_reg3 = 0; //задание тока по оси d - оси возбудения
+		pid_id.pid_fdb_reg3 = park.de; //обратная связь рег. тока оси d - вычисленный ток по фазе d
+		pid_id.pid_out_max = pwm.I_lim_dynamic;
+		pid_id.pid_out_min = -pwm.I_lim_dynamic;
+		pid_id.calc(&pid_id); //расчет регулятора тока оси d
 
 			//Обратный поворот на угол refs.theta_elec для
 			//выходов регуляторов тока (напряжений по осям d и q)
@@ -631,14 +647,14 @@ void SM_Ctrl_Fast_Calc(TSM_Ctrl *p) {
 			pid_spd.pid_fdb_reg3 = posspeedEqep.speed_elec; //обратная связь регулятора скорости - скорость ДПР
 
 
-			pid_spd.pid_out_max = refs.Iq_ref; //Максимум выхода регулятора скорости - заданный ток
+		pid_spd.pid_out_max = pwm.I_lim_dynamic; //Максимум выхода регулятора скорости - динамический лимит тока
 
-			if (sw.recuperation_ena & 1)            //если разрешена рекуперация
-				pid_spd.pid_out_min = -refs.Iq_ref; //минимум рег. скор. - отрицательный ток
-			else
-				//иначе
-				pid_spd.pid_out_min = 0; //нулевой ток не даст рекупераци при вращении в положительную сторону
-			pid_spd.calc(&pid_spd); //расчет регулятора скорости
+		if (sw.recuperation_ena & 1)            //если разрешена рекуперация
+			pid_spd.pid_out_min = -pwm.I_lim_dynamic; //минимум рег. скор. - отрицательный ток
+		else
+			//иначе
+			pid_spd.pid_out_min = 0; //нулевой ток не даст рекупераци при вращении в положительную сторону
+		pid_spd.calc(&pid_spd); //расчет регулятора скорости
 
 
 			//Поворот токов фаз на угол refs.theta_elec
@@ -663,37 +679,41 @@ void SM_Ctrl_Fast_Calc(TSM_Ctrl *p) {
 			park.ang = refs.theta_elec;
 			park.calc(&park);
 
-			//регуляторы токов d, q используются для регулирования осей x, y (чтобы не делать разных названий)
-			//задание рег. тока по оси y (оси момента) - выход регулятора скорости
-			pid_iq.pid_ref_reg3 = pid_spd.pid_out_reg3;
-			pid_iq.pid_fdb_reg3 = park.qe; //обратная связь рег. тока оси y - вычисленный ток по фазе y
-			pid_iq.calc(&pid_iq); //расчет регулятора тока оси y
+		//регуляторы токов d, q используются для регулирования осей x, y (чтобы не делать разных названий)
+		//задание рег. тока по оси y (оси момента) - выход регулятора скорости
+		pid_iq.pid_ref_reg3 = pid_spd.pid_out_reg3;
+		pid_iq.pid_fdb_reg3 = park.qe; //обратная связь рег. тока оси y - вычисленный ток по фазе y
+		pid_iq.pid_out_max = pwm.I_lim_dynamic;
+		pid_iq.pid_out_min = -pwm.I_lim_dynamic;
+		pid_iq.calc(&pid_iq); //расчет регулятора тока оси y
 
-			pid_id.pid_ref_reg3 = _IQmpy(RotorObserver.FluxCurrentRatio,labs(pid_iq.pid_ref_reg3)); //задание тока по оси x - оси возбудения. Пропорционально амплитуде задания тока статора
-			if (pid_id.pid_ref_reg3 < RotorObserver.FluxCurrentMin)
-				pid_id.pid_ref_reg3=RotorObserver.FluxCurrentMin;
-			pid_id.pid_fdb_reg3 = park.de; //обратная связь рег. тока оси x - вычисленный ток по фазе x
-			pid_id.calc(&pid_id); //расчет регулятора тока оси x
+		pid_id.pid_ref_reg3 = _IQmpy(RotorObserver.FluxCurrentRatio,labs(pid_iq.pid_ref_reg3)); //задание тока по оси x - оси возбудения. Пропорционально амплитуде задания тока статора
+		if (pid_id.pid_ref_reg3 < RotorObserver.FluxCurrentMin)
+			pid_id.pid_ref_reg3=RotorObserver.FluxCurrentMin;
+		pid_id.pid_fdb_reg3 = park.de; //обратная связь рег. тока оси x - вычисленный ток по фазе x
+		pid_id.pid_out_max = pwm.I_lim_dynamic;
+		pid_id.pid_out_min = -pwm.I_lim_dynamic;
+		pid_id.calc(&pid_id); //расчет регулятора тока оси x
 
 
-			//Обратный поворот на угол refs.theta_elec для
-			//выходов регуляторов тока (напряжений по осям x и y)
-			ipark.de = pid_id.pid_out_reg3;
-			ipark.qe = pid_iq.pid_out_reg3;
-			ipark.ang = refs.theta_elec;
-			ipark.calc(&ipark);            //расчет преобразования координат
+		//Обратный поворот на угол refs.theta_elec для
+		//выходов регуляторов тока (напряжений по осям x и y)
+		ipark.de = pid_id.pid_out_reg3;
+		ipark.qe = pid_iq.pid_out_reg3;
+		ipark.ang = refs.theta_elec;
+		ipark.calc(&ipark);            //расчет преобразования координат
 
-			//Задание напряжение на модуль ШИМ после преобразования координат
-			pwm.UalphaRef = ipark.ds;            //Ось альфа
-			pwm.UbetaRef = ipark.qs;            //Ось бета
-			pwm.update(&pwm);            //Расчет модуля ШИМ
+		//Задание напряжение на модуль ШИМ после преобразования координат
+		pwm.UalphaRef = ipark.ds;            //Ось альфа
+		pwm.UbetaRef = ipark.qs;            //Ось бета
+		pwm.update(&pwm);            //Расчет модуля ШИМ
 
-			/*DO END*/
-		}
-		break;
+		/*DO END*/
 	}
+	break;
+}
 
-	case CTRL_RUN_VECTOR_IM_ENCODER_POS: { //Датчиковая СУ для АД с энкодером и контурами скорости и положения
+case CTRL_RUN_VECTOR_IM_ENCODER_POS: { //Датчиковая СУ для АД с энкодером и контурами скорости и положения
 		if (p->E == 1) {
 			/*ENTRY START*/
 			pwm.On(&pwm);            //Включение ШИМ
@@ -795,57 +815,63 @@ void SM_Ctrl_Fast_Calc(TSM_Ctrl *p) {
 //			pid_spd.pid_fdb_reg3 = posspeedEqep.speed_filter.output; //обратная связь регулятора скорости - скорость ДПР
 			pid_spd.pid_fdb_reg3 = cur_par.speed;
 
-			pid_spd.pid_out_max = refs.Iq_ref; //Максимум выхода регулятора скорости - заданный ток
-			pid_spd.pid_out_min = -refs.Iq_ref; //минимум рег. скор. - отрицательный ток
-			pid_spd.calc(&pid_spd); //расчет регулятора скорости
+		pid_spd.pid_out_max = pwm.I_lim_dynamic; //Максимум выхода регулятора скорости - динамический лимит тока
+		pid_iq.pid_out_max = pwm.I_lim_dynamic;
+		pid_iq.pid_out_min = -pwm.I_lim_dynamic;
+		pid_spd.pid_out_min = -pwm.I_lim_dynamic; //минимум рег. скор. - отрицательный ток
+		pid_spd.calc(&pid_spd); //расчет регулятора скорости
 
 
-			//Поворот токов фаз на угол Temp1
-			park.ds = clarke.ds;
-			park.qs = clarke.qs;
-			park.ang = posspeedEqep.theta_elec;
-			park.calc(&park); //расчет преобразования координат
+		//Поворот токов фаз на угол Temp1
+		park.ds = clarke.ds;
+		park.qs = clarke.qs;
+		park.ang = posspeedEqep.theta_elec;
+		park.calc(&park); //расчет преобразования координат
 
-			RotorObserver.id=park.de;//на наблюдатель ротора АД - токи статора, повернутый на угол ДПРа
-			RotorObserver.iq=park.qe;
-			RotorObserver.calc(&RotorObserver);
+		RotorObserver.id=park.de;//на наблюдатель ротора АД - токи статора, повернутый на угол ДПРа
+		RotorObserver.iq=park.qe;
+		RotorObserver.calc(&RotorObserver);
 
-			Temp1 = RotorObserver.theta_psi_elec+posspeedEqep.theta_elec; //текущее угловое положение - с ДПР и наблюдателя ротора (оси x,y)
-			Temp1 &= 0x00FFFFFF; //Ограничение угла на 1.0 в формате 8.24
-			cur_par.ThetaRefCurr = Temp1;
+		Temp1 = RotorObserver.theta_psi_elec+posspeedEqep.theta_elec; //текущее угловое положение - с ДПР и наблюдателя ротора (оси x,y)
+		Temp1 &= 0x00FFFFFF; //Ограничение угла на 1.0 в формате 8.24
+		cur_par.ThetaRefCurr = Temp1;
 
 
-			//Теперь Temp1 - угол потокосцепления ротора. Повторяем векторную систему от синхронной машины для этого угла
-			park.ds = clarke.ds;
+		//Теперь Temp1 - угол потокосцепления ротора. Повторяем векторную систему от синхронной машины для этого угла
+		park.ds = clarke.ds;
 			park.qs = clarke.qs;
 			//второе слагаемое - доворот для устойчивости регуляторов на высокой скорости. Дублироваться второй раз для ipark не должен!
 			park.ang = Temp1;
 			park.calc(&park);
 
-			//регуляторы токов d, q используются для регулирования осей x, y (чтобы не делать разных названий)
-			//задание рег. тока по оси y (оси момента) - выход регулятора скорости
-			pid_iq.pid_ref_reg3 = pid_spd.pid_out_reg3;
-			pid_iq.pid_fdb_reg3 = park.qe; //обратная связь рег. тока оси y - вычисленный ток по фазе y
-			pid_iq.calc(&pid_iq); //расчет регулятора тока оси y
+		//регуляторы токов d, q используются для регулирования осей x, y (чтобы не делать разных названий)
+		//задание рег. тока по оси y (оси момента) - выход регулятора скорости
+		pid_iq.pid_ref_reg3 = pid_spd.pid_out_reg3;
+		pid_iq.pid_fdb_reg3 = park.qe; //обратная связь рег. тока оси y - вычисленный ток по фазе y
+		pid_iq.pid_out_max = pwm.I_lim_dynamic;
+		pid_iq.pid_out_min = -pwm.I_lim_dynamic;
+		pid_iq.calc(&pid_iq); //расчет регулятора тока оси y
 
-			pid_id.pid_ref_reg3 = _IQmpy(RotorObserver.FluxCurrentRatio,labs(pid_iq.pid_ref_reg3)); //задание тока по оси x - оси возбудения. Пропорционально амплитуде задания тока статора
-			if (pid_id.pid_ref_reg3 < RotorObserver.FluxCurrentMin)
-				pid_id.pid_ref_reg3=RotorObserver.FluxCurrentMin;
-			pid_id.pid_fdb_reg3 = park.de; //обратная связь рег. тока оси x - вычисленный ток по фазе x
-			pid_id.calc(&pid_id); //расчет регулятора тока оси x
+		pid_id.pid_ref_reg3 = _IQmpy(RotorObserver.FluxCurrentRatio,labs(pid_iq.pid_ref_reg3)); //задание тока по оси x - оси возбудения. Пропорционально амплитуде задания тока статора
+		if (pid_id.pid_ref_reg3 < RotorObserver.FluxCurrentMin)
+			pid_id.pid_ref_reg3=RotorObserver.FluxCurrentMin;
+		pid_id.pid_fdb_reg3 = park.de; //обратная связь рег. тока оси x - вычисленный ток по фазе x
+		pid_id.pid_out_max = pwm.I_lim_dynamic;
+		pid_id.pid_out_min = -pwm.I_lim_dynamic;
+		pid_id.calc(&pid_id); //расчет регулятора тока оси x
 
 
-			//Обратный поворот на угол Temp1 для
-			//выходов регуляторов тока (напряжений по осям x и y)
-			ipark.de = pid_id.pid_out_reg3;
-			ipark.qe = pid_iq.pid_out_reg3;
-			ipark.ang = Temp1;
-			ipark.calc(&ipark);            //расчет преобразования координат
+		//Обратный поворот на угол Temp1 для
+		//выходов регуляторов тока (напряжений по осям x и y)
+		ipark.de = pid_id.pid_out_reg3;
+		ipark.qe = pid_iq.pid_out_reg3;
+		ipark.ang = Temp1;
+		ipark.calc(&ipark);            //расчет преобразования координат
 
-			//Задание напряжение на модуль ШИМ после преобразования координат
-			pwm.UalphaRef = ipark.ds;            //Ось альфа
-			pwm.UbetaRef = ipark.qs;            //Ось бета
-			pwm.update(&pwm);            //Расчет модуля ШИМ
+		//Задание напряжение на модуль ШИМ после преобразования координат
+		pwm.UalphaRef = ipark.ds;            //Ось альфа
+		pwm.UbetaRef = ipark.qs;            //Ось бета
+		pwm.update(&pwm);            //Расчет модуля ШИМ
 
 			/*DO END*/
 		}
@@ -881,16 +907,17 @@ void SM_Ctrl_Fast_Calc(TSM_Ctrl *p) {
 		pid_spd.pid_ref_reg3 = refs.DCMspeed_ref; //задание
 		pid_spd.pid_fdb_reg3 = posspeedEqep.speed_elec; //обратная связь регулятора скорости - скорость ДПР
 /*
-		pid_spd.pid_out_max = sm_prot.Imax_protect; //Максимум выхода регулятора скорости - заданный ток
+		pid_spd.pid_out_max = pwm.I_lim_dynamic; //Максимум выхода регулятора скорости - динамический лимит тока
 		if (sw.recuperation_ena & 1)            //если разрешена рекуперация
-			pid_spd.pid_out_min = -sm_prot.Imax_protect; //минимум рег. скор. - отрицательный ток
+			pid_spd.pid_out_min = -pwm.I_lim_dynamic; //минимум рег. скор. - отрицательный ток
 		else
 			pid_spd.pid_out_min = 0; //нулевой ток не даст рекупераци при вращении в положительную сторону
-*/
 		pid_spd.calc(&pid_spd); //расчет регулятора скорости
 
 		pid_ia.pid_ref_reg3 = pid_spd.pid_out_reg3;
 		pid_ia.pid_fdb_reg3 = adc.Imeas_a; //обратная связь рег. тока оси y - вычисленный ток по фазе y
+		pid_ia.pid_out_max = pwm.I_lim_dynamic;
+		pid_ia.pid_out_min = -pwm.I_lim_dynamic;
 		pid_ia.calc(&pid_ia); //расчет регулятора тока оси y
 
 		pwm.UalphaRef = pid_ia.pid_out_reg3;
@@ -930,18 +957,22 @@ void SM_Ctrl_Fast_Calc(TSM_Ctrl *p) {
 			cur_par.ThetaRefCurr = refs.theta_elec;
 			refs.theta_elec &= 0x00FFFFFF;
 
-			park.ds = clarke.ds;
-			park.qs = clarke.qs;
-			park.ang = refs.theta_elec;
-			park.calc(&park);
+		park.ds = clarke.ds;
+		park.qs = clarke.qs;
+		park.ang = refs.theta_elec;
+		park.calc(&park);
 
-			pid_iq.pid_ref_reg3 = 0;
-			pid_iq.pid_fdb_reg3 = park.qe;
-			pid_iq.calc(&pid_iq);
+		pid_iq.pid_ref_reg3 = 0;
+		pid_iq.pid_fdb_reg3 = park.qe;
+		pid_iq.pid_out_max = pwm.I_lim_dynamic;
+		pid_iq.pid_out_min = -pwm.I_lim_dynamic;
+		pid_iq.calc(&pid_iq);
 
-			pid_id.pid_ref_reg3 = refs.i_flux_ref;
-			pid_id.pid_fdb_reg3 = park.de;
-			pid_id.calc(&pid_id);
+		pid_id.pid_ref_reg3 = refs.i_flux_ref;
+		pid_id.pid_fdb_reg3 = park.de;
+		pid_id.pid_out_max = pwm.I_lim_dynamic;
+		pid_id.pid_out_min = -pwm.I_lim_dynamic;
+		pid_id.calc(&pid_id);
 
 			ipark.de = pid_id.pid_out_reg3;
 			ipark.qe = pid_iq.pid_out_reg3;
@@ -998,9 +1029,9 @@ void SM_Ctrl_Fast_Calc(TSM_Ctrl *p) {
 			pid_spd.pid_ref_reg3 = rmp.output;//на вход регулятора скорости - выход ЗИ
 			pid_spd.pid_fdb_reg3 = DPReCAP.speed;//обратная связь регулятора скорости - скорость ДПР Холла
 
-			pid_spd.pid_out_max = refs.Iq_ref;//Максимум выхода регулятора скорости - заданный ток
-			pid_spd.pid_out_min = 0; //Минимум выхода регулятора скорости - 0
-			pid_spd.calc(&pid_spd); //расчет регулятора скорости
+		pid_spd.pid_out_max = pwm.I_lim_dynamic;//Максимум выхода регулятора скорости - динамический лимит тока
+		pid_spd.pid_out_min = 0; //Минимум выхода регулятора скорости - 0
+		pid_spd.calc(&pid_spd); //расчет регулятора скорости
 
 			//выдача задания тока в фазы с положительным моментом, исходя из угла
 			switch (DPReCAP.Angle6)

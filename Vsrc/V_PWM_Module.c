@@ -717,6 +717,7 @@ void PWM_Module_ChargingMode(TPWM_Module *p) {
 
 //! \memberof TPWM_Module
 void PWM_Module_Update(TPWM_Module *p) {
+	PWM_Module_CalcDynamicCurrentLimit(p);
 
 	if (p->ChargingMode)
 		PWM_Module_ChargingMode(p);
@@ -834,6 +835,17 @@ void PWM_Module_Off(TPWM_Module *p) {
     NT_PWM2->AQCSFRC = 9;  // 0x1 - 0 на выходе PWMxA, 0x8 - 1 на выходе PWMxB
 	GPIO_INV_OFF;
 
+}
+
+//! Расчет динамического лимита тока в зависимости от напряжения ЗПТ и возможностей ШИМ
+//! \memberof TPWM_Module
+void PWM_Module_CalcDynamicCurrentLimit(TPWM_Module *p) {
+	p->I_lim_dynamic = _IQmpy(_IQmpy(refs.Iq_ref, adc.Udc_meas), p->U_lim);
+
+	if (p->I_lim_dynamic > refs.Iq_ref)
+		p->I_lim_dynamic = refs.Iq_ref;
+	if (p->I_lim_dynamic < 0)
+		p->I_lim_dynamic = 0;
 }
 
 /*@}*/
