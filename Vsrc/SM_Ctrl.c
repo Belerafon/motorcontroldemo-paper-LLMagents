@@ -28,6 +28,22 @@
 #include "main.h"
 
 
+//!Компенсация перекрестных связей контура тока (декаплинг) синхронной машины.
+//!Уравнения СДПМ в осях d,q: usd=Rs*isd+d(psi_d)/dt - w*psi_q; usq=Rs*isq+d(psi_q)/dt + w*psi_d,
+//!где psi_d=Ld*id+psi_pm, psi_q=Lq*iq. Компенсирующие (развязывающие) напряжения:
+//!ud_ff = -w*Lq*iq ; uq_ff = +w*(Ld*id + psi_pm).
+//!Все величины - в относительных единицах: w - электрическая частота (равна скорости в о.е.
+//!относительно базовой частоты), id,iq - токи статора, Ld,Lq,psi_pm - параметры машины.
+//! \param w_pu электрическая частота, о.е.
+//! \param id_pu ток по оси d (обратная связь), о.е.
+//! \param iq_pu ток по оси q (обратная связь), о.е.
+//! \param ud_ff выход: компенсирующее напряжение по оси d, о.е.
+//! \param uq_ff выход: компенсирующее напряжение по оси q, о.е.
+static void cur_decouple_calc(long w_pu, long id_pu, long iq_pu, long *ud_ff, long *uq_ff) {
+	*ud_ff = -_IQmpy(_IQmpy(w_pu, curdec_Lq_pu), iq_pu);
+	*uq_ff = _IQmpy(w_pu, _IQmpy(curdec_Ld_pu, id_pu) + curdec_psi_pu);
+}
+
 //!Инициализация
 //!Всякие обнуления
 //! \memberof TSM_Ctrl
@@ -442,10 +458,16 @@ void SM_Ctrl_Fast_Calc(TSM_Ctrl *p) {
 			pid_id.pid_fdb_reg3 = park.de; //обратная связь рег. тока оси d - вычисленный ток по фазе d
 			pid_id.calc(&pid_id); //расчет регулятора тока оси d
 
+			//компенсация перекрестных связей контура тока (декаплинг)
+			{
+				long ud_ff, uq_ff;
+				cur_decouple_calc(cur_par.speed, park.de, park.qe, &ud_ff, &uq_ff);
+				ipark.de = pid_id.pid_out_reg3 + ud_ff;
+				ipark.qe = pid_iq.pid_out_reg3 + uq_ff;
+			}
+
 			//Обратный поворот на угол refs.theta_elec для 
 			//выходов регуляторов тока (напряжений по осям d и q)
-			ipark.de = pid_id.pid_out_reg3;
-			ipark.qe = pid_iq.pid_out_reg3;
 			ipark.ang = refs.theta_elec;
 			ipark.calc(&ipark);            //расчет преобразования координат
 
@@ -582,10 +604,16 @@ void SM_Ctrl_Fast_Calc(TSM_Ctrl *p) {
 			pid_id.pid_fdb_reg3 = park.de; //обратная связь рег. тока оси d - вычисленный ток по фазе d
 			pid_id.calc(&pid_id); //расчет регулятора тока оси d
 
+			//компенсация перекрестных связей контура тока (декаплинг)
+			{
+				long ud_ff, uq_ff;
+				cur_decouple_calc(cur_par.speed, park.de, park.qe, &ud_ff, &uq_ff);
+				ipark.de = pid_id.pid_out_reg3 + ud_ff;
+				ipark.qe = pid_iq.pid_out_reg3 + uq_ff;
+			}
+
 			//Обратный поворот на угол refs.theta_elec для
 			//выходов регуляторов тока (напряжений по осям d и q)
-			ipark.de = pid_id.pid_out_reg3;
-			ipark.qe = pid_iq.pid_out_reg3;
 			ipark.ang = posspeedEqep.theta_elec;
 			ipark.calc(&ipark);            //расчет преобразования координат
 

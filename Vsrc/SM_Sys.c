@@ -289,6 +289,24 @@ void SM_Sys_Slow_Calc(TSM_Sys *p) {
 	drv_params._1_I_nom = _IQdiv(_IQ16(1), _IQ16(drv_params.I_nom));
 	drv_params._1_U_nom = _IQdiv(_IQ16(1), _IQ16(drv_params.U_nom));
 
+	//Расчет коэффициентов декаплинга контура тока (компенсация перекрестных связей) в о.е.
+	//База: Ub=U_nom (амплитуда фазного), Ib=I_nom, wb=2*pi*freq_nom.
+	//Lb=Ub/(wb*Ib), Пси_b=Ub/wb.
+	//Ld,Lq задаются в мГн, потокосцепление ротора m - в Вб (берутся из параметров выбранного двигателя).
+	if ((drv_params.freq_nom != 0) && (drv_params.I_nom != 0) && (drv_params.U_nom != 0)) {
+		float wb = 2.0f * MOTOR_MODEL_PI * drv_params.freq_nom;
+		float psi_b = drv_params.U_nom / wb;			//базовое потокосцепление
+		float Lb = psi_b / drv_params.I_nom;			//базовая индуктивность
+		curdec_Ld_pu = _IQ((model.motorInternals.lsd / 1000.0f) / Lb);
+		curdec_Lq_pu = _IQ((model.motorInternals.lsq / 1000.0f) / Lb);
+		curdec_psi_pu = _IQ(model.motorInternals.m / psi_b);
+	}
+	else {
+		curdec_Ld_pu = 0;
+		curdec_Lq_pu = 0;
+		curdec_psi_pu = 0;
+	}
+
 	if (sw.Reboot & 1) { //команда перезагрузки
 		sw.Reboot = 0; //сбрасываем её
 		if (sm_ctrl.state == CTRL_STOP) { //перезагружаемся только в останове

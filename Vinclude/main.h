@@ -109,6 +109,9 @@ extern TRefs refs;
 extern TSM_Net sm_net;
 extern TRMPCtrl rmp;
 extern TDrvParams drv_params;
+extern long curdec_Ld_pu;	//!< Индуктивность статора по оси d, о.е. (декаплинг контура тока)
+extern long curdec_Lq_pu;	//!< Индуктивность статора по оси q, о.е. (декаплинг контура тока)
+extern long curdec_psi_pu;	//!< Потокосцепление ротора, о.е. (декаплинг контура тока)
 extern TAdcDrv  adc;
 extern TPWM_Module pwm;
 extern TCurPar cur_par;
