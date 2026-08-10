@@ -380,6 +380,10 @@ void SM_Ctrl_Fast_Calc(TSM_Ctrl *p) {
 			rmp.output = 0;            //Обнуление задатчика интенсивности
 			if (dlog.StartBits & (1 << 4)) //Если пользователь задал этот бит осциллографирования
 				dlog.set_mode(1, &dlog);  //Запуск осциллографа по этому событию
+
+			p->K_dec_d = _IQ(2.0 * 3.1415926f * (drv_params.freq_nom / 65536.0f) / motor.pp * motor.lsq * 0.001f * _IQtoF(drv_params._1_I_nom) * _IQtoF(drv_params._1_U_nom));
+			p->K_dec_q = _IQ(2.0 * 3.1415926f * (drv_params.freq_nom / 65536.0f) / motor.pp * motor.lsd * 0.001f * _IQtoF(drv_params._1_I_nom) * _IQtoF(drv_params._1_U_nom));
+			p->K_dec_emf = _IQ(2.0 * 3.1415926f * (drv_params.freq_nom / 65536.0f) / motor.pp * motor.m * _IQtoF(drv_params._1_I_nom) * _IQtoF(drv_params._1_U_nom));
 			/*ENTRY END*/
 		}
 		/*DO START*/
@@ -442,6 +446,12 @@ void SM_Ctrl_Fast_Calc(TSM_Ctrl *p) {
 			pid_id.pid_fdb_reg3 = park.de; //обратная связь рег. тока оси d - вычисленный ток по фазе d
 			pid_id.calc(&pid_id); //расчет регулятора тока оси d
 
+			//Декаплинг регуляторов тока (компенсация перекрестных связей)
+			_iq dec_d = _IQmpy(_IQmpy(cur_par.speed, p->K_dec_d), park.qe);
+			_iq dec_q = _IQmpy(_IQmpy(cur_par.speed, p->K_dec_q), park.de) + _IQmpy(cur_par.speed, p->K_dec_emf);
+			pid_id.pid_out_reg3 -= dec_d;
+			pid_iq.pid_out_reg3 += dec_q;
+
 			//Обратный поворот на угол refs.theta_elec для 
 			//выходов регуляторов тока (напряжений по осям d и q)
 			ipark.de = pid_id.pid_out_reg3;
@@ -472,6 +482,10 @@ void SM_Ctrl_Fast_Calc(TSM_Ctrl *p) {
 			rmp.output = 0;            //Обнуление задатчика интенсивности
 			if (dlog.StartBits & (1 << 4)) //Если пользователь задал этот бит осциллографирования
 				dlog.set_mode(1, &dlog);  //Запуск осциллографа по этому событию
+
+			p->K_dec_d = _IQ(2.0 * 3.1415926f * (drv_params.freq_nom / 65536.0f) / motor.pp * motor.lsq * 0.001f * _IQtoF(drv_params._1_I_nom) * _IQtoF(drv_params._1_U_nom));
+			p->K_dec_q = _IQ(2.0 * 3.1415926f * (drv_params.freq_nom / 65536.0f) / motor.pp * motor.lsd * 0.001f * _IQtoF(drv_params._1_I_nom) * _IQtoF(drv_params._1_U_nom));
+			p->K_dec_emf = _IQ(2.0 * 3.1415926f * (drv_params.freq_nom / 65536.0f) / motor.pp * motor.m * _IQtoF(drv_params._1_I_nom) * _IQtoF(drv_params._1_U_nom));
 			/*ENTRY END*/
 		}
 		/*DO START*/
@@ -582,8 +596,14 @@ void SM_Ctrl_Fast_Calc(TSM_Ctrl *p) {
 			pid_id.pid_fdb_reg3 = park.de; //обратная связь рег. тока оси d - вычисленный ток по фазе d
 			pid_id.calc(&pid_id); //расчет регулятора тока оси d
 
+			//Декаплинг регуляторов тока (компенсация перекрестных связей)
+			_iq dec_d = _IQmpy(_IQmpy(cur_par.speed, p->K_dec_d), park.qe);
+			_iq dec_q = _IQmpy(_IQmpy(cur_par.speed, p->K_dec_q), park.de) + _IQmpy(cur_par.speed, p->K_dec_emf);
+			pid_id.pid_out_reg3 -= dec_d;
+			pid_iq.pid_out_reg3 += dec_q;
+
 			//Обратный поворот на угол refs.theta_elec для
-			//выходов регуляторов тока (напряжений по осям d и q)
+			//выходов регуляторов тока (напряжений по осям x и y)
 			ipark.de = pid_id.pid_out_reg3;
 			ipark.qe = pid_iq.pid_out_reg3;
 			ipark.ang = posspeedEqep.theta_elec;
@@ -609,6 +629,13 @@ void SM_Ctrl_Fast_Calc(TSM_Ctrl *p) {
 			rmp.output = 0;            //Обнуление задатчика интенсивности
 			if (dlog.StartBits & (1 << 4)) //Если пользователь задал этот бит осциллографирования
 				dlog.set_mode(1, &dlog);  //Запуск осциллографа по этому событию
+
+			{
+				float sigma = 1.0f - (motor.lm * motor.lm) / (motor.ls * motor.lr);
+				p->K_dec_d = _IQ(2.0 * 3.1415926f * (drv_params.freq_nom / 65536.0f) / motor.pp * sigma * motor.ls * 0.001f * _IQtoF(drv_params._1_I_nom) * _IQtoF(drv_params._1_U_nom));
+				p->K_dec_q = p->K_dec_d;
+				p->K_dec_emf = _IQ(0);
+			}
 			/*ENTRY END*/
 		}
 		/*DO START*/
@@ -675,6 +702,11 @@ void SM_Ctrl_Fast_Calc(TSM_Ctrl *p) {
 			pid_id.pid_fdb_reg3 = park.de; //обратная связь рег. тока оси x - вычисленный ток по фазе x
 			pid_id.calc(&pid_id); //расчет регулятора тока оси x
 
+			//Декаплинг регуляторов тока (компенсация перекрестных связей)
+			_iq dec_d = _IQmpy(_IQmpy(cur_par.speed, p->K_dec_d), park.qe);
+			_iq dec_q = _IQmpy(_IQmpy(cur_par.speed, p->K_dec_q), park.de) + _IQmpy(cur_par.speed, p->K_dec_emf);
+			pid_id.pid_out_reg3 -= dec_d;
+			pid_iq.pid_out_reg3 += dec_q;
 
 			//Обратный поворот на угол refs.theta_elec для
 			//выходов регуляторов тока (напряжений по осям x и y)
@@ -702,6 +734,13 @@ void SM_Ctrl_Fast_Calc(TSM_Ctrl *p) {
 			rmp.output = 0;            //Обнуление задатчика интенсивности
 			if (dlog.StartBits & (1 << 4)) //Если пользователь задал этот бит осциллографирования
 				dlog.set_mode(1, &dlog);  //Запуск осциллографа по этому событию
+
+			{
+				float sigma = 1.0f - (motor.lm * motor.lm) / (motor.ls * motor.lr);
+				p->K_dec_d = _IQ(2.0 * 3.1415926f * (drv_params.freq_nom / 65536.0f) / motor.pp * sigma * motor.ls * 0.001f * _IQtoF(drv_params._1_I_nom) * _IQtoF(drv_params._1_U_nom));
+				p->K_dec_q = p->K_dec_d;
+				p->K_dec_emf = _IQ(0);
+			}
 			/*ENTRY END*/
 		}
 		/*DO START*/
@@ -834,6 +873,11 @@ void SM_Ctrl_Fast_Calc(TSM_Ctrl *p) {
 			pid_id.pid_fdb_reg3 = park.de; //обратная связь рег. тока оси x - вычисленный ток по фазе x
 			pid_id.calc(&pid_id); //расчет регулятора тока оси x
 
+			//Декаплинг регуляторов тока (компенсация перекрестных связей)
+			_iq dec_d = _IQmpy(_IQmpy(cur_par.speed, p->K_dec_d), park.qe);
+			_iq dec_q = _IQmpy(_IQmpy(cur_par.speed, p->K_dec_q), park.de) + _IQmpy(cur_par.speed, p->K_dec_emf);
+			pid_id.pid_out_reg3 -= dec_d;
+			pid_iq.pid_out_reg3 += dec_q;
 
 			//Обратный поворот на угол Temp1 для
 			//выходов регуляторов тока (напряжений по осям x и y)

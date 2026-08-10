@@ -54,6 +54,9 @@ extern "C"
     int E;//!<Флаг первого вхождения.
     long AnglePrev;//!< Предыдущее значение угла для режима автонастройки ДПР
     long AngleDemo;//!< Угол для демо-режима контура положения
+    _iq K_dec_d;//!< Коэффициент декаплинга по оси d
+    _iq K_dec_q;//!< Коэффициент декаплинга по оси q (кросс-связь)
+    _iq K_dec_emf;//!< Коэффициент декаплинга по оси q (эдс)
     void (*init)(struct SSM_Ctrl*);     //!< Pointer to the init funcion
     void (*slow_calc)(struct SSM_Ctrl*);//!< Pointer to the calc funtion
     void (*fast_calc)(struct SSM_Ctrl*); //!< Pointer to the calc funtion
