@@ -610,6 +610,86 @@ void PWM_Module_Sin_Update(TPWM_Module *p) {
 
 }
 
+//! Функция симметричной векторной ШИМ без привязки к шинам
+
+//! Реализует классическую пространственно-векторную ШИМ методом вписания
+//! нулевой последовательности: фазные потенциалы центрируются относительно
+//! середины звена постоянного тока, поэтому ни одна фаза не прижимается к
+//! верхней или нижней шине (в отличие от 6-секторной ШИМ PWM_Module_No_SV_Update).
+//! Это эквивалентно симметричному распределению нулевых векторов 000 и 111.
+//! По сравнению с синусоидальной ШИМ позволяет реализовать напряжение
+//! примерно в 1.155 раза больше: линейный диапазон достигает U_lim = 1.0
+//! (вписанная в шестиугольник окружность) против 0.866 у синусоидальной ШИМ,
+//! т.е. лучше используется напряжение звена постоянного тока.
+//! \memberof TPWM_Module
+void PWM_Module_SV_Update(TPWM_Module *p) {
+	_iq PhasePtsA;
+	_iq PhasePtsB;
+	_iq PhasePtsC;
+	_iq max;
+	_iq min;
+	_iq offset;
+
+	//нормировка, компенсация Ud и ограничение вектора напряжения (как в 6-секторной ШИМ)
+	PWM_Module_NormInput(p);
+
+	/* преобразование альфа-бетта в фазные потенциалы */
+	PhasePtsA = _IQ(0.5) - p->UalphaNorm;
+	PhasePtsB = _IQ(0.5) + (p->UalphaNorm >> 1) - _IQmpy(p->UbetaNorm, _IQ(0.8660254));
+	PhasePtsC = _IQ(0.5) + (p->UalphaNorm >> 1) + _IQmpy(p->UbetaNorm, _IQ(0.8660254));
+
+	/* вписание нулевой последовательности: центрируем фазные потенциалы
+	   относительно середины звена постоянного тока (0.5), исключая привязку
+	   к какой-либо шине и увеличивая максимально-реализуемое напряжение */
+	max = PhasePtsA;
+	if (PhasePtsB > max)
+		max = PhasePtsB;
+	if (PhasePtsC > max)
+		max = PhasePtsC;
+
+	min = PhasePtsA;
+	if (PhasePtsB < min)
+		min = PhasePtsB;
+	if (PhasePtsC < min)
+		min = PhasePtsC;
+
+	offset = _IQ(0.5) - ((max + min) >> 1);
+
+	PhasePtsA += offset;
+	PhasePtsB += offset;
+	PhasePtsC += offset;
+
+	p->GammaA = _IQmpy(p->k_pwm, PhasePtsA);
+	p->GammaB = _IQmpy(p->k_pwm, PhasePtsB);
+	p->GammaC = _IQmpy(p->k_pwm, PhasePtsC);
+
+	/* насыщения */
+
+	if (p->GammaA < 0)
+		p->GammaA = 0;
+	if (p->GammaB < 0)
+		p->GammaB = 0;
+	if (p->GammaC < 0)
+		p->GammaC = 0;
+
+	if (p->GammaA > p->k_pwm)
+		p->GammaA = p->k_pwm + 1;
+	if (p->GammaB > p->k_pwm)
+		p->GammaB = p->k_pwm + 1;
+	if (p->GammaC > p->k_pwm)
+		p->GammaC = p->k_pwm + 1;
+
+	//Присвоение трех уставок сравнения только если счетчик таймера далек от нуля, чтобы
+	//предотвратить частичное применение скважностей, что в векторной ШИМ может быть критично и испортить период ШИМ.
+	DINT;
+	if (NT_PWM0->TBCTR > 30) {
+		NT_PWM0->CMPA_bit.CMPA = (Uint16) p->GammaA;
+		NT_PWM1->CMPA_bit.CMPA = (Uint16) p->GammaB;
+		NT_PWM2->CMPA_bit.CMPA = (Uint16) p->GammaC;
+	}
+	EINT;
+}
+
 //! Функция ШИМ с раздельными фазами (для модели SRM)
 
 //! \memberof TPWM_Module
@@ -736,6 +816,10 @@ void PWM_Module_Update(TPWM_Module *p) {
 		}
 		case PWM_TYPE_SRD: {
 			PWM_Module_Separate_Update(p);
+			break;
+		}
+		case PWM_TYPE_SV: {
+			PWM_Module_SV_Update(p);
 			break;
 		}
 		}
