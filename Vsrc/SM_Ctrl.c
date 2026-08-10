@@ -28,6 +28,61 @@
 #include "main.h"
 
 
+//!Развязка (компенсация перекрестных связей) регуляторов тока осей d и q.
+//!В синхронной машине напряжения по осям d и q связаны через противо-ЭДС и
+//!скорость вращения. Без компенсации на высоких скоростях изменение задания по
+//!одной оси вызывает возмущение по другой, и регуляторы тока хуже отрабатывают
+//!задания. Развязка добавляет к выходам регуляторов компенсирующие слагаемые:
+//!   Ud_comp = -w*Lq*Iq
+//!   Uq_comp =  w*(Ld*Id + Psi)
+//!все величины в относительных единицах. Базовые величины системы управления:
+//!I_base = I_nom (А), U_base = Udc_nom (В), w_base = 2*pi*freq_nom (рад/с).
+static _iq decoupl_Ld_pu;   //!< Индуктивность оси d в о.е.
+static _iq decoupl_Lq_pu;   //!< Индуктивность оси q в о.е.
+static _iq decoupl_Psi_pu;  //!< Потокосцепление постоянных магнитов в о.е.
+static Uint16 decoupl_paramsNum = 0xFFFF; //!< Номер параметров, для которых посчитаны коэффициенты
+static Uint16 decoupl_ready = 0;          //!< Флаг готовности коэффициентов развязки
+
+//!Пересчет коэффициентов развязки из параметров двигателя и базовых величин
+static void SM_Ctrl_Decouple_Update(void) {
+	//развязка имеет смысл только для синхронной машины с постоянными магнитами
+	if (model.MotorType != MODEL_SYNC_MOTOR) { decoupl_ready = 0; return; }
+	//если параметры не менялись, коэффициенты уже посчитаны
+	if (model.MotorParametersNum == decoupl_paramsNum) { decoupl_ready = 1; return; }
+	decoupl_paramsNum = model.MotorParametersNum;
+	decoupl_ready = 0;
+	if ((drv_params.freq_nom <= 0) || (drv_params.I_nom <= 0) || (drv_params.Udc_nom <= 0))
+		return;
+	{
+		float wBase = 6.283185307f * (float)drv_params.freq_nom; //рад/с
+		float iBase = (float)drv_params.I_nom;                   //А
+		float uBase = (float)drv_params.Udc_nom;                 //В
+		float lBase = uBase / (wBase * iBase);                   //базовая индуктивность, Гн
+		float psiBase = uBase / wBase;                           //базовое потокосцепление, Вб
+		float lsd = model.motorInternals.lsd / 1000.0f;          //мГн -> Гн
+		float lsq = model.motorInternals.lsq / 1000.0f;          //мГн -> Гн
+		float psi = model.motorInternals.m;                      //Вб
+		if ((lsd <= 0.0f) || (lsq <= 0.0f) || (psi <= 0.0f))
+			return;
+		decoupl_Ld_pu  = _IQ(lsd / lBase);
+		decoupl_Lq_pu  = _IQ(lsq / lBase);
+		decoupl_Psi_pu = _IQ(psi / psiBase);
+		decoupl_ready = 1;
+	}
+}
+
+//!Расчет компенсации перекрестных связей регуляторов тока осей d и q
+//!\param Id, Iq - токи по осям d,q (о.е.), omega - электрическая скорость (о.е.)
+static void SM_Ctrl_Decouple_Calc(long Id, long Iq, long omega, long *UdComp, long *UqComp) {
+	*UdComp = 0;
+	*UqComp = 0;
+	if (!decoupl_ready) return;
+	// Ud_comp = -w*Lq*Iq
+	*UdComp = -_IQmpy(omega, _IQmpy(decoupl_Lq_pu, Iq));
+	// Uq_comp = +w*(Ld*Id + Psi)
+	*UqComp = _IQmpy(omega, _IQmpy(decoupl_Ld_pu, Id) + decoupl_Psi_pu);
+}
+
 //!Инициализация
 //!Всякие обнуления
 //! \memberof TSM_Ctrl
@@ -444,8 +499,15 @@ void SM_Ctrl_Fast_Calc(TSM_Ctrl *p) {
 
 			//Обратный поворот на угол refs.theta_elec для 
 			//выходов регуляторов тока (напряжений по осям d и q)
-			ipark.de = pid_id.pid_out_reg3;
-			ipark.qe = pid_iq.pid_out_reg3;
+			//Компенсация перекрестных связей осей d,q (развязка) для улучшения
+			//реакции регуляторов тока на высоких скоростях вращения
+			{
+				long UdComp, UqComp;
+				SM_Ctrl_Decouple_Update();
+				SM_Ctrl_Decouple_Calc(park.de, park.qe, cur_par.speed, &UdComp, &UqComp);
+				ipark.de = pid_id.pid_out_reg3 + UdComp;
+				ipark.qe = pid_iq.pid_out_reg3 + UqComp;
+			}
 			ipark.ang = refs.theta_elec;
 			ipark.calc(&ipark);            //расчет преобразования координат
 
@@ -584,8 +646,15 @@ void SM_Ctrl_Fast_Calc(TSM_Ctrl *p) {
 
 			//Обратный поворот на угол refs.theta_elec для
 			//выходов регуляторов тока (напряжений по осям d и q)
-			ipark.de = pid_id.pid_out_reg3;
-			ipark.qe = pid_iq.pid_out_reg3;
+			//Компенсация перекрестных связей осей d,q (развязка) для улучшения
+			//реакции регуляторов тока на высоких скоростях вращения
+			{
+				long UdComp, UqComp;
+				SM_Ctrl_Decouple_Update();
+				SM_Ctrl_Decouple_Calc(park.de, park.qe, cur_par.speed, &UdComp, &UqComp);
+				ipark.de = pid_id.pid_out_reg3 + UdComp;
+				ipark.qe = pid_iq.pid_out_reg3 + UqComp;
+			}
 			ipark.ang = posspeedEqep.theta_elec;
 			ipark.calc(&ipark);            //расчет преобразования координат
 
