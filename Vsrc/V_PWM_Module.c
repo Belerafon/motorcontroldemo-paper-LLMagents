@@ -610,6 +610,101 @@ void PWM_Module_Sin_Update(TPWM_Module *p) {
 
 }
 
+//! Функция векторной ШИМ с инжекцией нулевой последовательности (метод "минимакс")
+
+//!В отличие от синусоидальной ШИМ (PWM_Module_Sin_Update) в этой функции в
+//!задания скважностей добавляется общая (нулевой последовательности)
+//!составляющая, сдвигающая все три фазы так, чтобы их размах симметрично
+//!располагался относительно середины периода ШИМ. При этом в линейной зоне
+//!ни одна из фаз не привязывается к шине ЗПТ (все три фазы продолжают
+//!коммутировать, в отличие от 6-секторной ШИМ PWM_Module_No_SV_Update), а
+//!диапазон линейной модуляции расширяется до полной величины базового
+//!вектора, т.е. до 1/0.866 большего напряжения ЗПТ, чем может дать
+//!синусоидальная ШИМ. Ограничение (насыщение скважностей) применяется только
+//!при выходе за пределы линейной зоны.
+//! \memberof TPWM_Module
+void PWM_Module_SV_CM_Update(TPWM_Module *p) {
+	_iq PhasePtsA;
+	_iq PhasePtsB;
+	_iq PhasePtsC;
+	_iq vmax;
+	_iq vmin;
+	_iq voff;
+	_iq knorm;
+
+	p->UalphaNorm = p->UalphaRef;
+	p->UbetaNorm = p->UbetaRef;
+
+	//находим амплитуду (без учета ограничения)
+	p->U_mag = _IQmag(p->UalphaNorm, p->UbetaNorm);
+
+	/* рассчитываем амплитуду вектора, который хотим отработать*/
+	knorm = _IQmag(p->UalphaNorm, p->UbetaNorm);
+	if (knorm >= p->U_lim) { //он больше, чем наше ограничение?
+		knorm = _IQdiv(p->U_lim, knorm); //в эту же переменную, для экономии, рассчитываем нормировку
+		p->UalphaNorm = _IQmpy(knorm, p->UalphaNorm); //уменьшаем пропорционально нормировке
+		p->UbetaNorm = _IQmpy(knorm, p->UbetaNorm); //и это
+		p->ULimitation = 1; //флаг о том, что идет ограничение напряжения
+	} else
+		p->ULimitation = 0;
+
+	//Нормирование входного напряжения. Синусоидальная ШИМ формирует на 0.866
+	//меньшее напряжение, чем векторная ШИМ. Здесь используется то же самое
+	//масштабирование, что и в синусоидальной ШИМ, однако благодаря инжекции
+	//нулевой последовательности запас линейной модуляции используется вплоть
+	//до полного базового вектора.
+	p->UalphaNorm = _IQmpy(p->UalphaNorm, _IQ(1/0.866/2));
+	p->UbetaNorm = _IQmpy(p->UbetaNorm, _IQ(1/0.866/2));
+
+	/*фазное преобразование из системы альфа, бетта в a,b,c */
+
+	PhasePtsA = _IQ(0.5) - (p->UalphaNorm);
+	PhasePtsB = _IQ(0.5) - (_IQmpy(p->UbetaNorm,_IQ(0.8660254)) - (p->UalphaNorm >> 1));
+	PhasePtsC = _IQ(0.5) - (-_IQmpy(p->UbetaNorm, _IQ(0.8660254)) - (p->UalphaNorm >> 1));
+
+	/*инжекция нулевой последовательности (метод "минимакс").
+	  Находим максимум и минимум фазных уставок и сдвигаем все три фазы на
+	  общую составляющую так, чтобы размах симметрично расположился вокруг
+	  середины периода ШИМ (0.5). Фазы не привязываются к шинам ЗПТ.*/
+	vmax = PhasePtsA;
+	if (PhasePtsB > vmax) vmax = PhasePtsB;
+	if (PhasePtsC > vmax) vmax = PhasePtsC;
+	vmin = PhasePtsA;
+	if (PhasePtsB < vmin) vmin = PhasePtsB;
+	if (PhasePtsC < vmin) vmin = PhasePtsC;
+
+	voff = _IQmpy(vmax + vmin, _IQ(0.5)) - _IQ(0.5);
+
+	PhasePtsA -= voff;
+	PhasePtsB -= voff;
+	PhasePtsC -= voff;
+
+	p->GammaA = _IQmpy(p->k_pwm, PhasePtsA);
+	p->GammaB = _IQmpy(p->k_pwm, PhasePtsB);
+	p->GammaC = _IQmpy(p->k_pwm, PhasePtsC);
+
+	/*насыщения (только за пределами линейной зоны) */
+
+	if (p->GammaA < 0)
+		p->GammaA = 0;
+	if (p->GammaB < 0)
+		p->GammaB = 0;
+	if (p->GammaC < 0)
+		p->GammaC = 0;
+
+	if (p->GammaA > p->k_pwm)
+		p->GammaA = p->k_pwm + 1;
+	if (p->GammaB > p->k_pwm)
+		p->GammaB = p->k_pwm + 1;
+	if (p->GammaC > p->k_pwm)
+		p->GammaC = p->k_pwm + 1;
+
+	NT_PWM0->CMPA_bit.CMPA = (Uint16) p->GammaA;
+	NT_PWM1->CMPA_bit.CMPA = (Uint16) p->GammaB;
+	NT_PWM2->CMPA_bit.CMPA = (Uint16) p->GammaC;
+
+}
+
 //! Функция ШИМ с раздельными фазами (для модели SRM)
 
 //! \memberof TPWM_Module
@@ -736,6 +831,10 @@ void PWM_Module_Update(TPWM_Module *p) {
 		}
 		case PWM_TYPE_SRD: {
 			PWM_Module_Separate_Update(p);
+			break;
+		}
+		case PWM_TYPE_SV_CM: {
+			PWM_Module_SV_CM_Update(p);
 			break;
 		}
 		}
