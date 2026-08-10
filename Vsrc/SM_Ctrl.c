@@ -26,6 +26,7 @@
 #include "DSP.h"
 #include "V_IQmath.h"
 #include "main.h"
+#include "V_FieldWeaken.h"
 
 
 //!Инициализация
@@ -438,34 +439,34 @@ void SM_Ctrl_Fast_Calc(TSM_Ctrl *p) {
 			pid_iq.pid_fdb_reg3 = park.qe; //обратная связь рег. тока оси q - вычисленный ток по фазе q
 			pid_iq.calc(&pid_iq); //расчет регулятора тока оси q
 
-			pid_id.pid_ref_reg3 = 0; //задание тока по оси d - оси возбудения
-			pid_id.pid_fdb_reg3 = park.de; //обратная связь рег. тока оси d - вычисленный ток по фазе d
-			pid_id.calc(&pid_id); //расчет регулятора тока оси d
+		pid_id.pid_ref_reg3 = FieldWeaken_Calc(cur_par.speed, _IQ(1.0), refs.Iq_ref, 0); //ослабление поля + задание тока по оси d - оси возбудения
+		pid_id.pid_fdb_reg3 = park.de; //обратная связь рег. тока оси d - вычисленный ток по фазе d
+		pid_id.calc(&pid_id); //расчет регулятора тока оси d
 
-			//Обратный поворот на угол refs.theta_elec для 
-			//выходов регуляторов тока (напряжений по осям d и q)
-			ipark.de = pid_id.pid_out_reg3;
-			ipark.qe = pid_iq.pid_out_reg3;
-			ipark.ang = refs.theta_elec;
-			ipark.calc(&ipark);            //расчет преобразования координат
+		//Обратный поворот на угол refs.theta_elec для
+		//выходов регуляторов тока (напряжений по осям d и q)
+		ipark.de = pid_id.pid_out_reg3;
+		ipark.qe = pid_iq.pid_out_reg3;
+		ipark.ang = refs.theta_elec;
+		ipark.calc(&ipark);            //расчет преобразования координат
 
-			//Задание напряжение на модуль ШИМ после преобразования координат
-			pwm.UalphaRef = ipark.ds;            //Ось альфа
-			pwm.UbetaRef = ipark.qs;            //Ось бета
-			pwm.update(&pwm);            //Расчет модуля ШИМ
+		//Задание напряжение на модуль ШИМ после преобразования координат
+		pwm.UalphaRef = ipark.ds;            //Ось альфа
+		pwm.UbetaRef = ipark.qs;            //Ось бета
+		pwm.update(&pwm);            //Расчет модуля ШИМ
 
-			if (sw.excitation_ena)
-			{
-				pwm_ex.ref = refs.uf_ref;
-				pwm_ex.calc(&pwm_ex);
-			}
-
-			/*DO END*/
+		if (sw.excitation_ena)
+		{
+			pwm_ex.ref = refs.uf_ref;
+			pwm_ex.calc(&pwm_ex);
 		}
-		break;
-	}
 
-	case CTRL_RUN_VECTOR_SM_ENCODER_POS: {            //Датчиковая СУ с энкодером и с контуром положения
+		/*DO END*/
+	}
+	break;
+}
+
+case CTRL_RUN_VECTOR_SM_ENCODER_POS: {            //Датчиковая СУ с энкодером и с контуром положения
 		if (p->E == 1) {
 			/*ENTRY START*/
 			pwm.On(&pwm);            //Включение ШИМ
@@ -578,21 +579,21 @@ void SM_Ctrl_Fast_Calc(TSM_Ctrl *p) {
 			pid_iq.pid_fdb_reg3 = park.qe; //обратная связь рег. тока оси q - вычисленный ток по фазе q
 			pid_iq.calc(&pid_iq); //расчет регулятора тока оси q
 
-			pid_id.pid_ref_reg3 = 0; //задание тока по оси d - оси возбудения
-			pid_id.pid_fdb_reg3 = park.de; //обратная связь рег. тока оси d - вычисленный ток по фазе d
-			pid_id.calc(&pid_id); //расчет регулятора тока оси d
+		pid_id.pid_ref_reg3 = FieldWeaken_Calc(cur_par.speed, _IQ(1.0), refs.Iq_ref, 0); //ослабление поля + задание тока по оси d - оси возбудения
+		pid_id.pid_fdb_reg3 = park.de; //обратная связь рег. тока оси d - вычисленный ток по фазе d
+		pid_id.calc(&pid_id); //расчет регулятора тока оси d
 
-			//Обратный поворот на угол refs.theta_elec для
-			//выходов регуляторов тока (напряжений по осям d и q)
-			ipark.de = pid_id.pid_out_reg3;
-			ipark.qe = pid_iq.pid_out_reg3;
-			ipark.ang = posspeedEqep.theta_elec;
-			ipark.calc(&ipark);            //расчет преобразования координат
+		//Обратный поворот на угол refs.theta_elec для
+		//выходов регуляторов тока (напряжений по осям d и q)
+		ipark.de = pid_id.pid_out_reg3;
+		ipark.qe = pid_iq.pid_out_reg3;
+		ipark.ang = posspeedEqep.theta_elec;
+		ipark.calc(&ipark);            //расчет преобразования координат
 
-			//Задание напряжение на модуль ШИМ после преобразования координат
-			pwm.UalphaRef = ipark.ds;            //Ось альфа
-			pwm.UbetaRef = ipark.qs;            //Ось бета
-			pwm.update(&pwm);            //Расчет модуля ШИМ
+		//Задание напряжение на модуль ШИМ после преобразования координат
+		pwm.UalphaRef = ipark.ds;            //Ось альфа
+		pwm.UbetaRef = ipark.qs;            //Ось бета
+		pwm.update(&pwm);            //Расчет модуля ШИМ
 
 			/*DO END*/
 		}
@@ -663,37 +664,38 @@ void SM_Ctrl_Fast_Calc(TSM_Ctrl *p) {
 			park.ang = refs.theta_elec;
 			park.calc(&park);
 
-			//регуляторы токов d, q используются для регулирования осей x, y (чтобы не делать разных названий)
-			//задание рег. тока по оси y (оси момента) - выход регулятора скорости
-			pid_iq.pid_ref_reg3 = pid_spd.pid_out_reg3;
-			pid_iq.pid_fdb_reg3 = park.qe; //обратная связь рег. тока оси y - вычисленный ток по фазе y
-			pid_iq.calc(&pid_iq); //расчет регулятора тока оси y
+		//регуляторы токов d, q используются для регулирования осей x, y (чтобы не делать разных названий)
+		//задание рег. тока по оси y (оси момента) - выход регулятора скорости
+		pid_iq.pid_ref_reg3 = pid_spd.pid_out_reg3;
+		pid_iq.pid_fdb_reg3 = park.qe; //обратная связь рег. тока оси y - вычисленный ток по фазе y
+		pid_iq.calc(&pid_iq); //расчет регулятора тока оси y
 
-			pid_id.pid_ref_reg3 = _IQmpy(RotorObserver.FluxCurrentRatio,labs(pid_iq.pid_ref_reg3)); //задание тока по оси x - оси возбудения. Пропорционально амплитуде задания тока статора
-			if (pid_id.pid_ref_reg3 < RotorObserver.FluxCurrentMin)
-				pid_id.pid_ref_reg3=RotorObserver.FluxCurrentMin;
-			pid_id.pid_fdb_reg3 = park.de; //обратная связь рег. тока оси x - вычисленный ток по фазе x
-			pid_id.calc(&pid_id); //расчет регулятора тока оси x
+		pid_id.pid_ref_reg3 = _IQmpy(RotorObserver.FluxCurrentRatio,labs(pid_iq.pid_ref_reg3)); //задание тока по оси x - оси возбудения. Пропорционально амплитуде задания тока статора
+		if (pid_id.pid_ref_reg3 < RotorObserver.FluxCurrentMin)
+			pid_id.pid_ref_reg3=RotorObserver.FluxCurrentMin;
+		pid_id.pid_ref_reg3 = FieldWeaken_Calc(cur_par.speed, _IQ(1.0), refs.Iq_ref, pid_id.pid_ref_reg3); //ослабление поля
+		pid_id.pid_fdb_reg3 = park.de; //обратная связь рег. тока оси x - вычисленный ток по фазе x
+		pid_id.calc(&pid_id); //расчет регулятора тока оси x
 
 
-			//Обратный поворот на угол refs.theta_elec для
-			//выходов регуляторов тока (напряжений по осям x и y)
-			ipark.de = pid_id.pid_out_reg3;
-			ipark.qe = pid_iq.pid_out_reg3;
-			ipark.ang = refs.theta_elec;
-			ipark.calc(&ipark);            //расчет преобразования координат
+		//Обратный поворот на угол refs.theta_elec для
+		//выходов регуляторов тока (напряжений по осям x и y)
+		ipark.de = pid_id.pid_out_reg3;
+		ipark.qe = pid_iq.pid_out_reg3;
+		ipark.ang = refs.theta_elec;
+		ipark.calc(&ipark);            //расчет преобразования координат
 
-			//Задание напряжение на модуль ШИМ после преобразования координат
-			pwm.UalphaRef = ipark.ds;            //Ось альфа
-			pwm.UbetaRef = ipark.qs;            //Ось бета
-			pwm.update(&pwm);            //Расчет модуля ШИМ
+		//Задание напряжение на модуль ШИМ после преобразования координат
+		pwm.UalphaRef = ipark.ds;            //Ось альфа
+		pwm.UbetaRef = ipark.qs;            //Ось бета
+		pwm.update(&pwm);            //Расчет модуля ШИМ
 
-			/*DO END*/
-		}
-		break;
+		/*DO END*/
 	}
+	break;
+}
 
-	case CTRL_RUN_VECTOR_IM_ENCODER_POS: { //Датчиковая СУ для АД с энкодером и контурами скорости и положения
+case CTRL_RUN_VECTOR_IM_ENCODER_POS: { //Датчиковая СУ для АД с энкодером и контурами скорости и положения
 		if (p->E == 1) {
 			/*ENTRY START*/
 			pwm.On(&pwm);            //Включение ШИМ
@@ -822,30 +824,31 @@ void SM_Ctrl_Fast_Calc(TSM_Ctrl *p) {
 			park.ang = Temp1;
 			park.calc(&park);
 
-			//регуляторы токов d, q используются для регулирования осей x, y (чтобы не делать разных названий)
-			//задание рег. тока по оси y (оси момента) - выход регулятора скорости
-			pid_iq.pid_ref_reg3 = pid_spd.pid_out_reg3;
-			pid_iq.pid_fdb_reg3 = park.qe; //обратная связь рег. тока оси y - вычисленный ток по фазе y
-			pid_iq.calc(&pid_iq); //расчет регулятора тока оси y
+		//регуляторы токов d, q используются для регулирования осей x, y (чтобы не делать разных названий)
+		//задание рег. тока по оси y (оси момента) - выход регулятора скорости
+		pid_iq.pid_ref_reg3 = pid_spd.pid_out_reg3;
+		pid_iq.pid_fdb_reg3 = park.qe; //обратная связь рег. тока оси y - вычисленный ток по фазе y
+		pid_iq.calc(&pid_iq); //расчет регулятора тока оси y
 
-			pid_id.pid_ref_reg3 = _IQmpy(RotorObserver.FluxCurrentRatio,labs(pid_iq.pid_ref_reg3)); //задание тока по оси x - оси возбудения. Пропорционально амплитуде задания тока статора
-			if (pid_id.pid_ref_reg3 < RotorObserver.FluxCurrentMin)
-				pid_id.pid_ref_reg3=RotorObserver.FluxCurrentMin;
-			pid_id.pid_fdb_reg3 = park.de; //обратная связь рег. тока оси x - вычисленный ток по фазе x
-			pid_id.calc(&pid_id); //расчет регулятора тока оси x
+		pid_id.pid_ref_reg3 = _IQmpy(RotorObserver.FluxCurrentRatio,labs(pid_iq.pid_ref_reg3)); //задание тока по оси x - оси возбудения. Пропорционально амплитуде задания тока статора
+		if (pid_id.pid_ref_reg3 < RotorObserver.FluxCurrentMin)
+			pid_id.pid_ref_reg3=RotorObserver.FluxCurrentMin;
+		pid_id.pid_ref_reg3 = FieldWeaken_Calc(cur_par.speed, _IQ(1.0), refs.Iq_ref, pid_id.pid_ref_reg3); //ослабление поля
+		pid_id.pid_fdb_reg3 = park.de; //обратная связь рег. тока оси x - вычисленный ток по фазе x
+		pid_id.calc(&pid_id); //расчет регулятора тока оси x
 
 
-			//Обратный поворот на угол Temp1 для
-			//выходов регуляторов тока (напряжений по осям x и y)
-			ipark.de = pid_id.pid_out_reg3;
-			ipark.qe = pid_iq.pid_out_reg3;
-			ipark.ang = Temp1;
-			ipark.calc(&ipark);            //расчет преобразования координат
+		//Обратный поворот на угол Temp1 для
+		//выходов регуляторов тока (напряжений по осям x и y)
+		ipark.de = pid_id.pid_out_reg3;
+		ipark.qe = pid_iq.pid_out_reg3;
+		ipark.ang = Temp1;
+		ipark.calc(&ipark);            //расчет преобразования координат
 
-			//Задание напряжение на модуль ШИМ после преобразования координат
-			pwm.UalphaRef = ipark.ds;            //Ось альфа
-			pwm.UbetaRef = ipark.qs;            //Ось бета
-			pwm.update(&pwm);            //Расчет модуля ШИМ
+		//Задание напряжение на модуль ШИМ после преобразования координат
+		pwm.UalphaRef = ipark.ds;            //Ось альфа
+		pwm.UbetaRef = ipark.qs;            //Ось бета
+		pwm.update(&pwm);            //Расчет модуля ШИМ
 
 			/*DO END*/
 		}
@@ -932,16 +935,16 @@ void SM_Ctrl_Fast_Calc(TSM_Ctrl *p) {
 
 			park.ds = clarke.ds;
 			park.qs = clarke.qs;
-			park.ang = refs.theta_elec;
-			park.calc(&park);
+		park.ang = refs.theta_elec;
+		park.calc(&park);
 
-			pid_iq.pid_ref_reg3 = 0;
-			pid_iq.pid_fdb_reg3 = park.qe;
-			pid_iq.calc(&pid_iq);
+		pid_iq.pid_ref_reg3 = 0;
+		pid_iq.pid_fdb_reg3 = park.qe;
+		pid_iq.calc(&pid_iq);
 
-			pid_id.pid_ref_reg3 = refs.i_flux_ref;
-			pid_id.pid_fdb_reg3 = park.de;
-			pid_id.calc(&pid_id);
+		pid_id.pid_ref_reg3 = FieldWeaken_Calc(cur_par.speed, _IQ(1.0), refs.Iq_ref, refs.i_flux_ref); //ослабление поля + задание тока намагничивания
+		pid_id.pid_fdb_reg3 = park.de;
+		pid_id.calc(&pid_id);
 
 			ipark.de = pid_id.pid_out_reg3;
 			ipark.qe = pid_iq.pid_out_reg3;
