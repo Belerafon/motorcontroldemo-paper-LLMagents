@@ -454,6 +454,15 @@ void SM_Ctrl_Fast_Calc(TSM_Ctrl *p) {
 			pwm.UbetaRef = ipark.qs;            //Ось бета
 			pwm.update(&pwm);            //Расчет модуля ШИМ
 
+			if (cur_par.speed > _IQ(0.1))
+			{
+				pid_fw.pid_fdb_reg3 = pwm.U_mag;
+				pid_fw.calc(&pid_fw);
+				pid_id.pid_ref_reg3 = pid_fw.pid_out_reg3;
+			}
+			else
+				pid_id.pid_ref_reg3 = 0;
+
 			if (sw.excitation_ena)
 			{
 				pwm_ex.ref = refs.uf_ref;
@@ -593,6 +602,15 @@ void SM_Ctrl_Fast_Calc(TSM_Ctrl *p) {
 			pwm.UalphaRef = ipark.ds;            //Ось альфа
 			pwm.UbetaRef = ipark.qs;            //Ось бета
 			pwm.update(&pwm);            //Расчет модуля ШИМ
+
+			if (cur_par.speed > _IQ(0.1))
+			{
+				pid_fw.pid_fdb_reg3 = pwm.U_mag;
+				pid_fw.calc(&pid_fw);
+				pid_id.pid_ref_reg3 = pid_fw.pid_out_reg3;
+			}
+			else
+				pid_id.pid_ref_reg3 = 0;
 
 			/*DO END*/
 		}

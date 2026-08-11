@@ -58,6 +58,10 @@ void SM_Sys_Init(TSM_Sys *p) {
 	sm_cmd_logic.init(&sm_cmd_logic); //Логика включения/выключения
 	sm_ctrl.init(&sm_ctrl); //Структура системы управления
 	pwm.init(&pwm); //Модуль ШИМ
+	pid_fw.pid_ref_reg3 = _IQ(1.0);
+	pid_fw.pid_out_max = _IQ(0.0);
+	pid_fw.pid_out_min = _IQ(-0.5);
+	pid_fw.Kp_reg3 = _IQ(5.0);
 	cur_par.init(&cur_par); //Расчет текущих показателей привода
 	leds.init(&leds);//светодиоды
 	udControl.init(&udControl); //плавная зарядка ЗПТ через термисторы
