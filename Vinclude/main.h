@@ -84,6 +84,7 @@ extern "C" {
 #include "V_fifo.h"
 #include "V_usblib.h"
 #include "V_Fan.h"
+#include "V_PowerConst.h"
 
 extern TClarke 		clarke;
 extern TPark 		park;

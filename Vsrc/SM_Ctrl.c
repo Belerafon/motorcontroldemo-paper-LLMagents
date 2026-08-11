@@ -397,21 +397,23 @@ void SM_Ctrl_Fast_Calc(TSM_Ctrl *p) {
 				refs.theta_elec = SSI_Encoder.theta_elec; //текущее угловое положение - с ДПР
 			}
 
-			cur_par.Is = pid_iq.pid_fdb_reg3; //Текущий ток статора - ток по оси q
+		cur_par.Is = pid_iq.pid_fdb_reg3; //Текущий ток статора - ток по оси q
 
-			//Преобразование токов из трехфазной системы координат в двухфазную
-			clarke.as = adc.Imeas_a;
-			clarke.bs = adc.Imeas_b;
-			clarke.calc(&clarke);
-			cur_par.Ialpha = clarke.ds;
-			cur_par.Ibeta = clarke.qs;
+		//Преобразование токов из трехфазной системы координат в двухфазную
+		clarke.as = adc.Imeas_a;
+		clarke.bs = adc.Imeas_b;
+		clarke.calc(&clarke);
+		cur_par.Ialpha = clarke.ds;
+		cur_par.Ibeta = clarke.qs;
 
-			// задание скорости от задатчика интенсивности (ЗИ)
-			rmp.input = refs.speed_ref;
-			rmp.calc(&rmp);//Расчет ЗИ
+		// задание скорости от задатчика интенсивности (ЗИ)
+		rmp.input = refs.speed_ref;
+		rmp.calc(&rmp);//Расчет ЗИ
 
-			pid_spd.pid_ref_reg3 = rmp.output; //на воход регулятора скорости - выход ЗИ
-			pid_spd.pid_fdb_reg3 = cur_par.speed; //обратная связь регулятора скорости - скорость ДПР
+		V_PowerConstLimit(&rmp.output, refs.PowerMax, pid_iq.pid_fdb_reg3, cur_par.speed);
+
+		pid_spd.pid_ref_reg3 = rmp.output; //на воход регулятора скорости - выход ЗИ
+		pid_spd.pid_fdb_reg3 = cur_par.speed; //обратная связь регулятора скорости - скорость ДПР
 
 
 			pid_spd.pid_out_max = refs.Iq_ref; //Максимум выхода регулятора скорости - заданный ток
@@ -558,16 +560,18 @@ void SM_Ctrl_Fast_Calc(TSM_Ctrl *p) {
 			pid_pos.saterr_reg3Add=pid_spd.saterr_reg3;//это улучшайзер. Учитывает насыщение рег. скорости и передает его в рег. положения.
 			pid_pos.calc(&pid_pos); //расчет регулятора положения
 
-			pid_spd.pid_ref_reg3 = pid_pos.pid_out_reg3; //на вход регулятора скорости - выход рег. положения
+		pid_spd.pid_ref_reg3 = pid_pos.pid_out_reg3; //на вход регулятора скорости - выход рег. положения
 //			pid_spd.pid_fdb_reg3 = posspeedEqep.speed_filter.output; //обратная связь регулятора скорости - скорость ДПР
-			pid_spd.pid_fdb_reg3 = cur_par.speed;
+		pid_spd.pid_fdb_reg3 = cur_par.speed;
 
-			pid_spd.pid_out_max = refs.Iq_ref; //Максимум выхода регулятора скорости - заданный ток
-			pid_spd.pid_out_min = -refs.Iq_ref; //минимум рег. скор. - отрицательный ток
-			pid_spd.calc(&pid_spd); //расчет регулятора скорости
+		V_PowerConstLimit(&pid_spd.pid_ref_reg3, refs.PowerMax, pid_iq.pid_fdb_reg3, cur_par.speed);
+
+		pid_spd.pid_out_max = refs.Iq_ref; //Максимум выхода регулятора скорости - заданный ток
+		pid_spd.pid_out_min = -refs.Iq_ref; //минимум рег. скор. - отрицательный ток
+		pid_spd.calc(&pid_spd); //расчет регулятора скорости
 
 
-			//Поворот токов фаз на угол refs.theta_elec
+		//Поворот токов фаз на угол refs.theta_elec
 			park.ds = clarke.ds;
 			park.qs = clarke.qs;
 			park.ang = posspeedEqep.theta_elec;
@@ -626,6 +630,8 @@ void SM_Ctrl_Fast_Calc(TSM_Ctrl *p) {
 			// задание скорости от задатчика интенсивности (ЗИ)
 			rmp.input = refs.speed_ref;
 			rmp.calc(&rmp);//Расчет ЗИ
+
+			V_PowerConstLimit(&rmp.output, refs.PowerMax, pid_iq.pid_fdb_reg3, cur_par.speed);
 
 			pid_spd.pid_ref_reg3 = rmp.output; //на воход регулятора скорости - выход ЗИ
 			pid_spd.pid_fdb_reg3 = posspeedEqep.speed_elec; //обратная связь регулятора скорости - скорость ДПР
@@ -769,35 +775,37 @@ void SM_Ctrl_Fast_Calc(TSM_Ctrl *p) {
 			cur_par.ThetaCurr = posspeedEqep.theta_elecContinouos;
 			cur_par.ThetaRefCurr=refs.theta_elec;//заданный угол электрический (продублируем в эту переменную задание для удобства наблюдения)
 
-			//ошибка - разница между заданием и текущим углом. Эта разница обычно считается внутри ПИД регулятора,
-			//однако в данном случае нужно после расчета произвести ограничение, чтобы в регуляторе ничего не переполнилось
-			long posRefError=refs.theta_elec - cur_par.ThetaCurr;
+		//ошибка - разница между заданием и текущим углом. Эта разница обычно считается внутри ПИД регулятора,
+		//однако в данном случае нужно после расчета произвести ограничение, чтобы в регуляторе ничего не переполнилось
+		long posRefError=refs.theta_elec - cur_par.ThetaCurr;
 
 
-			//ограничим ошибку - чтобы при расчете регулятора внутри него не было переполнения.
-			if (posRefError>_IQ(1))
-				posRefError=_IQ(1);
-			if (posRefError<-_IQ(1))
-				posRefError=-_IQ(1);
+		//ограничим ошибку - чтобы при расчете регулятора внутри него не было переполнения.
+		if (posRefError>_IQ(1))
+			posRefError=_IQ(1);
+		if (posRefError<-_IQ(1))
+			posRefError=-_IQ(1);
 
 
-			//обычно на ПИД регулятор подается задание и обратная связь, а внутри считается их разница.
-			//но разницу мы посчитали выше (и ограничили). Потому пусть задание на регулятор будет всё время нулевым,
-			//а в обратную связь подадим уже посчитанную и ограниченную ошибку (со знаком минус)
-			pid_pos.pid_ref_reg3 = 0;//задавать задание на положение надо через Temp1 (группа задания)
-			pid_pos.pid_fdb_reg3 = -posRefError;//обратная связь
-			pid_pos.pid_out_max=refs.speed_ref;//ограничение рег. положения - максимум задаваемой скорости
-			pid_pos.pid_out_min=-refs.speed_ref;//и в минус
-			pid_pos.saterr_reg3Add=pid_spd.saterr_reg3;//это улучшайзер. Учитывает насыщение рег. скорости и передает его в рег. положения.
-			pid_pos.calc(&pid_pos); //расчет регулятора положения
+		//обычно на ПИД регулятор подается задание и обратная связь, а внутри считается их разница.
+		//но разницу мы посчитали выше (и ограничили). Потому пусть задание на регулятор будет всё время нулевым,
+		//а в обратную связь подадим уже посчитанную и ограниченную ошибку (со знаком минус)
+		pid_pos.pid_ref_reg3 = 0;//задавать задание на положение надо через Temp1 (группа задания)
+		pid_pos.pid_fdb_reg3 = -posRefError;//обратная связь
+		pid_pos.pid_out_max=refs.speed_ref;//ограничение рег. положения - максимум задаваемой скорости
+		pid_pos.pid_out_min=-refs.speed_ref;//и в минус
+		pid_pos.saterr_reg3Add=pid_spd.saterr_reg3;//это улучшайзер. Учитывает насыщение рег. скорости и передает его в рег. положения.
+		pid_pos.calc(&pid_pos); //расчет регулятора положения
 
-			pid_spd.pid_ref_reg3 = pid_pos.pid_out_reg3; //на вход регулятора скорости - выход рег. положения
+		pid_spd.pid_ref_reg3 = pid_pos.pid_out_reg3; //на вход регулятора скорости - выход рег. положения
 //			pid_spd.pid_fdb_reg3 = posspeedEqep.speed_filter.output; //обратная связь регулятора скорости - скорость ДПР
-			pid_spd.pid_fdb_reg3 = cur_par.speed;
+		pid_spd.pid_fdb_reg3 = cur_par.speed;
 
-			pid_spd.pid_out_max = refs.Iq_ref; //Максимум выхода регулятора скорости - заданный ток
-			pid_spd.pid_out_min = -refs.Iq_ref; //минимум рег. скор. - отрицательный ток
-			pid_spd.calc(&pid_spd); //расчет регулятора скорости
+		V_PowerConstLimit(&pid_spd.pid_ref_reg3, refs.PowerMax, pid_iq.pid_fdb_reg3, cur_par.speed);
+
+		pid_spd.pid_out_max = refs.Iq_ref; //Максимум выхода регулятора скорости - заданный ток
+		pid_spd.pid_out_min = -refs.Iq_ref; //минимум рег. скор. - отрицательный ток
+		pid_spd.calc(&pid_spd); //расчет регулятора скорости
 
 
 			//Поворот токов фаз на угол Temp1
