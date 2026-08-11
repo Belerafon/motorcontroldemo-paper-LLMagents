@@ -38,14 +38,18 @@ extern "C" {
       изменяющий свой выход, пока он не сравняется со входом. Чаще всего служит
       для плавного разгона двигателя при изменении задания скачком.*/
 
-//! см. TRMPCtrl
-struct SRMPCtrl{ long  input;//!< Вход
+ //! см. TRMPCtrl
+ struct SRMPCtrl{ long  input;//!< Вход
                  long  output;//!< Выход
                  long Ts;//!< Частота дискретизации
                  unsigned long  T;//!< Темп разгона (время в секундах до изменения выхода от нуля до единицы)
                  long step;//!<Служебная переменная
+                 int power_ena;//!< Разрешение ограничения по мощности
+                 long power_limit;//!< Ограничение мощности (доля от номинала, 1.0 = 100%)
+                 long power_K;//!< Коэффициент пересчета мощности модели (кВт) в долю от номинала (IQ24)
                  void  (*calc)(struct SRMPCtrl*); //!< Функция расчета, должна вызываться с заданной в Ts дискретностью
                  void  (*slow_calc)(struct SRMPCtrl*); //!< Функция пересчета коэффициентов
+                 void  (*slow_calc_power)(struct SRMPCtrl*); //!< Функция пересчета коэффициента power_K при изменении параметров двигателя
                  };	            
 
 typedef struct SRMPCtrl TRMPCtrl;
@@ -57,14 +61,20 @@ typedef struct SRMPCtrl TRMPCtrl;
     .Ts = _IQ(0.0001), \
     .T = _IQ(20), \
     .step = 0, \
+    .power_ena = 0, \
+    .power_limit = _IQ(1.0), \
+    .power_K = 0, \
     .calc = V_RMP_CTRL_calc, \
-    .slow_calc = V_RMP_CTRL_slow_calc \
+    .slow_calc = V_RMP_CTRL_slow_calc, \
+    .slow_calc_power = V_RMP_CTRL_slow_calc_power \
 }
 
 //! \memberof TRMPCtrl
 void V_RMP_CTRL_calc(TRMPCtrl*);
 //! \memberof TRMPCtrl
 void V_RMP_CTRL_slow_calc(TRMPCtrl*);
+//! \memberof TRMPCtrl
+void V_RMP_CTRL_slow_calc_power(TRMPCtrl*);
 
 #ifdef __cplusplus
 }

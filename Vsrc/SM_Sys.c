@@ -274,10 +274,11 @@ void SM_Sys_Slow_Calc(TSM_Sys *p) {
 	sm_net.slow_calc(&sm_net); //обертка для вызова коммуникационных драйверов
 	dlog.background_analizer(&dlog); //фоновый обработчик модуля осциллографирования
 	global_time.slow_calc(&global_time);
-	rmp.slow_calc(&rmp); //пересчет интенсивности разгона из пользовтельской во внутреннее представление
-	pwm.slow_calc(&pwm); //фоновый обработчик модуля ШИМ (пересчет пользовательских заданий)
-	adc.slow_calc(&adc); //Фоновый обработчик АЦП
-	cur_par.slow_calc(&cur_par); //Расчет текущих показателей привода
+ 	rmp.slow_calc(&rmp); //пересчет интенсивности разгона из пользовтельской во внутреннее представление
+ 	rmp.slow_calc_power(&rmp); //пересчет коэффициента ограничения по мощности
+ 	pwm.slow_calc(&pwm); //фоновый обработчик модуля ШИМ (пересчет пользовательских заданий)
+ 	adc.slow_calc(&adc); //Фоновый обработчик АЦП
+ 	cur_par.slow_calc(&cur_par); //Расчет текущих показателей привода
 	AutoOffset.slow_calc(&AutoOffset);
 	posspeedEqep.slow_calc(&posspeedEqep);//инициализация модуля энкодера
 	RotorObserver.slow_calc(&RotorObserver);//наблюдатель потока ротора АД
