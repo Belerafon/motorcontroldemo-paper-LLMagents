@@ -114,8 +114,9 @@ typedef struct {
 		Uint16  rotation_dir;//!< Направление вращения
 		Uint16  Reboot;//!< Программная перезагрузка
 		Uint16 	AutoOffset;//!< автосмещение АЦП
-		Uint16 	HardwareType;//!< Тип железа, под который собран проект
+		Uint16 	HardwareType;//!< Тип железа, под которое собран проект
 		Uint16 	excitation_ena;//!< Разрешение возбудителя
+		Uint16 	field_weakening_ena;//!< Разрешение автоматического ослабления поля (отрицательный Id при U_mag > порога)
 		} TSysSwitches;
 
 #ifdef __cplusplus

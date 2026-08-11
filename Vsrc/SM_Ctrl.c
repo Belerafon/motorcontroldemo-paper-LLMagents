@@ -117,6 +117,7 @@ void SM_Ctrl_Fast_Calc(TSM_Ctrl *p) {
 		pid_ia.reset(&pid_ia);
 		pid_spd.reset(&pid_spd);
 		pid_pos.reset(&pid_pos);
+		field_weakening.reset(&field_weakening); //сброс интегратора ослабления поля
 		cur_par.Is = 0;
 		cur_par.power = 0;
 		cur_par.speed = 0;
@@ -378,6 +379,7 @@ void SM_Ctrl_Fast_Calc(TSM_Ctrl *p) {
 			/*ENTRY START*/
 			pwm.On(&pwm);            //Включение ШИМ
 			rmp.output = 0;            //Обнуление задатчика интенсивности
+			field_weakening.reset(&field_weakening); //сброс интегратора ослабления поля при запуске
 			if (dlog.StartBits & (1 << 4)) //Если пользователь задал этот бит осциллографирования
 				dlog.set_mode(1, &dlog);  //Запуск осциллографа по этому событию
 			/*ENTRY END*/
@@ -438,7 +440,15 @@ void SM_Ctrl_Fast_Calc(TSM_Ctrl *p) {
 			pid_iq.pid_fdb_reg3 = park.qe; //обратная связь рег. тока оси q - вычисленный ток по фазе q
 			pid_iq.calc(&pid_iq); //расчет регулятора тока оси q
 
-			pid_id.pid_ref_reg3 = 0; //задание тока по оси d - оси возбудения
+			//расчёт автоматического ослабления поля: при U_mag > U_thresh формируется
+			//отрицательный Id, ослабляющий поток и противо-ЭДС, что позволяет вращать
+			//двигатель быстрее базовой скорости при ограниченном напряжении ЗПТ.
+			//При выключенной функции или при U_mag < U_thresh id_ref = 0 (номинальный поток).
+			field_weakening.U_mag = pwm.U_mag;            //амплитуда напряжения с предыдущей итерации (pwm.update ещё не вызван)
+			field_weakening.enabled = sw.field_weakening_ena & 1;
+			field_weakening.Id_min = -refs.Iq_ref;        //ограничение тока ослабления по току статора
+			field_weakening.calc(&field_weakening);
+			pid_id.pid_ref_reg3 = field_weakening.id_ref; //задание тока оси d: 0 (нет ослабления) либо отрицательное (ослабление)
 			pid_id.pid_fdb_reg3 = park.de; //обратная связь рег. тока оси d - вычисленный ток по фазе d
 			pid_id.calc(&pid_id); //расчет регулятора тока оси d
 
@@ -470,6 +480,7 @@ void SM_Ctrl_Fast_Calc(TSM_Ctrl *p) {
 			/*ENTRY START*/
 			pwm.On(&pwm);            //Включение ШИМ
 			rmp.output = 0;            //Обнуление задатчика интенсивности
+			field_weakening.reset(&field_weakening); //сброс интегратора ослабления поля при запуске
 			if (dlog.StartBits & (1 << 4)) //Если пользователь задал этот бит осциллографирования
 				dlog.set_mode(1, &dlog);  //Запуск осциллографа по этому событию
 			/*ENTRY END*/
@@ -578,7 +589,15 @@ void SM_Ctrl_Fast_Calc(TSM_Ctrl *p) {
 			pid_iq.pid_fdb_reg3 = park.qe; //обратная связь рег. тока оси q - вычисленный ток по фазе q
 			pid_iq.calc(&pid_iq); //расчет регулятора тока оси q
 
-			pid_id.pid_ref_reg3 = 0; //задание тока по оси d - оси возбудения
+			//расчёт автоматического ослабления поля: при U_mag > U_thresh формируется
+			//отрицательный Id, ослабляющий поток и противо-ЭДС, что позволяет вращать
+			//двигатель быстрее базовой скорости при ограниченном напряжении ЗПТ.
+			//При выключенной функции или при U_mag < U_thresh id_ref = 0 (номинальный поток).
+			field_weakening.U_mag = pwm.U_mag;            //амплитуда напряжения с предыдущей итерации (pwm.update ещё не вызван)
+			field_weakening.enabled = sw.field_weakening_ena & 1;
+			field_weakening.Id_min = -refs.Iq_ref;        //ограничение тока ослабления по току статора
+			field_weakening.calc(&field_weakening);
+			pid_id.pid_ref_reg3 = field_weakening.id_ref; //задание тока оси d: 0 (нет ослабления) либо отрицательное (ослабление)
 			pid_id.pid_fdb_reg3 = park.de; //обратная связь рег. тока оси d - вычисленный ток по фазе d
 			pid_id.calc(&pid_id); //расчет регулятора тока оси d
 

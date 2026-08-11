@@ -59,6 +59,7 @@ void SM_Sys_Init(TSM_Sys *p) {
 	sm_ctrl.init(&sm_ctrl); //Структура системы управления
 	pwm.init(&pwm); //Модуль ШИМ
 	cur_par.init(&cur_par); //Расчет текущих показателей привода
+	field_weakening.init(&field_weakening); //Модуль ослабления поля
 	leds.init(&leds);//светодиоды
 	udControl.init(&udControl); //плавная зарядка ЗПТ через термисторы
 	DIO_Init(); //дискретные входы/выходы

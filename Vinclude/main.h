@@ -73,6 +73,7 @@ extern "C" {
 #include "V_ModBus.h"
 #include "V_MBVarsConv.h"
 #include "V_excitation.h"
+#include "V_FieldWeakening.h"
 #include "X_CANFlashProgData.h"
 #include "X_CANFlashProgStarter.h"
 #include "CANBlockTransferInterface.h"
@@ -125,6 +126,7 @@ extern TCANtoRS CANtoRS;
 extern TModBus ModBus;
 extern TMBVarsConv MBVarsConv;
 extern Texcitation pwm_ex;
+extern TFieldWeakening field_weakening;
 extern TCanBTInterface 	Can2BTInterface;
 extern TDrvInterface drv_interface;
 extern TLogger		FaultLog;
