@@ -544,6 +544,107 @@ void PWM_Module_No_SV_Update(TPWM_Module *p) {
     EINT;
 }
 
+//! Функция векторной ШИМ без привязки к шинам (SVPWM)
+//! Использует полный диапазон напряжения ЗПТ (модуляция до 1.0 вместо 0.866)
+//! без вписывания вектора в окружность. Формирует 6 секторов, вычисляет
+//! времена активных векторов T1, T2 и расчитывает симметричную ШИМ.
+//! \memberof TPWM_Module
+void PWM_Module_SVPWM_Update(TPWM_Module *p) {
+    _iq T1;
+    _iq T2;
+    _iq tmp;
+    int16 sector;
+
+    p->UalphaNorm = p->UalphaRef;
+    p->UbetaNorm = p->UbetaRef;
+
+    p->U_mag = _IQmag(p->UalphaNorm, p->UbetaNorm);
+
+    if (p->UdCompEnable & 1) {
+        p->UdCorTmp = _IQdiv(_IQ(1.0), (_IQ(1.0) + _IQmpy((adc.Udc_meas - _IQ(1.0)), p->UdCompK)));
+        p->UalphaNorm = _IQmpy(p->UalphaNorm, p->UdCorTmp);
+        p->UbetaNorm = _IQmpy(p->UbetaNorm, p->UdCorTmp);
+    }
+
+    p->UalphaNorm = _IQmpy(p->UalphaNorm, _IQ(0.866));
+    p->UbetaNorm = _IQmpy(p->UbetaNorm, _IQ(0.866));
+
+    tmp = _IQmpy(_1_SQRT3, p->UbetaNorm);
+    T1 = -p->UalphaNorm + tmp;
+    T2 = -p->UalphaNorm - tmp;
+
+    if (T1 < 0) {
+        if (T2 > 0) {
+            sector = 1;
+            T1 = T2;
+            T2 = -p->UalphaNorm - tmp;
+        } else {
+            sector = 2;
+            T1 = -_IQmpy(_2_SQRT3, p->UbetaNorm);
+            T2 = T1;
+        }
+    } else {
+        if (T2 < 0) {
+            sector = 3;
+            T1 = -_IQmpy(_2_SQRT3, p->UbetaNorm);
+            T2 = -T1;
+        } else {
+            sector = 0;
+            T1 = p->UalphaNorm + tmp;
+            T2 = p->UalphaNorm - tmp;
+        }
+    }
+
+    if (T1 < _IQ(0.0))
+        T1 = _IQ(0.0);
+    if (T2 < _IQ(0.0))
+        T2 = _IQ(0.0);
+
+    p->sector = sector;
+
+    if (sector == 0) {
+        p->GammaA = p->k_pwm - (_IQmpy(_IQ(0.5), T1) + _IQmpy(_IQ(0.5), T2) + _IQ(1.0));
+        p->GammaB = p->k_pwm - _IQmpy(_IQ(0.5), T2);
+        p->GammaC = p->k_pwm - (_IQmpy(_IQ(0.5), T1) + _IQmpy(_IQ(0.5), T2));
+    } else if (sector == 1) {
+        p->GammaA = p->k_pwm - _IQmpy(_IQ(0.5), T1);
+        p->GammaB = p->k_pwm - (_IQmpy(_IQ(0.5), T1) + _IQmpy(_IQ(0.5), T2) + _IQ(1.0));
+        p->GammaC = p->k_pwm - (_IQmpy(_IQ(0.5), T1) + _IQmpy(_IQ(0.5), T2));
+    } else if (sector == 2) {
+        p->GammaA = p->k_pwm - (_IQmpy(_IQ(0.5), T1) + _IQmpy(_IQ(0.5), T2));
+        p->GammaB = p->k_pwm - (_IQmpy(_IQ(0.5), T1) + _IQmpy(_IQ(0.5), T2) + _IQ(1.0));
+        p->GammaC = p->k_pwm - _IQmpy(_IQ(0.5), T2);
+    } else if (sector == 3) {
+        p->GammaA = p->k_pwm - (_IQmpy(_IQ(0.5), T1) + _IQmpy(_IQ(0.5), T2));
+        p->GammaB = p->k_pwm - _IQmpy(_IQ(0.5), T2);
+        p->GammaC = p->k_pwm - (_IQmpy(_IQ(0.5), T1) + _IQmpy(_IQ(0.5), T2) + _IQ(1.0));
+    } else if (sector == 4) {
+        p->GammaA = p->k_pwm - _IQmpy(_IQ(0.5), T2);
+        p->GammaB = p->k_pwm - (_IQmpy(_IQ(0.5), T1) + _IQmpy(_IQ(0.5), T2));
+        p->GammaC = p->k_pwm - (_IQmpy(_IQ(0.5), T1) + _IQmpy(_IQ(0.5), T2) + _IQ(1.0));
+    } else {
+        p->GammaA = p->k_pwm - (_IQmpy(_IQ(0.5), T1) + _IQmpy(_IQ(0.5), T2));
+        p->GammaB = p->k_pwm - (_IQmpy(_IQ(0.5), T1) + _IQmpy(_IQ(0.5), T2) + _IQ(1.0));
+        p->GammaC = p->k_pwm - _IQmpy(_IQ(0.5), T2);
+    }
+
+    if (p->GammaA < 0) p->GammaA = 0;
+    if (p->GammaB < 0) p->GammaB = 0;
+    if (p->GammaC < 0) p->GammaC = 0;
+
+    if (p->GammaA > p->k_pwm) p->GammaA = p->k_pwm + 1;
+    if (p->GammaB > p->k_pwm) p->GammaB = p->k_pwm + 1;
+    if (p->GammaC > p->k_pwm) p->GammaC = p->k_pwm + 1;
+
+    DINT;
+    if (NT_PWM0->TBCTR > 30) {
+        NT_PWM0->CMPA_bit.CMPA = (Uint16)p->GammaA;
+        NT_PWM1->CMPA_bit.CMPA = (Uint16)p->GammaB;
+        NT_PWM2->CMPA_bit.CMPA = (Uint16)p->GammaC;
+    }
+    EINT;
+}
+
 //! Функция синусоидальной ШИМ
 
 //! \memberof TPWM_Module
@@ -736,6 +837,10 @@ void PWM_Module_Update(TPWM_Module *p) {
 		}
 		case PWM_TYPE_SRD: {
 			PWM_Module_Separate_Update(p);
+			break;
+		}
+		case PWM_TYPE_SVPWM: {
+			PWM_Module_SVPWM_Update(p);
 			break;
 		}
 		}
