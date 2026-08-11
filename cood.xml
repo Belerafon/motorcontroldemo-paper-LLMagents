@@ -3787,6 +3787,12 @@
 			<defaults default="0" min="" max=""/>
 			<description description="Задание углового положения для режима удержания."/>
 		</obj_5112h.05h>
+		<obj_5112h.06h DataType="Editable" name="Power limit" addr="refs.power_ref" group="3" groupName="Refs" fullgroup="3" callback="">
+			<format Type="IQ" Size="32" Signed="true" QValue="24" ScaleNum="8"/>
+			<text text="Pwr_lim" textID="757"/>
+			<defaults default="0" min="" max=""/>
+			<description description="Power limit for constant-power acceleration. Per-unit of drv_params.power. 0 = disabled."/>
+		</obj_5112h.06h>
 		<obj_5113h.00h DataType="Viewable" name="Параметры двигателя" addr="" group="15" groupName="Базов. парам" fullgroup="15" callback="">
 			<format Type="Root"/>
 			<text text="ПарДв" textID="399"/>

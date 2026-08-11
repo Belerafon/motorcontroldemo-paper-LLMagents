@@ -34,6 +34,17 @@
 void SM_Ctrl_Init(TSM_Ctrl *p) {
 	p->state_prev = 0xff;
 	p->state = 0x00;
+	p->Iq_limit = 0;
+	//Настройка регулятора мощности по умолчанию.
+	//Регулятор поддерживает заданное ограничение мощности (refs.power_ref, о.е.)
+	//за счет динамического ограничения тока момента (Iq). Коэффициенты
+	//перекрываемые значениями из словаря CANopen при загрузке параметров.
+	pid_power.Kp_reg3 = _IQ(1.0);
+	pid_power.Ki_reg3 = _IQ(0.005);
+	pid_power.Kc_reg3 = _IQ(0.5);
+	pid_power.Kd_reg3 = _IQ(0);
+	pid_power.pid_out_max = _IQ(1);
+	pid_power.pid_out_min = 0;
 }
 
 //!Фоновый расчет
@@ -83,9 +94,32 @@ void SM_Ctrl_Fast_Calc(TSM_Ctrl *p) {
 		p->E = 1;
 	else
 		p->E = 0;
-//нужно для дискретного автомата, определение
-//первого вхождения
+	//нужно для дискретного автомата, определение
+	//первого вхождения
 	p->state_prev = p->state;
+
+	//------------------------------------------------------------------
+	// Расчет ограничения мощности (разгон с постоянством мощности).
+	// Если задано refs.power_ref > 0, регулятор мощности поддерживает
+	// активную мощность (cur_par.power, о.е.) на уровне задания путем
+	// динамического ограничения тока момента Iq. На малых скоростях ток
+	// момента ограничен только токоограничением refs.Iq_ref (зона
+	// постоянного момента), а при достижении ограничения мощности ток
+	// момента снижается обратно пропорционально скорости (зона постоянной
+	// мощности). При refs.power_ref == 0 ограничение выключено.
+	//------------------------------------------------------------------
+	if (p->state != CTRL_STOP) {
+		if (refs.power_ref > 0) {
+			pid_power.pid_ref_reg3 = refs.power_ref;
+			pid_power.pid_fdb_reg3 = cur_par.power;
+			pid_power.pid_out_max = refs.Iq_ref;
+			pid_power.pid_out_min = 0;
+			pid_power.calc(&pid_power);
+			p->Iq_limit = pid_power.pid_out_reg3;
+		} else {
+			p->Iq_limit = refs.Iq_ref;
+		}
+	}
 
 	switch (p->state) {
 	case CTRL_STOP: { //Состояние ОСТАНОВ
@@ -117,6 +151,7 @@ void SM_Ctrl_Fast_Calc(TSM_Ctrl *p) {
 		pid_ia.reset(&pid_ia);
 		pid_spd.reset(&pid_spd);
 		pid_pos.reset(&pid_pos);
+		pid_power.reset(&pid_power);
 		cur_par.Is = 0;
 		cur_par.power = 0;
 		cur_par.speed = 0;
@@ -414,10 +449,10 @@ void SM_Ctrl_Fast_Calc(TSM_Ctrl *p) {
 			pid_spd.pid_fdb_reg3 = cur_par.speed; //обратная связь регулятора скорости - скорость ДПР
 
 
-			pid_spd.pid_out_max = refs.Iq_ref; //Максимум выхода регулятора скорости - заданный ток
+			pid_spd.pid_out_max = p->Iq_limit; //Максимум выхода регулятора скорости - динамическое ограничение (с учетом ограничения мощности)
 
 			if (sw.recuperation_ena & 1)            //если разрешена рекуперация
-				pid_spd.pid_out_min = -refs.Iq_ref; //минимум рег. скор. - отрицательный ток
+				pid_spd.pid_out_min = -p->Iq_limit; //минимум рег. скор. - отрицательный ток
 			else
 				//иначе
 				pid_spd.pid_out_min = 0; //нулевой ток не даст рекупераци при вращении в положительную сторону
@@ -562,8 +597,8 @@ void SM_Ctrl_Fast_Calc(TSM_Ctrl *p) {
 //			pid_spd.pid_fdb_reg3 = posspeedEqep.speed_filter.output; //обратная связь регулятора скорости - скорость ДПР
 			pid_spd.pid_fdb_reg3 = cur_par.speed;
 
-			pid_spd.pid_out_max = refs.Iq_ref; //Максимум выхода регулятора скорости - заданный ток
-			pid_spd.pid_out_min = -refs.Iq_ref; //минимум рег. скор. - отрицательный ток
+			pid_spd.pid_out_max = p->Iq_limit; //Максимум выхода регулятора скорости - динамическое ограничение (с учетом ограничения мощности)
+			pid_spd.pid_out_min = -p->Iq_limit; //минимум рег. скор. - отрицательный ток
 			pid_spd.calc(&pid_spd); //расчет регулятора скорости
 
 
@@ -631,10 +666,10 @@ void SM_Ctrl_Fast_Calc(TSM_Ctrl *p) {
 			pid_spd.pid_fdb_reg3 = posspeedEqep.speed_elec; //обратная связь регулятора скорости - скорость ДПР
 
 
-			pid_spd.pid_out_max = refs.Iq_ref; //Максимум выхода регулятора скорости - заданный ток
+			pid_spd.pid_out_max = p->Iq_limit; //Максимум выхода регулятора скорости - динамическое ограничение (с учетом ограничения мощности)
 
 			if (sw.recuperation_ena & 1)            //если разрешена рекуперация
-				pid_spd.pid_out_min = -refs.Iq_ref; //минимум рег. скор. - отрицательный ток
+				pid_spd.pid_out_min = -p->Iq_limit; //минимум рег. скор. - отрицательный ток
 			else
 				//иначе
 				pid_spd.pid_out_min = 0; //нулевой ток не даст рекупераци при вращении в положительную сторону
@@ -795,8 +830,8 @@ void SM_Ctrl_Fast_Calc(TSM_Ctrl *p) {
 //			pid_spd.pid_fdb_reg3 = posspeedEqep.speed_filter.output; //обратная связь регулятора скорости - скорость ДПР
 			pid_spd.pid_fdb_reg3 = cur_par.speed;
 
-			pid_spd.pid_out_max = refs.Iq_ref; //Максимум выхода регулятора скорости - заданный ток
-			pid_spd.pid_out_min = -refs.Iq_ref; //минимум рег. скор. - отрицательный ток
+			pid_spd.pid_out_max = p->Iq_limit; //Максимум выхода регулятора скорости - динамическое ограничение (с учетом ограничения мощности)
+			pid_spd.pid_out_min = -p->Iq_limit; //минимум рег. скор. - отрицательный ток
 			pid_spd.calc(&pid_spd); //расчет регулятора скорости
 
 
@@ -998,7 +1033,7 @@ void SM_Ctrl_Fast_Calc(TSM_Ctrl *p) {
 			pid_spd.pid_ref_reg3 = rmp.output;//на вход регулятора скорости - выход ЗИ
 			pid_spd.pid_fdb_reg3 = DPReCAP.speed;//обратная связь регулятора скорости - скорость ДПР Холла
 
-			pid_spd.pid_out_max = refs.Iq_ref;//Максимум выхода регулятора скорости - заданный ток
+			pid_spd.pid_out_max = p->Iq_limit;//Максимум выхода регулятора скорости - динамическое ограничение (с учетом ограничения мощности)
 			pid_spd.pid_out_min = 0; //Минимум выхода регулятора скорости - 0
 			pid_spd.calc(&pid_spd); //расчет регулятора скорости
 
