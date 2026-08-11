@@ -104,12 +104,9 @@ void SM_Sys_Init(TSM_Sys *p) {
 	AutoOffset.FilterK = _IQ(0.00001);//постоянная времени фильтра для автосмещения АЦП
 	AutoOffset.init(&AutoOffset); //авто смещение некоторых каналов АЦП (токи)
 
-#if defined(HW_VECTORCARD_SIMULATOR) || defined(HW_NIIET_BOARD_SIMULATOR) || defined (HW_MOTORCONTROLBOARD_SIMULATOR)
-	//model.motorInternals.udc = 540; //задается через словарь объектов
 	model.tpr = _IQ10div(_IQ10(CORE_CLK/1000.0), pwm.Frequency << 1) >> 10; //период частоты ШИМ
 	model.dt = _IQ4mpy(_IQ4(150 / 4), pwm.DeadBand >> 20) >> 4; //величина мертвого времени
 	model.Init(&model); //Модель двигателя
-#endif
 
 	// Настройка таймера 0 на 10 кГц
 	NT_TIMER0->INTSTATUS_INTCLEAR_bit.INT = 1;
