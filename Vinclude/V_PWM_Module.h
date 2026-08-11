@@ -49,6 +49,8 @@ extern "C"
 #define PWM_TYPE_DC_DRIVE		4
 //!ШИМ для управления SRM
 #define PWM_TYPE_SRD			5
+//!Векторная 7-секторная ШИМ (Space Vector PWM) без привязки к шинам
+#define PWM_TYPE_SVPWM_7SECT	6
 
 
 //! Ограничения величины "минимальной скважности", мкс, min
@@ -151,6 +153,8 @@ void PWM_Module_Off(TPWM_Module *);
 
 //векторные функции из библиотеки
 void PWM_Module_No_SV_Update(TPWM_Module *);
+//! Функция 7-секторной векторной ШИМ (Space Vector PWM)
+void PWM_Module_SVPWM_7Sect_Update(TPWM_Module *);
 
 #ifdef __cplusplus
 }

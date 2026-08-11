@@ -544,6 +544,161 @@ void PWM_Module_No_SV_Update(TPWM_Module *p) {
     EINT;
 }
 
+//! Функция 7-секторной векторной ШИМ (Space Vector PWM) без привязки к шинам
+//! Обеспечивает лучшее использование напряжения ЗПТ по сравнению с синусоидальной ШИМ
+//! за счет использования 7-секментной симметричной последовательности переключений.
+//! В линейном диапазоне модуляции (до 0.866) дает такой же линейный диапазон, как и 6-секторная ШИМ,
+//! но с меньшими гармониками тока и отсутствием привязки к шинам.
+
+//! \memberof TPWM_Module
+void PWM_Module_SVPWM_7Sect_Update(TPWM_Module *p) {
+    _iq X, Y, Z;
+    _iq T1, T2;
+    int16 sector;
+    long tmp_pwm;
+
+    DINT;
+    if (NT_PWM0->TBCTR > 30) {
+        NT_PWM0->CMPA_bit.CMPA = (Uint16) p->GammaA;
+        NT_PWM1->CMPA_bit.CMPA = (Uint16) p->GammaB;
+        NT_PWM2->CMPA_bit.CMPA = (Uint16) p->GammaC;
+    }
+    EINT;
+
+    PWM_Module_NormInput(p);
+
+    //Определение сектора
+    tmp_pwm = _IQmpy(_1_SQRT3, p->UbetaNorm);
+    X = p->UbetaNorm;
+    Y = _IQmpy(_1_SQRT3, p->UalphaNorm) - p->UbetaNorm;
+    Z = -_IQmpy(_1_SQRT3, p->UalphaNorm) - p->UbetaNorm;
+
+    if (X >= 0)
+        if (Y >= 0)
+            if (Z >= 0)
+                sector = 2;
+            else
+                sector = 1;
+        else if (Z >= 0)
+            sector = 3;
+        else
+            sector = 0;
+    else if (Y >= 0)
+        if (Z >= 0)
+            sector = 4;
+        else {
+            sector = 5;
+        }
+    else if (Z >= 0)
+        sector = 5;
+    else
+        sector = 4;
+
+    //Расчет времен нахождения в активных векторах (стандартный алгоритм 7-секторной SVPWM)
+    //T1 = (1/sqrt(3)) * (sqrt(3)*Ubeta - Ualpha)
+    //T2 = (1/sqrt(3)) * (sqrt(3)*Ubeta + Ualpha)
+    tmp_pwm = _IQmpy(_1_SQRT3, p->UbetaNorm);
+    T1 = tmp_pwm - _IQmpy(_1_SQRT3, p->UalphaNorm);
+    T2 = -tmp_pwm - _IQmpy(_1_SQRT3, p->UalphaNorm);
+
+    if (T1 < _IQ(0.0))
+        T1 = -T1;
+    if (T2 < _IQ(0.0))
+        T2 = -T2;
+
+    //Приведение времен к размерности таймера ШИМ (k_pwm — это полный период)
+    T1 = _IQmpy(p->k_pwm, T1);
+    T2 = _IQmpy(p->k_pwm, T2);
+
+    //Насыщение: если сумма T1+T2 > k_pwm, ограничиваем пропорционально
+    if (T1 + T2 > p->k_pwm) {
+        _iq scale = _IQdiv(p->k_pwm, T1 + T2);
+        T1 = _IQmpy(T1, scale);
+        T2 = _IQmpy(T2, scale);
+        p->ULimitation = 1;
+    } else {
+        p->ULimitation = 0;
+    }
+
+    //Вычисление скважностей для 7-секментной симметричной последовательности
+    //(V0 - Va - Vb - V7 - Vb - Va - V0), время V0 распределяется поровну по краям
+    switch (sector) {
+    case 0: {
+        long gamma1 = (p->k_pwm - T1 - T2) >> 1;
+        long gamma2 = gamma1 + T1;
+        long gamma3 = gamma2 + T2;
+        p->GammaA = gamma3;
+        p->GammaB = gamma2;
+        p->GammaC = gamma1;
+        break;
+    }
+    case 1: {
+        long gamma1 = (p->k_pwm - T1 - T2) >> 1;
+        long gamma2 = gamma1 + T2;
+        p->GammaA = gamma2;
+        p->GammaB = gamma1;
+        p->GammaC = gamma1 + T1;
+        break;
+    }
+    case 2: {
+        long gamma1 = (p->k_pwm - T1 - T2) >> 1;
+        p->GammaA = gamma1 + T2;
+        p->GammaB = gamma1;
+        p->GammaC = gamma1 + T1;
+        break;
+    }
+    case 3: {
+        long gamma1 = (p->k_pwm - T1 - T2) >> 1;
+        long gamma2 = gamma1 + T2;
+        p->GammaA = gamma1;
+        p->GammaB = gamma2;
+        p->GammaC = gamma1 + T1;
+        break;
+    }
+    case 4: {
+        long gamma1 = (p->k_pwm - T1 - T2) >> 1;
+        long gamma2 = gamma1 + T1;
+        p->GammaA = gamma1;
+        p->GammaB = gamma2;
+        p->GammaC = gamma2 + T2;
+        break;
+    }
+    case 5: {
+        long gamma1 = (p->k_pwm - T1 - T2) >> 1;
+        long gamma2 = gamma1 + T1;
+        p->GammaA = gamma1;
+        p->GammaB = gamma2 + T2;
+        p->GammaC = gamma1;
+        break;
+    }
+    }
+
+    p->sector = sector;
+
+    /*насыщения */
+    if (p->GammaA < 0)
+        p->GammaA = 0;
+    if (p->GammaB < 0)
+        p->GammaB = 0;
+    if (p->GammaC < 0)
+        p->GammaC = 0;
+
+    if (p->GammaA > p->k_pwm)
+        p->GammaA = p->k_pwm + 1;
+    if (p->GammaB > p->k_pwm)
+        p->GammaB = p->k_pwm + 1;
+    if (p->GammaC > p->k_pwm)
+        p->GammaC = p->k_pwm + 1;
+
+    DINT;
+    if (NT_PWM0->TBCTR > 30) {
+        NT_PWM0->CMPA_bit.CMPA = (Uint16) p->GammaA;
+        NT_PWM1->CMPA_bit.CMPA = (Uint16) p->GammaB;
+        NT_PWM2->CMPA_bit.CMPA = (Uint16) p->GammaC;
+    }
+    EINT;
+}
+
 //! Функция синусоидальной ШИМ
 
 //! \memberof TPWM_Module
@@ -736,6 +891,10 @@ void PWM_Module_Update(TPWM_Module *p) {
 		}
 		case PWM_TYPE_SRD: {
 			PWM_Module_Separate_Update(p);
+			break;
+		}
+		case PWM_TYPE_SVPWM_7SECT: {
+			PWM_Module_SVPWM_7Sect_Update(p);
 			break;
 		}
 		}
