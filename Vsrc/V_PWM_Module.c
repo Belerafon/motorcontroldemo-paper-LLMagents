@@ -610,6 +610,99 @@ void PWM_Module_Sin_Update(TPWM_Module *p) {
 
 }
 
+//! Функция непрерывной векторной ШИМ (SVPWM) без привязки к шинам
+//! Обеспечивает полное использование напряжения шестиугольника базовых векторов
+//! (примерно на 15% больше, чем синусоидальная ШИМ)
+
+//! \memberof TPWM_Module
+void PWM_Module_SVPWM_Update(TPWM_Module *p) {
+    _iq T1;
+    _iq T2;
+    _iq T0;
+    _iq T0a;
+    _iq sin_theta;
+    _iq sin_60_minus_theta;
+    _iq k_pwm_iq;
+    int16 sector;
+
+    k_pwm_iq = (_iq)p->k_pwm;
+
+    PWM_Module_NormInput(p);
+
+    _iq angle = _IQ24atan2PU(p->UbetaNorm, p->UalphaNorm);
+    if (angle < 0)
+        angle += _IQ24(1.0);
+
+    _iq sector_float = _IQ24mpy(angle, _IQ24(6.0));
+    sector = (int16)sector_float;
+    _iq theta = angle - _IQ24div((int32)sector_float, _IQ24(6.0));
+
+    sin_theta = _IQ24sinPU(theta);
+    sin_60_minus_theta = _IQ24sinPU(_IQ24(1.0/6.0) - theta);
+
+    T1 = _IQmpy(k_pwm_iq, _IQdiv(sin_60_minus_theta, _IQ(0.8660254)));
+    T2 = _IQmpy(k_pwm_iq, _IQdiv(sin_theta, _IQ(0.8660254)));
+
+    if (T1 < 0) T1 = 0;
+    if (T2 < 0) T2 = 0;
+
+    _iq T1_T2 = T1 + T2;
+    if (T1_T2 > k_pwm_iq) {
+        _iq scale = _IQdiv(k_pwm_iq, T1_T2);
+        T1 = _IQmpy(T1, scale);
+        T2 = _IQmpy(T2, scale);
+        T1_T2 = k_pwm_iq;
+    }
+
+    T0 = k_pwm_iq - T1_T2;
+    T0a = _IQmpy(T0, _IQ(0.5));
+
+    switch (sector) {
+        case 0:
+            p->GammaA = k_pwm_iq/2 - (T1 + T2)/2;
+            p->GammaB = k_pwm_iq/2 + (T1 - T2)/2;
+            p->GammaC = k_pwm_iq/2 + (T1 + T2)/2;
+            break;
+        case 1:
+            p->GammaA = k_pwm_iq/2 + (T2 - T1)/2;
+            p->GammaB = k_pwm_iq/2 - (T1 + T2)/2;
+            p->GammaC = k_pwm_iq/2 + (T1 + T2)/2;
+            break;
+        case 2:
+            p->GammaA = k_pwm_iq/2 + (T1 + T2)/2;
+            p->GammaB = k_pwm_iq/2 - (T1 + T2)/2;
+            p->GammaC = k_pwm_iq/2 + (T1 - T2)/2;
+            break;
+        case 3:
+            p->GammaA = k_pwm_iq/2 + (T1 + T2)/2;
+            p->GammaB = k_pwm_iq/2 + (T2 - T1)/2;
+            p->GammaC = k_pwm_iq/2 - (T1 + T2)/2;
+            break;
+        case 4:
+            p->GammaA = k_pwm_iq/2 + (T1 - T2)/2;
+            p->GammaB = k_pwm_iq/2 + (T1 + T2)/2;
+            p->GammaC = k_pwm_iq/2 - (T1 + T2)/2;
+            break;
+        case 5:
+            p->GammaA = k_pwm_iq/2 - (T1 + T2)/2;
+            p->GammaB = k_pwm_iq/2 + (T1 + T2)/2;
+            p->GammaC = k_pwm_iq/2 + (T2 - T1)/2;
+            break;
+    }
+
+    if (p->GammaA < 0) p->GammaA = 0;
+    if (p->GammaB < 0) p->GammaB = 0;
+    if (p->GammaC < 0) p->GammaC = 0;
+
+    if (p->GammaA > k_pwm_iq) p->GammaA = k_pwm_iq + 1;
+    if (p->GammaB > k_pwm_iq) p->GammaB = k_pwm_iq + 1;
+    if (p->GammaC > k_pwm_iq) p->GammaC = k_pwm_iq + 1;
+
+    NT_PWM0->CMPA_bit.CMPA = (Uint16)p->GammaA;
+    NT_PWM1->CMPA_bit.CMPA = (Uint16)p->GammaB;
+    NT_PWM2->CMPA_bit.CMPA = (Uint16)p->GammaC;
+}
+
 //! Функция ШИМ с раздельными фазами (для модели SRM)
 
 //! \memberof TPWM_Module
@@ -736,6 +829,10 @@ void PWM_Module_Update(TPWM_Module *p) {
 		}
 		case PWM_TYPE_SRD: {
 			PWM_Module_Separate_Update(p);
+			break;
+		}
+		case PWM_TYPE_SVPWM: {
+			PWM_Module_SVPWM_Update(p);
 			break;
 		}
 		}
