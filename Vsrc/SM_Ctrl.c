@@ -442,10 +442,16 @@ void SM_Ctrl_Fast_Calc(TSM_Ctrl *p) {
 			pid_id.pid_fdb_reg3 = park.de; //обратная связь рег. тока оси d - вычисленный ток по фазе d
 			pid_id.calc(&pid_id); //расчет регулятора тока оси d
 
+			//Декаплинг регуляторов тока - компенсация перекрестных связей
+			decouple.id = park.de;
+			decouple.iq = park.qe;
+			decouple.wr = cur_par.speed;
+			decouple.calc(&decouple);
+
 			//Обратный поворот на угол refs.theta_elec для 
 			//выходов регуляторов тока (напряжений по осям d и q)
-			ipark.de = pid_id.pid_out_reg3;
-			ipark.qe = pid_iq.pid_out_reg3;
+			ipark.de = pid_id.pid_out_reg3 + decouple.ud_dec;
+			ipark.qe = pid_iq.pid_out_reg3 + decouple.uq_dec;
 			ipark.ang = refs.theta_elec;
 			ipark.calc(&ipark);            //расчет преобразования координат
 
@@ -582,10 +588,16 @@ void SM_Ctrl_Fast_Calc(TSM_Ctrl *p) {
 			pid_id.pid_fdb_reg3 = park.de; //обратная связь рег. тока оси d - вычисленный ток по фазе d
 			pid_id.calc(&pid_id); //расчет регулятора тока оси d
 
+			//Декаплинг регуляторов тока - компенсация перекрестных связей
+			decouple.id = park.de;
+			decouple.iq = park.qe;
+			decouple.wr = cur_par.speed;
+			decouple.calc(&decouple);
+
 			//Обратный поворот на угол refs.theta_elec для
 			//выходов регуляторов тока (напряжений по осям d и q)
-			ipark.de = pid_id.pid_out_reg3;
-			ipark.qe = pid_iq.pid_out_reg3;
+			ipark.de = pid_id.pid_out_reg3 + decouple.ud_dec;
+			ipark.qe = pid_iq.pid_out_reg3 + decouple.uq_dec;
 			ipark.ang = posspeedEqep.theta_elec;
 			ipark.calc(&ipark);            //расчет преобразования координат
 
@@ -676,10 +688,16 @@ void SM_Ctrl_Fast_Calc(TSM_Ctrl *p) {
 			pid_id.calc(&pid_id); //расчет регулятора тока оси x
 
 
+			//Декаплинг регуляторов тока - компенсация перекрестных связей
+			decouple.id = park.de;
+			decouple.iq = park.qe;
+			decouple.wr = cur_par.speed;
+			decouple.calc(&decouple);
+
 			//Обратный поворот на угол refs.theta_elec для
 			//выходов регуляторов тока (напряжений по осям x и y)
-			ipark.de = pid_id.pid_out_reg3;
-			ipark.qe = pid_iq.pid_out_reg3;
+			ipark.de = pid_id.pid_out_reg3 + decouple.ud_dec;
+			ipark.qe = pid_iq.pid_out_reg3 + decouple.uq_dec;
 			ipark.ang = refs.theta_elec;
 			ipark.calc(&ipark);            //расчет преобразования координат
 
@@ -835,10 +853,16 @@ void SM_Ctrl_Fast_Calc(TSM_Ctrl *p) {
 			pid_id.calc(&pid_id); //расчет регулятора тока оси x
 
 
+			//Декаплинг регуляторов тока - компенсация перекрестных связей
+			decouple.id = park.de;
+			decouple.iq = park.qe;
+			decouple.wr = cur_par.speed;
+			decouple.calc(&decouple);
+
 			//Обратный поворот на угол Temp1 для
 			//выходов регуляторов тока (напряжений по осям x и y)
-			ipark.de = pid_id.pid_out_reg3;
-			ipark.qe = pid_iq.pid_out_reg3;
+			ipark.de = pid_id.pid_out_reg3 + decouple.ud_dec;
+			ipark.qe = pid_iq.pid_out_reg3 + decouple.uq_dec;
 			ipark.ang = Temp1;
 			ipark.calc(&ipark);            //расчет преобразования координат
 

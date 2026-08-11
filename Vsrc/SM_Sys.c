@@ -289,6 +289,9 @@ void SM_Sys_Slow_Calc(TSM_Sys *p) {
 	drv_params._1_I_nom = _IQdiv(_IQ16(1), _IQ16(drv_params.I_nom));
 	drv_params._1_U_nom = _IQdiv(_IQ16(1), _IQ16(drv_params.U_nom));
 
+	//Пересчет коэффициентов декаплинга регуляторов тока из параметров двигателя
+	decouple.slow_calc(&decouple);
+
 	if (sw.Reboot & 1) { //команда перезагрузки
 		sw.Reboot = 0; //сбрасываем её
 		if (sm_ctrl.state == CTRL_STOP) { //перезагружаемся только в останове
