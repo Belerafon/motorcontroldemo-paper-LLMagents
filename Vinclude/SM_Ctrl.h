@@ -54,6 +54,7 @@ extern "C"
     int E;//!<Флаг первого вхождения.
     long AnglePrev;//!< Предыдущее значение угла для режима автонастройки ДПР
     long AngleDemo;//!< Угол для демо-режима контура положения
+    long fw_id_ref;//!< Текущее значение тока ослабления поля (IQ, отрицательное)
     void (*init)(struct SSM_Ctrl*);     //!< Pointer to the init funcion
     void (*slow_calc)(struct SSM_Ctrl*);//!< Pointer to the calc funtion
     void (*fast_calc)(struct SSM_Ctrl*); //!< Pointer to the calc funtion
