@@ -283,6 +283,7 @@ void SM_Sys_Slow_Calc(TSM_Sys *p) {
 	RotorObserver.slow_calc(&RotorObserver);//наблюдатель потока ротора АД
 	DIO_slow_calc(); //дискретные входы/выходы
 	FanControl.slow_calc(&FanControl);//вентилятор
+	sm_ctrl.slow_calc(&sm_ctrl);//декомпозиция регуляторов тока
 
 	//Пересчет коэффициентов для масштабирования токов и напряжений
 	drv_params._1_Udc_nom = _IQdiv(_IQ16(1), _IQ16(drv_params.Udc_nom));

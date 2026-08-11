@@ -92,6 +92,7 @@ extern TPidReg3 	pid_id;
 extern TPidReg3 	pid_iq;
 extern TPidReg3 	pid_ia;
 extern TPidReg3 	pid_spd;
+extern TDecoup		decoup;
 extern TPidReg3_pos 	pid_pos;
 extern TRelayReg i_a_reg;
 extern TRelayReg i_b_reg;

@@ -36,11 +36,90 @@ void SM_Ctrl_Init(TSM_Ctrl *p) {
 	p->state = 0x00;
 }
 
+//! \memberof TDecoup
+//!Расчет коэффициентов декомпозиции (компенсации перекрестных связей) регуляторов тока
+//!Выполняется в фоновом режиме на основе текущих параметров двигателя и скорости
+void decoup_calc(TDecoup *p) {
+	float l_q, l_d, r_s, psi_pm, pp;
+	float speed_pu, i_q, i_d;
+	float Ud;
+	float U_decoup_d, U_decoup_q, U_back_emf;
+	float freq_nom;
+
+	freq_nom = (float) drv_params.freq_nom;
+	Ud = model.motorInternals.udc;
+	speed_pu = (float) cur_par.speed;
+	i_q = (float) pid_iq.pid_fdb_reg3;
+	i_d = (float) pid_id.pid_fdb_reg3;
+
+	if (model.MotorType == MODEL_SYNC_MOTOR) {
+		l_q = model.motorInternals.lsq / 1000.0f;
+		l_d = model.motorInternals.lsd / 1000.0f;
+		r_s = model.motorInternals.rs;
+		psi_pm = model.motorInternals.m;
+		pp = model.motorInternals.pp;
+	} else if (model.MotorType == MODEL_INDUCTION_MOTOR) {
+		l_q = model.motorInternals.lr / 1000.0f;
+		l_d = model.motorInternals.ls / 1000.0f;
+		r_s = model.motorInternals.rs;
+	} else {
+		p->K_decoup_d = 0;
+		p->K_decoup_q = 0;
+		p->K_decoup_pm = 0;
+		p->iq_decoup = 0;
+		p->id_decoup = 0;
+		p->speed_decoup = 0;
+		p->U_decoup_d = 0;
+		p->U_decoup_q = 0;
+		p->U_back_emf = 0;
+		return;
+	}
+
+	U_decoup_d = l_q * i_q * speed_pu * freq_nom * 6.28318530718f / Ud;
+	U_decoup_q = l_d * i_d * speed_pu * freq_nom * 6.28318530718f / Ud;
+
+	if (U_decoup_d > 1.0f) U_decoup_d = 1.0f;
+	if (U_decoup_d < -1.0f) U_decoup_d = -1.0f;
+	if (U_decoup_q > 1.0f) U_decoup_q = 1.0f;
+	if (U_decoup_q < -1.0f) U_decoup_q = -1.0f;
+
+	p->K_decoup_d = (long)(U_decoup_d * 16777216.0f);
+	p->K_decoup_q = (long)(U_decoup_q * 16777216.0f);
+	p->U_decoup_d = (long)(U_decoup_d * 16777216.0f);
+	p->U_decoup_q = (long)(U_decoup_q * 16777216.0f);
+	p->iq_decoup = pid_iq.pid_fdb_reg3;
+	p->id_decoup = pid_id.pid_fdb_reg3;
+	p->speed_decoup = cur_par.speed;
+
+	if (model.MotorType == MODEL_SYNC_MOTOR) {
+		U_back_emf = psi_pm * speed_pu * freq_nom * 6.28318530718f / Ud;
+		if (U_back_emf > 1.0f) U_back_emf = 1.0f;
+		if (U_back_emf < -1.0f) U_back_emf = -1.0f;
+		p->K_decoup_pm = (long)(U_back_emf * 16777216.0f);
+		p->U_back_emf = (long)(U_back_emf * 16777216.0f);
+	} else {
+		p->K_decoup_pm = 0;
+		p->U_back_emf = 0;
+	}
+}
+
 //!Фоновый расчет
 
 //! \memberof TSM_Ctrl
 void SM_Ctrl_Slow_Calc(TSM_Ctrl *p) {
-
+	if (sw.decoup_ena & 1)
+		decoup_calc(&decoup);
+	else {
+		decoup.K_decoup_d = 0;
+		decoup.K_decoup_q = 0;
+		decoup.K_decoup_pm = 0;
+		decoup.iq_decoup = 0;
+		decoup.id_decoup = 0;
+		decoup.speed_decoup = 0;
+		decoup.U_decoup_d = 0;
+		decoup.U_decoup_q = 0;
+		decoup.U_back_emf = 0;
+	}
 }
 
 //!Миллисекундный расчет
@@ -378,6 +457,15 @@ void SM_Ctrl_Fast_Calc(TSM_Ctrl *p) {
 			/*ENTRY START*/
 			pwm.On(&pwm);            //Включение ШИМ
 			rmp.output = 0;            //Обнуление задатчика интенсивности
+			decoup.K_decoup_d = 0;
+			decoup.K_decoup_q = 0;
+			decoup.K_decoup_pm = 0;
+			decoup.iq_decoup = 0;
+			decoup.id_decoup = 0;
+			decoup.speed_decoup = 0;
+			decoup.U_decoup_d = 0;
+			decoup.U_decoup_q = 0;
+			decoup.U_back_emf = 0;
 			if (dlog.StartBits & (1 << 4)) //Если пользователь задал этот бит осциллографирования
 				dlog.set_mode(1, &dlog);  //Запуск осциллографа по этому событию
 			/*ENTRY END*/
@@ -442,8 +530,14 @@ void SM_Ctrl_Fast_Calc(TSM_Ctrl *p) {
 			pid_id.pid_fdb_reg3 = park.de; //обратная связь рег. тока оси d - вычисленный ток по фазе d
 			pid_id.calc(&pid_id); //расчет регулятора тока оси d
 
-			//Обратный поворот на угол refs.theta_elec для 
-			//выходов регуляторов тока (напряжений по осям d и q)
+			if (sw.decoup_ena & 1) {
+				pid_id.pid_out_reg3 -= decoup.U_decoup_d;
+				pid_iq.pid_out_reg3 -= decoup.U_decoup_q;
+				pid_iq.pid_out_reg3 -= decoup.U_back_emf;
+			}
+
+			//Обратный поворот на угол refs.theta_elec для
+			//выходов регуляторов тока (напряжения по осям d и q)
 			ipark.de = pid_id.pid_out_reg3;
 			ipark.qe = pid_iq.pid_out_reg3;
 			ipark.ang = refs.theta_elec;
@@ -470,12 +564,22 @@ void SM_Ctrl_Fast_Calc(TSM_Ctrl *p) {
 			/*ENTRY START*/
 			pwm.On(&pwm);            //Включение ШИМ
 			rmp.output = 0;            //Обнуление задатчика интенсивности
+			decoup.K_decoup_d = 0;
+			decoup.K_decoup_q = 0;
+			decoup.K_decoup_pm = 0;
+			decoup.iq_decoup = 0;
+			decoup.id_decoup = 0;
+			decoup.speed_decoup = 0;
+			decoup.U_decoup_d = 0;
+			decoup.U_decoup_q = 0;
+			decoup.U_back_emf = 0;
 			if (dlog.StartBits & (1 << 4)) //Если пользователь задал этот бит осциллографирования
 				dlog.set_mode(1, &dlog);  //Запуск осциллографа по этому событию
 			/*ENTRY END*/
 		}
 		/*DO START*/
 		{
+
 			cur_par.Is = pid_iq.pid_fdb_reg3; //Текущий ток статора - ток по оси q
 			cur_par.speed = posspeedEqep.speed_elec; //Текущая скорость - с ДПР фильтрованная
 
@@ -582,8 +686,14 @@ void SM_Ctrl_Fast_Calc(TSM_Ctrl *p) {
 			pid_id.pid_fdb_reg3 = park.de; //обратная связь рег. тока оси d - вычисленный ток по фазе d
 			pid_id.calc(&pid_id); //расчет регулятора тока оси d
 
+			if (sw.decoup_ena & 1) {
+				pid_id.pid_out_reg3 -= decoup.U_decoup_d;
+				pid_iq.pid_out_reg3 -= decoup.U_decoup_q;
+				pid_iq.pid_out_reg3 -= decoup.U_back_emf;
+			}
+
 			//Обратный поворот на угол refs.theta_elec для
-			//выходов регуляторов тока (напряжений по осям d и q)
+			//выходов регуляторов тока (напряжения по осям x и y)
 			ipark.de = pid_id.pid_out_reg3;
 			ipark.qe = pid_iq.pid_out_reg3;
 			ipark.ang = posspeedEqep.theta_elec;
@@ -607,12 +717,22 @@ void SM_Ctrl_Fast_Calc(TSM_Ctrl *p) {
 			RotorObserver.psi_d=0;
 			RotorObserver.psi_q=0;
 			rmp.output = 0;            //Обнуление задатчика интенсивности
+			decoup.K_decoup_d = 0;
+			decoup.K_decoup_q = 0;
+			decoup.K_decoup_pm = 0;
+			decoup.iq_decoup = 0;
+			decoup.id_decoup = 0;
+			decoup.speed_decoup = 0;
+			decoup.U_decoup_d = 0;
+			decoup.U_decoup_q = 0;
+			decoup.U_back_emf = 0;
 			if (dlog.StartBits & (1 << 4)) //Если пользователь задал этот бит осциллографирования
 				dlog.set_mode(1, &dlog);  //Запуск осциллографа по этому событию
 			/*ENTRY END*/
 		}
 		/*DO START*/
 		{
+
 			cur_par.Is = _IQmag(pid_iq.pid_fdb_reg3,pid_id.pid_fdb_reg3) ; //Текущий ток статора - амплитуда из токов d и q
 			cur_par.speed = posspeedEqep.speed_elec; //posspeedEqep.speed.output;//Текущая скорость - с ДПР фильтрованная
 
@@ -675,9 +795,13 @@ void SM_Ctrl_Fast_Calc(TSM_Ctrl *p) {
 			pid_id.pid_fdb_reg3 = park.de; //обратная связь рег. тока оси x - вычисленный ток по фазе x
 			pid_id.calc(&pid_id); //расчет регулятора тока оси x
 
+			if (sw.decoup_ena & 1) {
+				pid_id.pid_out_reg3 -= decoup.U_decoup_d;
+				pid_iq.pid_out_reg3 -= decoup.U_decoup_q;
+			}
 
 			//Обратный поворот на угол refs.theta_elec для
-			//выходов регуляторов тока (напряжений по осям x и y)
+			//выходов регуляторов тока (напряжения по осям x и y)
 			ipark.de = pid_id.pid_out_reg3;
 			ipark.qe = pid_iq.pid_out_reg3;
 			ipark.ang = refs.theta_elec;
@@ -700,12 +824,22 @@ void SM_Ctrl_Fast_Calc(TSM_Ctrl *p) {
 			RotorObserver.psi_d=0;
 			RotorObserver.psi_q=0;
 			rmp.output = 0;            //Обнуление задатчика интенсивности
+			decoup.K_decoup_d = 0;
+			decoup.K_decoup_q = 0;
+			decoup.K_decoup_pm = 0;
+			decoup.iq_decoup = 0;
+			decoup.id_decoup = 0;
+			decoup.speed_decoup = 0;
+			decoup.U_decoup_d = 0;
+			decoup.U_decoup_q = 0;
+			decoup.U_back_emf = 0;
 			if (dlog.StartBits & (1 << 4)) //Если пользователь задал этот бит осциллографирования
 				dlog.set_mode(1, &dlog);  //Запуск осциллографа по этому событию
 			/*ENTRY END*/
 		}
 		/*DO START*/
 		{
+
 			cur_par.Is = _IQmag(pid_iq.pid_fdb_reg3,pid_id.pid_fdb_reg3) ; //Текущий ток статора - амплитуда из токов d и q
 			cur_par.speed = posspeedEqep.speed_elec; //posspeedEqep.speed.output;//Текущая скорость - с ДПР фильтрованная
 
@@ -834,9 +968,13 @@ void SM_Ctrl_Fast_Calc(TSM_Ctrl *p) {
 			pid_id.pid_fdb_reg3 = park.de; //обратная связь рег. тока оси x - вычисленный ток по фазе x
 			pid_id.calc(&pid_id); //расчет регулятора тока оси x
 
+			if (sw.decoup_ena & 1) {
+				pid_id.pid_out_reg3 -= decoup.U_decoup_d;
+				pid_iq.pid_out_reg3 -= decoup.U_decoup_q;
+			}
 
 			//Обратный поворот на угол Temp1 для
-			//выходов регуляторов тока (напряжений по осям x и y)
+			//выходов регуляторов тока (напряжения по осям x и y)
 			ipark.de = pid_id.pid_out_reg3;
 			ipark.qe = pid_iq.pid_out_reg3;
 			ipark.ang = Temp1;
@@ -851,6 +989,7 @@ void SM_Ctrl_Fast_Calc(TSM_Ctrl *p) {
 		}
 		break;
 	}
+
 	case CTRL_DC_DRIVE: {  // ДПТ разомкнутый
 		if (p->E == 1) {
 			/*ENTRY START*/

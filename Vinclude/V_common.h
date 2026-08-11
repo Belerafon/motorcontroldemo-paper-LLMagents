@@ -116,6 +116,7 @@ typedef struct {
 		Uint16 	AutoOffset;//!< автосмещение АЦП
 		Uint16 	HardwareType;//!< Тип железа, под который собран проект
 		Uint16 	excitation_ena;//!< Разрешение возбудителя
+		Uint16 	decoup_ena;//!< Разрешение декомпозиции (компенсации перекрестных связей) регуляторов тока
 		} TSysSwitches;
 
 #ifdef __cplusplus

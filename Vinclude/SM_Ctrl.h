@@ -43,7 +43,42 @@ extern "C"
       В run_mode задается номер желаемой структуры управления.
        */
 
-//! см. TSM_Ctrl
+  //! см. TSM_Ctrl
+
+//! Структура для хранения коэффициентов декомпозиции (компенсации перекрестных связей) регуляторов тока
+  struct SDecoup
+  {
+    long K_decoup_d;//!< Коэффициент декомпозиции для регулятора тока по оси d (нормированный, IQ24)
+    long K_decoup_q;//!< Коэффициент декомпозиции для регулятора тока по оси q (нормированный, IQ24)
+    long K_decoup_pm;//!< Коэффициент компенсации back-EMF для PMSM (нормированный, IQ24)
+    long iq_decoup;//!< Обратная связь Iq для декомпозиции (IQ24)
+    long id_decoup;//!< Обратная связь Id для декомпозиции (IQ24)
+    long speed_decoup;//!< Скорость для декомпозиции (IQ24)
+    long MotorParametersNum_prev;//!< Предыдущий номер параметров двигателя (для отслеживания смены)
+    long U_decoup_d;//!< Предрасчитанное напряжение декомпозиции для оси d (IQ24)
+    long U_decoup_q;//!< Предрасчитанное напряжение декомпозиции для оси q (IQ24)
+    long U_back_emf;//!< Предрасчитанное напряжение back-EMF (IQ24)
+  } ;
+  typedef volatile struct SDecoup TDecoup;
+
+  //!Инициализатор по умолчанию
+  #define DECOUP_DEFAULTS { \
+      .K_decoup_d = 0, \
+      .K_decoup_q = 0, \
+      .K_decoup_pm = 0, \
+      .iq_decoup = 0, \
+      .id_decoup = 0, \
+      .speed_decoup = 0, \
+      .MotorParametersNum_prev = 0, \
+      .U_decoup_d = 0, \
+      .U_decoup_q = 0, \
+      .U_back_emf = 0 \
+  }
+
+  //! \memberof TDecoup
+  void decoup_calc(TDecoup*);
+
+  //! см. TSM_Ctrl
 
   struct SSM_Ctrl
   {
