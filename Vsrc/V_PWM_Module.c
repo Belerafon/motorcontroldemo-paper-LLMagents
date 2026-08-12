@@ -610,6 +610,105 @@ void PWM_Module_Sin_Update(TPWM_Module *p) {
 
 }
 
+//! Симметричная векторная ШИМ с равным распределением нулевого вектора
+
+//! \memberof TPWM_Module
+void PWM_Module_Centered_SVPWM_Update(TPWM_Module *p) {
+	_iq PhasePtsA;
+	_iq PhasePtsB;
+	_iq PhasePtsC;
+	_iq PhaseMin;
+	_iq PhaseMax;
+	_iq PhaseSpan;
+	_iq CommonMode;
+	_iq Scale;
+	_iq UbetaBySqrt3;
+
+	PWM_Module_NormInput(p);
+
+	/*
+	 * Phase potentials before the zero-sequence component is added.
+	 * Their differences define the requested voltage vector.  Centering
+	 * the minimum and maximum around 0.5 splits the zero-vector time
+	 * equally between 000 and 111 instead of clamping a phase to a bus.
+	 */
+	UbetaBySqrt3 = _IQmpy(p->UbetaNorm, _1_SQRT3);
+	PhasePtsA = -_IQmpy(p->UalphaNorm, _IQ(2.0 / 3.0));
+	PhasePtsB = _IQmpy(p->UalphaNorm, _IQ(1.0 / 3.0)) - UbetaBySqrt3;
+	PhasePtsC = _IQmpy(p->UalphaNorm, _IQ(1.0 / 3.0)) + UbetaBySqrt3;
+
+	PhaseMin = PhasePtsA;
+	PhaseMax = PhasePtsA;
+	if (PhasePtsB < PhaseMin)
+		PhaseMin = PhasePtsB;
+	if (PhasePtsC < PhaseMin)
+		PhaseMin = PhasePtsC;
+	if (PhasePtsB > PhaseMax)
+		PhaseMax = PhasePtsB;
+	if (PhasePtsC > PhaseMax)
+		PhaseMax = PhasePtsC;
+
+	/* Limit against the inverter hexagon if U_lim permits overmodulation. */
+	PhaseSpan = PhaseMax - PhaseMin;
+	if (PhaseSpan > _IQ(1.0)) {
+		Scale = _IQdiv(_IQ(1.0), PhaseSpan);
+		PhasePtsA = _IQmpy(PhasePtsA, Scale);
+		PhasePtsB = _IQmpy(PhasePtsB, Scale);
+		PhasePtsC = _IQmpy(PhasePtsC, Scale);
+		PhaseMin = _IQmpy(PhaseMin, Scale);
+		PhaseMax = _IQmpy(PhaseMax, Scale);
+		p->ULimitation = 1;
+	}
+
+	CommonMode = -((PhaseMax + PhaseMin) >> 1);
+	PhasePtsA += _IQ(0.5) + CommonMode;
+	PhasePtsB += _IQ(0.5) + CommonMode;
+	PhasePtsC += _IQ(0.5) + CommonMode;
+
+	p->GammaA = _IQmpy(p->k_pwm, PhasePtsA);
+	p->GammaB = _IQmpy(p->k_pwm, PhasePtsB);
+	p->GammaC = _IQmpy(p->k_pwm, PhasePtsC);
+
+	if (p->GammaA < 0)
+		p->GammaA = 0;
+	if (p->GammaB < 0)
+		p->GammaB = 0;
+	if (p->GammaC < 0)
+		p->GammaC = 0;
+	if (p->GammaA > p->k_pwm)
+		p->GammaA = p->k_pwm;
+	if (p->GammaB > p->k_pwm)
+		p->GammaB = p->k_pwm;
+	if (p->GammaC > p->k_pwm)
+		p->GammaC = p->k_pwm;
+
+	/* Sector is retained for diagnostics; it is not needed by this method. */
+	if (p->UbetaNorm >= 0) {
+		if (p->UalphaNorm >= UbetaBySqrt3)
+			p->sector = 0;
+		else if (p->UalphaNorm <= -UbetaBySqrt3)
+			p->sector = 2;
+		else
+			p->sector = 1;
+	} else {
+		UbetaBySqrt3 = -UbetaBySqrt3;
+		if (p->UalphaNorm >= UbetaBySqrt3)
+			p->sector = 5;
+		else if (p->UalphaNorm <= -UbetaBySqrt3)
+			p->sector = 3;
+		else
+			p->sector = 4;
+	}
+
+	DINT;
+	if (NT_PWM0->TBCTR > 30) {
+		NT_PWM0->CMPA_bit.CMPA = (Uint16) p->GammaA;
+		NT_PWM1->CMPA_bit.CMPA = (Uint16) p->GammaB;
+		NT_PWM2->CMPA_bit.CMPA = (Uint16) p->GammaC;
+	}
+	EINT;
+}
+
 //! Функция ШИМ с раздельными фазами (для модели SRM)
 
 //! \memberof TPWM_Module
@@ -728,6 +827,10 @@ void PWM_Module_Update(TPWM_Module *p) {
 		}
 		case PWM_TYPE_SIN_PWM: {
 			PWM_Module_Sin_Update(p);
+			break;
+		}
+		case PWM_TYPE_CENTERED_SVPWM: {
+			PWM_Module_Centered_SVPWM_Update(p);
 			break;
 		}
 		case PWM_TYPE_DC_DRIVE: {
