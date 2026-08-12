@@ -544,6 +544,121 @@ void PWM_Module_No_SV_Update(TPWM_Module *p) {
     EINT;
 }
 
+//! Symmetric space-vector PWM.
+//!
+//! The common-mode component centers the three compare values in the PWM
+//! period.  Thus the zero-vector time is shared equally between 000 and 111,
+//! and no phase is tied to either DC bus before the voltage limit is reached.
+//! Compared with sinusoidal PWM, this increases linear DC-link utilization by
+//! 2/sqrt(3) (approximately 15.47 percent).
+//!
+//! \memberof TPWM_Module
+void PWM_Module_Symmetric_SV_Update(TPWM_Module *p) {
+	_iq phaseA;
+	_iq phaseB;
+	_iq phaseC;
+	_iq phaseMax;
+	_iq phaseMin;
+	_iq phaseSpan;
+	_iq commonMode;
+	_iq scale;
+	_iq compareA;
+	_iq compareB;
+	_iq compareC;
+
+	/*
+	 * Refresh the shadow registers before the calculation as well as after it.
+	 * The second write below normally supplies the new values; this first write
+	 * prevents a missed update when execution coincides with TBCTR == 0.
+	 */
+	DINT;
+	if (NT_PWM0->TBCTR > 30) {
+		NT_PWM0->CMPA_bit.CMPA = (Uint16) p->GammaA;
+		NT_PWM1->CMPA_bit.CMPA = (Uint16) p->GammaB;
+		NT_PWM2->CMPA_bit.CMPA = (Uint16) p->GammaC;
+	}
+	EINT;
+
+	PWM_Module_NormInput(p);
+
+	/*
+	 * Inverse Clarke transform followed by the modulation scaling.  NormInput
+	 * converts the voltage base by sqrt(3)/2, therefore multiplying the phase
+	 * values by 2/3 gives the required 1/sqrt(3) modulation scale.
+	 */
+	phaseA = _IQmpy(p->UalphaNorm, _IQ(2.0 / 3.0));
+	phaseB = _IQmpy((-p->UalphaNorm >> 1)
+			+ _IQmpy(p->UbetaNorm, _IQ(0.8660254)), _IQ(2.0 / 3.0));
+	phaseC = _IQmpy((-p->UalphaNorm >> 1)
+			- _IQmpy(p->UbetaNorm, _IQ(0.8660254)), _IQ(2.0 / 3.0));
+
+	phaseMax = phaseA;
+	if (phaseB > phaseMax)
+		phaseMax = phaseB;
+	if (phaseC > phaseMax)
+		phaseMax = phaseC;
+
+	phaseMin = phaseA;
+	if (phaseB < phaseMin)
+		phaseMin = phaseB;
+	if (phaseC < phaseMin)
+		phaseMin = phaseC;
+
+	/* Keep the reference on the linear SVPWM hexagon during overmodulation. */
+	phaseSpan = phaseMax - phaseMin;
+	if (phaseSpan > _IQ(1.0)) {
+		scale = _IQdiv(_IQ(1.0), phaseSpan);
+		phaseA = _IQmpy(phaseA, scale);
+		phaseB = _IQmpy(phaseB, scale);
+		phaseC = _IQmpy(phaseC, scale);
+		p->UalphaNorm = _IQmpy(p->UalphaNorm, scale);
+		p->UbetaNorm = _IQmpy(p->UbetaNorm, scale);
+		phaseMax = _IQmpy(phaseMax, scale);
+		phaseMin = _IQmpy(phaseMin, scale);
+		p->ULimitation = 1;
+	}
+
+	/* Select the sector from the ordering of the three phase references. */
+	if ((phaseA >= phaseB) && (phaseA >= phaseC))
+		p->sector = (phaseB >= phaseC) ? 0 : 5;
+	else if ((phaseB >= phaseA) && (phaseB >= phaseC))
+		p->sector = (phaseC >= phaseA) ? 2 : 1;
+	else
+		p->sector = (phaseA >= phaseB) ? 4 : 3;
+
+	/* Center max and min: both zero vectors receive equal duration. */
+	commonMode = (phaseMax + phaseMin) >> 1;
+	compareA = _IQ(0.5) - phaseA + commonMode;
+	compareB = _IQ(0.5) - phaseB + commonMode;
+	compareC = _IQ(0.5) - phaseC + commonMode;
+
+	p->GammaA = _IQmpy(p->k_pwm, compareA);
+	p->GammaB = _IQmpy(p->k_pwm, compareB);
+	p->GammaC = _IQmpy(p->k_pwm, compareC);
+
+	if (p->GammaA < 0)
+		p->GammaA = 0;
+	if (p->GammaB < 0)
+		p->GammaB = 0;
+	if (p->GammaC < 0)
+		p->GammaC = 0;
+
+	if (p->GammaA > p->k_pwm)
+		p->GammaA = p->k_pwm;
+	if (p->GammaB > p->k_pwm)
+		p->GammaB = p->k_pwm;
+	if (p->GammaC > p->k_pwm)
+		p->GammaC = p->k_pwm;
+
+	DINT;
+	if (NT_PWM0->TBCTR > 30) {
+		NT_PWM0->CMPA_bit.CMPA = (Uint16) p->GammaA;
+		NT_PWM1->CMPA_bit.CMPA = (Uint16) p->GammaB;
+		NT_PWM2->CMPA_bit.CMPA = (Uint16) p->GammaC;
+	}
+	EINT;
+}
+
 //! Функция синусоидальной ШИМ
 
 //! \memberof TPWM_Module
@@ -736,6 +851,10 @@ void PWM_Module_Update(TPWM_Module *p) {
 		}
 		case PWM_TYPE_SRD: {
 			PWM_Module_Separate_Update(p);
+			break;
+		}
+		case PWM_TYPE_SYMMETRIC_SVPWM: {
+			PWM_Module_Symmetric_SV_Update(p);
 			break;
 		}
 		}

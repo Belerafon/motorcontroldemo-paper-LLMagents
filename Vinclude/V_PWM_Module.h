@@ -49,6 +49,8 @@ extern "C"
 #define PWM_TYPE_DC_DRIVE		4
 //!ШИМ для управления SRM
 #define PWM_TYPE_SRD			5
+//!Symmetric space-vector PWM with centered zero-vector time
+#define PWM_TYPE_SYMMETRIC_SVPWM 6
 
 
 //! Ограничения величины "минимальной скважности", мкс, min
@@ -151,6 +153,7 @@ void PWM_Module_Off(TPWM_Module *);
 
 //векторные функции из библиотеки
 void PWM_Module_No_SV_Update(TPWM_Module *);
+void PWM_Module_Symmetric_SV_Update(TPWM_Module *);
 
 #ifdef __cplusplus
 }
