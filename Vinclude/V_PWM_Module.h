@@ -43,12 +43,14 @@ extern "C"
 #define PWM_TYPE_SIN_PWM     	1
 //!Векторная 12-ти секторная ШИМ
 #define PWM_TYPE_12SECT_NO_SV 	2
-//!ШИМ методом вычисления фазных потенциалов 
+//!ШИМ методом вычисления фазных потенциалов
 #define PWM_TYPE_FLY_12SECT 	3
 //!ШИМ для управления ДПТ
 #define PWM_TYPE_DC_DRIVE		4
 //!ШИМ для управления SRM
 #define PWM_TYPE_SRD			5
+//!Непрерывная векторная ШИМ (SVPWM с симметричным распределением нулевых векторов V0+V7, без привязки фазы к шине)
+#define PWM_TYPE_SVPWM			6
 
 
 //! Ограничения величины "минимальной скважности", мкс, min
@@ -151,6 +153,8 @@ void PWM_Module_Off(TPWM_Module *);
 
 //векторные функции из библиотеки
 void PWM_Module_No_SV_Update(TPWM_Module *);
+//! \memberof TPWM_Module
+void PWM_Module_SV_Update(TPWM_Module *);
 
 #ifdef __cplusplus
 }
