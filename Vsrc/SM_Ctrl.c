@@ -117,6 +117,7 @@ void SM_Ctrl_Fast_Calc(TSM_Ctrl *p) {
 		pid_ia.reset(&pid_ia);
 		pid_spd.reset(&pid_spd);
 		pid_pos.reset(&pid_pos);
+		fieldWeakening.reset(&fieldWeakening);
 		cur_par.Is = 0;
 		cur_par.power = 0;
 		cur_par.speed = 0;
@@ -378,6 +379,7 @@ void SM_Ctrl_Fast_Calc(TSM_Ctrl *p) {
 			/*ENTRY START*/
 			pwm.On(&pwm);            //Включение ШИМ
 			rmp.output = 0;            //Обнуление задатчика интенсивности
+			fieldWeakening.reset(&fieldWeakening);//Сброс регулятора ослабления поля
 			if (dlog.StartBits & (1 << 4)) //Если пользователь задал этот бит осциллографирования
 				dlog.set_mode(1, &dlog);  //Запуск осциллографа по этому событию
 			/*ENTRY END*/
@@ -410,17 +412,36 @@ void SM_Ctrl_Fast_Calc(TSM_Ctrl *p) {
 			rmp.input = refs.speed_ref;
 			rmp.calc(&rmp);//Расчет ЗИ
 
+			//Расчет регулятора ослабления поля.
+			//Используется амплитуда требуемого напряжения с прошлого такта (pwm.U_mag)
+			//и максимально реализуемое напряжение (pwm.U_lim). Когда требуемое
+			//напряжение превышает доступное, на выходе формируется отрицательный Id,
+			//ослабляющий поле магнитов и снижающий противо-ЭДС - двигатель разгоняется выше базовой скорости.
+			fieldWeakening.Us = pwm.U_mag;
+			fieldWeakening.Umax = pwm.U_lim;
+			fieldWeakening.calc(&fieldWeakening);
+
+			//Ограничение выхода регулятора скорости с учётом тока ослабления поля:
+			//суммарный ток статора не должен превышать заданный предел refs.Iq_ref,
+			//поэтому доступный ток оси q уменьшается: Iq_max = sqrt(Imax^2 - Id^2).
+			{
+				long Imax2 = _IQmpy(refs.Iq_ref, refs.Iq_ref);
+				long Id2 = _IQmpy(fieldWeakening.Id_ref, fieldWeakening.Id_ref);
+				long Iq_lim;
+				if (Imax2 > Id2)
+					Iq_lim = _IQsqrt(Imax2 - Id2);
+				else
+					Iq_lim = 0;
+
+				pid_spd.pid_out_max = Iq_lim; //Максимум выхода регулятора скорости
+				if (sw.recuperation_ena & 1)            //если разрешена рекуперация
+					pid_spd.pid_out_min = -Iq_lim; //минимум рег. скор. - отрицательный ток
+				else
+					//иначе
+					pid_spd.pid_out_min = 0; //нулевой ток не даст рекупераци при вращении в положительную сторону
+			}
 			pid_spd.pid_ref_reg3 = rmp.output; //на воход регулятора скорости - выход ЗИ
 			pid_spd.pid_fdb_reg3 = cur_par.speed; //обратная связь регулятора скорости - скорость ДПР
-
-
-			pid_spd.pid_out_max = refs.Iq_ref; //Максимум выхода регулятора скорости - заданный ток
-
-			if (sw.recuperation_ena & 1)            //если разрешена рекуперация
-				pid_spd.pid_out_min = -refs.Iq_ref; //минимум рег. скор. - отрицательный ток
-			else
-				//иначе
-				pid_spd.pid_out_min = 0; //нулевой ток не даст рекупераци при вращении в положительную сторону
 			pid_spd.calc(&pid_spd); //расчет регулятора скорости
 
 
@@ -438,7 +459,7 @@ void SM_Ctrl_Fast_Calc(TSM_Ctrl *p) {
 			pid_iq.pid_fdb_reg3 = park.qe; //обратная связь рег. тока оси q - вычисленный ток по фазе q
 			pid_iq.calc(&pid_iq); //расчет регулятора тока оси q
 
-			pid_id.pid_ref_reg3 = 0; //задание тока по оси d - оси возбудения
+			pid_id.pid_ref_reg3 = fieldWeakening.Id_ref; //задание тока по оси d - с регулятора ослабления поля (0 ниже базовой скорости, отрицательный - выше)
 			pid_id.pid_fdb_reg3 = park.de; //обратная связь рег. тока оси d - вычисленный ток по фазе d
 			pid_id.calc(&pid_id); //расчет регулятора тока оси d
 
@@ -470,6 +491,7 @@ void SM_Ctrl_Fast_Calc(TSM_Ctrl *p) {
 			/*ENTRY START*/
 			pwm.On(&pwm);            //Включение ШИМ
 			rmp.output = 0;            //Обнуление задатчика интенсивности
+			fieldWeakening.reset(&fieldWeakening);//Сброс регулятора ослабления поля
 			if (dlog.StartBits & (1 << 4)) //Если пользователь задал этот бит осциллографирования
 				dlog.set_mode(1, &dlog);  //Запуск осциллографа по этому событию
 			/*ENTRY END*/
@@ -558,12 +580,30 @@ void SM_Ctrl_Fast_Calc(TSM_Ctrl *p) {
 			pid_pos.saterr_reg3Add=pid_spd.saterr_reg3;//это улучшайзер. Учитывает насыщение рег. скорости и передает его в рег. положения.
 			pid_pos.calc(&pid_pos); //расчет регулятора положения
 
+			//Расчет регулятора ослабления поля (см. подробности в CTRL_RUN_VECTOR_SM).
+			//Используется амплитуда требуемого напряжения с прошлого такта.
+			fieldWeakening.Us = pwm.U_mag;
+			fieldWeakening.Umax = pwm.U_lim;
+			fieldWeakening.calc(&fieldWeakening);
+
+			//Ограничение выхода регулятора скорости с учётом тока ослабления поля:
+			//суммарный ток статора не должен превышать заданный предел refs.Iq_ref.
+			{
+				long Imax2 = _IQmpy(refs.Iq_ref, refs.Iq_ref);
+				long Id2 = _IQmpy(fieldWeakening.Id_ref, fieldWeakening.Id_ref);
+				long Iq_lim;
+				if (Imax2 > Id2)
+					Iq_lim = _IQsqrt(Imax2 - Id2);
+				else
+					Iq_lim = 0;
+
+				pid_spd.pid_out_max = Iq_lim; //Максимум выхода регулятора скорости
+				pid_spd.pid_out_min = -Iq_lim; //минимум рег. скор. - отрицательный ток
+			}
+
 			pid_spd.pid_ref_reg3 = pid_pos.pid_out_reg3; //на вход регулятора скорости - выход рег. положения
 //			pid_spd.pid_fdb_reg3 = posspeedEqep.speed_filter.output; //обратная связь регулятора скорости - скорость ДПР
 			pid_spd.pid_fdb_reg3 = cur_par.speed;
-
-			pid_spd.pid_out_max = refs.Iq_ref; //Максимум выхода регулятора скорости - заданный ток
-			pid_spd.pid_out_min = -refs.Iq_ref; //минимум рег. скор. - отрицательный ток
 			pid_spd.calc(&pid_spd); //расчет регулятора скорости
 
 
@@ -578,7 +618,7 @@ void SM_Ctrl_Fast_Calc(TSM_Ctrl *p) {
 			pid_iq.pid_fdb_reg3 = park.qe; //обратная связь рег. тока оси q - вычисленный ток по фазе q
 			pid_iq.calc(&pid_iq); //расчет регулятора тока оси q
 
-			pid_id.pid_ref_reg3 = 0; //задание тока по оси d - оси возбудения
+			pid_id.pid_ref_reg3 = fieldWeakening.Id_ref; //задание тока по оси d - с регулятора ослабления поля
 			pid_id.pid_fdb_reg3 = park.de; //обратная связь рег. тока оси d - вычисленный ток по фазе d
 			pid_id.calc(&pid_id); //расчет регулятора тока оси d
 
