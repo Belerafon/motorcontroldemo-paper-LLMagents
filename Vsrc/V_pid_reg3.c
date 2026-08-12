@@ -105,6 +105,7 @@ void pid_reg3_reset(TPidReg3 *v) {
 	v->pid_fdb_reg3=0;
 	v->pid_ref_reg3=0;
 	v->ui_reg3=0;
+	v->saterr_reg3Add=0;
 	v->KdFilterInitFlag=1;
 }
 

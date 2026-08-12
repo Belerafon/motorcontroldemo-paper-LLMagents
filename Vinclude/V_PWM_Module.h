@@ -142,6 +142,9 @@ typedef volatile struct SPWM_Module TPWM_Module;
 void PWM_Module_Init(TPWM_Module *);
 //! \memberof TPWM_Module
 void PWM_Module_Update(TPWM_Module *);
+//! Возвращает доступную амплитуду напряжения для регуляторов тока
+//! с учетом текущего напряжения ЗПТ и линейной области выбранного типа ШИМ.
+int32 PWM_Module_GetVoltageLimit(TPWM_Module *);
 //! \memberof TPWM_Module
 void PWM_Module_SlowCalc(TPWM_Module *);
 //! \memberof TPWM_Module

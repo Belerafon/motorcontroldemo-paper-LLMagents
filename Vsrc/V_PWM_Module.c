@@ -379,6 +379,56 @@ void PWM_Module_Init(TPWM_Module *p) {
 
 
 
+//! Доступная амплитуда напряжения для регуляторов тока.
+//!
+//! Выход регуляторов тока задан относительно номинального напряжения,
+//! а adc.Udc_meas — текущее напряжение ЗПТ относительно номинального.
+//! Поэтому физически достижимый предел пропорционален adc.Udc_meas.
+//! Дополнительно учитывается линейная область выбранного алгоритма ШИМ.
+//! \memberof TPWM_Module
+int32 PWM_Module_GetVoltageLimit(TPWM_Module *p) {
+	int32 modulation_limit;
+
+	if (adc.Udc_meas <= 0)
+		return 0;
+
+	switch (p->PWM_type) {
+	case PWM_TYPE_6SECT_NO_SV:
+		// Для SVPWM единичная окружность целиком помещается в
+		// шестиугольник базовых векторов. U_lim может дополнительно
+		// уменьшить доступное напряжение.
+		modulation_limit = p->U_lim;
+		if (modulation_limit > _IQ(1.0))
+			modulation_limit = _IQ(1.0);
+		break;
+
+	case PWM_TYPE_SIN_PWM:
+		// Синусоидальный ШИМ использует не более sqrt(3)/2 от
+		// возможностей SVPWM.
+		modulation_limit = p->U_lim;
+		if (modulation_limit > _IQ(0.8660254))
+			modulation_limit = _IQ(0.8660254);
+		break;
+
+	case PWM_TYPE_DC_DRIVE:
+		// В PWM_Module_DC_Update задание непосредственно ограничивается
+		// диапазоном -1..1.
+		modulation_limit = _IQ(1.0);
+		break;
+
+	default:
+		// Для не реализованных в PWM_Module_Update типов нельзя обещать
+		// регулятору тока доступное напряжение.
+		return 0;
+	}
+
+	if (modulation_limit <= 0)
+		return 0;
+
+	return _IQmpy(modulation_limit, adc.Udc_meas);
+}
+
+
 //! Нормирование входных величин.
 
 //!Учитывает компенсацию напряжения при изменении Ud,

@@ -28,6 +28,43 @@
 #include "main.h"
 
 
+//! Обновляет скалярные ограничения всех регуляторов тока.
+static void SM_Ctrl_SetCurrentVoltageLimits(long voltage_limit) {
+	pid_id.pid_out_max = voltage_limit;
+	pid_id.pid_out_min = -voltage_limit;
+	pid_iq.pid_out_max = voltage_limit;
+	pid_iq.pid_out_min = -voltage_limit;
+	pid_ia.pid_out_max = voltage_limit;
+	pid_ia.pid_out_min = -voltage_limit;
+}
+
+
+//! Вписывает выход двухосных регуляторов тока в доступную окружность
+//! напряжения и передает ошибку насыщения в anti-windup регуляторов.
+static void SM_Ctrl_LimitCurrentVoltageVector(long voltage_limit) {
+	long voltage_magnitude;
+	long scale;
+	long id_output;
+	long iq_output;
+
+	pid_id.saterr_reg3Add = 0;
+	pid_iq.saterr_reg3Add = 0;
+
+	voltage_magnitude = _IQmag(pid_id.pid_out_reg3, pid_iq.pid_out_reg3);
+	if ((voltage_magnitude <= voltage_limit) || (voltage_magnitude == 0))
+		return;
+
+	id_output = pid_id.pid_out_reg3;
+	iq_output = pid_iq.pid_out_reg3;
+	scale = _IQdiv(voltage_limit, voltage_magnitude);
+	pid_id.pid_out_reg3 = _IQmpy(id_output, scale);
+	pid_iq.pid_out_reg3 = _IQmpy(iq_output, scale);
+
+	pid_id.saterr_reg3Add = pid_id.pid_out_reg3 - id_output;
+	pid_iq.saterr_reg3Add = pid_iq.pid_out_reg3 - iq_output;
+}
+
+
 //!Инициализация
 //!Всякие обнуления
 //! \memberof TSM_Ctrl
@@ -63,6 +100,7 @@ void SM_Ctrl_ms_Calc(TSM_Ctrl *p) {
 //! \memberof TSM_Ctrl
 void SM_Ctrl_Fast_Calc(TSM_Ctrl *p) {
 	long Temp1;
+	long current_voltage_limit;
 
 //если система находится в перееинициализации,
 //то пропускаем контур управления
@@ -77,6 +115,9 @@ void SM_Ctrl_Fast_Calc(TSM_Ctrl *p) {
 // если есть авария, то переходим в стоп
 	if (sm_prot.state == PROT_FAIL)
 		p->state = CTRL_STOP;
+
+	current_voltage_limit = PWM_Module_GetVoltageLimit(&pwm);
+	SM_Ctrl_SetCurrentVoltageLimits(current_voltage_limit);
 
 //считаем дискретный автомат
 	if (p->state_prev != p->state)
@@ -224,6 +265,7 @@ void SM_Ctrl_Fast_Calc(TSM_Ctrl *p) {
 
 		//обратные фазные преобразования.
 		//Крутим вектор напряжения, который выдают регуляторы токов обратно на угол refs.theta_elec
+		SM_Ctrl_LimitCurrentVoltageVector(current_voltage_limit);
 		ipark.de = pid_id.pid_out_reg3;
 		ipark.qe = pid_iq.pid_out_reg3;
 		ipark.ang = refs.theta_elec;
@@ -347,6 +389,7 @@ void SM_Ctrl_Fast_Calc(TSM_Ctrl *p) {
 
 			//обратные фазные преобразования.
 			//Крутим вектор напряжения, который выдают регуляторы токов обратно на угол refs.theta_elec
+			SM_Ctrl_LimitCurrentVoltageVector(current_voltage_limit);
 			ipark.de = pid_id.pid_out_reg3;
 			ipark.qe = pid_iq.pid_out_reg3;
 			ipark.ang = refs.theta_elec;
@@ -444,6 +487,7 @@ void SM_Ctrl_Fast_Calc(TSM_Ctrl *p) {
 
 			//Обратный поворот на угол refs.theta_elec для 
 			//выходов регуляторов тока (напряжений по осям d и q)
+			SM_Ctrl_LimitCurrentVoltageVector(current_voltage_limit);
 			ipark.de = pid_id.pid_out_reg3;
 			ipark.qe = pid_iq.pid_out_reg3;
 			ipark.ang = refs.theta_elec;
@@ -584,6 +628,7 @@ void SM_Ctrl_Fast_Calc(TSM_Ctrl *p) {
 
 			//Обратный поворот на угол refs.theta_elec для
 			//выходов регуляторов тока (напряжений по осям d и q)
+			SM_Ctrl_LimitCurrentVoltageVector(current_voltage_limit);
 			ipark.de = pid_id.pid_out_reg3;
 			ipark.qe = pid_iq.pid_out_reg3;
 			ipark.ang = posspeedEqep.theta_elec;
@@ -678,6 +723,7 @@ void SM_Ctrl_Fast_Calc(TSM_Ctrl *p) {
 
 			//Обратный поворот на угол refs.theta_elec для
 			//выходов регуляторов тока (напряжений по осям x и y)
+			SM_Ctrl_LimitCurrentVoltageVector(current_voltage_limit);
 			ipark.de = pid_id.pid_out_reg3;
 			ipark.qe = pid_iq.pid_out_reg3;
 			ipark.ang = refs.theta_elec;
@@ -837,6 +883,7 @@ void SM_Ctrl_Fast_Calc(TSM_Ctrl *p) {
 
 			//Обратный поворот на угол Temp1 для
 			//выходов регуляторов тока (напряжений по осям x и y)
+			SM_Ctrl_LimitCurrentVoltageVector(current_voltage_limit);
 			ipark.de = pid_id.pid_out_reg3;
 			ipark.qe = pid_iq.pid_out_reg3;
 			ipark.ang = Temp1;
@@ -943,6 +990,7 @@ void SM_Ctrl_Fast_Calc(TSM_Ctrl *p) {
 			pid_id.pid_fdb_reg3 = park.de;
 			pid_id.calc(&pid_id);
 
+			SM_Ctrl_LimitCurrentVoltageVector(current_voltage_limit);
 			ipark.de = pid_id.pid_out_reg3;
 			ipark.qe = pid_iq.pid_out_reg3;
 			ipark.ang = refs.theta_elec;
