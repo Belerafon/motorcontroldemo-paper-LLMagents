@@ -544,6 +544,63 @@ void PWM_Module_No_SV_Update(TPWM_Module *p) {
     EINT;
 }
 
+//! Функция непрерывной векторной ШИМ (SVPWM, без привязки к шинам)
+
+//! \memberof TPWM_Module
+void PWM_Module_SVPWM_Update(TPWM_Module *p) {
+	_iq Ua, Ub, Uc;
+	_iq Vmax, Vmin, Voff;
+	_iq tmp;
+
+	DINT;
+	if (NT_PWM0->TBCTR > 30) {
+		NT_PWM0->CMPA_bit.CMPA = (Uint16) p->GammaA;
+		NT_PWM1->CMPA_bit.CMPA = (Uint16) p->GammaB;
+		NT_PWM2->CMPA_bit.CMPA = (Uint16) p->GammaC;
+	}
+	EINT;
+
+	PWM_Module_NormInput(p);
+
+	Ua = p->UalphaNorm;
+	tmp = _IQmpy(_IQ(0.8660254), p->UbetaNorm);
+	Ub = tmp - (p->UalphaNorm >> 1);
+	Uc = -tmp - (p->UalphaNorm >> 1);
+
+	Ua = _IQmpy(Ua, _IQ(0.6666667));
+	Ub = _IQmpy(Ub, _IQ(0.6666667));
+	Uc = _IQmpy(Uc, _IQ(0.6666667));
+
+	Vmax = Ua;
+	if (Ub > Vmax) Vmax = Ub;
+	if (Uc > Vmax) Vmax = Uc;
+	Vmin = Ua;
+	if (Ub < Vmin) Vmin = Ub;
+	if (Uc < Vmin) Vmin = Uc;
+	Voff = (Vmax + Vmin) >> 1;
+
+	tmp = _IQ(0.5) + Voff;
+	p->GammaA = _IQmpy(p->k_pwm, tmp - Ua);
+	p->GammaB = _IQmpy(p->k_pwm, tmp - Ub);
+	p->GammaC = _IQmpy(p->k_pwm, tmp - Uc);
+
+	if (p->GammaA < 0) p->GammaA = 0;
+	if (p->GammaB < 0) p->GammaB = 0;
+	if (p->GammaC < 0) p->GammaC = 0;
+
+	if (p->GammaA > p->k_pwm) p->GammaA = p->k_pwm + 1;
+	if (p->GammaB > p->k_pwm) p->GammaB = p->k_pwm + 1;
+	if (p->GammaC > p->k_pwm) p->GammaC = p->k_pwm + 1;
+
+	DINT;
+	if (NT_PWM0->TBCTR > 30) {
+		NT_PWM0->CMPA_bit.CMPA = (Uint16) p->GammaA;
+		NT_PWM1->CMPA_bit.CMPA = (Uint16) p->GammaB;
+		NT_PWM2->CMPA_bit.CMPA = (Uint16) p->GammaC;
+	}
+	EINT;
+}
+
 //! Функция синусоидальной ШИМ
 
 //! \memberof TPWM_Module
@@ -724,6 +781,10 @@ void PWM_Module_Update(TPWM_Module *p) {
 		switch (p->PWM_type) {
 		case PWM_TYPE_6SECT_NO_SV: {
 			PWM_Module_No_SV_Update(p);
+			break;
+		}
+		case PWM_TYPE_SVPWM: {
+			PWM_Module_SVPWM_Update(p);
 			break;
 		}
 		case PWM_TYPE_SIN_PWM: {
