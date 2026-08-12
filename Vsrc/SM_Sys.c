@@ -272,6 +272,7 @@ void SM_Sys_Slow_Calc(TSM_Sys *p) {
 	RTCclock.slowCalc(&RTCclock);//часы реального времени
 	sm_prot.slow_calc(&sm_prot);//модуль защит
 	sm_net.slow_calc(&sm_net); //обертка для вызова коммуникационных драйверов
+	sm_ctrl.slow_calc(&sm_ctrl); //Recalculate current-loop decoupling coefficient
 	dlog.background_analizer(&dlog); //фоновый обработчик модуля осциллографирования
 	global_time.slow_calc(&global_time);
 	rmp.slow_calc(&rmp); //пересчет интенсивности разгона из пользовтельской во внутреннее представление

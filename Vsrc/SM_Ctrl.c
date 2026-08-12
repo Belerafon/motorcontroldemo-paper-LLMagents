@@ -27,6 +27,58 @@
 #include "V_IQmath.h"
 #include "main.h"
 
+static inline long SM_Ctrl_SaturateInt64(int64_t value) {
+	if (value > 0x7FFFFFFFLL)
+		return 0x7FFFFFFF;
+	if (value < (-0x7FFFFFFFLL - 1))
+		return (long) 0x80000000;
+	return (long) value;
+}
+
+static inline long SM_Ctrl_IQmpySaturated(long a, long b) {
+	return SM_Ctrl_SaturateInt64(((int64_t) a * b) >> 24);
+}
+
+static inline long SM_Ctrl_AddAndLimit(long controller_out, long feed_forward,
+		long out_min, long out_max, long *saturation_error) {
+	int64_t raw_out = (int64_t) controller_out + feed_forward;
+	long limited_out;
+
+	if (raw_out > out_max)
+		limited_out = out_max;
+	else if (raw_out < out_min)
+		limited_out = out_min;
+	else
+		limited_out = (long) raw_out;
+
+	*saturation_error = SM_Ctrl_SaturateInt64((int64_t) limited_out - raw_out);
+	return limited_out;
+}
+
+/*
+ * Compensate the dq current cross-coupling terms:
+ *   ud_ff = -omega_e * Ls * iq
+ *   uq_ff =  omega_e * Ls * id
+ * All inputs and outputs are normalized IQ24 values. The additional
+ * saturation error is returned to the PID anti-windup path on the next tick.
+ */
+static inline void SM_Ctrl_ApplyCurrentDecoupling(TSM_Ctrl *p, long speed) {
+	long omega_l = SM_Ctrl_IQmpySaturated(p->current_decoupling_k, speed);
+	long ud_cross = SM_Ctrl_IQmpySaturated(omega_l, pid_iq.pid_fdb_reg3);
+
+	p->ud_decoupling = (ud_cross == (long) 0x80000000) ?
+			0x7FFFFFFF : -ud_cross;
+	p->uq_decoupling = SM_Ctrl_IQmpySaturated(omega_l,
+			pid_id.pid_fdb_reg3);
+
+	ipark.de = SM_Ctrl_AddAndLimit(pid_id.pid_out_reg3,
+			p->ud_decoupling, pid_id.pid_out_min, pid_id.pid_out_max,
+			&pid_id.saterr_reg3Add);
+	ipark.qe = SM_Ctrl_AddAndLimit(pid_iq.pid_out_reg3,
+			p->uq_decoupling, pid_iq.pid_out_min, pid_iq.pid_out_max,
+			&pid_iq.saterr_reg3Add);
+}
+
 
 //!Инициализация
 //!Всякие обнуления
@@ -34,13 +86,30 @@
 void SM_Ctrl_Init(TSM_Ctrl *p) {
 	p->state_prev = 0xff;
 	p->state = 0x00;
+	p->current_decoupling_k = 0;
+	p->ud_decoupling = 0;
+	p->uq_decoupling = 0;
+	pid_id.saterr_reg3Add = 0;
+	pid_iq.saterr_reg3Add = 0;
 }
 
 //!Фоновый расчет
 
 //! \memberof TSM_Ctrl
 void SM_Ctrl_Slow_Calc(TSM_Ctrl *p) {
+	int64_t coefficient;
 
+	if ((drv_params.Ls <= 0) || (drv_params.freq_nom <= 0)
+			|| (drv_params.I_nom <= 0) || (drv_params.U_nom <= 0)) {
+		p->current_decoupling_k = 0;
+		return;
+	}
+
+	/* Ls is IQ24 in H; frequency, base current and voltage are integers. */
+	coefficient = ((int64_t) drv_params.Ls * _IQ(2.0f * _PI)) >> 24;
+	coefficient = coefficient * drv_params.freq_nom * drv_params.I_nom
+			/ drv_params.U_nom;
+	p->current_decoupling_k = SM_Ctrl_SaturateInt64(coefficient);
 }
 
 //!Миллисекундный расчет
@@ -117,6 +186,10 @@ void SM_Ctrl_Fast_Calc(TSM_Ctrl *p) {
 		pid_ia.reset(&pid_ia);
 		pid_spd.reset(&pid_spd);
 		pid_pos.reset(&pid_pos);
+		p->ud_decoupling = 0;
+		p->uq_decoupling = 0;
+		pid_id.saterr_reg3Add = 0;
+		pid_iq.saterr_reg3Add = 0;
 		cur_par.Is = 0;
 		cur_par.power = 0;
 		cur_par.speed = 0;
@@ -224,8 +297,7 @@ void SM_Ctrl_Fast_Calc(TSM_Ctrl *p) {
 
 		//обратные фазные преобразования.
 		//Крутим вектор напряжения, который выдают регуляторы токов обратно на угол refs.theta_elec
-		ipark.de = pid_id.pid_out_reg3;
-		ipark.qe = pid_iq.pid_out_reg3;
+		SM_Ctrl_ApplyCurrentDecoupling(p, 0);
 		ipark.ang = refs.theta_elec;
 		ipark.calc(&ipark);
 
@@ -347,8 +419,7 @@ void SM_Ctrl_Fast_Calc(TSM_Ctrl *p) {
 
 			//обратные фазные преобразования.
 			//Крутим вектор напряжения, который выдают регуляторы токов обратно на угол refs.theta_elec
-			ipark.de = pid_id.pid_out_reg3;
-			ipark.qe = pid_iq.pid_out_reg3;
+			SM_Ctrl_ApplyCurrentDecoupling(p, rmp.output);
 			ipark.ang = refs.theta_elec;
 			ipark.calc(&ipark);
 
@@ -444,8 +515,7 @@ void SM_Ctrl_Fast_Calc(TSM_Ctrl *p) {
 
 			//Обратный поворот на угол refs.theta_elec для 
 			//выходов регуляторов тока (напряжений по осям d и q)
-			ipark.de = pid_id.pid_out_reg3;
-			ipark.qe = pid_iq.pid_out_reg3;
+			SM_Ctrl_ApplyCurrentDecoupling(p, cur_par.speed);
 			ipark.ang = refs.theta_elec;
 			ipark.calc(&ipark);            //расчет преобразования координат
 
@@ -584,8 +654,7 @@ void SM_Ctrl_Fast_Calc(TSM_Ctrl *p) {
 
 			//Обратный поворот на угол refs.theta_elec для
 			//выходов регуляторов тока (напряжений по осям d и q)
-			ipark.de = pid_id.pid_out_reg3;
-			ipark.qe = pid_iq.pid_out_reg3;
+			SM_Ctrl_ApplyCurrentDecoupling(p, cur_par.speed);
 			ipark.ang = posspeedEqep.theta_elec;
 			ipark.calc(&ipark);            //расчет преобразования координат
 
@@ -678,8 +747,7 @@ void SM_Ctrl_Fast_Calc(TSM_Ctrl *p) {
 
 			//Обратный поворот на угол refs.theta_elec для
 			//выходов регуляторов тока (напряжений по осям x и y)
-			ipark.de = pid_id.pid_out_reg3;
-			ipark.qe = pid_iq.pid_out_reg3;
+			SM_Ctrl_ApplyCurrentDecoupling(p, cur_par.speed);
 			ipark.ang = refs.theta_elec;
 			ipark.calc(&ipark);            //расчет преобразования координат
 
@@ -837,8 +905,7 @@ void SM_Ctrl_Fast_Calc(TSM_Ctrl *p) {
 
 			//Обратный поворот на угол Temp1 для
 			//выходов регуляторов тока (напряжений по осям x и y)
-			ipark.de = pid_id.pid_out_reg3;
-			ipark.qe = pid_iq.pid_out_reg3;
+			SM_Ctrl_ApplyCurrentDecoupling(p, cur_par.speed);
 			ipark.ang = Temp1;
 			ipark.calc(&ipark);            //расчет преобразования координат
 
@@ -943,8 +1010,7 @@ void SM_Ctrl_Fast_Calc(TSM_Ctrl *p) {
 			pid_id.pid_fdb_reg3 = park.de;
 			pid_id.calc(&pid_id);
 
-			ipark.de = pid_id.pid_out_reg3;
-			ipark.qe = pid_iq.pid_out_reg3;
+			SM_Ctrl_ApplyCurrentDecoupling(p, rmp.output);
 			ipark.ang = refs.theta_elec;
 			ipark.calc(&ipark);
 
