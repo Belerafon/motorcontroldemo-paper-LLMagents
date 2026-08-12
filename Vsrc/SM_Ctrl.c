@@ -444,8 +444,11 @@ void SM_Ctrl_Fast_Calc(TSM_Ctrl *p) {
 
 			//Обратный поворот на угол refs.theta_elec для 
 			//выходов регуляторов тока (напряжений по осям d и q)
-			ipark.de = pid_id.pid_out_reg3;
-			ipark.qe = pid_iq.pid_out_reg3;
+			//декаплинг: компенсация перекрестных связей (we*Ls) контуров тока
+			//для улучшения реакции регуляторов на изменение задания на высокой скорости
+			long wLs = _IQmpy(cur_par.speed, drv_params.Ls);
+			ipark.de = pid_id.pid_out_reg3 - _IQmpy(wLs, park.qe);
+			ipark.qe = pid_iq.pid_out_reg3 + _IQmpy(wLs, park.de);
 			ipark.ang = refs.theta_elec;
 			ipark.calc(&ipark);            //расчет преобразования координат
 
@@ -584,8 +587,11 @@ void SM_Ctrl_Fast_Calc(TSM_Ctrl *p) {
 
 			//Обратный поворот на угол refs.theta_elec для
 			//выходов регуляторов тока (напряжений по осям d и q)
-			ipark.de = pid_id.pid_out_reg3;
-			ipark.qe = pid_iq.pid_out_reg3;
+			//декаплинг: компенсация перекрестных связей (we*Ls) контуров тока
+			//для улучшения реакции регуляторов на изменение задания на высокой скорости
+			long wLs = _IQmpy(cur_par.speed, drv_params.Ls);
+			ipark.de = pid_id.pid_out_reg3 - _IQmpy(wLs, park.qe);
+			ipark.qe = pid_iq.pid_out_reg3 + _IQmpy(wLs, park.de);
 			ipark.ang = posspeedEqep.theta_elec;
 			ipark.calc(&ipark);            //расчет преобразования координат
 
@@ -678,8 +684,11 @@ void SM_Ctrl_Fast_Calc(TSM_Ctrl *p) {
 
 			//Обратный поворот на угол refs.theta_elec для
 			//выходов регуляторов тока (напряжений по осям x и y)
-			ipark.de = pid_id.pid_out_reg3;
-			ipark.qe = pid_iq.pid_out_reg3;
+			//декаплинг: компенсация перекрестных связей (we*Ls) контуров тока
+			//для улучшения реакции регуляторов на изменение задания на высокой скорости
+			long wLs = _IQmpy(cur_par.speed, drv_params.Ls);
+			ipark.de = pid_id.pid_out_reg3 - _IQmpy(wLs, park.qe);
+			ipark.qe = pid_iq.pid_out_reg3 + _IQmpy(wLs, park.de);
 			ipark.ang = refs.theta_elec;
 			ipark.calc(&ipark);            //расчет преобразования координат
 
@@ -837,8 +846,11 @@ void SM_Ctrl_Fast_Calc(TSM_Ctrl *p) {
 
 			//Обратный поворот на угол Temp1 для
 			//выходов регуляторов тока (напряжений по осям x и y)
-			ipark.de = pid_id.pid_out_reg3;
-			ipark.qe = pid_iq.pid_out_reg3;
+			//декаплинг: компенсация перекрестных связей (we*Ls) контуров тока
+			//для улучшения реакции регуляторов на изменение задания на высокой скорости
+			long wLs = _IQmpy(cur_par.speed, drv_params.Ls);
+			ipark.de = pid_id.pid_out_reg3 - _IQmpy(wLs, park.qe);
+			ipark.qe = pid_iq.pid_out_reg3 + _IQmpy(wLs, park.de);
 			ipark.ang = Temp1;
 			ipark.calc(&ipark);            //расчет преобразования координат
 
