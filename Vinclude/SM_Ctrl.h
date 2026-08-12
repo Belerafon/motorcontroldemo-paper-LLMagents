@@ -54,6 +54,13 @@ extern "C"
     int E;//!<Флаг первого вхождения.
     long AnglePrev;//!< Предыдущее значение угла для режима автонастройки ДПР
     long AngleDemo;//!< Угол для демо-режима контура положения
+    long CurrentDecouplingK;//!< Коэффициент компенсации перекрестных связей токов dq
+    long CurrentDecouplingUd;//!< Компенсирующее напряжение по оси d
+    long CurrentDecouplingUq;//!< Компенсирующее напряжение по оси q
+    long DecouplingLsPrev;//!< Предыдущее значение Ls для пересчета коэффициента
+    int DecouplingFreqPrev;//!< Предыдущее значение базовой электрической частоты
+    int DecouplingINomPrev;//!< Предыдущее значение базового тока
+    int DecouplingUNomPrev;//!< Предыдущее значение базового напряжения
     void (*init)(struct SSM_Ctrl*);     //!< Pointer to the init funcion
     void (*slow_calc)(struct SSM_Ctrl*);//!< Pointer to the calc funtion
     void (*fast_calc)(struct SSM_Ctrl*); //!< Pointer to the calc funtion
