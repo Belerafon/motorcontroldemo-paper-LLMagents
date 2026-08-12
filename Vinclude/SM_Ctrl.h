@@ -54,6 +54,9 @@ extern "C"
     int E;//!<Флаг первого вхождения.
     long AnglePrev;//!< Предыдущее значение угла для режима автонастройки ДПР
     long AngleDemo;//!< Угол для демо-режима контура положения
+    long power_current_limit;//!< Динамический предел задания тока по ограничению мощности
+    Uint16 power_limit_active;//!< Признак активного ограничения мощности
+    Uint16 power_limiter_initialized;//!< Признак инициализации динамического предела тока
     void (*init)(struct SSM_Ctrl*);     //!< Pointer to the init funcion
     void (*slow_calc)(struct SSM_Ctrl*);//!< Pointer to the calc funtion
     void (*fast_calc)(struct SSM_Ctrl*); //!< Pointer to the calc funtion
