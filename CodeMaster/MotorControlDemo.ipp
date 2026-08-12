@@ -15,7 +15,7 @@ mLevel=0
 descr=
 mFlags=0
 idCode=4294967295
-file_name=Asm Sources|Ассемблерные файлы
+file_name=Asm Sources|пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ
 
 [[[sp_node_0]
 mType=2
@@ -66,7 +66,7 @@ mLevel=0
 descr=
 mFlags=0
 idCode=4294967295
-file_name=C/C++ Sources|C/C++ файлы
+file_name=C/C++ Sources|C/C++ пїЅпїЅпїЅпїЅпїЅ
 
 [[[sp_node_0]
 mType=1
@@ -2455,6 +2455,63 @@ STATIC=1
 OPTLEVEL=High (balanced)
 FLOAT_CONSTS=0
 
+[[[[sp_node_41]
+mType=1
+mLevel=1
+descr=
+mFlags=1024
+idCode=4294967295
+file_name=V_CurDecoupling.c
+mName=..\Vsrc\V_CurDecoupling.c
+mFat=0
+mErr=0
+mWrn=0
+mRem=0
+mOther=0
+ExtraOpt=
+
+[[[[[LocOptions_Debug]
+conf_name=Debug
+c_type=1
+OVERPRJ=0
+ANSI=0
+CHAR=0
+ENUM=0
+INLINE=0
+LIST=1
+DEBUG=1
+PREP=0
+ASM=0
+INC=0
+LANGUAGE=C++
+EMBEDED_C=0
+EXCEPTIONS=1
+RTTI=1
+STATIC=1
+OPTLEVEL=High by speed
+FLOAT_CONSTS=1
+
+[[[[[LocOptions_Release]
+conf_name=Release
+c_type=1
+OVERPRJ=0
+ANSI=0
+CHAR=0
+ENUM=0
+INLINE=0
+LIST=1
+DEBUG=0
+PREP=0
+ASM=0
+INC=1
+LANGUAGE=C++
+EMBEDED_C=0
+EXCEPTIONS=1
+RTTI=1
+STATIC=1
+OPTLEVEL=High (balanced)
+FLOAT_CONSTS=0
+
 [[[sp_node_1]
 mType=1
 mLevel=7
@@ -2568,7 +2625,7 @@ mLevel=0
 descr=
 mFlags=0
 idCode=4294967295
-file_name=Libraries and Object Files|Библиотечные и объектные файлы
+file_name=Libraries and Object Files|пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ
 
 [[[sp_node_0]
 mType=5
@@ -2601,7 +2658,7 @@ mLevel=0
 descr=
 mFlags=0
 idCode=4294967295
-file_name=Output files|Выходные файлы
+file_name=Output files|пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ
 
 [[[sp_node_0]
 mType=14
@@ -2609,7 +2666,7 @@ mLevel=0
 descr=
 mFlags=0
 idCode=4294967295
-file_name=Listings|Файлы листинга
+file_name=Listings|пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ
 
 
 [[[sp_node_1]
@@ -2618,7 +2675,7 @@ mLevel=0
 descr=
 mFlags=0
 idCode=4294967295
-file_name=Map|Map-файлы
+file_name=Map|Map-пїЅпїЅпїЅпїЅпїЅ
 
 
 [[[sp_node_2]
@@ -2627,7 +2684,7 @@ mLevel=0
 descr=
 mFlags=0
 idCode=4294967295
-file_name=Response files|Файлы командной строки
+file_name=Response files|пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ
 
 
 [[[sp_node_3]
@@ -2636,7 +2693,7 @@ mLevel=0
 descr=
 mFlags=0
 idCode=4294967295
-file_name=Other output files|Другие выходные файлы
+file_name=Other output files|пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ
 
 
 [__Desktop__]
@@ -3171,7 +3228,7 @@ LOGFONT=F3FFFFFF000000000000000000000000000000000000000100000200436F6E736F6C6173
 LFPointSize=10
 VerticalGrid=0
 HorizontalGrid=0
-TabTitle=Ошибки/Предупреждения
+TabTitle=пїЅпїЅпїЅпїЅпїЅпїЅ/пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ
 NoWarnings=0
 
 [[Window32_0_Pane_1]
@@ -3191,7 +3248,7 @@ LOGFONT=F3FFFFFF000000000000000000000000000000000000000100000200436F6E736F6C6173
 LFPointSize=10
 VerticalGrid=0
 HorizontalGrid=0
-TabTitle=Журнал компиляции
+TabTitle=пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ
 NoWarnings=0
 
 [[Window32_1]
@@ -3220,7 +3277,7 @@ LOGFONT=F3FFFFFF000000000000000000000000000000000000000100000200436F6E736F6C6173
 LFPointSize=10
 VerticalGrid=0
 HorizontalGrid=0
-TabTitle=Дисассемблер
+TabTitle=пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ
 Symbols=1
 DisplaySourceLines=1
 RightPanePresent=0
@@ -3253,7 +3310,7 @@ LOGFONT=F4FFFFFF0000000000000000000000009001000000000001000000005461686F6D610000
 LFPointSize=9
 VerticalGrid=0
 HorizontalGrid=0
-TabTitle=Workspace|Проекты
+TabTitle=Workspace|пїЅпїЅпїЅпїЅпїЅпїЅпїЅ
 TreeVPos=0
 TreeHPos=0
 
@@ -3706,7 +3763,7 @@ L03=OS:                     Windows 10 x64 [ver. 10.0.0], build = 14393, SP: '']
 L04=Screen:                 1580x1027 (1680x1050), DPI: 96
 L05=System Language Id:     1049
 L06=User Language Id:       1049
-L07=System Default CP:      1251  (ANSI - кириллица)
+L07=System Default CP:      1251  (ANSI - пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ)
 L08=RAM Total/Free:         8,094/1,495 MB
 L09=Number of processors:   4
 L10=Battery:                Yes, 87%, AC: On

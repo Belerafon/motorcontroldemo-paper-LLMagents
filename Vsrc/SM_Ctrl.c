@@ -117,6 +117,7 @@ void SM_Ctrl_Fast_Calc(TSM_Ctrl *p) {
 		pid_ia.reset(&pid_ia);
 		pid_spd.reset(&pid_spd);
 		pid_pos.reset(&pid_pos);
+		cur_decoupling.reset(&cur_decoupling);
 		cur_par.Is = 0;
 		cur_par.power = 0;
 		cur_par.speed = 0;
@@ -442,10 +443,17 @@ void SM_Ctrl_Fast_Calc(TSM_Ctrl *p) {
 			pid_id.pid_fdb_reg3 = park.de; //обратная связь рег. тока оси d - вычисленный ток по фазе d
 			pid_id.calc(&pid_id); //расчет регулятора тока оси d
 
+			//Декаплинг регуляторов тока: компенсация перекрестных связей и ЭДС вращения,
+			//чтобы регуляторы лучше реагировали на изменение задания на высокой частоте вращения.
+			cur_decoupling.omega_e = cur_par.speed;
+			cur_decoupling.id = pid_id.pid_fdb_reg3;
+			cur_decoupling.iq = pid_iq.pid_fdb_reg3;
+			cur_decoupling.calc(&cur_decoupling);
+
 			//Обратный поворот на угол refs.theta_elec для 
 			//выходов регуляторов тока (напряжений по осям d и q)
-			ipark.de = pid_id.pid_out_reg3;
-			ipark.qe = pid_iq.pid_out_reg3;
+			ipark.de = pid_id.pid_out_reg3 + cur_decoupling.ud_decoup;
+			ipark.qe = pid_iq.pid_out_reg3 + cur_decoupling.uq_decoup + cur_decoupling.uq_emf;
 			ipark.ang = refs.theta_elec;
 			ipark.calc(&ipark);            //расчет преобразования координат
 
@@ -582,10 +590,17 @@ void SM_Ctrl_Fast_Calc(TSM_Ctrl *p) {
 			pid_id.pid_fdb_reg3 = park.de; //обратная связь рег. тока оси d - вычисленный ток по фазе d
 			pid_id.calc(&pid_id); //расчет регулятора тока оси d
 
+			//Декаплинг регуляторов тока: компенсация перекрестных связей и ЭДС вращения,
+			//чтобы регуляторы лучше реагировали на изменение задания на высокой частоте вращения.
+			cur_decoupling.omega_e = cur_par.speed;
+			cur_decoupling.id = pid_id.pid_fdb_reg3;
+			cur_decoupling.iq = pid_iq.pid_fdb_reg3;
+			cur_decoupling.calc(&cur_decoupling);
+
 			//Обратный поворот на угол refs.theta_elec для
 			//выходов регуляторов тока (напряжений по осям d и q)
-			ipark.de = pid_id.pid_out_reg3;
-			ipark.qe = pid_iq.pid_out_reg3;
+			ipark.de = pid_id.pid_out_reg3 + cur_decoupling.ud_decoup;
+			ipark.qe = pid_iq.pid_out_reg3 + cur_decoupling.uq_decoup + cur_decoupling.uq_emf;
 			ipark.ang = posspeedEqep.theta_elec;
 			ipark.calc(&ipark);            //расчет преобразования координат
 
@@ -676,10 +691,18 @@ void SM_Ctrl_Fast_Calc(TSM_Ctrl *p) {
 			pid_id.calc(&pid_id); //расчет регулятора тока оси x
 
 
+			//Декаплинг регуляторов тока: компенсация перекрестных связей и ЭДС вращения,
+			//чтобы регуляторы лучше реагировали на изменение задания на высокой частоте вращения.
+			//Для АД psi_pm = 0 (ЭДС вращения ротора уже учтена в наблюдателе потокосцепления).
+			cur_decoupling.omega_e = cur_par.speed;
+			cur_decoupling.id = pid_id.pid_fdb_reg3;
+			cur_decoupling.iq = pid_iq.pid_fdb_reg3;
+			cur_decoupling.calc(&cur_decoupling);
+
 			//Обратный поворот на угол refs.theta_elec для
 			//выходов регуляторов тока (напряжений по осям x и y)
-			ipark.de = pid_id.pid_out_reg3;
-			ipark.qe = pid_iq.pid_out_reg3;
+			ipark.de = pid_id.pid_out_reg3 + cur_decoupling.ud_decoup;
+			ipark.qe = pid_iq.pid_out_reg3 + cur_decoupling.uq_decoup + cur_decoupling.uq_emf;
 			ipark.ang = refs.theta_elec;
 			ipark.calc(&ipark);            //расчет преобразования координат
 
@@ -835,10 +858,18 @@ void SM_Ctrl_Fast_Calc(TSM_Ctrl *p) {
 			pid_id.calc(&pid_id); //расчет регулятора тока оси x
 
 
+			//Декаплинг регуляторов тока: компенсация перекрестных связей и ЭДС вращения,
+			//чтобы регуляторы лучше реагировали на изменение задания на высокой частоте вращения.
+			//Для АД psi_pm = 0 (ЭДС вращения ротора уже учтена в наблюдателе потокосцепления).
+			cur_decoupling.omega_e = cur_par.speed;
+			cur_decoupling.id = pid_id.pid_fdb_reg3;
+			cur_decoupling.iq = pid_iq.pid_fdb_reg3;
+			cur_decoupling.calc(&cur_decoupling);
+
 			//Обратный поворот на угол Temp1 для
 			//выходов регуляторов тока (напряжений по осям x и y)
-			ipark.de = pid_id.pid_out_reg3;
-			ipark.qe = pid_iq.pid_out_reg3;
+			ipark.de = pid_id.pid_out_reg3 + cur_decoupling.ud_decoup;
+			ipark.qe = pid_iq.pid_out_reg3 + cur_decoupling.uq_decoup + cur_decoupling.uq_emf;
 			ipark.ang = Temp1;
 			ipark.calc(&ipark);            //расчет преобразования координат
 
