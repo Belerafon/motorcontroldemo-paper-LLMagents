@@ -51,6 +51,7 @@ TRMPCtrl rmp = V_RMP_CTRL_DEFAULTS; 	//!< Задатчик интенсивно�
 TAdcDrv adc = ADC_DRV_DEFAULTS; 	//!< Модуль АЦП
 TPWM_Module pwm = PWM_Module_DEFAULTS; 	//!< Модуль ШИМ
 Texcitation pwm_ex = excitation_DEFAULTS;	//!< Модуль возбудителя СД
+TFieldWeakening fieldWeakening = FIELD_WEAKENING_DEFAULTS;	//!< Модуль ослабления поля
 TDPReCAP DPReCAP = DPRECAP_DEFAULTS; //!< Модуль ДПР на элементах Холла
 TposspeedEqep posspeedEqep = POSSPEED_DEFAULTS; //!< Модуль ДПР типа энкодер
 TCurPar cur_par = TCUR_PAR_DEFAULTS; //!< Модуль расчета и хранения текущих показателей привода - мощность, скорость

@@ -117,6 +117,7 @@ void SM_Ctrl_Fast_Calc(TSM_Ctrl *p) {
 		pid_ia.reset(&pid_ia);
 		pid_spd.reset(&pid_spd);
 		pid_pos.reset(&pid_pos);
+		fieldWeakening.init(&fieldWeakening);
 		cur_par.Is = 0;
 		cur_par.power = 0;
 		cur_par.speed = 0;
@@ -423,6 +424,10 @@ void SM_Ctrl_Fast_Calc(TSM_Ctrl *p) {
 				pid_spd.pid_out_min = 0; //нулевой ток не даст рекупераци при вращении в положительную сторону
 			pid_spd.calc(&pid_spd); //расчет регулятора скорости
 
+			//расчет ослабления поля по напряжению предыдущего такта
+			fieldWeakening.Ud_input = pid_id.pid_out_reg3;
+			fieldWeakening.Uq_input = pid_iq.pid_out_reg3;
+			fieldWeakening.calc(&fieldWeakening);
 
 			cur_par.ThetaRefCurr = refs.theta_elec;
 			refs.theta_elec &= 0x00FFFFFF; //Ограничение угла на 1.0 в формате 8.24
@@ -438,7 +443,7 @@ void SM_Ctrl_Fast_Calc(TSM_Ctrl *p) {
 			pid_iq.pid_fdb_reg3 = park.qe; //обратная связь рег. тока оси q - вычисленный ток по фазе q
 			pid_iq.calc(&pid_iq); //расчет регулятора тока оси q
 
-			pid_id.pid_ref_reg3 = 0; //задание тока по оси d - оси возбудения
+			pid_id.pid_ref_reg3 = fieldWeakening.Id_ref_out; //задание тока по оси d - оси возбудения (отрицательный Id при ослаблении поля)
 			pid_id.pid_fdb_reg3 = park.de; //обратная связь рег. тока оси d - вычисленный ток по фазе d
 			pid_id.calc(&pid_id); //расчет регулятора тока оси d
 
@@ -566,6 +571,11 @@ void SM_Ctrl_Fast_Calc(TSM_Ctrl *p) {
 			pid_spd.pid_out_min = -refs.Iq_ref; //минимум рег. скор. - отрицательный ток
 			pid_spd.calc(&pid_spd); //расчет регулятора скорости
 
+			//расчет ослабления поля по напряжению предыдущего такта
+			fieldWeakening.Ud_input = pid_id.pid_out_reg3;
+			fieldWeakening.Uq_input = pid_iq.pid_out_reg3;
+			fieldWeakening.calc(&fieldWeakening);
+
 
 			//Поворот токов фаз на угол refs.theta_elec
 			park.ds = clarke.ds;
@@ -578,7 +588,7 @@ void SM_Ctrl_Fast_Calc(TSM_Ctrl *p) {
 			pid_iq.pid_fdb_reg3 = park.qe; //обратная связь рег. тока оси q - вычисленный ток по фазе q
 			pid_iq.calc(&pid_iq); //расчет регулятора тока оси q
 
-			pid_id.pid_ref_reg3 = 0; //задание тока по оси d - оси возбудения
+			pid_id.pid_ref_reg3 = fieldWeakening.Id_ref_out; //задание тока по оси d - оси возбудения (отрицательный Id при ослаблении поля)
 			pid_id.pid_fdb_reg3 = park.de; //обратная связь рег. тока оси d - вычисленный ток по фазе d
 			pid_id.calc(&pid_id); //расчет регулятора тока оси d
 
@@ -655,6 +665,11 @@ void SM_Ctrl_Fast_Calc(TSM_Ctrl *p) {
 			refs.theta_elec &= 0x00FFFFFF; //Ограничение угла на 1.0 в формате 8.24
 			cur_par.ThetaRefCurr = refs.theta_elec;
 
+			//расчет ослабления поля по напряжению предыдущего такта
+			fieldWeakening.Ud_input = pid_id.pid_out_reg3;
+			fieldWeakening.Uq_input = pid_iq.pid_out_reg3;
+			fieldWeakening.calc(&fieldWeakening);
+
 
 			//Теперь refs.theta_elec - угол потокосцепления ротора. Повторяем векторную систему от синхронной машины для этого угла
 			park.ds = clarke.ds;
@@ -672,6 +687,7 @@ void SM_Ctrl_Fast_Calc(TSM_Ctrl *p) {
 			pid_id.pid_ref_reg3 = _IQmpy(RotorObserver.FluxCurrentRatio,labs(pid_iq.pid_ref_reg3)); //задание тока по оси x - оси возбудения. Пропорционально амплитуде задания тока статора
 			if (pid_id.pid_ref_reg3 < RotorObserver.FluxCurrentMin)
 				pid_id.pid_ref_reg3=RotorObserver.FluxCurrentMin;
+			pid_id.pid_ref_reg3 += fieldWeakening.Id_ref_out; //добавка ослабления поля (отрицательная) - ослабление потока ротора на высокой скорости
 			pid_id.pid_fdb_reg3 = park.de; //обратная связь рег. тока оси x - вычисленный ток по фазе x
 			pid_id.calc(&pid_id); //расчет регулятора тока оси x
 
@@ -814,6 +830,11 @@ void SM_Ctrl_Fast_Calc(TSM_Ctrl *p) {
 			Temp1 &= 0x00FFFFFF; //Ограничение угла на 1.0 в формате 8.24
 			cur_par.ThetaRefCurr = Temp1;
 
+			//расчет ослабления поля по напряжению предыдущего такта
+			fieldWeakening.Ud_input = pid_id.pid_out_reg3;
+			fieldWeakening.Uq_input = pid_iq.pid_out_reg3;
+			fieldWeakening.calc(&fieldWeakening);
+
 
 			//Теперь Temp1 - угол потокосцепления ротора. Повторяем векторную систему от синхронной машины для этого угла
 			park.ds = clarke.ds;
@@ -831,6 +852,7 @@ void SM_Ctrl_Fast_Calc(TSM_Ctrl *p) {
 			pid_id.pid_ref_reg3 = _IQmpy(RotorObserver.FluxCurrentRatio,labs(pid_iq.pid_ref_reg3)); //задание тока по оси x - оси возбудения. Пропорционально амплитуде задания тока статора
 			if (pid_id.pid_ref_reg3 < RotorObserver.FluxCurrentMin)
 				pid_id.pid_ref_reg3=RotorObserver.FluxCurrentMin;
+			pid_id.pid_ref_reg3 += fieldWeakening.Id_ref_out; //добавка ослабления поля (отрицательная) - ослабление потока ротора на высокой скорости
 			pid_id.pid_fdb_reg3 = park.de; //обратная связь рег. тока оси x - вычисленный ток по фазе x
 			pid_id.calc(&pid_id); //расчет регулятора тока оси x
 
