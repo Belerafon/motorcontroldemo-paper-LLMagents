@@ -27,6 +27,64 @@
 #include "V_IQmath.h"
 #include "main.h"
 
+static long SM_Ctrl_Abs(long value) {
+	if (value >= 0)
+		return value;
+	if (value == (-2147483647L - 1L))
+		return 2147483647L;
+	return -value;
+}
+
+/*
+ * Closed-loop field weakening for synchronous machines. The voltage command
+ * from the previous current-control cycle is compared with a configurable
+ * fraction of the PWM limit. The integral state is the Id reference itself:
+ * voltage shortage makes it more negative, while spare voltage returns it to
+ * zero smoothly.
+ */
+static void SM_Ctrl_FieldWeakeningCalc(TSM_Ctrl *p, long speed,
+		long current_limit) {
+	long voltage_target;
+	long voltage_error;
+	long current_limit_abs = SM_Ctrl_Abs(current_limit);
+	long id_abs;
+	long iq_limit_square;
+
+	/* PWM has already calculated this magnitude during the previous cycle. */
+	p->FWVoltage = pwm.U_mag;
+	if (pwm.UdCompEnable & 1)
+		p->FWVoltage = _IQmpy(p->FWVoltage, pwm.UdCorTmp);
+
+	voltage_target = _IQmpy(pwm.U_lim, p->FWVoltageMargin);
+	if ((current_limit_abs <= 0) || (pwm.U_lim <= 0)) {
+		p->FWIdRef = 0;
+	} else if ((!p->FWEnabled) || (voltage_target <= 0)
+			|| (SM_Ctrl_Abs(speed) < p->FWMinSpeed)) {
+		/* Ramp out field weakening instead of applying a positive Id step. */
+		p->FWIdRef += _IQmpy(p->FWGain, pwm.U_lim);
+	} else {
+		voltage_error = voltage_target - p->FWVoltage;
+		p->FWIdRef += _IQmpy(p->FWGain, voltage_error);
+	}
+
+	if (p->FWIdRef > 0)
+		p->FWIdRef = 0;
+	if (p->FWIdRef < -current_limit_abs)
+		p->FWIdRef = -current_limit_abs;
+
+	/* Reserve the remaining stator-current circle for torque-producing Iq. */
+	id_abs = SM_Ctrl_Abs(p->FWIdRef);
+	if (id_abs == 0) {
+		p->FWIqLimit = current_limit_abs;
+	} else if (id_abs >= current_limit_abs) {
+		p->FWIqLimit = 0;
+	} else {
+		iq_limit_square = _IQmpy(current_limit_abs, current_limit_abs)
+				- _IQmpy(id_abs, id_abs);
+		p->FWIqLimit = _IQsqrt(iq_limit_square);
+	}
+}
+
 
 //!Инициализация
 //!Всякие обнуления
@@ -34,6 +92,9 @@
 void SM_Ctrl_Init(TSM_Ctrl *p) {
 	p->state_prev = 0xff;
 	p->state = 0x00;
+	p->FWIdRef = 0;
+	p->FWIqLimit = 0;
+	p->FWVoltage = 0;
 }
 
 //!Фоновый расчет
@@ -117,6 +178,9 @@ void SM_Ctrl_Fast_Calc(TSM_Ctrl *p) {
 		pid_ia.reset(&pid_ia);
 		pid_spd.reset(&pid_spd);
 		pid_pos.reset(&pid_pos);
+		p->FWIdRef = 0;
+		p->FWIqLimit = 0;
+		p->FWVoltage = 0;
 		cur_par.Is = 0;
 		cur_par.power = 0;
 		cur_par.speed = 0;
@@ -378,6 +442,7 @@ void SM_Ctrl_Fast_Calc(TSM_Ctrl *p) {
 			/*ENTRY START*/
 			pwm.On(&pwm);            //Включение ШИМ
 			rmp.output = 0;            //Обнуление задатчика интенсивности
+			p->FWIdRef = 0;
 			if (dlog.StartBits & (1 << 4)) //Если пользователь задал этот бит осциллографирования
 				dlog.set_mode(1, &dlog);  //Запуск осциллографа по этому событию
 			/*ENTRY END*/
@@ -397,7 +462,7 @@ void SM_Ctrl_Fast_Calc(TSM_Ctrl *p) {
 				refs.theta_elec = SSI_Encoder.theta_elec; //текущее угловое положение - с ДПР
 			}
 
-			cur_par.Is = pid_iq.pid_fdb_reg3; //Текущий ток статора - ток по оси q
+			cur_par.Is = _IQmag(pid_iq.pid_fdb_reg3, pid_id.pid_fdb_reg3);
 
 			//Преобразование токов из трехфазной системы координат в двухфазную
 			clarke.as = adc.Imeas_a;
@@ -414,10 +479,12 @@ void SM_Ctrl_Fast_Calc(TSM_Ctrl *p) {
 			pid_spd.pid_fdb_reg3 = cur_par.speed; //обратная связь регулятора скорости - скорость ДПР
 
 
-			pid_spd.pid_out_max = refs.Iq_ref; //Максимум выхода регулятора скорости - заданный ток
+			SM_Ctrl_FieldWeakeningCalc(p, cur_par.speed, refs.Iq_ref);
+
+			pid_spd.pid_out_max = p->FWIqLimit; //Torque current remaining after field weakening
 
 			if (sw.recuperation_ena & 1)            //если разрешена рекуперация
-				pid_spd.pid_out_min = -refs.Iq_ref; //минимум рег. скор. - отрицательный ток
+				pid_spd.pid_out_min = -p->FWIqLimit; //минимум рег. скор. - отрицательный ток
 			else
 				//иначе
 				pid_spd.pid_out_min = 0; //нулевой ток не даст рекупераци при вращении в положительную сторону
@@ -438,7 +505,7 @@ void SM_Ctrl_Fast_Calc(TSM_Ctrl *p) {
 			pid_iq.pid_fdb_reg3 = park.qe; //обратная связь рег. тока оси q - вычисленный ток по фазе q
 			pid_iq.calc(&pid_iq); //расчет регулятора тока оси q
 
-			pid_id.pid_ref_reg3 = 0; //задание тока по оси d - оси возбудения
+			pid_id.pid_ref_reg3 = p->FWIdRef; //automatic negative Id for field weakening
 			pid_id.pid_fdb_reg3 = park.de; //обратная связь рег. тока оси d - вычисленный ток по фазе d
 			pid_id.calc(&pid_id); //расчет регулятора тока оси d
 
@@ -470,13 +537,14 @@ void SM_Ctrl_Fast_Calc(TSM_Ctrl *p) {
 			/*ENTRY START*/
 			pwm.On(&pwm);            //Включение ШИМ
 			rmp.output = 0;            //Обнуление задатчика интенсивности
+			p->FWIdRef = 0;
 			if (dlog.StartBits & (1 << 4)) //Если пользователь задал этот бит осциллографирования
 				dlog.set_mode(1, &dlog);  //Запуск осциллографа по этому событию
 			/*ENTRY END*/
 		}
 		/*DO START*/
 		{
-			cur_par.Is = pid_iq.pid_fdb_reg3; //Текущий ток статора - ток по оси q
+			cur_par.Is = _IQmag(pid_iq.pid_fdb_reg3, pid_id.pid_fdb_reg3);
 			cur_par.speed = posspeedEqep.speed_elec; //Текущая скорость - с ДПР фильтрованная
 
 			//Преобразование токов из трехфазной системы координат в двухфазную
@@ -562,8 +630,10 @@ void SM_Ctrl_Fast_Calc(TSM_Ctrl *p) {
 //			pid_spd.pid_fdb_reg3 = posspeedEqep.speed_filter.output; //обратная связь регулятора скорости - скорость ДПР
 			pid_spd.pid_fdb_reg3 = cur_par.speed;
 
-			pid_spd.pid_out_max = refs.Iq_ref; //Максимум выхода регулятора скорости - заданный ток
-			pid_spd.pid_out_min = -refs.Iq_ref; //минимум рег. скор. - отрицательный ток
+			SM_Ctrl_FieldWeakeningCalc(p, cur_par.speed, refs.Iq_ref);
+
+			pid_spd.pid_out_max = p->FWIqLimit; //Torque current remaining after field weakening
+			pid_spd.pid_out_min = -p->FWIqLimit;
 			pid_spd.calc(&pid_spd); //расчет регулятора скорости
 
 
@@ -578,7 +648,7 @@ void SM_Ctrl_Fast_Calc(TSM_Ctrl *p) {
 			pid_iq.pid_fdb_reg3 = park.qe; //обратная связь рег. тока оси q - вычисленный ток по фазе q
 			pid_iq.calc(&pid_iq); //расчет регулятора тока оси q
 
-			pid_id.pid_ref_reg3 = 0; //задание тока по оси d - оси возбудения
+			pid_id.pid_ref_reg3 = p->FWIdRef; //automatic negative Id for field weakening
 			pid_id.pid_fdb_reg3 = park.de; //обратная связь рег. тока оси d - вычисленный ток по фазе d
 			pid_id.calc(&pid_id); //расчет регулятора тока оси d
 

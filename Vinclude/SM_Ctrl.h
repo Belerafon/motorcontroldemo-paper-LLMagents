@@ -25,6 +25,8 @@
 #ifndef SM_Ctrl_H
 #define SM_Ctrl_H
 
+#include "V_IQmath.h"
+
 #ifdef __cplusplus
 extern "C"
 {
@@ -54,6 +56,13 @@ extern "C"
     int E;//!<Флаг первого вхождения.
     long AnglePrev;//!< Предыдущее значение угла для режима автонастройки ДПР
     long AngleDemo;//!< Угол для демо-режима контура положения
+    int FWEnabled; //!< Field weakening enable for synchronous vector modes.
+    long FWIdRef; //!< Automatically calculated negative d-axis current reference.
+    long FWIqLimit; //!< q-axis current limit after applying the stator current circle.
+    long FWVoltage; //!< Voltage vector used by the field weakening regulator.
+    long FWVoltageMargin; //!< Requested part of the PWM voltage limit.
+    long FWGain; //!< Integral gain of the voltage/field weakening regulator.
+    long FWMinSpeed; //!< Minimum absolute speed at which field weakening is allowed.
     void (*init)(struct SSM_Ctrl*);     //!< Pointer to the init funcion
     void (*slow_calc)(struct SSM_Ctrl*);//!< Pointer to the calc funtion
     void (*fast_calc)(struct SSM_Ctrl*); //!< Pointer to the calc funtion
@@ -63,7 +72,11 @@ extern "C"
   typedef struct SSM_Ctrl TSM_Ctrl;
 
 //!Инициализатор по умолчанию
-#define SM_CTRL_DEFAULTS { .init = SM_Ctrl_Init,\
+#define SM_CTRL_DEFAULTS { .FWEnabled = 1,\
+    .FWVoltageMargin = _IQ(0.95),\
+    .FWGain = _IQ(0.002),\
+    .FWMinSpeed = _IQ(0.8),\
+    .init = SM_Ctrl_Init,\
     .slow_calc = SM_Ctrl_Slow_Calc,\
     .fast_calc = SM_Ctrl_Fast_Calc,\
     .ms_calc = SM_Ctrl_ms_Calc \
