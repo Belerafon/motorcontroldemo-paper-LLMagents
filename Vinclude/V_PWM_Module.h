@@ -50,6 +50,11 @@ extern "C"
 //!ШИМ для управления SRM
 #define PWM_TYPE_SRD			5
 
+//! Максимальная амплитуда задания для векторной ШИМ (граница базовых векторов)
+#define PWM_VECTOR_U_LIMIT_MAX _IQ(1.0/0.866)
+//! Максимальная амплитуда задания в линейной области синусоидальной ШИМ
+#define PWM_SIN_U_LIMIT_MAX    _IQ(0.866)
+
 
 //! Ограничения величины "минимальной скважности", мкс, min
 #define GAMMA_LIMIT_MIN	_IQ(0)
@@ -144,6 +149,8 @@ void PWM_Module_Init(TPWM_Module *);
 void PWM_Module_Update(TPWM_Module *);
 //! \memberof TPWM_Module
 void PWM_Module_SlowCalc(TPWM_Module *);
+//! Возвращает доступную амплитуду выходного напряжения при текущем напряжении ЗПТ
+int32 PWM_Module_GetAvailableVoltage(TPWM_Module *);
 //! \memberof TPWM_Module
 void PWM_Module_On(TPWM_Module *);
 //! \memberof TPWM_Module

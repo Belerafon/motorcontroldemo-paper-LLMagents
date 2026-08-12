@@ -404,8 +404,8 @@ void PWM_Module_NormInput(TPWM_Module* p) {
 
     //вписывание заданной амплитуды напряжения в окружность, вписываемую в шестиугольник базывых векторов
     //когда U_lim=1.0, это и есть такая окружность. Бывает, что мы хотим вписывать в шестиугольник. Тогда просто задираем вверх огрианичение U_lim
-    if (p->U_lim>_IQ(1.0/0.866)) //но нет смысла задирать выше максимально-реализ. напряжения (больше базового вектора)
-        p->U_lim=_IQ(1.0/0.866);
+    if (p->U_lim>PWM_VECTOR_U_LIMIT_MAX) //но нет смысла задирать выше максимально-реализ. напряжения (больше базового вектора)
+        p->U_lim=PWM_VECTOR_U_LIMIT_MAX;
     /* рассчитываем амплитуду вектора, который хотим отработать*/
     knorm=_IQmag(p->UalphaNorm,p->UbetaNorm);//плюс нормируем от 540 к 311
     if (knorm>=p->U_lim) { //он больше, чем наше ограничение?
@@ -424,6 +424,44 @@ void PWM_Module_NormInput(TPWM_Module* p) {
     */
     p->UalphaNorm=_IQmpy(p->UalphaNorm,_IQ(0.866));
     p->UbetaNorm=_IQmpy(p->UbetaNorm,_IQ(0.866));
+}
+
+//! Расчет напряжения, физически доступного выбранному типу ШИМ при текущем Ud.
+//! Результат имеет тот же относительный масштаб, что и задания напряжения
+//! регуляторов тока. Пользовательское U_lim учитывается, но не может расширить
+//! область модуляции за физический предел выбранного алгоритма ШИМ.
+//! \memberof TPWM_Module
+int32 PWM_Module_GetAvailableVoltage(TPWM_Module *p) {
+	int32 modulation_limit;
+
+	if (adc.Udc_meas <= 0)
+		return 0;
+
+	switch (p->PWM_type) {
+	case PWM_TYPE_6SECT_NO_SV:
+		modulation_limit = p->U_lim;
+		if (modulation_limit > PWM_VECTOR_U_LIMIT_MAX)
+			modulation_limit = PWM_VECTOR_U_LIMIT_MAX;
+		break;
+
+	case PWM_TYPE_SIN_PWM:
+		modulation_limit = p->U_lim;
+		if (modulation_limit > PWM_SIN_U_LIMIT_MAX)
+			modulation_limit = PWM_SIN_U_LIMIT_MAX;
+		break;
+
+	case PWM_TYPE_DC_DRIVE:
+		modulation_limit = _IQ(1.0);
+		break;
+
+	default:
+		return 0;
+	}
+
+	if (modulation_limit <= 0)
+		return 0;
+
+	return _IQmpy(modulation_limit, adc.Udc_meas);
 }
 
 

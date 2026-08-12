@@ -27,6 +27,20 @@
 #include "V_IQmath.h"
 #include "main.h"
 
+//! Обновление ограничений выходного напряжения регуляторов тока.
+//! Предел пересчитывается каждый быстрый такт, поэтому учитывает как текущее
+//! напряжение ЗПТ, так и реально доступную область выбранного алгоритма ШИМ.
+static void SM_Ctrl_UpdateCurrentRegLimits(void) {
+	long voltage_limit = PWM_Module_GetAvailableVoltage(&pwm);
+
+	pid_id.pid_out_max = voltage_limit;
+	pid_id.pid_out_min = -voltage_limit;
+	pid_iq.pid_out_max = voltage_limit;
+	pid_iq.pid_out_min = -voltage_limit;
+	pid_ia.pid_out_max = voltage_limit;
+	pid_ia.pid_out_min = -voltage_limit;
+}
+
 
 //!Инициализация
 //!Всякие обнуления
@@ -69,6 +83,8 @@ void SM_Ctrl_Fast_Calc(TSM_Ctrl *p) {
 	if (sm_sys.state == SYS_INIT) {
 		return;
 	}
+
+	SM_Ctrl_UpdateCurrentRegLimits();
 
 //если команда остановить, то переходим
 //в режим ОСТАНОВЛЕН
