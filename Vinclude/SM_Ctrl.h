@@ -54,6 +54,15 @@ extern "C"
     int E;//!<Флаг первого вхождения.
     long AnglePrev;//!< Предыдущее значение угла для режима автонастройки ДПР
     long AngleDemo;//!< Угол для демо-режима контура положения
+    long power_error;       //!< Power-controller error in per-unit
+    long power_feedback;    //!< Fast-filtered active-power feedback in per-unit
+    long power_iq_limit;    //!< Dynamic current limit produced by the power controller
+    long power_integral;    //!< Integral state of the power controller
+    long power_kp;          //!< Proportional gain of the power controller
+    long power_ki;          //!< Integral gain of the power controller per fast-control tick
+    long power_kc;          //!< Anti-windup gain of the power controller
+    int power_limit_state;  //!< Control mode for which the limiter state is initialized
+    Uint16 power_limiting;  //!< Nonzero while the power limit reduces the current limit
     void (*init)(struct SSM_Ctrl*);     //!< Pointer to the init funcion
     void (*slow_calc)(struct SSM_Ctrl*);//!< Pointer to the calc funtion
     void (*fast_calc)(struct SSM_Ctrl*); //!< Pointer to the calc funtion
@@ -63,7 +72,11 @@ extern "C"
   typedef struct SSM_Ctrl TSM_Ctrl;
 
 //!Инициализатор по умолчанию
-#define SM_CTRL_DEFAULTS { .init = SM_Ctrl_Init,\
+#define SM_CTRL_DEFAULTS { .power_kp = _IQ(2.0),\
+    .power_ki = _IQ(0.003),\
+    .power_kc = _IQ(0.1),\
+    .power_limit_state = -1,\
+    .init = SM_Ctrl_Init,\
     .slow_calc = SM_Ctrl_Slow_Calc,\
     .fast_calc = SM_Ctrl_Fast_Calc,\
     .ms_calc = SM_Ctrl_ms_Calc \

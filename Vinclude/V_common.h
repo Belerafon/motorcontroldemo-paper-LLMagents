@@ -87,6 +87,7 @@ unsigned int reserved:
     long theta_elec;//!< Задание углового положения вектора тока/напряжения
 	long ua_ref, uf_ref; // Задания тока якоря и тока ОВ для ДПТ
 	long DCMspeed_ref;//!< Задание скорости
+    long power_ref; /* Active power limit in per-unit of drv_params.power; zero disables limiting */
   } TRefs;
 
 //! Структура для хранения параметров привода, двигателя, базовых величин системы управления

@@ -27,6 +27,96 @@
 #include "V_IQmath.h"
 #include "main.h"
 
+#define POWER_LIMIT_MAX_PU _IQ(8.0)
+#define POWER_LIMIT_FILTER_K _IQ(0.02)
+
+static long SM_Ctrl_PositiveMagnitude(long value) {
+	if (value >= 0)
+		return value;
+	if (value == (long)0x80000000)
+		return (long)0x7fffffff;
+	return -value;
+}
+
+static void SM_Ctrl_PowerLimitReset(TSM_Ctrl *p) {
+	p->power_error = 0;
+	p->power_feedback = 0;
+	p->power_iq_limit = 0;
+	p->power_integral = 0;
+	p->power_limiting = 0;
+	p->power_limit_state = -1;
+}
+
+/*
+ * Closed-loop active-power limiter. The inner speed/current loops remain
+ * unchanged; this controller only reduces their existing current limit.
+ * At low speed the current limit is dominant. Above the transition point,
+ * measured active power is held at refs.power_ref.
+ */
+static long SM_Ctrl_PowerCurrentLimit(TSM_Ctrl *p, long current_limit) {
+	long power_ref;
+	long power_feedback;
+	long unsaturated;
+	long tracking_error;
+
+	current_limit = SM_Ctrl_PositiveMagnitude(current_limit);
+	power_ref = refs.power_ref;
+
+	if ((power_ref <= 0) || (current_limit == 0)) {
+		SM_Ctrl_PowerLimitReset(p);
+		p->power_iq_limit = current_limit;
+		return current_limit;
+	}
+
+	if (power_ref > POWER_LIMIT_MAX_PU)
+		power_ref = POWER_LIMIT_MAX_PU;
+
+	if (p->power_limit_state != p->state) {
+		p->power_integral = current_limit;
+		p->power_limit_state = p->state;
+	}
+
+	if (p->power_integral > current_limit)
+		p->power_integral = current_limit;
+	else if (p->power_integral < 0)
+		p->power_integral = 0;
+
+	power_feedback = SM_Ctrl_PositiveMagnitude(cur_par.fPower.input);
+	if (power_feedback > POWER_LIMIT_MAX_PU)
+		power_feedback = POWER_LIMIT_MAX_PU;
+	p->power_feedback += _IQmpy(POWER_LIMIT_FILTER_K,
+			power_feedback - p->power_feedback);
+
+	p->power_error = power_ref - p->power_feedback;
+	unsaturated = p->power_integral + _IQmpy(p->power_kp, p->power_error);
+
+	if (unsaturated > current_limit)
+		p->power_iq_limit = current_limit;
+	else if (unsaturated < 0)
+		p->power_iq_limit = 0;
+	else
+		p->power_iq_limit = unsaturated;
+
+	tracking_error = p->power_iq_limit - unsaturated;
+	p->power_integral += _IQmpy(p->power_ki, p->power_error)
+			+ _IQmpy(p->power_kc, tracking_error);
+
+	if (p->power_integral > current_limit)
+		p->power_integral = current_limit;
+	else if (p->power_integral < 0)
+		p->power_integral = 0;
+
+	p->power_limiting = (p->power_iq_limit < current_limit);
+	return p->power_iq_limit;
+}
+
+static void SM_Ctrl_SetSpeedCurrentLimits(TSM_Ctrl *p, Uint16 allow_negative) {
+	long current_limit = SM_Ctrl_PowerCurrentLimit(p, refs.Iq_ref);
+
+	pid_spd.pid_out_max = current_limit;
+	pid_spd.pid_out_min = allow_negative ? -current_limit : 0;
+}
+
 
 //!Инициализация
 //!Всякие обнуления
@@ -34,6 +124,9 @@
 void SM_Ctrl_Init(TSM_Ctrl *p) {
 	p->state_prev = 0xff;
 	p->state = 0x00;
+	SM_Ctrl_PowerLimitReset(p);
+	if (refs.power_ref <= 0)
+		refs.power_ref = _IQ(1.0);
 }
 
 //!Фоновый расчет
@@ -117,6 +210,7 @@ void SM_Ctrl_Fast_Calc(TSM_Ctrl *p) {
 		pid_ia.reset(&pid_ia);
 		pid_spd.reset(&pid_spd);
 		pid_pos.reset(&pid_pos);
+		SM_Ctrl_PowerLimitReset(p);
 		cur_par.Is = 0;
 		cur_par.power = 0;
 		cur_par.speed = 0;
@@ -336,7 +430,7 @@ void SM_Ctrl_Fast_Calc(TSM_Ctrl *p) {
 			park.calc(&park);
 
 			//регулятор тока "как бы" оси d (на самом деле эта ось к двигателю к оси d не привязана, это свободная ось)
-			pid_id.pid_ref_reg3 = refs.i_flux_ref;
+			pid_id.pid_ref_reg3 = SM_Ctrl_PowerCurrentLimit(p, refs.i_flux_ref);
 			pid_id.pid_fdb_reg3 = park.de;
 			pid_id.calc(&pid_id);
 
@@ -414,10 +508,10 @@ void SM_Ctrl_Fast_Calc(TSM_Ctrl *p) {
 			pid_spd.pid_fdb_reg3 = cur_par.speed; //обратная связь регулятора скорости - скорость ДПР
 
 
-			pid_spd.pid_out_max = refs.Iq_ref; //Максимум выхода регулятора скорости - заданный ток
+			SM_Ctrl_SetSpeedCurrentLimits(p, sw.recuperation_ena & 1);
 
 			if (sw.recuperation_ena & 1)            //если разрешена рекуперация
-				pid_spd.pid_out_min = -refs.Iq_ref; //минимум рег. скор. - отрицательный ток
+				pid_spd.pid_out_min = -pid_spd.pid_out_max; //минимум рег. скор. - отрицательный ток
 			else
 				//иначе
 				pid_spd.pid_out_min = 0; //нулевой ток не даст рекупераци при вращении в положительную сторону
@@ -562,8 +656,7 @@ void SM_Ctrl_Fast_Calc(TSM_Ctrl *p) {
 //			pid_spd.pid_fdb_reg3 = posspeedEqep.speed_filter.output; //обратная связь регулятора скорости - скорость ДПР
 			pid_spd.pid_fdb_reg3 = cur_par.speed;
 
-			pid_spd.pid_out_max = refs.Iq_ref; //Максимум выхода регулятора скорости - заданный ток
-			pid_spd.pid_out_min = -refs.Iq_ref; //минимум рег. скор. - отрицательный ток
+			SM_Ctrl_SetSpeedCurrentLimits(p, 1);
 			pid_spd.calc(&pid_spd); //расчет регулятора скорости
 
 
@@ -631,10 +724,10 @@ void SM_Ctrl_Fast_Calc(TSM_Ctrl *p) {
 			pid_spd.pid_fdb_reg3 = posspeedEqep.speed_elec; //обратная связь регулятора скорости - скорость ДПР
 
 
-			pid_spd.pid_out_max = refs.Iq_ref; //Максимум выхода регулятора скорости - заданный ток
+			SM_Ctrl_SetSpeedCurrentLimits(p, sw.recuperation_ena & 1);
 
 			if (sw.recuperation_ena & 1)            //если разрешена рекуперация
-				pid_spd.pid_out_min = -refs.Iq_ref; //минимум рег. скор. - отрицательный ток
+				pid_spd.pid_out_min = -pid_spd.pid_out_max; //минимум рег. скор. - отрицательный ток
 			else
 				//иначе
 				pid_spd.pid_out_min = 0; //нулевой ток не даст рекупераци при вращении в положительную сторону
@@ -795,8 +888,7 @@ void SM_Ctrl_Fast_Calc(TSM_Ctrl *p) {
 //			pid_spd.pid_fdb_reg3 = posspeedEqep.speed_filter.output; //обратная связь регулятора скорости - скорость ДПР
 			pid_spd.pid_fdb_reg3 = cur_par.speed;
 
-			pid_spd.pid_out_max = refs.Iq_ref; //Максимум выхода регулятора скорости - заданный ток
-			pid_spd.pid_out_min = -refs.Iq_ref; //минимум рег. скор. - отрицательный ток
+			SM_Ctrl_SetSpeedCurrentLimits(p, 1);
 			pid_spd.calc(&pid_spd); //расчет регулятора скорости
 
 

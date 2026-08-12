@@ -662,10 +662,10 @@ long const CO2_OD_TBL3[] = {
 (long)(&SSI_Encoder.Poscnt_resContinouosInt),	//[5157h.0Ch], Название: Абс. положение в метках, ТекстПУ: qcAbsPos, Группа: ДПР-SSI энкодер
 (long)(&SSI_Encoder.theta_mechContinouos),	//[5157h.0Dh], Название: Угол механический не огранич., ТекстПУ: Уг.мех.не_огр, Группа: ДПР-SSI энкодер
 (long)(&SSI_Encoder.theta_elecContinouos),	//[5157h.0Eh], Название: Угол электрический не огранич., ТекстПУ: Уг.эл.не_огр, Группа: ДПР-SSI энкодер
-(long)(&Debug1),	//[5174h.01h], Название: DebugL1, ТекстПУ: DebugL1, Группа: Для отладки
-(long)(&Debug1),	//[5174h.02h], Название: DebugL1, ТекстПУ: DebugL1, Группа: Для отладки
-(long)(&Debug2),	//[5174h.03h], Название: DebugL2, ТекстПУ: DebugL2, Группа: Для отладки
-(long)(&Debug2),	//[5174h.04h], Название: DebugL2, ТекстПУ: DebugL2, Группа: Для отладки
+(long)(&sm_ctrl.power_error),	//[5174h.01h], Power-limit error (Q24)
+(long)(&sm_ctrl.power_error),	//[5174h.02h], Power-limit error (raw Q24)
+(long)(&sm_ctrl.power_iq_limit),	//[5174h.03h], Dynamic current limit (Q24)
+(long)(&sm_ctrl.power_iq_limit),	//[5174h.04h], Dynamic current limit (raw Q24)
 (long)(&Debug3),	//[5174h.05h], Название: DebugI3, ТекстПУ: DebugI3, Группа: Для отладки
 (long)(&Debug3),	//[5174h.06h], Название: DebugI3, ТекстПУ: DebugI3, Группа: Для отладки
 (long)(&Debug4),	//[5174h.07h], Название: DebugI4, ТекстПУ: DebugI4, Группа: Для отладки
@@ -676,8 +676,8 @@ long const CO2_OD_TBL3[] = {
 (long)(&DebugW2),	//[5174h.0Ch], Название: DebugW2, ТекстПУ: DebugW2, Группа: Для отладки
 (long)(&DebugW3),	//[5174h.0Dh], Название: DebugW3, ТекстПУ: DebugW3, Группа: Для отладки
 (long)(&DebugW3),	//[5174h.0Eh], Название: DebugW3, ТекстПУ: DebugW3, Группа: Для отладки
-(long)(&DebugW4),	//[5174h.0Fh], Название: DebugW4, ТекстПУ: DebugW4, Группа: Для отладки
-(long)(&DebugW4),	//[5174h.10h], Название: DebugW4, ТекстПУ: DebugW4, Группа: Для отладки
+(long)(&refs.power_ref),	//[5174h.0Fh], Active power limit in per-unit (Q24)
+(long)(&refs.power_ref),	//[5174h.10h], Active power limit (raw Q24)
 (long)(&DebugF1),	//[5174h.11h], Название: DebugF1, ТекстПУ: DebugF1, Группа: Для отладки
 (long)(&DebugF2),	//[5174h.12h], Название: DebugF2, ТекстПУ: DebugF2, Группа: Для отладки
 (long)(&DebugF3),	//[5174h.13h], Название: DebugF3, ТекстПУ: DebugF3, Группа: Для отладки
