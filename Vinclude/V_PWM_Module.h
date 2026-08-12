@@ -148,6 +148,8 @@ void PWM_Module_SlowCalc(TPWM_Module *);
 void PWM_Module_On(TPWM_Module *);
 //! \memberof TPWM_Module
 void PWM_Module_Off(TPWM_Module *);
+//! Доступное напряжение на входе регуляторов с учетом Udc и режима ШИМ.
+int32 PWM_Module_GetVoltageLimit(TPWM_Module *, int32 Udc);
 
 //векторные функции из библиотеки
 void PWM_Module_No_SV_Update(TPWM_Module *);

@@ -379,6 +379,71 @@ void PWM_Module_Init(TPWM_Module *p) {
 
 
 
+//! Коэффициент пересчета задания напряжения в скважность при текущем Udc.
+static void PWM_Module_ApplyUdcCompensation(TPWM_Module *p) {
+	long denominator;
+
+	if (!(p->UdCompEnable & 1)) {
+		p->UdCorTmp = _IQ(1.0);
+		return;
+	}
+
+	denominator = _IQ(1.0)
+			+ _IQmpy((adc.Udc_meas - _IQ(1.0)), p->UdCompK);
+	if (denominator <= 0) {
+		p->UdCorTmp = 0;
+		p->UalphaNorm = 0;
+		p->UbetaNorm = 0;
+		return;
+	}
+
+	p->UdCorTmp = _IQdiv(_IQ(1.0), denominator);
+	p->UalphaNorm = _IQmpy(p->UalphaNorm, p->UdCorTmp);
+	p->UbetaNorm = _IQmpy(p->UbetaNorm, p->UdCorTmp);
+}
+
+//! Возвращает предел задания напряжения, который реально может принять ШИМ.
+//! При полной компенсации Udc (UdCompK=1) результат равен
+//! Udc/Udc_nom, умноженному на допустимый коэффициент модуляции.
+int32 PWM_Module_GetVoltageLimit(TPWM_Module *p, int32 Udc) {
+	long modulationLimit;
+	long modulationMax;
+	long voltageScale = _IQ(1.0);
+
+	if ((Udc <= 0) || (p->k_pwm <= 0))
+		return 0;
+
+	switch (p->PWM_type) {
+	case PWM_TYPE_6SECT_NO_SV:
+		modulationMax = _IQ(1.0 / 0.866);
+		modulationLimit = p->U_lim;
+		break;
+	case PWM_TYPE_SIN_PWM:
+		modulationMax = _IQ(0.866);
+		modulationLimit = p->U_lim;
+		break;
+	case PWM_TYPE_DC_DRIVE:
+		modulationMax = _IQ(1.0);
+		modulationLimit = modulationMax;
+		break;
+	default:
+		return 0;
+	}
+
+	if (modulationLimit < 0)
+		modulationLimit = 0;
+	if (modulationLimit > modulationMax)
+		modulationLimit = modulationMax;
+
+	if (p->UdCompEnable & 1) {
+		voltageScale = _IQ(1.0) + _IQmpy((Udc - _IQ(1.0)), p->UdCompK);
+		if (voltageScale <= 0)
+			return 0;
+	}
+
+	return _IQmpy(voltageScale, modulationLimit);
+}
+
 //! Нормирование входных величин.
 
 //!Учитывает компенсацию напряжения при изменении Ud,
@@ -395,20 +460,18 @@ void PWM_Module_NormInput(TPWM_Module* p) {
     p->U_mag=_IQmag(p->UalphaNorm,p->UbetaNorm);
 
 
-    p->UdCorTmp=_IQdiv(_IQ(1.0),(_IQ(1.0)+_IQmpy((adc.Udc_meas-_IQ(1.0)),p->UdCompK)));
     //учет пульсаций напряжения на Ud
-    if (p->UdCompEnable&1) { //он включен?
-        p->UalphaNorm=_IQmpy(p->UalphaNorm, p->UdCorTmp);//изменим пропорционально коэфф-ту коррекции
-        p->UbetaNorm=_IQmpy(p->UbetaNorm, p->UdCorTmp);//и это тоже
-    }
+    PWM_Module_ApplyUdcCompensation(p);
 
     //вписывание заданной амплитуды напряжения в окружность, вписываемую в шестиугольник базывых векторов
     //когда U_lim=1.0, это и есть такая окружность. Бывает, что мы хотим вписывать в шестиугольник. Тогда просто задираем вверх огрианичение U_lim
+    if (p->U_lim < 0)
+        p->U_lim = 0;
     if (p->U_lim>_IQ(1.0/0.866)) //но нет смысла задирать выше максимально-реализ. напряжения (больше базового вектора)
         p->U_lim=_IQ(1.0/0.866);
     /* рассчитываем амплитуду вектора, который хотим отработать*/
     knorm=_IQmag(p->UalphaNorm,p->UbetaNorm);//плюс нормируем от 540 к 311
-    if (knorm>=p->U_lim) { //он больше, чем наше ограничение?
+    if ((knorm > p->U_lim) && (knorm > 0)) { //он больше, чем наше ограничение?
         knorm=_IQdiv(p->U_lim,knorm);//в эту же переменную, для экономии, рассчитываем нормировку
         p->UalphaNorm=_IQmpy(knorm,p->UalphaNorm);//уменьшаем пропорционально нормировке
         p->UbetaNorm=_IQmpy(knorm,p->UbetaNorm);//и это
@@ -552,6 +615,7 @@ void PWM_Module_Sin_Update(TPWM_Module *p) {
 	_iq PhasePtsB;
 	_iq PhasePtsC;
 	_iq knorm;
+	_iq voltageLimit;
 
 
 	p->UalphaNorm = p->UalphaRef;
@@ -559,11 +623,17 @@ void PWM_Module_Sin_Update(TPWM_Module *p) {
 
 	//находим амплитуду (без учета ограничения)
 	p->U_mag = _IQmag(p->UalphaNorm, p->UbetaNorm);
+	PWM_Module_ApplyUdcCompensation(p);
 
 	/* рассчитываем амплитуду вектора, который хотим отработать*/
 	knorm = _IQmag(p->UalphaNorm, p->UbetaNorm);
-	if (knorm >= p->U_lim) { //он больше, чем наше ограничение?
-		knorm = _IQdiv(p->U_lim, knorm); //в эту же переменную, для экономии, рассчитываем нормировку
+	voltageLimit = p->U_lim;
+	if (voltageLimit < 0)
+		voltageLimit = 0;
+	if (voltageLimit > _IQ(0.866))
+		voltageLimit = _IQ(0.866);
+	if ((knorm > voltageLimit) && (knorm > 0)) { //он больше, чем наше ограничение?
+		knorm = _IQdiv(voltageLimit, knorm); //в эту же переменную, для экономии, рассчитываем нормировку
 		p->UalphaNorm = _IQmpy(knorm, p->UalphaNorm); //уменьшаем пропорционально нормировке
 		p->UbetaNorm = _IQmpy(knorm, p->UbetaNorm); //и это
 		p->ULimitation = 1; //флаг о том, что идет ограничение напряжения
@@ -661,6 +731,12 @@ void PWM_Module_DC_Update(TPWM_Module *p)
 
 	UalphaRef = p->UalphaRef;
 	UbetaRef = p->UbetaRef;
+	p->UalphaNorm = UalphaRef;
+	p->UbetaNorm = UbetaRef;
+	p->U_mag = _IQmag(UalphaRef, UbetaRef);
+	PWM_Module_ApplyUdcCompensation(p);
+	UalphaRef = p->UalphaNorm;
+	UbetaRef = p->UbetaNorm;
 
 	if (UalphaRef > _IQ(1))
 		UalphaRef = _IQ(1);

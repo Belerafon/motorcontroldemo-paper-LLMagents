@@ -27,6 +27,45 @@
 #include "V_IQmath.h"
 #include "main.h"
 
+static long CurrentRegulatorVoltageLimit;
+
+//! Синхронизирует насыщение токовых ПИД с доступным напряжением инвертора.
+static void SM_Ctrl_UpdateCurrentRegulatorLimits(void) {
+	CurrentRegulatorVoltageLimit = PWM_Module_GetVoltageLimit(&pwm, adc.Udc_meas);
+
+	pid_id.pid_out_max = CurrentRegulatorVoltageLimit;
+	pid_id.pid_out_min = -CurrentRegulatorVoltageLimit;
+	pid_iq.pid_out_max = CurrentRegulatorVoltageLimit;
+	pid_iq.pid_out_min = -CurrentRegulatorVoltageLimit;
+	pid_ia.pid_out_max = CurrentRegulatorVoltageLimit;
+	pid_ia.pid_out_min = -CurrentRegulatorVoltageLimit;
+}
+
+//! Вписывает результирующий вектор d/q в доступную окружность напряжения.
+//! Добавочная ошибка насыщения не даёт интеграторам накапливаться, когда
+//! каждая компонента допустима отдельно, но их результирующий вектор уже нет.
+static void SM_Ctrl_LimitCurrentRegulatorVector(void) {
+	long voltageMagnitude;
+	long scale;
+	long limitedD;
+	long limitedQ;
+
+	voltageMagnitude = _IQmag(pid_id.pid_out_reg3, pid_iq.pid_out_reg3);
+	if (voltageMagnitude > CurrentRegulatorVoltageLimit) {
+		scale = _IQdiv(CurrentRegulatorVoltageLimit, voltageMagnitude);
+		limitedD = _IQmpy(pid_id.pid_out_reg3, scale);
+		limitedQ = _IQmpy(pid_iq.pid_out_reg3, scale);
+
+		pid_id.saterr_reg3Add = limitedD - pid_id.pid_out_reg3;
+		pid_iq.saterr_reg3Add = limitedQ - pid_iq.pid_out_reg3;
+		pid_id.pid_out_reg3 = limitedD;
+		pid_iq.pid_out_reg3 = limitedQ;
+	} else {
+		pid_id.saterr_reg3Add = 0;
+		pid_iq.saterr_reg3Add = 0;
+	}
+}
+
 
 //!Инициализация
 //!Всякие обнуления
@@ -69,6 +108,8 @@ void SM_Ctrl_Fast_Calc(TSM_Ctrl *p) {
 	if (sm_sys.state == SYS_INIT) {
 		return;
 	}
+
+	SM_Ctrl_UpdateCurrentRegulatorLimits();
 
 //если команда остановить, то переходим
 //в режим ОСТАНОВЛЕН
@@ -115,6 +156,8 @@ void SM_Ctrl_Fast_Calc(TSM_Ctrl *p) {
 		pid_id.reset(&pid_id);
 		pid_iq.reset(&pid_iq);
 		pid_ia.reset(&pid_ia);
+		pid_id.saterr_reg3Add = 0;
+		pid_iq.saterr_reg3Add = 0;
 		pid_spd.reset(&pid_spd);
 		pid_pos.reset(&pid_pos);
 		cur_par.Is = 0;
@@ -221,6 +264,7 @@ void SM_Ctrl_Fast_Calc(TSM_Ctrl *p) {
 		pid_iq.pid_ref_reg3 = 0;//задание - ноль
 		pid_iq.pid_fdb_reg3 = park.qe;park.de;//обратная связь - то что пришло с фазных преобразований
 		pid_iq.calc(&pid_iq);
+		SM_Ctrl_LimitCurrentRegulatorVector();
 
 		//обратные фазные преобразования.
 		//Крутим вектор напряжения, который выдают регуляторы токов обратно на угол refs.theta_elec
@@ -344,6 +388,7 @@ void SM_Ctrl_Fast_Calc(TSM_Ctrl *p) {
 			pid_iq.pid_ref_reg3 = 0;
 			pid_iq.pid_fdb_reg3 = park.qe;
 			pid_iq.calc(&pid_iq);
+			SM_Ctrl_LimitCurrentRegulatorVector();
 
 			//обратные фазные преобразования.
 			//Крутим вектор напряжения, который выдают регуляторы токов обратно на угол refs.theta_elec
@@ -441,6 +486,7 @@ void SM_Ctrl_Fast_Calc(TSM_Ctrl *p) {
 			pid_id.pid_ref_reg3 = 0; //задание тока по оси d - оси возбудения
 			pid_id.pid_fdb_reg3 = park.de; //обратная связь рег. тока оси d - вычисленный ток по фазе d
 			pid_id.calc(&pid_id); //расчет регулятора тока оси d
+			SM_Ctrl_LimitCurrentRegulatorVector();
 
 			//Обратный поворот на угол refs.theta_elec для 
 			//выходов регуляторов тока (напряжений по осям d и q)
@@ -581,6 +627,7 @@ void SM_Ctrl_Fast_Calc(TSM_Ctrl *p) {
 			pid_id.pid_ref_reg3 = 0; //задание тока по оси d - оси возбудения
 			pid_id.pid_fdb_reg3 = park.de; //обратная связь рег. тока оси d - вычисленный ток по фазе d
 			pid_id.calc(&pid_id); //расчет регулятора тока оси d
+			SM_Ctrl_LimitCurrentRegulatorVector();
 
 			//Обратный поворот на угол refs.theta_elec для
 			//выходов регуляторов тока (напряжений по осям d и q)
@@ -674,6 +721,7 @@ void SM_Ctrl_Fast_Calc(TSM_Ctrl *p) {
 				pid_id.pid_ref_reg3=RotorObserver.FluxCurrentMin;
 			pid_id.pid_fdb_reg3 = park.de; //обратная связь рег. тока оси x - вычисленный ток по фазе x
 			pid_id.calc(&pid_id); //расчет регулятора тока оси x
+			SM_Ctrl_LimitCurrentRegulatorVector();
 
 
 			//Обратный поворот на угол refs.theta_elec для
@@ -833,6 +881,7 @@ void SM_Ctrl_Fast_Calc(TSM_Ctrl *p) {
 				pid_id.pid_ref_reg3=RotorObserver.FluxCurrentMin;
 			pid_id.pid_fdb_reg3 = park.de; //обратная связь рег. тока оси x - вычисленный ток по фазе x
 			pid_id.calc(&pid_id); //расчет регулятора тока оси x
+			SM_Ctrl_LimitCurrentRegulatorVector();
 
 
 			//Обратный поворот на угол Temp1 для
@@ -942,6 +991,7 @@ void SM_Ctrl_Fast_Calc(TSM_Ctrl *p) {
 			pid_id.pid_ref_reg3 = refs.i_flux_ref;
 			pid_id.pid_fdb_reg3 = park.de;
 			pid_id.calc(&pid_id);
+			SM_Ctrl_LimitCurrentRegulatorVector();
 
 			ipark.de = pid_id.pid_out_reg3;
 			ipark.qe = pid_iq.pid_out_reg3;
