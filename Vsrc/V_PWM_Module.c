@@ -431,7 +431,7 @@ void PWM_Module_NormInput(TPWM_Module* p) {
 //! Функция 6ти секторной векторной ШИМ
 
 //! \memberof TPWM_Module
-void PWM_Module_No_SV_Update(TPWM_Module *p) {
+static void PWM_Module_6Sector_Update(TPWM_Module *p, int16 centerZeroVector) {
     _iq lambda1;
     _iq lambda2;
     _iq lambda3;
@@ -439,6 +439,9 @@ void PWM_Module_No_SV_Update(TPWM_Module *p) {
     int16 gamma;
     int16 gamma1;
     long tmp_pwm;
+    int32 gammaMin;
+    int32 gammaMax;
+    int32 commonMode;
 
     //Присвоение трех уставок сравнения только если счетчик таймера далек от нуля, чтобы
     //предотвратить частичное применение скважностей, что в векторной ШИМ может быть критично и испортить период ШИМ.
@@ -532,6 +535,27 @@ void PWM_Module_No_SV_Update(TPWM_Module *p) {
     if (p->GammaB>p->k_pwm) p->GammaB=p->k_pwm+1;
     if (p->GammaC>p->k_pwm) p->GammaC=p->k_pwm+1;
 
+    if (centerZeroVector) {
+        /*
+         * The sector calculation above produces the requested line voltages
+         * with one phase clamped to a DC bus.  A common-mode translation does
+         * not change any line voltage.  Centering the occupied compare range
+         * splits the available zero-vector time equally between both buses.
+         */
+        gammaMin = p->GammaA;
+        if (p->GammaB < gammaMin) gammaMin = p->GammaB;
+        if (p->GammaC < gammaMin) gammaMin = p->GammaC;
+
+        gammaMax = p->GammaA;
+        if (p->GammaB > gammaMax) gammaMax = p->GammaB;
+        if (p->GammaC > gammaMax) gammaMax = p->GammaC;
+
+        commonMode = (p->k_pwm - gammaMax - gammaMin) / 2;
+        p->GammaA += commonMode;
+        p->GammaB += commonMode;
+        p->GammaC += commonMode;
+    }
+
     //Присвоение трех уставок сравнения только если счетчик таймера далек от нуля, чтобы
     //предотвратить частичное применение скважностей, что в векторной ШИМ может быть критично и испортить период ШИМ.
     //Второй раз - чтобы предотвратить ситуацию с постоянной "незагрузкой" при равенстве частот расчета и ШИМ
@@ -542,6 +566,14 @@ void PWM_Module_No_SV_Update(TPWM_Module *p) {
         NT_PWM2->CMPA_bit.CMPA=(Uint16)p->GammaC;
     }
     EINT;
+}
+
+void PWM_Module_No_SV_Update(TPWM_Module *p) {
+    PWM_Module_6Sector_Update(p, 0);
+}
+
+void PWM_Module_Centered_SV_Update(TPWM_Module *p) {
+    PWM_Module_6Sector_Update(p, 1);
 }
 
 //! Функция синусоидальной ШИМ
@@ -736,6 +768,10 @@ void PWM_Module_Update(TPWM_Module *p) {
 		}
 		case PWM_TYPE_SRD: {
 			PWM_Module_Separate_Update(p);
+			break;
+		}
+		case PWM_TYPE_CENTERED_SV_PWM: {
+			PWM_Module_Centered_SV_Update(p);
 			break;
 		}
 		}
