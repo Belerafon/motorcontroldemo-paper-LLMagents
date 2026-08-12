@@ -54,6 +54,11 @@ extern "C"
     int E;//!<Флаг первого вхождения.
     long AnglePrev;//!< Предыдущее значение угла для режима автонастройки ДПР
     long AngleDemo;//!< Угол для демо-режима контура положения
+    long CurrentDecouplingGain;//!< Base coefficient 2*pi*f_base*Ls*I_base/U_base in Q24
+    long CurrentDecouplingUd;//!< d-axis cross-coupling compensation voltage in Q24
+    long CurrentDecouplingUq;//!< q-axis cross-coupling compensation voltage in Q24
+    long CurrentVoltageD;//!< Limited d-axis voltage command after decoupling in Q24
+    long CurrentVoltageQ;//!< Limited q-axis voltage command after decoupling in Q24
     void (*init)(struct SSM_Ctrl*);     //!< Pointer to the init funcion
     void (*slow_calc)(struct SSM_Ctrl*);//!< Pointer to the calc funtion
     void (*fast_calc)(struct SSM_Ctrl*); //!< Pointer to the calc funtion

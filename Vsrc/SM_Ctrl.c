@@ -27,6 +27,77 @@
 #include "V_IQmath.h"
 #include "main.h"
 
+#define CURRENT_DECOUPLING_FF_MAX   _IQ(4.0)
+#define CURRENT_DECOUPLING_WL_MAX   _IQ(127.0)
+#define CURRENT_VOLTAGE_LIMIT_MAX   _IQ(1.0 / 0.866)
+
+static long SM_Ctrl_IQmpyLimited(long a, long b, long limit) {
+	int64 result = ((int64) a * b) >> 24;
+
+	if (result > limit)
+		return limit;
+	if (result < -limit)
+		return -limit;
+	return (long) result;
+}
+
+static long SM_Ctrl_AddSaturated(long a, long b) {
+	int64 result = (int64) a + b;
+
+	if (result > 0x7fffffffLL)
+		return 0x7fffffffL;
+	if (result < (-0x7fffffffLL - 1))
+		return (long) 0x80000000;
+	return (long) result;
+}
+
+/*
+ * Adds the dq cross-coupling feed-forward terms and limits the complete
+ * voltage vector before the inverse Park transform. The saturation error is
+ * returned to both PI regulators through their external anti-windup inputs.
+ */
+static void SM_Ctrl_ApplyCurrentDecoupling(TSM_Ctrl *p,
+		long electrical_speed) {
+	long omega_l;
+	long voltage_d;
+	long voltage_q;
+	long voltage_mag;
+	long voltage_scale;
+	long voltage_limit = pwm.U_lim;
+
+	if (voltage_limit < 0)
+		voltage_limit = 0;
+	else if (voltage_limit > CURRENT_VOLTAGE_LIMIT_MAX)
+		voltage_limit = CURRENT_VOLTAGE_LIMIT_MAX;
+
+	omega_l = SM_Ctrl_IQmpyLimited(electrical_speed,
+			p->CurrentDecouplingGain, CURRENT_DECOUPLING_WL_MAX);
+	p->CurrentDecouplingUd = -SM_Ctrl_IQmpyLimited(omega_l, park.qe,
+			CURRENT_DECOUPLING_FF_MAX);
+	p->CurrentDecouplingUq = SM_Ctrl_IQmpyLimited(omega_l, park.de,
+			CURRENT_DECOUPLING_FF_MAX);
+
+	voltage_d = SM_Ctrl_AddSaturated(pid_id.pid_out_reg3,
+			p->CurrentDecouplingUd);
+	voltage_q = SM_Ctrl_AddSaturated(pid_iq.pid_out_reg3,
+			p->CurrentDecouplingUq);
+	voltage_mag = _IQmag(voltage_d, voltage_q);
+
+	if (voltage_mag > voltage_limit) {
+		voltage_scale = _IQdiv(voltage_limit, voltage_mag);
+		p->CurrentVoltageD = _IQmpy(voltage_scale, voltage_d);
+		p->CurrentVoltageQ = _IQmpy(voltage_scale, voltage_q);
+	} else {
+		p->CurrentVoltageD = voltage_d;
+		p->CurrentVoltageQ = voltage_q;
+	}
+
+	pid_id.saterr_reg3Add = p->CurrentVoltageD - voltage_d;
+	pid_iq.saterr_reg3Add = p->CurrentVoltageQ - voltage_q;
+	ipark.de = p->CurrentVoltageD;
+	ipark.qe = p->CurrentVoltageQ;
+}
+
 
 //!Инициализация
 //!Всякие обнуления
@@ -34,13 +105,29 @@
 void SM_Ctrl_Init(TSM_Ctrl *p) {
 	p->state_prev = 0xff;
 	p->state = 0x00;
+	p->CurrentDecouplingGain = 0;
+	p->CurrentDecouplingUd = 0;
+	p->CurrentDecouplingUq = 0;
+	p->CurrentVoltageD = 0;
+	p->CurrentVoltageQ = 0;
 }
 
 //!Фоновый расчет
 
 //! \memberof TSM_Ctrl
 void SM_Ctrl_Slow_Calc(TSM_Ctrl *p) {
+	float decoupling_gain = 0.0f;
 
+	if ((drv_params.Ls > 0) && (drv_params.freq_nom > 0)
+			&& (drv_params.I_nom > 0) && (drv_params.U_nom > 0)) {
+		decoupling_gain = 2.0f * _PI * (float) drv_params.freq_nom
+				* _IQtoF(drv_params.Ls) * (float) drv_params.I_nom
+				/ (float) drv_params.U_nom;
+		if (decoupling_gain > 16.0f)
+			decoupling_gain = 16.0f;
+	}
+
+	p->CurrentDecouplingGain = _IQ(decoupling_gain);
 }
 
 //!Миллисекундный расчет
@@ -219,13 +306,12 @@ void SM_Ctrl_Fast_Calc(TSM_Ctrl *p) {
 
 		//регулятор тока "как бы" оси q (на самом деле эта ось к двигателю к оси q не привязана, это свободная ось)
 		pid_iq.pid_ref_reg3 = 0;//задание - ноль
-		pid_iq.pid_fdb_reg3 = park.qe;park.de;//обратная связь - то что пришло с фазных преобразований
+		pid_iq.pid_fdb_reg3 = park.qe;//обратная связь - то что пришло с фазных преобразований
 		pid_iq.calc(&pid_iq);
 
 		//обратные фазные преобразования.
 		//Крутим вектор напряжения, который выдают регуляторы токов обратно на угол refs.theta_elec
-		ipark.de = pid_id.pid_out_reg3;
-		ipark.qe = pid_iq.pid_out_reg3;
+		SM_Ctrl_ApplyCurrentDecoupling(p, 0);
 		ipark.ang = refs.theta_elec;
 		ipark.calc(&ipark);
 
@@ -347,8 +433,7 @@ void SM_Ctrl_Fast_Calc(TSM_Ctrl *p) {
 
 			//обратные фазные преобразования.
 			//Крутим вектор напряжения, который выдают регуляторы токов обратно на угол refs.theta_elec
-			ipark.de = pid_id.pid_out_reg3;
-			ipark.qe = pid_iq.pid_out_reg3;
+			SM_Ctrl_ApplyCurrentDecoupling(p, rmp.output);
 			ipark.ang = refs.theta_elec;
 			ipark.calc(&ipark);
 
@@ -444,8 +529,7 @@ void SM_Ctrl_Fast_Calc(TSM_Ctrl *p) {
 
 			//Обратный поворот на угол refs.theta_elec для 
 			//выходов регуляторов тока (напряжений по осям d и q)
-			ipark.de = pid_id.pid_out_reg3;
-			ipark.qe = pid_iq.pid_out_reg3;
+			SM_Ctrl_ApplyCurrentDecoupling(p, cur_par.speed);
 			ipark.ang = refs.theta_elec;
 			ipark.calc(&ipark);            //расчет преобразования координат
 
@@ -584,8 +668,7 @@ void SM_Ctrl_Fast_Calc(TSM_Ctrl *p) {
 
 			//Обратный поворот на угол refs.theta_elec для
 			//выходов регуляторов тока (напряжений по осям d и q)
-			ipark.de = pid_id.pid_out_reg3;
-			ipark.qe = pid_iq.pid_out_reg3;
+			SM_Ctrl_ApplyCurrentDecoupling(p, cur_par.speed);
 			ipark.ang = posspeedEqep.theta_elec;
 			ipark.calc(&ipark);            //расчет преобразования координат
 
@@ -678,8 +761,7 @@ void SM_Ctrl_Fast_Calc(TSM_Ctrl *p) {
 
 			//Обратный поворот на угол refs.theta_elec для
 			//выходов регуляторов тока (напряжений по осям x и y)
-			ipark.de = pid_id.pid_out_reg3;
-			ipark.qe = pid_iq.pid_out_reg3;
+			SM_Ctrl_ApplyCurrentDecoupling(p, cur_par.speed);
 			ipark.ang = refs.theta_elec;
 			ipark.calc(&ipark);            //расчет преобразования координат
 
@@ -837,8 +919,7 @@ void SM_Ctrl_Fast_Calc(TSM_Ctrl *p) {
 
 			//Обратный поворот на угол Temp1 для
 			//выходов регуляторов тока (напряжений по осям x и y)
-			ipark.de = pid_id.pid_out_reg3;
-			ipark.qe = pid_iq.pid_out_reg3;
+			SM_Ctrl_ApplyCurrentDecoupling(p, cur_par.speed);
 			ipark.ang = Temp1;
 			ipark.calc(&ipark);            //расчет преобразования координат
 
@@ -943,8 +1024,7 @@ void SM_Ctrl_Fast_Calc(TSM_Ctrl *p) {
 			pid_id.pid_fdb_reg3 = park.de;
 			pid_id.calc(&pid_id);
 
-			ipark.de = pid_id.pid_out_reg3;
-			ipark.qe = pid_iq.pid_out_reg3;
+			SM_Ctrl_ApplyCurrentDecoupling(p, rmp.output);
 			ipark.ang = refs.theta_elec;
 			ipark.calc(&ipark);
 

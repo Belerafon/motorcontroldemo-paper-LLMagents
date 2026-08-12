@@ -281,6 +281,7 @@ void SM_Sys_Slow_Calc(TSM_Sys *p) {
 	AutoOffset.slow_calc(&AutoOffset);
 	posspeedEqep.slow_calc(&posspeedEqep);//инициализация модуля энкодера
 	RotorObserver.slow_calc(&RotorObserver);//наблюдатель потока ротора АД
+	sm_ctrl.slow_calc(&sm_ctrl);//пересчет коэффициента декаплинга контуров тока
 	DIO_slow_calc(); //дискретные входы/выходы
 	FanControl.slow_calc(&FanControl);//вентилятор
 
