@@ -27,6 +27,69 @@
 #include "V_IQmath.h"
 #include "main.h"
 
+/*
+ * Внешний контур ограничения активной мощности работает на частоте быстрого
+ * расчета (10 кГц). Его выход ограничивает задание тока момента Iq регулятора
+ * скорости. При разгоне ток автоматически уменьшается после достижения
+ * заданной мощности, поэтому дальнейший разгон идет с постоянной мощностью.
+ */
+#define POWER_LIMIT_KP _IQ(0.20)
+#define POWER_LIMIT_KI _IQ(0.0005)
+
+static long SM_Ctrl_PowerCurrentLimit(TSM_Ctrl *p, long current_limit) {
+	long power;
+	long error;
+	long integral_prev;
+	long output;
+
+	if (current_limit < 0)
+		current_limit = -current_limit;
+
+	/* Нулевое/отрицательное задание сохраняет прежнее поведение привода. */
+	if ((refs.power_limit <= 0) || (current_limit == 0)) {
+		p->power_limit_active = 0;
+		p->power_limit_integral = current_limit;
+		p->power_current_limit = current_limit;
+		return current_limit;
+	}
+
+	/* При включении ограничителя начинаем с действующего токового предела. */
+	if (p->power_limit_active == 0) {
+		p->power_limit_integral = current_limit;
+		p->power_limit_active = 1;
+	}
+
+	power = cur_par.power;
+	if (power < 0)
+		power = -power;
+	error = refs.power_limit - power;
+
+	/* PI-регулятор мощности с ограничением интегратора токовым пределом. */
+	if (p->power_limit_integral > current_limit)
+		p->power_limit_integral = current_limit;
+	integral_prev = p->power_limit_integral;
+	p->power_limit_integral += _IQmpy(POWER_LIMIT_KI, error);
+	if (p->power_limit_integral > current_limit)
+		p->power_limit_integral = current_limit;
+	else if (p->power_limit_integral < 0)
+		p->power_limit_integral = 0;
+
+	output = p->power_limit_integral + _IQmpy(POWER_LIMIT_KP, error);
+	if (output > current_limit) {
+		output = current_limit;
+		if (error > 0)
+			p->power_limit_integral = integral_prev;
+	}
+	else if (output < 0) {
+		output = 0;
+		if (error < 0)
+			p->power_limit_integral = integral_prev;
+	}
+
+	p->power_current_limit = output;
+	return output;
+}
+
 
 //!Инициализация
 //!Всякие обнуления
@@ -34,6 +97,9 @@
 void SM_Ctrl_Init(TSM_Ctrl *p) {
 	p->state_prev = 0xff;
 	p->state = 0x00;
+	p->power_current_limit = 0;
+	p->power_limit_integral = 0;
+	p->power_limit_active = 0;
 }
 
 //!Фоновый расчет
@@ -120,6 +186,9 @@ void SM_Ctrl_Fast_Calc(TSM_Ctrl *p) {
 		cur_par.Is = 0;
 		cur_par.power = 0;
 		cur_par.speed = 0;
+		p->power_current_limit = 0;
+		p->power_limit_integral = 0;
+		p->power_limit_active = 0;
 		//  cur_par.ThetaRefCurr=0;
 
 		/* Конец */
@@ -336,7 +405,7 @@ void SM_Ctrl_Fast_Calc(TSM_Ctrl *p) {
 			park.calc(&park);
 
 			//регулятор тока "как бы" оси d (на самом деле эта ось к двигателю к оси d не привязана, это свободная ось)
-			pid_id.pid_ref_reg3 = refs.i_flux_ref;
+			pid_id.pid_ref_reg3 = SM_Ctrl_PowerCurrentLimit(p, refs.i_flux_ref);
 			pid_id.pid_fdb_reg3 = park.de;
 			pid_id.calc(&pid_id);
 
@@ -414,10 +483,10 @@ void SM_Ctrl_Fast_Calc(TSM_Ctrl *p) {
 			pid_spd.pid_fdb_reg3 = cur_par.speed; //обратная связь регулятора скорости - скорость ДПР
 
 
-			pid_spd.pid_out_max = refs.Iq_ref; //Максимум выхода регулятора скорости - заданный ток
+			pid_spd.pid_out_max = SM_Ctrl_PowerCurrentLimit(p, refs.Iq_ref); //Ток момента с динамическим ограничением мощности
 
 			if (sw.recuperation_ena & 1)            //если разрешена рекуперация
-				pid_spd.pid_out_min = -refs.Iq_ref; //минимум рег. скор. - отрицательный ток
+				pid_spd.pid_out_min = -p->power_current_limit; //симметричное ограничение мощности при рекуперации
 			else
 				//иначе
 				pid_spd.pid_out_min = 0; //нулевой ток не даст рекупераци при вращении в положительную сторону
@@ -562,8 +631,8 @@ void SM_Ctrl_Fast_Calc(TSM_Ctrl *p) {
 //			pid_spd.pid_fdb_reg3 = posspeedEqep.speed_filter.output; //обратная связь регулятора скорости - скорость ДПР
 			pid_spd.pid_fdb_reg3 = cur_par.speed;
 
-			pid_spd.pid_out_max = refs.Iq_ref; //Максимум выхода регулятора скорости - заданный ток
-			pid_spd.pid_out_min = -refs.Iq_ref; //минимум рег. скор. - отрицательный ток
+			pid_spd.pid_out_max = SM_Ctrl_PowerCurrentLimit(p, refs.Iq_ref); //Ток момента с динамическим ограничением мощности
+			pid_spd.pid_out_min = -p->power_current_limit; //симметричное ограничение мощности
 			pid_spd.calc(&pid_spd); //расчет регулятора скорости
 
 
@@ -631,10 +700,10 @@ void SM_Ctrl_Fast_Calc(TSM_Ctrl *p) {
 			pid_spd.pid_fdb_reg3 = posspeedEqep.speed_elec; //обратная связь регулятора скорости - скорость ДПР
 
 
-			pid_spd.pid_out_max = refs.Iq_ref; //Максимум выхода регулятора скорости - заданный ток
+			pid_spd.pid_out_max = SM_Ctrl_PowerCurrentLimit(p, refs.Iq_ref); //Ток момента с динамическим ограничением мощности
 
 			if (sw.recuperation_ena & 1)            //если разрешена рекуперация
-				pid_spd.pid_out_min = -refs.Iq_ref; //минимум рег. скор. - отрицательный ток
+				pid_spd.pid_out_min = -p->power_current_limit; //симметричное ограничение мощности при рекуперации
 			else
 				//иначе
 				pid_spd.pid_out_min = 0; //нулевой ток не даст рекупераци при вращении в положительную сторону
@@ -795,8 +864,8 @@ void SM_Ctrl_Fast_Calc(TSM_Ctrl *p) {
 //			pid_spd.pid_fdb_reg3 = posspeedEqep.speed_filter.output; //обратная связь регулятора скорости - скорость ДПР
 			pid_spd.pid_fdb_reg3 = cur_par.speed;
 
-			pid_spd.pid_out_max = refs.Iq_ref; //Максимум выхода регулятора скорости - заданный ток
-			pid_spd.pid_out_min = -refs.Iq_ref; //минимум рег. скор. - отрицательный ток
+			pid_spd.pid_out_max = SM_Ctrl_PowerCurrentLimit(p, refs.Iq_ref); //Ток момента с динамическим ограничением мощности
+			pid_spd.pid_out_min = -p->power_current_limit; //симметричное ограничение мощности
 			pid_spd.calc(&pid_spd); //расчет регулятора скорости
 
 
