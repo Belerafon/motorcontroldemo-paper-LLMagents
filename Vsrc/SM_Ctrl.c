@@ -27,6 +27,23 @@
 #include "V_IQmath.h"
 #include "main.h"
 
+static long SM_Ctrl_FieldWeakeningVoltage(void)
+{
+	long voltage = pwm.U_mag;
+
+	/* PWM applies DC-link compensation after U_mag has been measured. */
+	if ((pwm.UdCompEnable & 1) && pwm.UdCorTmp > 0)
+		voltage = _IQmpy(voltage, pwm.UdCorTmp);
+
+	return voltage;
+}
+
+static void SM_Ctrl_UpdateFieldWeakening(void)
+{
+	field_weakening.calc(&field_weakening,
+			SM_Ctrl_FieldWeakeningVoltage(), pwm.U_lim, refs.Iq_ref);
+}
+
 
 //!Инициализация
 //!Всякие обнуления
@@ -117,6 +134,7 @@ void SM_Ctrl_Fast_Calc(TSM_Ctrl *p) {
 		pid_ia.reset(&pid_ia);
 		pid_spd.reset(&pid_spd);
 		pid_pos.reset(&pid_pos);
+		field_weakening.reset(&field_weakening);
 		cur_par.Is = 0;
 		cur_par.power = 0;
 		cur_par.speed = 0;
@@ -378,6 +396,7 @@ void SM_Ctrl_Fast_Calc(TSM_Ctrl *p) {
 			/*ENTRY START*/
 			pwm.On(&pwm);            //Включение ШИМ
 			rmp.output = 0;            //Обнуление задатчика интенсивности
+			field_weakening.reset(&field_weakening);
 			if (dlog.StartBits & (1 << 4)) //Если пользователь задал этот бит осциллографирования
 				dlog.set_mode(1, &dlog);  //Запуск осциллографа по этому событию
 			/*ENTRY END*/
@@ -397,7 +416,7 @@ void SM_Ctrl_Fast_Calc(TSM_Ctrl *p) {
 				refs.theta_elec = SSI_Encoder.theta_elec; //текущее угловое положение - с ДПР
 			}
 
-			cur_par.Is = pid_iq.pid_fdb_reg3; //Текущий ток статора - ток по оси q
+			cur_par.Is = _IQmag(pid_iq.pid_fdb_reg3, pid_id.pid_fdb_reg3);
 
 			//Преобразование токов из трехфазной системы координат в двухфазную
 			clarke.as = adc.Imeas_a;
@@ -410,14 +429,16 @@ void SM_Ctrl_Fast_Calc(TSM_Ctrl *p) {
 			rmp.input = refs.speed_ref;
 			rmp.calc(&rmp);//Расчет ЗИ
 
+			SM_Ctrl_UpdateFieldWeakening();
+
 			pid_spd.pid_ref_reg3 = rmp.output; //на воход регулятора скорости - выход ЗИ
 			pid_spd.pid_fdb_reg3 = cur_par.speed; //обратная связь регулятора скорости - скорость ДПР
 
 
-			pid_spd.pid_out_max = refs.Iq_ref; //Максимум выхода регулятора скорости - заданный ток
+			pid_spd.pid_out_max = field_weakening.iq_limit;
 
 			if (sw.recuperation_ena & 1)            //если разрешена рекуперация
-				pid_spd.pid_out_min = -refs.Iq_ref; //минимум рег. скор. - отрицательный ток
+				pid_spd.pid_out_min = -field_weakening.iq_limit;
 			else
 				//иначе
 				pid_spd.pid_out_min = 0; //нулевой ток не даст рекупераци при вращении в положительную сторону
@@ -438,7 +459,7 @@ void SM_Ctrl_Fast_Calc(TSM_Ctrl *p) {
 			pid_iq.pid_fdb_reg3 = park.qe; //обратная связь рег. тока оси q - вычисленный ток по фазе q
 			pid_iq.calc(&pid_iq); //расчет регулятора тока оси q
 
-			pid_id.pid_ref_reg3 = 0; //задание тока по оси d - оси возбудения
+			pid_id.pid_ref_reg3 = field_weakening.id_ref;
 			pid_id.pid_fdb_reg3 = park.de; //обратная связь рег. тока оси d - вычисленный ток по фазе d
 			pid_id.calc(&pid_id); //расчет регулятора тока оси d
 
@@ -470,13 +491,14 @@ void SM_Ctrl_Fast_Calc(TSM_Ctrl *p) {
 			/*ENTRY START*/
 			pwm.On(&pwm);            //Включение ШИМ
 			rmp.output = 0;            //Обнуление задатчика интенсивности
+			field_weakening.reset(&field_weakening);
 			if (dlog.StartBits & (1 << 4)) //Если пользователь задал этот бит осциллографирования
 				dlog.set_mode(1, &dlog);  //Запуск осциллографа по этому событию
 			/*ENTRY END*/
 		}
 		/*DO START*/
 		{
-			cur_par.Is = pid_iq.pid_fdb_reg3; //Текущий ток статора - ток по оси q
+			cur_par.Is = _IQmag(pid_iq.pid_fdb_reg3, pid_id.pid_fdb_reg3);
 			cur_par.speed = posspeedEqep.speed_elec; //Текущая скорость - с ДПР фильтрованная
 
 			//Преобразование токов из трехфазной системы координат в двухфазную
@@ -558,12 +580,14 @@ void SM_Ctrl_Fast_Calc(TSM_Ctrl *p) {
 			pid_pos.saterr_reg3Add=pid_spd.saterr_reg3;//это улучшайзер. Учитывает насыщение рег. скорости и передает его в рег. положения.
 			pid_pos.calc(&pid_pos); //расчет регулятора положения
 
+			SM_Ctrl_UpdateFieldWeakening();
+
 			pid_spd.pid_ref_reg3 = pid_pos.pid_out_reg3; //на вход регулятора скорости - выход рег. положения
 //			pid_spd.pid_fdb_reg3 = posspeedEqep.speed_filter.output; //обратная связь регулятора скорости - скорость ДПР
 			pid_spd.pid_fdb_reg3 = cur_par.speed;
 
-			pid_spd.pid_out_max = refs.Iq_ref; //Максимум выхода регулятора скорости - заданный ток
-			pid_spd.pid_out_min = -refs.Iq_ref; //минимум рег. скор. - отрицательный ток
+			pid_spd.pid_out_max = field_weakening.iq_limit;
+			pid_spd.pid_out_min = -field_weakening.iq_limit;
 			pid_spd.calc(&pid_spd); //расчет регулятора скорости
 
 
@@ -578,7 +602,7 @@ void SM_Ctrl_Fast_Calc(TSM_Ctrl *p) {
 			pid_iq.pid_fdb_reg3 = park.qe; //обратная связь рег. тока оси q - вычисленный ток по фазе q
 			pid_iq.calc(&pid_iq); //расчет регулятора тока оси q
 
-			pid_id.pid_ref_reg3 = 0; //задание тока по оси d - оси возбудения
+			pid_id.pid_ref_reg3 = field_weakening.id_ref;
 			pid_id.pid_fdb_reg3 = park.de; //обратная связь рег. тока оси d - вычисленный ток по фазе d
 			pid_id.calc(&pid_id); //расчет регулятора тока оси d
 
