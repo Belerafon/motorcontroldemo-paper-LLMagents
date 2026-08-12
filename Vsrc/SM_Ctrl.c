@@ -159,6 +159,9 @@ void SM_Ctrl_Fast_Calc(TSM_Ctrl *p) {
 		if (p->run_mode == CTRL_RUN_VECTOR_SM) {//векторная СУ синхронной машины с двумя контурами
 			p->state = CTRL_RUN_VECTOR_SM;
 		}
+		if (p->run_mode == CTRL_RUN_VECTOR_SM_POWER) {//векторная СУ синхронной машины с динамическим ограничением мощности
+			p->state = CTRL_RUN_VECTOR_SM_POWER;
+		}
 		if (p->run_mode == CTRL_RUN_VECTOR_SM_ENCODER_POS) {//векторная СУ синхронной машины  с обратной связью по энкодеру и контуром положения
 			p->state = CTRL_RUN_VECTOR_SM_ENCODER_POS;
 		}
@@ -443,6 +446,129 @@ void SM_Ctrl_Fast_Calc(TSM_Ctrl *p) {
 			pid_id.calc(&pid_id); //расчет регулятора тока оси d
 
 			//Обратный поворот на угол refs.theta_elec для 
+			//выходов регуляторов тока (напряжений по осям d и q)
+			ipark.de = pid_id.pid_out_reg3;
+			ipark.qe = pid_iq.pid_out_reg3;
+			ipark.ang = refs.theta_elec;
+			ipark.calc(&ipark);            //расчет преобразования координат
+
+			//Задание напряжение на модуль ШИМ после преобразования координат
+			pwm.UalphaRef = ipark.ds;            //Ось альфа
+			pwm.UbetaRef = ipark.qs;            //Ось бета
+			pwm.update(&pwm);            //Расчет модуля ШИМ
+
+			if (sw.excitation_ena)
+			{
+				pwm_ex.ref = refs.uf_ref;
+				pwm_ex.calc(&pwm_ex);
+			}
+
+			/*DO END*/
+		}
+		break;
+	}
+
+	case CTRL_RUN_VECTOR_SM_POWER: {            //Датчиковая векторная СУ синхронной машины с динамическим ограничением мощности
+		if (p->E == 1) {
+			/*ENTRY START*/
+			pwm.On(&pwm);            //Включение ШИМ
+			rmp.output = 0;            //Обнуление задатчика интенсивности
+			if (dlog.StartBits & (1 << 4)) //Если пользователь задал этот бит осциллографирования
+				dlog.set_mode(1, &dlog);  //Запуск осциллографа по этому событию
+			/*ENTRY END*/
+		}
+		/*DO START*/
+		{
+			long speed_abs;       //Модуль текущей скорости (о.е.)
+			long iq_max;          //Динамический предел выхода регулятора скорости (задание тока Iq)
+			long p_err;           //Ошибка по мощности для корректирующей обратной связи
+			long iq_correction;   //Корректирующая добавка к пределу Iq
+
+			if (drv_params.sens_type == POS_SENSOR_TYPE_HALL){  //ДПР на элементах Холла
+				cur_par.speed = DPReCAP.speed;
+				refs.theta_elec = DPReCAP.Angle;
+			}
+			if (drv_params.sens_type == POS_SENSOR_TYPE_ENCODER){  //энкодер
+				cur_par.speed = posspeedEqep.speed_elec;
+				refs.theta_elec = posspeedEqep.theta_elec;
+			}
+			if (drv_params.sens_type == POS_SENSOR_TYPE_SSI){  //цифровой датчик с SSI
+				cur_par.speed = SSI_Encoder.speed_elec;
+				refs.theta_elec = SSI_Encoder.theta_elec;
+			}
+
+			cur_par.Is = pid_iq.pid_fdb_reg3; //Текущий ток статора - ток по оси q
+
+			//Преобразование токов из трехфазной системы координат в двухфазную
+			clarke.as = adc.Imeas_a;
+			clarke.bs = adc.Imeas_b;
+			clarke.calc(&clarke);
+			cur_par.Ialpha = clarke.ds;
+			cur_par.Ibeta = clarke.qs;
+
+			//Задание скорости от задатчика интенсивности (ЗИ)
+			rmp.input = refs.speed_ref;
+			rmp.calc(&rmp);//Расчет ЗИ
+
+			//------ Динамический расчет предела тока Iq из уставки мощности ------
+			//Принцип: механическая мощность P = w * T, в о.е. T ~ Iq.
+			//На малой скорости (зона постоянного момента) доступен полный ток Iq_ref.
+			//На высокой скорости (зона постоянной мощности) Iq ограничивается как P_ref / |w|.
+			//Дополнительно работает обратная связь по измеренной мощности cur_par.power.
+			speed_abs = labs(cur_par.speed);
+
+			if ((sw.power_limit_ena) && (speed_abs > _IQ(0.01))) {
+				//Прямой канал: предел момента из уставки мощности
+				iq_max = _IQdiv(refs.power_ref, speed_abs);
+				//Ограничение сверху абсолютным максимумом тока Iq_ref (зона постоянного момента)
+				if (iq_max > refs.Iq_ref)
+					iq_max = refs.Iq_ref;
+				//Корректирующая обратная связь: если фактическая мощность превысила уставку,
+				//дополнительно снижаем предел Iq пропорционально превышению, деленному на скорость
+				if (cur_par.power > refs.power_ref) {
+					p_err = cur_par.power - refs.power_ref;
+					iq_correction = _IQdiv(p_err, speed_abs);
+					iq_max -= iq_correction;
+				}
+				//Нижний предел - ноль (нельзя требовать отрицательный ток в режиме ограничения)
+				if (iq_max < 0)
+					iq_max = 0;
+			} else {
+				//Ограничение мощности выключено либо скорость слишком мала - работаем как обычная векторная СУ
+				iq_max = refs.Iq_ref;
+			}
+			//---------------------------------------------------------------------
+
+			pid_spd.pid_ref_reg3 = rmp.output; //на вход регулятора скорости - выход ЗИ
+			pid_spd.pid_fdb_reg3 = cur_par.speed; //обратная связь регулятора скорости - скорость ДПР
+
+			//Выход регулятора скорости ограничивается динамически вычисленным iq_max
+			pid_spd.pid_out_max = iq_max;
+			if (sw.recuperation_ena & 1)            //если разрешена рекуперация
+				pid_spd.pid_out_min = -iq_max;       //симметричный предел для торможения
+			else
+				pid_spd.pid_out_min = 0;
+			pid_spd.calc(&pid_spd); //расчет регулятора скорости
+
+			cur_par.ThetaRefCurr = refs.theta_elec;
+			refs.theta_elec &= 0x00FFFFFF; //Ограничение угла на 1.0 в формате 8.24
+
+			//Поворот токов фаз на угол refs.theta_elec
+			park.ds = clarke.ds;
+			park.qs = clarke.qs;
+			park.ang = refs.theta_elec;
+			park.calc(&park); //расчет преобразования координат
+
+			//задание рег. тока по оси q (оси момента) - выход регулятора скорости
+			pid_iq.pid_ref_reg3 = pid_spd.pid_out_reg3;
+			pid_iq.pid_fdb_reg3 = park.qe; //обратная связь рег. тока оси q
+			pid_iq.calc(&pid_iq); //расчет регулятора тока оси q
+
+			pid_id.pid_ref_reg3 = 0; //задание тока по оси d - оси возбудения
+			pid_id.pid_fdb_reg3 = park.de; //обратная связь рег. тока оси d
+			pid_id.calc(&pid_id); //расчет регулятора тока оси d
+
+			//Обратный поворот на угол refs.theta_elec для
 			//выходов регуляторов тока (напряжений по осям d и q)
 			ipark.de = pid_id.pid_out_reg3;
 			ipark.qe = pid_iq.pid_out_reg3;
