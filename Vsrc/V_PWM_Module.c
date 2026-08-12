@@ -544,6 +544,85 @@ void PWM_Module_No_SV_Update(TPWM_Module *p) {
     EINT;
 }
 
+//! Функция непрерывной векторной ШИМ (SVPWM) без привязки к шинам
+
+//! В отличие от PWM_Module_No_SV_Update, где одна из фаз постоянно
+//! привязана к нижней шине, здесь используется инжекция нулевой
+//! последовательности (метод min-max). Все три фазы переключаются в
+//! каждом периоде, привязки к шинам нет.
+//! Линейный диапазон - до окружности, вписанной в шестиугольник базовых
+//! векторов (|U| = 1.0 в отн. ед. фазного амплитудного базиса, т.е. Udc/sqrt(3)),
+//! что на 15.5% больше, чем у синусоидальной ШИМ (Udc/2).
+//! При превышении линейного диапазона (перенапряжение/овермодуляция)
+//! срабатывают насыщения скважностей.
+
+//! \memberof TPWM_Module
+void PWM_Module_SVPWM_Update(TPWM_Module *p) {
+	_iq Va, Vb, Vc;
+	_iq Vmax, Vmin, Vzero;
+	_iq tmp;
+
+	//Присвоение трех уставок сравнения только если счетчик таймера далек от нуля, чтобы
+	//предотвратить частичное применение скважностей, что в векторной ШИМ может быть критично и испортить период ШИМ.
+	DINT;
+	if (NT_PWM0->TBCTR>30) {
+		NT_PWM0->CMPA_bit.CMPA=(Uint16)p->GammaA;
+		NT_PWM1->CMPA_bit.CMPA=(Uint16)p->GammaB;
+		NT_PWM2->CMPA_bit.CMPA=(Uint16)p->GammaC;
+	}
+	EINT;
+
+	//Нормирование входных величин (компенсация Ud, ограничение по U_lim, смена базиса).
+	//После NormInput UalphaNorm, UbetaNorm - в базисе базового вектора (1.0 = Udc*2/3).
+	PWM_Module_NormInput(p);
+
+	//Обратное преобразование Кларка - фазные напряжения в базисе базового вектора
+	Va = p->UalphaNorm;
+	Vb = -(p->UalphaNorm >> 1) + _IQmpy(_IQ(0.8660254), p->UbetaNorm);
+	Vc = -(p->UalphaNorm >> 1) - _IQmpy(_IQ(0.8660254), p->UbetaNorm);
+
+	//Инжекция нулевой последовательности (метод min-max).
+	//Vzero = -(max(Va,Vb,Vc) + min(Va,Vb,Vc))/2 - центрирует фазные напряжения,
+	//в результате ни одна фаза не привязывается к шине (все три переключаются).
+	Vmax = Va;
+	Vmin = Va;
+	if (Vb > Vmax) Vmax = Vb;
+	if (Vc > Vmax) Vmax = Vc;
+	if (Vb < Vmin) Vmin = Vb;
+	if (Vc < Vmin) Vmin = Vc;
+	Vzero = _IQmpy(_IQ(-0.5), Vmax + Vmin);
+
+	//Переход к уставкам сравнения: CMPA = k_pwm * (0.5 - (Vphase + Vzero) * 2/3).
+	//Множитель 2/3 переводит базис базового вектора в скважность (1.0 = Udc*2/3 -> D = 2/3).
+	tmp = _IQmpy(_IQ(0.6666667), Va + Vzero);
+	p->GammaA = _IQmpy(p->k_pwm, _IQ(0.5) - tmp);
+	tmp = _IQmpy(_IQ(0.6666667), Vb + Vzero);
+	p->GammaB = _IQmpy(p->k_pwm, _IQ(0.5) - tmp);
+	tmp = _IQmpy(_IQ(0.6666667), Vc + Vzero);
+	p->GammaC = _IQmpy(p->k_pwm, _IQ(0.5) - tmp);
+
+	/*насыщения */
+
+	if (p->GammaA<0) p->GammaA=0;
+	if (p->GammaB<0) p->GammaB=0;
+	if (p->GammaC<0) p->GammaC=0;
+
+	if (p->GammaA>p->k_pwm) p->GammaA=p->k_pwm+1;
+	if (p->GammaB>p->k_pwm) p->GammaB=p->k_pwm+1;
+	if (p->GammaC>p->k_pwm) p->GammaC=p->k_pwm+1;
+
+	//Присвоение трех уставок сравнения только если счетчик таймера далек от нуля, чтобы
+	//предотвратить частичное применение скважностей, что в векторной ШИМ может быть критично и испортить период ШИМ.
+	//Второй раз - чтобы предотвратить ситуацию с постоянной "незагрузкой" при равенстве частот расчета и ШИМ
+	DINT;
+	if (NT_PWM0->TBCTR>30) {
+		NT_PWM0->CMPA_bit.CMPA=(Uint16)p->GammaA;
+		NT_PWM1->CMPA_bit.CMPA=(Uint16)p->GammaB;
+		NT_PWM2->CMPA_bit.CMPA=(Uint16)p->GammaC;
+	}
+	EINT;
+}
+
 //! Функция синусоидальной ШИМ
 
 //! \memberof TPWM_Module
@@ -724,6 +803,10 @@ void PWM_Module_Update(TPWM_Module *p) {
 		switch (p->PWM_type) {
 		case PWM_TYPE_6SECT_NO_SV: {
 			PWM_Module_No_SV_Update(p);
+			break;
+		}
+		case PWM_TYPE_SVPWM: {
+			PWM_Module_SVPWM_Update(p);
 			break;
 		}
 		case PWM_TYPE_SIN_PWM: {
