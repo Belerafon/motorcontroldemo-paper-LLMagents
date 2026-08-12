@@ -34,6 +34,88 @@
 void SM_Ctrl_Init(TSM_Ctrl *p) {
 	p->state_prev = 0xff;
 	p->state = 0x00;
+	SM_Ctrl_FieldWeakeningReset(p);
+}
+
+//! Сброс регулятора автоматического ослабления поля.
+//! Вызывается в останове и при входе в векторные режимы синхронной машины.
+void SM_Ctrl_FieldWeakeningReset(TSM_Ctrl *p) {
+	p->field_weakening_id_ref = 0;
+	p->field_weakening_iq_limit = 0;
+	p->field_weakening_voltage_ref = 0;
+	p->field_weakening_voltage_error = 0;
+	p->field_weakening_integral = 0;
+}
+
+//! Автоматический расчет отрицательного задания Id.
+//! Регулятор поддерживает требуемую амплитуду напряжения немного ниже предела ШИМ.
+//! Одновременно рассчитывается допустимый Iq так, чтобы вектор полного тока
+//! sqrt(Id^2 + Iq^2) не превышал current_limit.
+void SM_Ctrl_FieldWeakeningCalc(TSM_Ctrl *p, long voltage_mag,
+		long voltage_limit, long current_limit, long id_feedback) {
+	long id_min;
+	long id_ref;
+	long id_for_current_limit;
+	long current_square;
+	long id_square;
+
+	if (current_limit < 0)
+		current_limit = -current_limit;
+
+	p->field_weakening_iq_limit = current_limit;
+
+	if ((!p->field_weakening_enabled) || (current_limit == 0)
+			|| (voltage_limit <= 0)) {
+		p->field_weakening_id_ref = 0;
+		p->field_weakening_voltage_ref = 0;
+		p->field_weakening_voltage_error = 0;
+		p->field_weakening_integral = 0;
+		return;
+	}
+
+	// Ограничение Id задается отрицательным числом и дополнительно ограничивается
+	// текущим общим токовым лимитом привода.
+	id_min = p->field_weakening_id_min;
+	if (id_min > 0)
+		id_min = -id_min;
+	if (id_min < -current_limit)
+		id_min = -current_limit;
+
+	p->field_weakening_voltage_ref = _IQmpy(voltage_limit,
+			p->field_weakening_voltage_ratio);
+	p->field_weakening_voltage_error = p->field_weakening_voltage_ref
+			- voltage_mag;
+
+	// Интегратор уменьшает Id, когда напряжения не хватает, и автоматически
+	// возвращает Id к нулю после появления запаса по напряжению.
+	p->field_weakening_integral += _IQmpy(p->field_weakening_ki,
+			p->field_weakening_voltage_error);
+	if (p->field_weakening_integral > 0)
+		p->field_weakening_integral = 0;
+	if (p->field_weakening_integral < id_min)
+		p->field_weakening_integral = id_min;
+
+	id_ref = p->field_weakening_integral
+			+ _IQmpy(p->field_weakening_kp,
+					p->field_weakening_voltage_error);
+	if (id_ref > 0)
+		id_ref = 0;
+	if (id_ref < id_min)
+		id_ref = id_min;
+	p->field_weakening_id_ref = id_ref;
+
+	// При снятии ослабления измеренный Id возвращается к нулю не мгновенно.
+	// Для ограничения Iq берем больший модуль из задания и обратной связи Id.
+	id_for_current_limit = labs(id_ref);
+	if (labs(id_feedback) > id_for_current_limit)
+		id_for_current_limit = labs(id_feedback);
+
+	current_square = _IQmpy(current_limit, current_limit);
+	id_square = _IQmpy(id_for_current_limit, id_for_current_limit);
+	if (id_square >= current_square)
+		p->field_weakening_iq_limit = 0;
+	else
+		p->field_weakening_iq_limit = _IQsqrt(current_square - id_square);
 }
 
 //!Фоновый расчет
@@ -117,6 +199,7 @@ void SM_Ctrl_Fast_Calc(TSM_Ctrl *p) {
 		pid_ia.reset(&pid_ia);
 		pid_spd.reset(&pid_spd);
 		pid_pos.reset(&pid_pos);
+		SM_Ctrl_FieldWeakeningReset(p);
 		cur_par.Is = 0;
 		cur_par.power = 0;
 		cur_par.speed = 0;
@@ -378,6 +461,7 @@ void SM_Ctrl_Fast_Calc(TSM_Ctrl *p) {
 			/*ENTRY START*/
 			pwm.On(&pwm);            //Включение ШИМ
 			rmp.output = 0;            //Обнуление задатчика интенсивности
+			SM_Ctrl_FieldWeakeningReset(p);
 			if (dlog.StartBits & (1 << 4)) //Если пользователь задал этот бит осциллографирования
 				dlog.set_mode(1, &dlog);  //Запуск осциллографа по этому событию
 			/*ENTRY END*/
@@ -414,10 +498,15 @@ void SM_Ctrl_Fast_Calc(TSM_Ctrl *p) {
 			pid_spd.pid_fdb_reg3 = cur_par.speed; //обратная связь регулятора скорости - скорость ДПР
 
 
-			pid_spd.pid_out_max = refs.Iq_ref; //Максимум выхода регулятора скорости - заданный ток
+			// Ослабление поля начинается автоматически при приближении к пределу
+			// напряжения. U_mag относится к предыдущему быстрому такту.
+			SM_Ctrl_FieldWeakeningCalc(p, pwm.U_mag, pwm.U_lim, refs.Iq_ref,
+					pid_id.pid_fdb_reg3);
+
+			pid_spd.pid_out_max = p->field_weakening_iq_limit; //Максимум Iq с учетом отрицательного Id
 
 			if (sw.recuperation_ena & 1)            //если разрешена рекуперация
-				pid_spd.pid_out_min = -refs.Iq_ref; //минимум рег. скор. - отрицательный ток
+				pid_spd.pid_out_min = -p->field_weakening_iq_limit; //минимум рег. скор. - отрицательный ток
 			else
 				//иначе
 				pid_spd.pid_out_min = 0; //нулевой ток не даст рекупераци при вращении в положительную сторону
@@ -438,7 +527,7 @@ void SM_Ctrl_Fast_Calc(TSM_Ctrl *p) {
 			pid_iq.pid_fdb_reg3 = park.qe; //обратная связь рег. тока оси q - вычисленный ток по фазе q
 			pid_iq.calc(&pid_iq); //расчет регулятора тока оси q
 
-			pid_id.pid_ref_reg3 = 0; //задание тока по оси d - оси возбудения
+			pid_id.pid_ref_reg3 = p->field_weakening_id_ref; //автоматическое отрицательное задание Id
 			pid_id.pid_fdb_reg3 = park.de; //обратная связь рег. тока оси d - вычисленный ток по фазе d
 			pid_id.calc(&pid_id); //расчет регулятора тока оси d
 
@@ -470,6 +559,7 @@ void SM_Ctrl_Fast_Calc(TSM_Ctrl *p) {
 			/*ENTRY START*/
 			pwm.On(&pwm);            //Включение ШИМ
 			rmp.output = 0;            //Обнуление задатчика интенсивности
+			SM_Ctrl_FieldWeakeningReset(p);
 			if (dlog.StartBits & (1 << 4)) //Если пользователь задал этот бит осциллографирования
 				dlog.set_mode(1, &dlog);  //Запуск осциллографа по этому событию
 			/*ENTRY END*/
@@ -562,8 +652,12 @@ void SM_Ctrl_Fast_Calc(TSM_Ctrl *p) {
 //			pid_spd.pid_fdb_reg3 = posspeedEqep.speed_filter.output; //обратная связь регулятора скорости - скорость ДПР
 			pid_spd.pid_fdb_reg3 = cur_par.speed;
 
-			pid_spd.pid_out_max = refs.Iq_ref; //Максимум выхода регулятора скорости - заданный ток
-			pid_spd.pid_out_min = -refs.Iq_ref; //минимум рег. скор. - отрицательный ток
+			// В позиционном режиме используется тот же автоматический контур
+			// ослабления поля и то же ограничение полного тока статора.
+			SM_Ctrl_FieldWeakeningCalc(p, pwm.U_mag, pwm.U_lim, refs.Iq_ref,
+					pid_id.pid_fdb_reg3);
+			pid_spd.pid_out_max = p->field_weakening_iq_limit; //Максимум Iq с учетом отрицательного Id
+			pid_spd.pid_out_min = -p->field_weakening_iq_limit; //минимум рег. скор. - отрицательный ток
 			pid_spd.calc(&pid_spd); //расчет регулятора скорости
 
 
@@ -578,7 +672,7 @@ void SM_Ctrl_Fast_Calc(TSM_Ctrl *p) {
 			pid_iq.pid_fdb_reg3 = park.qe; //обратная связь рег. тока оси q - вычисленный ток по фазе q
 			pid_iq.calc(&pid_iq); //расчет регулятора тока оси q
 
-			pid_id.pid_ref_reg3 = 0; //задание тока по оси d - оси возбудения
+			pid_id.pid_ref_reg3 = p->field_weakening_id_ref; //автоматическое отрицательное задание Id
 			pid_id.pid_fdb_reg3 = park.de; //обратная связь рег. тока оси d - вычисленный ток по фазе d
 			pid_id.calc(&pid_id); //расчет регулятора тока оси d
 

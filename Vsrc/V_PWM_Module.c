@@ -391,16 +391,16 @@ void PWM_Module_NormInput(TPWM_Module* p) {
     p->UalphaNorm=p->UalphaRef;
     p->UbetaNorm=p->UbetaRef;
 
-    //находим амплитуду (без учета ограничения)
-    p->U_mag=_IQmag(p->UalphaNorm,p->UbetaNorm);
-
-
     p->UdCorTmp=_IQdiv(_IQ(1.0),(_IQ(1.0)+_IQmpy((adc.Udc_meas-_IQ(1.0)),p->UdCompK)));
     //учет пульсаций напряжения на Ud
     if (p->UdCompEnable&1) { //он включен?
         p->UalphaNorm=_IQmpy(p->UalphaNorm, p->UdCorTmp);//изменим пропорционально коэфф-ту коррекции
         p->UbetaNorm=_IQmpy(p->UbetaNorm, p->UdCorTmp);//и это тоже
     }
+
+	// Амплитуда требуемого вектора после компенсации Ud, но до ограничения.
+	// Именно запас между U_mag и U_lim используется автоматическим ослаблением поля.
+	p->U_mag=_IQmag(p->UalphaNorm,p->UbetaNorm);
 
     //вписывание заданной амплитуды напряжения в окружность, вписываемую в шестиугольник базывых векторов
     //когда U_lim=1.0, это и есть такая окружность. Бывает, что мы хотим вписывать в шестиугольник. Тогда просто задираем вверх огрианичение U_lim

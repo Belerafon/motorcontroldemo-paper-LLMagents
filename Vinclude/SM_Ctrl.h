@@ -54,6 +54,18 @@ extern "C"
     int E;//!<Флаг первого вхождения.
     long AnglePrev;//!< Предыдущее значение угла для режима автонастройки ДПР
     long AngleDemo;//!< Угол для демо-режима контура положения
+
+    int field_weakening_enabled;//!< Разрешение автоматического ослабления поля синхронной машины
+    long field_weakening_voltage_ratio;//!< Доля предельного напряжения, поддерживаемая регулятором ослабления поля
+    long field_weakening_kp;//!< Пропорциональный коэффициент регулятора ослабления поля
+    long field_weakening_ki;//!< Интегральный коэффициент регулятора ослабления поля за один быстрый такт
+    long field_weakening_id_min;//!< Максимально допустимый отрицательный ток Id
+    long field_weakening_id_ref;//!< Автоматически рассчитанное задание Id
+    long field_weakening_iq_limit;//!< Допустимый Iq с учетом полного ограничения тока
+    long field_weakening_voltage_ref;//!< Текущее задание амплитуды напряжения
+    long field_weakening_voltage_error;//!< Ошибка регулятора ослабления поля
+    long field_weakening_integral;//!< Интегральная составляющая регулятора ослабления поля
+
     void (*init)(struct SSM_Ctrl*);     //!< Pointer to the init funcion
     void (*slow_calc)(struct SSM_Ctrl*);//!< Pointer to the calc funtion
     void (*fast_calc)(struct SSM_Ctrl*); //!< Pointer to the calc funtion
@@ -66,7 +78,12 @@ extern "C"
 #define SM_CTRL_DEFAULTS { .init = SM_Ctrl_Init,\
     .slow_calc = SM_Ctrl_Slow_Calc,\
     .fast_calc = SM_Ctrl_Fast_Calc,\
-    .ms_calc = SM_Ctrl_ms_Calc \
+    .ms_calc = SM_Ctrl_ms_Calc,\
+    .field_weakening_enabled = 1,\
+    .field_weakening_voltage_ratio = _IQ(0.95),\
+    .field_weakening_kp = _IQ(0.25),\
+    .field_weakening_ki = _IQ(0.001),\
+    .field_weakening_id_min = _IQ(-1.0) \
     }
 
   //! \memberof TSM_Ctrl
@@ -77,6 +94,11 @@ extern "C"
   void SM_Ctrl_Fast_Calc(TSM_Ctrl*);
   //! \memberof TSM_Ctrl
   void SM_Ctrl_ms_Calc(TSM_Ctrl*);
+  //! Сброс автоматического регулятора ослабления поля
+  void SM_Ctrl_FieldWeakeningReset(TSM_Ctrl*);
+  //! Расчет отрицательного Id и доступного Iq по ограничениям напряжения и полного тока
+  void SM_Ctrl_FieldWeakeningCalc(TSM_Ctrl*, long voltage_mag,
+      long voltage_limit, long current_limit, long id_feedback);
 
 #ifdef __cplusplus
 }
