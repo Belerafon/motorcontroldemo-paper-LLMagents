@@ -1,0 +1,40 @@
+Baseline2 0d71ac0189f47efc7d0b2a1503f6d77b48e136b3
+OpenCode Desktop v1.3.3 под windows 
+Модель Step-3.7-flash-Q4_K_S
+параметры запуска 
+
+set "LLAMA_DIR=llama-b10107-bin-win-cuda-12.4-x64"
+set "MODEL=Step-3.7-flash-Q4_K_S-00001-of-00003.gguf"
+
+set "VRAM_MARGIN_MIB=2048"
+
+"%LLAMA_DIR%\llama-server.exe" ^
+  --model "%MODEL%" ^
+  --mmproj "mmproj-step3.7-flash-f16.gguf" ^
+  --ctx-size 262144 ^
+  --host 0.0.0.0 ^
+  --port 5001 ^
+  --threads 24 ^
+  --parallel 1 ^
+  --split-mode none ^
+  --main-gpu 0 ^
+  --n-gpu-layers auto ^
+  --fit on ^
+  --fit-target %VRAM_MARGIN_MIB% ^
+  --kv-offload ^
+  --cache-type-k q8_0 ^
+  --cache-type-v q8_0 ^
+  --flash-attn on ^
+  --batch-size 2048 ^
+  --ubatch-size 2048 ^
+  --temp 1.0 ^
+  --top-p 0.95 ^
+  --top-k 0 ^
+  --min-p 0.01 ^
+  --repeat-penalty 1.0 ^
+  --mlock ^
+  --jinja
+
+
+
+Промпт: Сейчас в проекте есть синусоидальная ШИМ и векторная ШИМ с привязкой к одной из шин (верхней или нижней не помню). Реализуй новый тип векторной ШИМ, где не будет привязки к шинам (пока не дойдём до ограничения напряжения, конечно) но будет лучшее использование напряжения звена постоянного тока чем в имеющейся синусоидальной ШИМ. Вопросов по ходу работы не задавай. В интернет не ходи, другие папки и репозитории не изучай.

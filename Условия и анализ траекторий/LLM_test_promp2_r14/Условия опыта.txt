@@ -1,0 +1,39 @@
+Baseline3 1dd7bc13160d35b3fc02916475d0aec06147133e
+OpenCode Desktop v1.3.3 под windows
+Модель DeepSeek-V4-Flash-0731 (UD-IQ4_NL), без скилла
+Провайдер local (llama.cpp b10107, CUDA 12.4)
+параметры запуска
+
+set "LLAMA_DIR=llama-b10107-bin-win-cuda-12.4-x64"
+set "MODEL=DeepSeek-V4-Flash-0731-UD-IQ4_NL-00001-of-00004.gguf"
+set "VRAM_MARGIN_MIB=1024"
+
+"%LLAMA_DIR%\llama-server.exe" ^
+  --model "%MODEL%" ^
+  --ctx-size 1048576 ^
+  --host 0.0.0.0 ^
+  --port 5001 ^
+  --threads 24 ^
+  --parallel 1 ^
+  --split-mode none ^
+  --main-gpu 0 ^
+  --n-gpu-layers auto ^
+  --fit on ^
+  --fit-target %VRAM_MARGIN_MIB% ^
+  --kv-offload ^
+  --cache-type-k q8_0 ^
+  --cache-type-v q8_0 ^
+  --flash-attn on ^
+  --no-mmap ^
+  --batch-size 2048 ^
+  --ubatch-size 2048 ^
+  --temp 1.0 ^
+  --top-p 0.95 ^
+  --top-k 0 ^
+  --min-p 0.0 ^
+  --repeat-penalty 1.0 ^
+  --jinja
+
+
+
+Промпт: Сделай функцию ослабления поля, чтобы можно было разгонять двигатель выше за счёт отрицательного тока по оси Id, который автоматически задаётся сколько надо когда это надо. Вопросов по ходу работы не задавай. В интернет не ходи, другие папки и репозитории не изучай.
