@@ -1,40 +1,40 @@
-# Материалы исследования LLM-агентов для задач электропривода
+# LLM agents for motor-control software: experimental materials
 
-Репозиторий содержит программные решения, условия запусков, разборы траекторий и первичные экспертные оценки, использованные в исследовании способности LLM-агентов дорабатывать программное обеспечение электропривода на базе проекта MotorControlDemo.
+[Русская версия](README.ru.md)
 
-Всего выполнено **120 запусков**: четыре модели решали пять заданий в двух экспериментальных условиях, по три запуска на каждую комбинацию. Результат каждого запуска сохранён в отдельной Git-ветке.
+This repository contains code produced by LLM agents, run conditions, model-assisted trajectory analyses, and human evaluation forms from a study of agent-assisted development of [MotorControlDemo](https://gitflic.ru/project/belerafon/motorcontroldemo-vector), an embedded motor-control project.
 
-## Быстрая навигация
+The dataset covers **120 independent runs**: four models worked on five programming tasks under two experimental conditions, with three repetitions per model, task, and condition. Each run's final code is preserved in its own Git branch. The `master` branch is the dataset index; it is not a combined firmware release.
 
-Для изучения конкретного запуска:
+The original prompts, trajectory analyses, and evaluation forms are in Russian. This README explains how to navigate them in English; the original records and branch names have not been translated or renamed.
 
-1. Найдите его в [`run_metadata.csv`](run_metadata.csv). Таблица связывает идентификатор запуска с заданием, моделью, условием эксперимента и исходным коммитом.
-2. Откройте Git-ветку, имя которой совпадает со значением `run_id`, например `LLM_test_promp1_r1`. В ней находится программное решение агента.
-3. Откройте каталог [`Условия и анализ траекторий/<run_id>`](<Условия и анализ траекторий/>). В нём находятся точные условия запуска и разбор действий агента.
-4. Если запуск оценивался человеком, откройте каталог [`Чек-листы экспертов/<run_id>`](<Чек-листы экспертов/>).
+## Find a run
+
+1. Find its `run_id` in [`run_metadata.csv`](run_metadata.csv). The row identifies the task, model, condition, and baseline commit.
+2. Check out the branch with the same name, for example `LLM_test_promp1_r1`, to inspect the agent's final code.
+3. Open its folder under [`Условия и анализ траекторий/`](<Условия и анализ траекторий/>). It contains the run conditions (`Условия опыта.txt`) and trajectory analysis (`Анализ_траектории.txt`).
+4. If the run received human evaluation, open its folder under [`Чек-листы экспертов/`](<Чек-листы экспертов/>).
 
 ```text
-README.md
-run_metadata.csv
-Чек-листы экспертов/
-└── <run_id>/
-    └── <один или несколько заполненных чек-листов>.md
+README.md                         English guide
+README.ru.md                      Original Russian guide
+run_metadata.csv                  One row per run
 Условия и анализ траекторий/
 └── <run_id>/
-    ├── Условия опыта.txt
-    └── Анализ_траектории.txt
+    ├── Условия опыта.txt         Run conditions and exact prompt
+    └── Анализ_траектории.txt     Analysis of the agent's actions
+Чек-листы экспертов/
+└── <run_id>/
+    └── *.md                      One or more completed evaluation forms
 ```
 
-## Идентификаторы запусков и веток
+After cloning a copy with all run branches, use `git branch -a` to list them. GitHub's branch selector can also open a run branch directly once the branches are published there.
 
-Идентификатор имеет вид `LLM_test_prompN_rM`:
+## Run IDs and experimental design
 
-- `N` — номер задания от 1 до 5;
-- `M` — номер экспериментального раунда внутри задания от 1 до 24.
+An ID has the form `LLM_test_prompN_rM`. `N` is the task number (1–5), and `M` is the run number within that task (1–24). The spelling `promp` is part of the original branch names. Each of the eight series below contains three independent runs for every task. Use the metadata table for programmatic joins instead of inferring all attributes from a branch name.
 
-Слово `promp` в именах веток сохранено в исходном виде, а буква `r` обозначает раунд (`round`). Раунд — это технический порядковый индекс в имени ветки; каждый раунд соответствует одному запуску, то есть одному полному акту отработки промпта агентом. По суффиксу `rM` можно определить экспериментальную серию, но для программной обработки и проверки соответствий следует использовать `run_metadata.csv`.
-
-| Значение `M` | Серия | Модель | Условие | Повторы внутри серии |
+| `M` | Series | Model | Condition | Repetitions |
 |---:|:---:|---|---|:---:|
 | 1–3 | C+ | GPT-5.6-Sol | `skill` | 1–3 |
 | 4–6 | S+ | Step-3.7-flash | `skill` | 1–3 |
@@ -45,48 +45,40 @@ run_metadata.csv
 | 19–21 | G− | GLM 5.2 | `no_skill` | 1–3 |
 | 22–24 | C− | GPT-5.6-Sol | `no_skill` | 1–3 |
 
-Знак `+` обозначает запуск с подготовленной инструментальной поддержкой, знак `−` — запуск без неё. В `run_metadata.csv` этим условиям соответствуют значения `skill` и `no_skill`.
+`skill` means the agent was given prepared project-specific tooling and instructions; `no_skill` means that support was removed. The `+` and `−` signs in series codes correspond to these conditions.
 
-## Экспериментальные задания
-
-| `task` / `N` | Задание |
+| Task | Programming assignment |
 |:---:|---|
-| 1 | Компенсация перекрёстных связей |
-| 2 | Автоматическое ослабление поля |
-| 3 | Динамическое ограничение выходов регуляторов тока |
-| 4 | Ограничение мощности |
-| 5 | Симметричная векторная ШИМ |
+| 1 | Compensate cross-coupling in the current controllers |
+| 2 | Add automatic field weakening |
+| 3 | Dynamically limit current-controller outputs |
+| 4 | Limit motor power |
+| 5 | Implement symmetric space-vector PWM |
 
-Для каждого задания существуют 24 ветки: восемь экспериментальных серий по три запуска. Например, ветки от `LLM_test_promp3_r1` до `LLM_test_promp3_r24` относятся к заданию 3.
+There are 24 branches per task. For example, `LLM_test_promp3_r1` through `LLM_test_promp3_r24` belong to task 3.
 
-## `run_metadata.csv`
+## Metadata fields
 
-Главная таблица-указатель содержит одну строку на каждый из 120 запусков. Основные поля:
+[`run_metadata.csv`](run_metadata.csv) has one row for each run. Its main columns are:
 
-| Поле | Содержание |
+| Column | Meaning |
 |---|---|
-| `run_id` | Идентификатор запуска и имя соответствующей Git-ветки |
-| `task`, `task_name` | Номер и название задания |
-| `repeat_within_series` | Номер повтора от 1 до 3 внутри серии |
-| `series`, `series_order` | Код серии и её порядок в эксперименте |
-| `model_code`, `model` | Краткий код и название модели |
-| `condition` | Условие `skill` или `no_skill` |
-| `declared_baseline_name`, `declared_baseline_commit` | Исходная версия проекта и точный Git-коммит |
-| `declared_model`, `provider`, `harness` | Сведения об агентной среде, если они были зафиксированы при запуске |
-| `prompt_text` | Полный текст задания агенту |
-| `run_folder`, `conditions_file` | Исходные относительные пути к материалам запуска |
+| `run_id` | Run identifier and Git branch name |
+| `task`, `task_name` | Task number and original Russian task name |
+| `repeat_within_series` | Repetition number within a series (1–3) |
+| `series`, `series_order` | Series code and order in the experiment |
+| `model_code`, `model` | Short model code and model name |
+| `condition` | `skill` or `no_skill` |
+| `declared_baseline_name`, `declared_baseline_commit` | Starting project version and exact commit |
+| `declared_model`, `provider`, `harness` | Agent environment details, where recorded |
+| `prompt_text` | Exact Russian prompt given to the agent |
+| `run_folder`, `conditions_file` | Original paths in the experimental working copy |
 
-Поля `run_folder` и `conditions_file` отражают структуру рабочей копии эксперимента. В опубликованном наборе файлы следует искать по `run_id` в каталогах `Условия и анализ траекторий` и `Чек-листы экспертов`.
+The `run_folder` and `conditions_file` values record the original experiment layout. In this publication, locate materials by `run_id` in the two directories above. Empty metadata cells mean that a value was not recorded; they should not be inferred from other columns.
 
-## Исходный проект и происхождение базовых версий
+## Source project and baselines
 
-Экспериментальный репозиторий основан на открытом проекте [MotorControlDemo](https://gitflic.ru/project/belerafon/motorcontroldemo-vector). Точной исходной точкой исследования служит коммит оригинального проекта:
-
-```text
-52a2c2a476ad70d09ed6c1988a6699b32ffecbfe
-```
-
-Этот коммит является общим предком Baseline1, Baseline2, Baseline3 и всех веток запусков. Поэтому связь с оригиналом определяется не сходством файлов или названием ветки, а историей Git и указанными ниже хешами.
+The experiment derives from the open [MotorControlDemo project](https://gitflic.ru/project/belerafon/motorcontroldemo-vector). Its reference commit is `52a2c2a476ad70d09ed6c1988a6699b32ffecbfe`, the common ancestor of the three baselines and all run branches. The baselines form a linear Git history:
 
 ```text
 MotorControlDemo 52a2c2a
@@ -95,73 +87,47 @@ MotorControlDemo 52a2c2a
         └── Baseline3 1dd7bc1
 ```
 
-Несмотря на линейную историю коммитов, Baseline3 не является «расширенной» версией Baseline2: при его подготовке агентная инструментальная поддержка была намеренно удалена для запусков в условии `no_skill`.
-
-### Отличия базовых версий от оригинала
-
-| Версия | Использование | Основные отличия от оригинального MotorControlDemo |
+| Baseline | Used for | Main changes from the source project |
 |---|---|---|
-| **Baseline1** — `2c008185cc9e1bcb94b64e8b849e240bd25e9edd` | 15 запусков серии C+; ветка `LLM_test` | Добавлены инструкции и skill в `.codex`, сборка через `Makefile`, средства сборки, прошивки, JTAG и сбора данных, автоматические тесты и вспомогательная документация. Проект переключён на `HW_MOTORCONTROLBOARD_SIMULATOR`; параметры первой модели СДПМ изменены на `l_sd = l_sq = 5.0`, `j = 0.001`. Текстовые исходники переведены из CP1251 в UTF-8. |
-| **Baseline2** — `0d71ac0189f47efc7d0b2a1503f6d77b48e136b3` | 45 запусков серий S+, G+ и D+; тег `baseline2` | Прошивка, конфигурация симулятора, параметры двигателя и тестовая среда соответствуют Baseline1. Skill перенесён из `.codex` в `.opencode`, пути к нему обновлены; в инструкции добавлено требование сопровождать новые функции прошивки сквозными тестами. |
-| **Baseline3** — `1dd7bc13160d35b3fc02916475d0aec06147133e` | 60 запусков серий C−, S−, G− и D−; тег `baseline3`, ветка `LLM_test_NoSkill` | Удалены skill, `AGENTS.md`, `Makefile`, автоматические тесты, отладочные сценарии, экспериментальные артефакты и добавленная документация. Сохранены перевод исходников в UTF-8, конфигурация `HW_MOTORCONTROLBOARD_SIMULATOR` и параметры модели `l_sd = l_sq = 5.0`, `j = 0.001`, чтобы условия `skill` и `no_skill` использовали одну целевую модель объекта. |
+| **Baseline1** `2c008185cc9e1bcb94b64e8b849e240bd25e9edd` | 15 C+ runs; branch `LLM_test` | Added `.codex` project instructions and skill, a `Makefile`, build/flash/JTAG/data-collection tools, automated tests, and supporting documentation. Selected `HW_MOTORCONTROLBOARD_SIMULATOR` and changed the first synchronous-motor model to `l_sd = l_sq = 5.0`, `j = 0.001`. Converted text sources from CP1251 to UTF-8. |
+| **Baseline2** `0d71ac0189f47efc7d0b2a1503f6d77b48e136b3` | 45 S+, G+, and D+ runs; tag `baseline2` | Kept the firmware, simulator configuration, model parameters, and test setup from Baseline1. Moved the skill from `.codex` to `.opencode`, updated its paths, and required end-to-end tests for new firmware functions. |
+| **Baseline3** `1dd7bc13160d35b3fc02916475d0aec06147133e` | 60 C−, S−, G−, and D− runs; tag `baseline3`, branch `LLM_test_NoSkill` | Removed the skill, `AGENTS.md`, `Makefile`, automated tests, debug scripts, experimental artifacts, and added documentation. Retained UTF-8 sources, the simulator configuration, and the same motor-model parameters so both conditions used the same target model. |
 
-Значительная часть формального diff между оригиналом и baseline связана с переводом файлов из CP1251 в UTF-8, а не с изменением алгоритмов управления.
+Although Baseline3 descends from Baseline2 in Git, it is not a superset of the `skill` setup: the agent tooling was deliberately removed. Much of the textual diff between the source project and a baseline is due to CP1251-to-UTF-8 conversion rather than motor-control changes.
 
-## Ветки с программными решениями
+Each `LLM_test_prompN_rM` branch contains the source state after one agent run. Compare it with the commit in that row's `declared_baseline_commit`, not with `master`:
 
-Каждая ветка `LLM_test_prompN_rM` содержит состояние исходного кода после одного запуска агента. Для воспроизведения сравнения её следует сопоставлять не с текущей веткой `master` и не непосредственно с оригинальным MotorControlDemo, а с коммитом из поля `declared_baseline_commit`.
-
-Например:
-
-```shell
-# отличия базовой версии от зафиксированного оригинала
+```sh
+# Changes made for the first skill-equipped baseline
 git diff 52a2c2a476ad70d09ed6c1988a6699b32ffecbfe 2c008185cc9e1bcb94b64e8b849e240bd25e9edd
 
-# пример: изменения, сделанные агентом в запуске LLM_test_promp1_r1
+# Changes made by the agent in one example run
 git diff 2c008185cc9e1bcb94b64e8b849e240bd25e9edd LLM_test_promp1_r1
 ```
 
-Точный базовый коммит конкретного запуска всегда указан в `run_metadata.csv` и в соответствующем файле `Условия опыта.txt`.
+## Run records and human evaluations
 
-## Условия и анализ траекторий
+Every run has a folder in [`Условия и анализ траекторий/`](<Условия и анализ траекторий/>):
 
-Каталог содержит отдельную подпапку для каждого из 120 запусков.
+- `Условия опыта.txt` records the available baseline, model, agent environment, and exact task prompt. The format varies slightly because the files were captured during the experiment.
+- `Анализ_траектории.txt` analyzes the agent's file reads, edits, tool calls, builds, tests, and revisions. Language models participated in preparing these analyses. They are **not complete agent logs**. References such as `[L…–L…]` point to lines in a source log that is not included in this dataset.
 
-### `Условия опыта.txt`
+The [`Чек-листы экспертов/`](<Чек-листы экспертов/>) directory contains **123 completed forms for 74 runs**. Human reviewers completed these forms; some runs have forms from multiple reviewers. The forms include numeric scores and comments on code correctness, integration, preservation of existing behavior, completeness, tests, build results, regressions, function behavior, and experimental boundaries. If a run has no form, it was not evaluated by a human; a missing score must not be treated as zero. Blank form templates are not included.
 
-Файл фиксирует доступные на момент запуска сведения: базовую версию и коммит, модель и агентную среду, а также точный текст задания. Формат отдельных файлов может незначительно различаться, поскольку они сохранялись непосредственно во время эксперимента.
+## Anonymization and publication scope
 
-### `Анализ_траектории.txt`
+The published copies remove reviewers' surnames and initials, local user-profile names, absolute filesystem paths, and internal session, project, and message identifiers. The labels `Эксперт 1`, `Эксперт 2`, and `Эксперт 3` are anonymized identifiers for the human reviewers.
 
-Пофайловый разбор последовательности действий агента: чтения файлов, правок, вызовов инструментов, компиляций, испытаний и последующих исправлений. Эти файлы являются исходным материалом для последующего агрегированного анализа траекторий.
+Path placeholders include `<PROJECT_ROOT>`, `<PROJECT_PARENT>`, `<USER_PROFILE>`, `<USER_TEMP>`, `<VECTORIDE_ROOT>`, `<HOST_GCC_ROOT>`, `<GIT_ROOT>`, and `<PROGRAM_FILES>`. Identifiers such as `<SESSION_ID>`, `<SESSION_UUID>`, `<SESSION_SLUG>`, `<PROJECT_ID>`, `<MESSAGE_ID>`, `<REASONING_ID>`, and `<TURN_ID>` replace internal IDs. The replacements leave evaluation scores, analytical conclusions, source-log line numbers, project-relative paths, and Git commit IDs intact.
 
-Это не полные журналы агентной среды. Ссылки вида `[L…–L…]` относятся к строкам исходного журнала соответствующего запуска; сами полные журналы в опубликованный набор не включены.
+The dataset intentionally excludes complete raw agent logs, aggregate trajectory-analysis tables, backup archives, article drafts, statistical-analysis scripts, and temporary files. The run branches hold the final software states; the published records allow readers to identify the conditions and principal actions of each run and, where available, compare them with a human evaluation.
 
-## Чек-листы экспертов
+## Credit and license
 
-Опубликовано 123 заполненных чек-листа для 74 запусков. Если один запуск оценивали несколько экспертов, в его каталоге находятся несколько файлов.
+The study was prepared by a research team affiliated with the [National Research University “Moscow Power Engineering Institute” (MPEI)](https://www.mpei.ru/lang/en/Pages/default.aspx). Human reviewers are identified only by the anonymized labels used in the forms. The attribution name for this dataset is **MotorControlDemo LLM Agents Study Team**; it does not designate MPEI as the copyright owner or determine the authorship of a future paper.
 
-Чек-листы содержат численные оценки и текстовые пояснения по критериям корректности и интеграции кода, сохранения существующего поведения, завершённости решения, качества теста, компиляции, отсутствия регрессий, работоспособности новой функции и соблюдения границ эксперимента.
+The team's original research materials on the `master` branch—this guide, [the Russian guide](README.ru.md), [the metadata table](run_metadata.csv), run-condition records, trajectory analyses, and expert evaluation forms—are licensed under [Creative Commons Attribution 4.0 International (CC BY 4.0)](LICENSE). When reusing them, credit the team, link to this repository and the license, and indicate changes. A suggested citation is:
 
-Отсутствие каталога или чек-листа означает, что запуск не был оценён человеком. Отсутствующую оценку не следует интерпретировать как нулевую. Пустой шаблон чек-листа не публикуется.
+> MotorControlDemo LLM Agents Study Team (2026). *LLM agents for motor-control software: experimental materials*. Repository dataset, CC BY 4.0. [Link to this repository].
 
-## Обезличивание
-
-В публикуемых копиях удалены фамилии и инициалы экспертов, локальные имена пользовательских профилей, абсолютные пути файловой системы и служебные идентификаторы сессий, проектов и сообщений. Эксперты обозначены как `Эксперт 1`, `Эксперт 2` и `Эксперт 3`; одинаковое обозначение во всех файлах относится к одному человеку.
-
-Используются следующие нейтральные обозначения:
-
-- `<PROJECT_ROOT>` — корень экспериментальной копии MotorControlDemo;
-- `<PROJECT_PARENT>` — её родительский каталог;
-- `<USER_PROFILE>` и `<USER_TEMP>` — локальный профиль и временный каталог пользователя;
-- `<VECTORIDE_ROOT>`, `<HOST_GCC_ROOT>`, `<GIT_ROOT>` и `<PROGRAM_FILES>` — каталоги установленного инструментария;
-- `<MISTYPED_PROJECT_PATH>` — ошибочно набранный путь вне разрешённого корня;
-- `<SESSION_ID>`, `<SESSION_UUID>`, `<SESSION_SLUG>`, `<PROJECT_ID>`, `<MESSAGE_ID>`, `<REASONING_ID>` и `<TURN_ID>` — служебные идентификаторы агентной среды.
-
-Замены не затрагивают оценки, выводы анализа, номера строк журналов, относительные пути файлов проекта и идентификаторы Git-коммитов.
-
-## Границы опубликованного набора
-
-В репозиторий намеренно не включены полные сырые журналы агентных сред, агрегированные таблицы анализа траекторий, резервные архивы, рабочие версии текста статьи, сценарии статистической обработки и временные файлы.
-
-Программные решения доступны непосредственно в ветках запусков, а опубликованные текстовые материалы позволяют установить условия каждого запуска, проследить основные действия агента и, при наличии оценки, сопоставить решение с экспертным заключением.
+This CC license does **not** apply to the firmware source, precompiled libraries, PDFs, or other third-party material in the run and baseline branches. Those branches retain their own license files and applicable third-party terms. The presence of an Apache 2.0 `LICENSE.txt` in a source branch does not place every bundled file under that license.

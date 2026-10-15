@@ -1,0 +1,23 @@
+# Local Python tooling
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+
+# Firmware build output retained in this checkout from experiment branches
+/EclipseIDE/Debug/
+/CodeMaster/Debug/
+
+# Generated motor-debug captures
+/artifacts/*
+
+# Scratch and editor files
+/tmp/
+*.log
+*.tmp
+*.bak
+*.swp
+*~
